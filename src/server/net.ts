@@ -59,6 +59,18 @@ export function pidAlive(pid: number): boolean {
 }
 
 /**
+ * プロセスグループにまだ誰かいるか（終了して回収待ちのプロセスを含む）。
+ * Phase 7B-2: 要素識別子のローダは Turbopack のワーカー（別プロセス）で走る。
+ * 親が先に終わると、ワーカーは回収されるまで少しの間グループに残る。
+ */
+export function groupAlive(pgid: number): boolean {
+  if (!Number.isInteger(pgid) || pgid <= 1) return false;
+  try { process.kill(-pgid, 0); return true; } catch (e) {
+    return (e as NodeJS.ErrnoException).code === 'EPERM';
+  }
+}
+
+/**
  * プロセスのコマンド行。**PID の再利用を見分けるために要る。**
  * 記録した PID が生きていても、それが同じプロセスだとは限らない。
  */

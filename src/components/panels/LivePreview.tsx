@@ -16,11 +16,34 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import FloatingPanel from './FloatingPanel';
 import Why from '../common/Why';
 import { RUN_STATE_LABEL, useRuntime, type Finding } from '@/state/RuntimeStore';
+import { useExplore } from '@/state/ExploreStore';
+import {
+  IDE_SOURCE, PROTOCOL_VERSION, isAgentHello, parseAgentMessage,
+  type AgentMessage, type ElementSelection,
+} from '@/lib/previewProtocol';
+import { LIVE_UNRESOLVED_LABEL, fromLiveSelection, type LiveResolution } from '@/lib/adapter';
+import { layout } from '@/lib/layout';
 
-/** 中継のスクリプトが送る知らせ（previewGateway.ts の AGENT_JS） */
-interface AgentMsg {
-  source: 'vcide-preview'; v: 1; kind: string; path: string; title: string;
-  status: number | null; soft: boolean; from: 'app' | 'gateway';
+/** 場所の知らせ（previewGateway.ts の agentJs。形は previewProtocol.ts） */
+type AgentMsg = Extract<AgentMessage, { path: string }>;
+
+/** 中継のスクリプトとの接続1本。iframe の文書ごとに作り直す */
+interface Conn { port: MessagePort; nonce: string; serverKey: string }
+
+/** 選択の状態（パネルの1行と、右ドックへの反映） */
+type LiveSel =
+  | { status: 'resolving'; tag: string; path: string }
+  | { status: 'resolved'; tag: string; path: string; component: string; at: string; ordinal: number; count: number }
+  | { status: 'unresolved'; tag: string; path: string; reason: string; label: string }
+  | { status: 'error'; tag: string; path: string; message: string }
+  | { status: 'cleared'; message: string };
+
+const POST_HEADERS = { 'content-type': 'application/json', 'x-vcide-request': '1' } as const;
+
+function newNonce(): string {
+  const b = new Uint8Array(18);
+  crypto.getRandomValues(b);
+  return btoa(String.fromCharCode(...b)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
 type View = 'starting' | 'stopping' | 'stopped' | 'error' | 'unavailable' | 'checking' | 'unreachable' | 'live';
@@ -87,6 +110,7 @@ export function wantsLivePreview(
 
 export default function LivePreview() {
   const { runtime, preview } = useRuntime();
+  const { showLive, clearLive } = useExplore();
   const state = runtime?.state ?? 'idle';
   const origin = preview?.origin ?? null;
   const running = state === 'running';
@@ -123,22 +147,157 @@ export default function LivePreview() {
     setAddr('/'); setMsg(null); setSilent(false); setAddrError(null);
   }, [serverKey]);
 
-  /* 中継のスクリプトからの知らせ。**送り主を確かめる**（中継の origin で、この iframe から） */
+  /* ------------------------------------------------ 中継のスクリプトとの接続
+   * 1. iframe から `hello`（中身なし）が来る。**送り主を確かめる**（中継の origin で、この iframe の window から）
+   * 2. MessageChannel を作り、片方を `connect` で渡す。宛先の origin を明示する（'*' にしない）
+   * 3. 以後はその port だけを信じる。**この起動の開発サーバーで、いまの文書の port** からの知らせだけを受ける
+   * アプリのスクリプトが `hello` を偽っても、スクリプトが先に port を受け取って握りつぶすので、
+   * 新しい port は答えない（＝昇格しない）。いまの接続は切れない */
+  const connRef = useRef<Conn | null>(null);
+  const pendingRef = useRef<Conn[]>([]);
+  const serverKeyRef = useRef<string | null>(serverKey);
+  serverKeyRef.current = serverKey;
+  const [rejected, setRejected] = useState(0);
+  const [connN, setConnN] = useState(0);
+  const [selectMode, setSelectMode] = useState(false);
+  const selectModeRef = useRef(selectMode);
+  selectModeRef.current = selectMode;
+  const [agentMode, setAgentMode] = useState(false);
+  const [liveSel, setLiveSel] = useState<LiveSel | null>(null);
+  const selSeqRef = useRef(0);
+  const runRef = useRef(runtime);
+  runRef.current = runtime;
+
+  const closeAll = useCallback(() => {
+    for (const c of [connRef.current, ...pendingRef.current]) { try { c?.port.close(); } catch { /* 閉じている */ } }
+    connRef.current = null;
+    pendingRef.current = [];
+    setAgentMode(false);
+  }, []);
+
+  const sendMode = useCallback((c: Conn | null, on: boolean) => {
+    c?.port.postMessage({ source: IDE_SOURCE, v: PROTOCOL_VERSION, nonce: c.nonce, kind: 'mode', select: on });
+  }, []);
+
+  /** 選択を IDE の対応表で解決する。位置は受け取らない（送ってくるのは識別子だけ） */
+  const resolve = useCallback(async (sel: ElementSelection, key: string) => {
+    const rt = runRef.current;
+    if (!rt?.pid || !rt.startedAt) return;
+    const mySeq = ++selSeqRef.current;
+    setLiveSel({ status: 'resolving', tag: sel.tag, path: sel.path });
+    let j: { resolution?: LiveResolution; error?: { code: string; message: string } };
+    try {
+      const r = await fetch('/api/runtime/anchor', {
+        method: 'POST', headers: POST_HEADERS,
+        body: JSON.stringify({ run: { instance: rt.instance, pid: rt.pid, startedAt: rt.startedAt }, selection: sel }),
+      });
+      j = await r.json() as typeof j;
+    } catch (e) {
+      j = { error: { code: 'fetch', message: e instanceof Error ? e.message : String(e) } };
+    }
+    // 返事を待つ間に、別の選択・停止・再起動があったら捨てる
+    if (mySeq !== selSeqRef.current || serverKeyRef.current !== key) return;
+    if (!j.resolution) {
+      setLiveSel({ status: 'error', tag: sel.tag, path: sel.path, message: j.error?.message ?? '解決できませんでした。' });
+      return;
+    }
+    const res = j.resolution;
+    const { dataset } = fromLiveSelection({
+      project: rt.project?.name ?? '—', port: rt.port ?? 0,
+      page: { path: sel.path, title: msg?.title ?? '' },
+      selection: sel, resolution: res, selectedAt: new Date().toISOString(),
+    });
+    const ds = layout(dataset);
+    const focus = ds.nodes.find((n) => n.kind === 'component')?.id ?? ds.nodes[0].id;
+    showLive(ds, `${key}#${mySeq}`, focus);
+    if (res.status === 'resolved') {
+      setLiveSel({
+        status: 'resolved', tag: sel.tag, path: sel.path, component: res.anchor.component,
+        at: `${res.anchor.file}:${res.anchor.line}:${res.anchor.col}`,
+        ordinal: sel.anchorOrdinal ?? 0, count: sel.anchorInstanceCount,
+      });
+    } else {
+      setLiveSel({
+        status: 'unresolved', tag: sel.tag, path: sel.path, reason: res.reason,
+        label: LIVE_UNRESOLVED_LABEL[res.reason] ?? res.reason,
+      });
+    }
+  // msg の title は表示用。古くても判定には使わない
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showLive]);
+
+  const onPortMessage = useCallback((c: Conn, data: unknown) => {
+    const m = parseAgentMessage(data, c.nonce);
+    if (!m) { setRejected((n) => n + 1); return; }
+    // 別の起動（停止・再起動の前）の文書からの知らせは受けない
+    if (c.serverKey !== serverKeyRef.current) { setRejected((n) => n + 1); return; }
+    if (connRef.current !== c) {
+      const i = pendingRef.current.indexOf(c);
+      if (i < 0) { setRejected((n) => n + 1); return; }
+      // 新しい文書のスクリプトが答えた。古い接続を閉じて入れ替える
+      try { connRef.current?.port.close(); } catch { /* 閉じている */ }
+      for (const p of pendingRef.current.slice(0, i)) { try { p.port.close(); } catch { /* 閉じている */ } }
+      pendingRef.current = pendingRef.current.slice(i + 1);
+      connRef.current = c;
+      setAgentMode(false);
+      setConnN((n) => n + 1);
+      sendMode(c, selectModeRef.current);
+    }
+    if (m.kind === 'connected') return;
+    if (m.kind === 'mode') { setAgentMode(m.select); return; }
+    if (m.kind === 'select') {
+      // 選択モードでないときの選択は受けない（利用者が選ぶと決めたときだけ）
+      if (!selectModeRef.current) { setRejected((n) => n + 1); return; }
+      void resolve(m.selection, c.serverKey);
+      return;
+    }
+    setSilent(false);
+    setMsg(m);
+    if (m.kind === 'ready') { readyRef.current = true; setLoads((n) => n + 1); }
+    if (!editingRef.current) setAddr(m.path);
+  }, [resolve, sendMode]);
+
   useEffect(() => {
     const onMsg = (e: MessageEvent) => {
       if (!origin || e.origin !== origin) return;
-      if (!frameRef.current || e.source !== frameRef.current.contentWindow) return;
-      const d = e.data as Partial<AgentMsg> | null;
-      if (!d || d.source !== 'vcide-preview' || typeof d.path !== 'string') return;
-      const m = d as AgentMsg;
-      setSilent(false);
-      setMsg(m);
-      if (m.kind === 'ready') { readyRef.current = true; setLoads((n) => n + 1); }
-      if (!editingRef.current) setAddr(m.path);
+      const win = frameRef.current?.contentWindow;
+      if (!win || e.source !== win) return;
+      if (!isAgentHello(e.data)) { setRejected((n) => n + 1); return; }
+      const key = serverKeyRef.current;
+      if (!key) return;
+      const ch = new MessageChannel();
+      const c: Conn = { port: ch.port1, nonce: newNonce(), serverKey: key };
+      ch.port1.onmessage = (ev) => onPortMessage(c, ev.data);
+      pendingRef.current = [...pendingRef.current.slice(-3), c];
+      // 宛先の origin を明示する。iframe の中が別の origin に移っていれば届かない
+      win.postMessage({ source: IDE_SOURCE, v: PROTOCOL_VERSION, kind: 'connect', nonce: c.nonce }, origin, [ch.port2]);
     };
     window.addEventListener('message', onMsg);
     return () => window.removeEventListener('message', onMsg);
-  }, [origin]);
+  }, [origin, onPortMessage]);
+
+  /* 選択モードの切り替えをスクリプトへ伝える */
+  useEffect(() => { sendMode(connRef.current, selectMode); }, [selectMode, sendMode]);
+
+  /* 開発サーバーが入れ替わった・止まった: 接続を閉じ、**選択も解除する**（実態と矛盾させない） */
+  const hadServerRef = useRef<string | null>(null);
+  useEffect(() => {
+    const prev = hadServerRef.current;
+    hadServerRef.current = serverKey;
+    if (prev === serverKey) return;
+    closeAll();
+    selSeqRef.current += 1;              // 返事を待っている解決も捨てる
+    setSelectMode(false);
+    if (prev !== null) {
+      clearLive();
+      setLiveSel((cur) => (cur && cur.status !== 'cleared'
+        ? { status: 'cleared', message: serverKey ? '開発サーバーが起動し直されたため、前の選択を解除しました。' : '開発サーバーが実行中ではなくなったため、選択を解除しました。' }
+        : cur));
+    }
+  }, [serverKey, closeAll, clearLive]);
+  useEffect(() => () => { closeAll(); clearLive(); }, [closeAll, clearLive]);
+
+  const clearSel = () => { selSeqRef.current += 1; clearLive(); setLiveSel(null); };
 
   const onFrameLoad = useCallback(() => {
     // 知らせは文書の DOMContentLoaded で来るので、load より先に届いている。
@@ -186,7 +345,12 @@ export default function LivePreview() {
       style={{ left: 232, top: 16, width: 392 }}>
       <div className="pvb pvlive" data-preview-state={view}
         data-http-status={msg?.status ?? ''} data-from={msg?.from ?? ''}
-        data-path={msg?.path ?? ''} data-loads={loads}>
+        data-path={msg?.path ?? ''} data-loads={loads}
+        data-conn={connN} data-rejected={rejected} data-select-mode={selectMode ? 'on' : 'off'}
+        data-agent-mode={agentMode ? 'on' : 'off'} data-selection={liveSel?.status ?? ''}
+        data-sel-at={liveSel?.status === 'resolved' ? liveSel.at : ''}
+        data-sel-component={liveSel?.status === 'resolved' ? liveSel.component : ''}
+        data-sel-reason={liveSel?.status === 'unresolved' ? liveSel.reason : ''}>
         <div className="rt-row pvbar">
           {canNav
             ? <button type="button" className="rt-b" title="再読み込み" aria-label="再読み込み" onClick={reload}>↻</button>
@@ -200,8 +364,29 @@ export default function LivePreview() {
           {canNav
             ? <button type="button" className="rt-b" onClick={submit}>移動</button>
             : <Why reason="開発サーバーのページを表示しているときだけ使えます。"><span className="rt-b off" aria-disabled="true">移動</span></Why>}
+          {canNav
+            ? <button type="button" className={`rt-b${selectMode ? ' go' : ''}`} aria-pressed={selectMode}
+              title={selectMode ? '選択モード中: プレビューの中のクリックは要素の選択になります（ページは操作されません）' : 'プレビューの中の要素をクリックで選び、React のソース位置を調べます'}
+              onClick={() => setSelectMode((v) => !v)}>選択</button>
+            : <Why reason="開発サーバーのページを表示しているときだけ使えます。"><span className="rt-b off" aria-disabled="true">選択</span></Why>}
         </div>
         {addrError && <p className="rt-note pvwarn">{addrError}</p>}
+        {liveSel && (
+          <div className="rt-row pvselrow">
+            <p className={`rt-note pvsel${liveSel.status === 'unresolved' || liveSel.status === 'error' ? ' pvwarn' : ''}`}>
+              {liveSel.status === 'resolving' && <>選択: &lt;{liveSel.tag}&gt; — 対応表で調べています…</>}
+              {liveSel.status === 'resolved' && <>選択: &lt;{liveSel.tag}&gt; → <b>{liveSel.component}</b> <code>{liveSel.at}</code>
+                {liveSel.count > 1 && <> （同じ JSX の要素 {liveSel.count} 個のうち {liveSel.ordinal + 1} 番目。どの使用箇所かは区別していません）</>}</>}
+              {liveSel.status === 'unresolved' && <>選択: &lt;{liveSel.tag}&gt; — 特定できません（{liveSel.label}）。理由は右の詳細に出しています</>}
+              {liveSel.status === 'error' && <>選択: &lt;{liveSel.tag}&gt; — {liveSel.message}</>}
+              {liveSel.status === 'cleared' && <>{liveSel.message}</>}
+            </p>
+            {liveSel.status !== 'cleared' && <button type="button" className="rt-b" onClick={clearSel}>解除</button>}
+          </div>
+        )}
+        {selectMode && !liveSel && view === 'live' && (
+          <p className="rt-note pvsel">選択モード: プレビューの中の要素をクリックしてください（ページは操作されません）。</p>
+        )}
 
         {view === 'live' && origin && (
           <div className="site pvsite">

@@ -5,6 +5,7 @@
  * 合成データと同じ描画部品を通ることと、実測であることが画面から読めることを見る。
  * ========================================================================== */
 import { chromium } from 'playwright-core';
+import { installCanvasPrecondition, n0Shows } from './lib/canvas-precondition.mjs';
 import { createRequire } from 'node:module';
 
 /*
@@ -28,6 +29,8 @@ const eq = (name, a, b) => ok(name, a === b, a);
 
 const browser = await chromium.launch({ channel: 'chrome' });
 const page = await browser.newPage({ viewport: { width: 1600, height: 1000 }, deviceScaleFactor: 1 });
+// 前提状態をそろえる: IDE の履歴で伸びる右上のパネルを、開くたびに閉じる（lib/canvas-precondition.mjs）
+installCanvasPrecondition(page);
 const pageErrors = [];
 page.on('pageerror', (e) => pageErrors.push(e.message));
 page.on('console', (m) => { if (m.type() === 'error' && !/favicon|404/.test(m.text())) pageErrors.push(m.text()); });
@@ -47,12 +50,23 @@ ok('実測データであることを常時表示している',
   (await page.locator('.note.synth').innerText()).includes('実測データ'));
 ok('合成データだと書いていない',
   !(await page.locator('.note.synth').innerText()).includes('合成'));
-ok('プロジェクト名は観測したアプリ',
-  (await page.locator('.proj').innerText()).includes('Fixture'));
-ok('実行中のポートは観測したアプリのもの',
-  (await page.locator('.chipbar .port').innerText()).includes('3200'));
-ok('計装方式が出ている',
-  (await page.locator('.chipbar.ins').innerText()).includes('NODE_OPTIONS'));
+if (await n0Shows(page) === 'recorded') {
+  ok('プロジェクト名は観測したアプリ',
+    (await page.locator('.proj').innerText()).includes('Fixture'));
+  ok('実行中のポートは観測したアプリのもの',
+    (await page.locator('.chipbar .port').innerText()).includes('3200'));
+  ok('計装方式が出ている',
+    (await page.locator('.chipbar.ins').innerText()).includes('NODE_OPTIONS'));
+} else {
+  /* IDE が開発サーバーを扱った後は、N0 は実際のプロセスの状態を出す（7A の設計）。
+   * そのときも記録の値は画面から読めることを確かめる（前提の違いで件数を変えない） */
+  ok('（起動・停止の後）N0 は記録ではなく実際の開発サーバーの状態を出す',
+    /未起動|実行中|停止しています|起動できていません/.test(await page.locator('header.n0').innerText()));
+  ok('記録のポートはキャンバスの層のラベルに出ている',
+    (await page.locator('.canvas').innerText()).includes('localhost:3200'));
+  ok('記録の計装方式はキャンバスの常時の注記に出ている',
+    (await page.locator('.note.synth').innerText()).includes('NODE_OPTIONS'));
+}
 
 const stats = await page.locator('.ov-stats dd').allInnerTexts();
 eq('通信件数（主経路1 + 経路外1）', stats[0], '2 件');

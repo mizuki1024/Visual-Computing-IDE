@@ -51,6 +51,14 @@ interface Ctx {
    * 描画部品はここからだけ読む — モジュール定数を読まない。
    */
   data: LaidOutDataset;
+  /**
+   * Phase 7B-2: 開発サーバーの実ページで選択した要素のデータセットを描いているか。
+   * 描いている間だけ `data` が差し替わる。解除すると、ページを開いたときのデータセットに戻る
+   * （合成・記録データの探索はそのまま残る）
+   */
+  live: { key: string } | null;
+  showLive: (ds: LaidOutDataset, key: string, focusNode: number) => void;
+  clearLive: () => void;
   /** null = 段階0（未選択の俯瞰）。空パネルではなくページの概要を出す（ST-16） */
   selection: SelectionRef | null;
   scope: Scope;
@@ -82,8 +90,10 @@ interface Ctx {
 const ExploreCtx = createContext<Ctx | null>(null);
 
 export function ExploreProvider(
-  { children, data }: { children: ReactNode; data: LaidOutDataset },
+  { children, data: baseData }: { children: ReactNode; data: LaidOutDataset },
 ) {
+  const [liveData, setLiveData] = useState<{ ds: LaidOutDataset; key: string } | null>(null);
+  const data = liveData?.ds ?? baseData;
   // 既定は未選択。ページを開いた時点で俯瞰が出ている（UXR-04 / 03a 5節）
   const [selection, setSelection] = useState<SelectionRef | null>(null);
   // ホップ選択から Esc で戻る先（03c 5.1「ホップ選択 → 選択_経路あり」）。
@@ -181,6 +191,23 @@ export function ExploreProvider(
     setTab('overview');
   }, []);
 
+  /* Phase 7B-2: 実ページの選択を、同じキャンバスと右ドックに出す */
+  const showLive = useCallback((ds: LaidOutDataset, key: string, focusNode: number) => {
+    setLiveData({ ds, key });
+    setSelection({ type: 'node', id: focusNode });
+    setLastNode(focusNode);
+    setTab('overview');
+  }, []);
+  const liveRef = useRef(liveData);
+  liveRef.current = liveData;
+  const clearLive = useCallback(() => {
+    if (!liveRef.current) return;
+    setLiveData(null);
+    // 選択していた番号は元のデータセットでは別のものを指す。持ち越さない
+    setSelection(null);
+    setTab('overview');
+  }, []);
+
   const zoomBy = useCallback((factor: number, sx?: number, sy?: number) => {
     stopTween();
     setView((v) => {
@@ -235,13 +262,15 @@ export function ExploreProvider(
 
   const scope: Scope = selection ? 'path' : 'page';
 
+  const live = useMemo(() => (liveData ? { key: liveData.key } : null), [liveData]);
+
   const value = useMemo<Ctx>(() => ({
-    data,
+    data, live, showLive, clearLive,
     selection, scope, hover, hoverNote, tab, panels, showLabels, pageFilter, view, viewport,
     select, clearSelection, setHover, setHoverNote, setTab, togglePanel, setShowLabels,
     setPageFilter, setView, setViewport, zoomBy, fit, focusOn,
   }), [
-    data,
+    data, live, showLive, clearLive,
     selection, scope, hover, hoverNote, tab, panels, showLabels, pageFilter, view, viewport,
     select, clearSelection, togglePanel, setViewport, zoomBy, fit, focusOn,
   ]);

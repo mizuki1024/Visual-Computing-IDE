@@ -1566,3 +1566,212 @@ export function countObservation(obs: ObservationBundle) {
     columns: obs.dbObjects.columns.length,
   };
 }
+
+/* ========================================================================== */
+/* Phase 7B-2 — 開発サーバーの実ページで選択した要素                            */
+/*                                                                            */
+/* PoC-03 の ①② と同じ部品（buildValueAndComponent）を通す。**条件も文言も      */
+/* PoC-03 の記録と同じ1か所にある。** 違いは、観測を記録から読むのではなく、     */
+/* いま実行中の開発サーバーのページで利用者が選んだ1要素であることだけである。   */
+/*                                                                            */
+/* 作るもの: ① 選択した要素（dom-read）② コンポーネント（element-anchor）renders */
+/* 作らないもの: 通信・サーバー処理・SQL・テーブル（7B-2 では結ばない）、derives  */
+/* 特定できなかった場合: ① だけを作り、理由を概要と切断に書く                    */
+/* ========================================================================== */
+
+/** 解決の結果（src/server/anchors.ts の AnchorResolution と同じ形。層2はサーバーを import しない） */
+type LiveAnchor = Omit<ObsElementAnchor, 'verified' | 'sourceLine'> & { sourceLine: string };
+export type LiveResolution =
+  | {
+    status: 'resolved';
+    anchor: LiveAnchor;
+    /** 祖先の識別子のうち、照合に通ったもの（近い順。包含関係の文脈） */
+    ancestors: LiveAnchor[];
+    directive: 'use-client' | 'none';
+    checks: string[];
+  }
+  | {
+    status: 'unresolved'; reason: string; detail: string;
+    context: { tag: string; component: string; file: string; line: number } | null;
+  };
+
+export interface LiveSelectionInput {
+  project: string;
+  port: number;
+  page: { path: string; title: string };
+  selection: {
+    tag: string; anchorOnSelf: string | null; anchorOrdinal: number | null; anchorInstanceCount: number;
+    ancestorAnchors: string[]; textNodeIndex: number | null;
+    valueShape: { chars: number; cls: string } | null; formControl: boolean; path: string;
+  };
+  resolution: LiveResolution;
+  /** 選択した時刻（ISO）。画面に出すだけ */
+  selectedAt: string;
+}
+
+/** 特定できなかった理由の見出し（anchors.ts の UnresolvedReason） */
+export const LIVE_UNRESOLVED_LABEL: Record<string, string> = {
+  'anchor-missing': 'この要素自身に要素識別子がありません',
+  'injection-unavailable': 'このプロジェクトでは要素識別子を注入していません',
+  'anchor-not-in-manifest': '識別子がいまのビルドの対応表にありません',
+  'outside-scope': '対応表のファイルが注入範囲の外です',
+  'id-mismatch': '対応表の位置と識別子が一致しません',
+  'tag-mismatch': 'DOM の要素と対応表の要素が一致しません',
+  'source-mismatch': 'ソースを読み直した結果が対応表と一致しません',
+  'verifier-unavailable': 'ソースを読み直せません',
+};
+
+const LIVE_METHOD = '方式1 ビルド時の要素識別子注入（JSX へ data-vcide を挿入）';
+const LIVE_NOT_OBSERVED: { what: string; why: string }[] = [
+  { what: 'props の由来（derives）', why: 'コンポーネントが props で受け取った値が、どこから来たかは観測していない（02a 3.5.1。構造的に推定）' },
+  { what: '通信・サーバー処理・SQL への経路', why: 'Phase 7B-2 の範囲外。この選択からは結んでいない' },
+  { what: 'どの使用箇所がこのインスタンスを描いたか', why: '同じコンポーネントが複数箇所で使われる場合、DOM からは使用箇所を一意に決められない' },
+  { what: '表示された値そのもの・DOM の本文・フォームの値', why: '方針として収集しない。持つのはタグ名・識別子・何番目か・文字数と文字種だけ' },
+  { what: 'ライブラリ由来か動的生成かの区別', why: '識別子を持たない要素について、DOM からは区別できない（PoC-03 と同じ）' },
+];
+
+export function fromLiveSelection(input: LiveSelectionInput): AdapterResult {
+  const { selection: sel, resolution: res } = input;
+  const skipped: { what: string; why: string }[] = [];
+  const nodes: ModelNode[] = [];
+  const hops: ModelHop[] = [];
+  const cuts: Cut[] = [];
+
+  const resolved = res.status === 'resolved';
+  const anchors: ObsElementAnchor[] = resolved
+    ? [res.anchor, ...res.ancestors].map((a) => ({ ...a, verified: true }))
+    : [];
+  const el: ObsElements = {
+    method: LIVE_METHOD,
+    bundler: '開発サーバーの既定',
+    injectedScope: 'src/',
+    transform: '挿入のみ。再出力しないため行番号はずれない。ソースマップに依存しない',
+    page: input.page.path,
+    // ページ全体の要素は数えていない（選んだ1要素だけを見る）
+    anchoredElements: 0,
+    totalElements: 0,
+    primaryKey: 'live',
+    selections: [{
+      key: 'live', selector: `<${sel.tag}>`, ordinal: 0, group: 'live', primary: true, tag: sel.tag,
+      // 照合に通ったときだけ「この要素自身の識別子」として渡す
+      anchorOnSelf: resolved ? res.anchor.id : null,
+      anchorOrdinal: sel.anchorOrdinal,
+      anchorInstanceCount: sel.anchorInstanceCount,
+      // 祖先も照合に通ったものだけ（包含関係の文脈）
+      ancestorAnchors: resolved ? sel.ancestorAnchors.filter((id) => res.ancestors.some((a) => a.id === id)) : [],
+      textNodeIndex: sel.textNodeIndex,
+      valueShape: sel.valueShape,
+      failure: resolved ? null : { reason: res.reason, detail: res.detail },
+    }],
+    anchors,
+    files: [],
+  };
+  const obs = { elements: el } as unknown as ObservationBundle;
+
+  const shapeText = sel.formControl
+    ? '収集していません（フォームの部品・編集できる要素のため）'
+    : sel.valueShape
+      ? `${sel.valueShape.chars} 文字・${CLS_LABEL[sel.valueShape.cls] ?? sel.valueShape.cls}`
+      : 'この要素は直下にテキストを持っていません';
+
+  if (resolved) {
+    const vc = buildValueAndComponent(obs, 1, nodes, hops, skipped);
+    const comp = nodes.find((n) => n.id === vc.componentId);
+    const value = nodes.find((n) => n.id === vc.valueId);
+    if (value) {
+      const row = value.overview.find((r) => r.k === '値の形');
+      if (row) row.v = shapeText;
+      value.overview.splice(1, 0, { k: 'ページ', v: input.page.path });
+    }
+    if (comp) {
+      const a = res.anchor;
+      const at = comp.overview.findIndex((r) => r.k === '定義');
+      // 右ドックの行は1行で省略される。行・列を先に置いて、切れても読めるようにする
+      comp.overview.splice(at + 1, 0, { k: '位置（行・列）', v: `${a.line} 行 ${a.col} 列 — ${a.file}:${a.line}:${a.col}` });
+      comp.overview.push(
+        {
+          k: 'ファイルの指定',
+          v: res.directive === 'use-client'
+            ? "先頭に 'use client' があります（Client Component の境界）"
+            : "'use client' はありません。サーバーで描かれたかブラウザで描かれたかは、"
+              + 'このファイルだけでは決まりません（読み込み元による）',
+        },
+        { k: '帰属の範囲', v: ATTRIBUTION_SCOPE_NOTE.definitionOnly },
+        { k: '特定方法', v: '要素自身の識別子 → いまのビルドの対応表 → ソースの読み直しで照合' },
+        { k: '照合', v: res.checks.join(' / ') },
+        { k: '主張の範囲', v: 'この要素を描いた JSX の位置とコンポーネントまでです。表示された値がどこから来たかは観測していません' },
+      );
+      cuts.push({
+        from: comp.id,
+        head: 'ここから先は観測していません',
+        sub: 'props の由来（この値がどこから来たか）',
+        where: 'コンポーネントの props / 通信の応答',
+        kind: 'derives は構造的に推定（02a 3.5.1）。7B-2 では関係を作らない',
+      });
+    }
+  }
+
+  if (!nodes.length) {
+    /* 特定できなかった。選んだ要素だけを置き、理由を書く。**祖先へは対応付けない** */
+    const why = res.status === 'unresolved' ? res : { reason: 'unknown', detail: '', context: null };
+    const label = LIVE_UNRESOLVED_LABEL[why.reason] ?? `特定できません（理由コード: ${why.reason}）`;
+    nodes.push(node({
+      id: 1, kind: 'value', form: 'physical',
+      title: '選択した要素',
+      identifier: `<${sel.tag}>${sel.textNodeIndex !== null ? ` のテキスト #${sel.textNodeIndex}` : ''}`,
+      chipSub: `<${sel.tag}>`,
+      hover: 'この要素のソースは特定できていません',
+      overview: [
+        { k: '取得手段', v: 'ブラウザのDOM直接読み取り' },
+        { k: 'ページ', v: input.page.path },
+        { k: '要素', v: `<${sel.tag}>` },
+        { k: '特定できなかった理由', v: label },
+        { k: '詳しく', v: why.detail || '—' },
+        ...(why.context ? [{
+          k: '祖先の文脈',
+          v: `<${why.context.tag}>（${why.context.component} — ${why.context.file}:${why.context.line}）の中にあります。`
+            + '祖先は文脈であって、この要素の出所ではありません',
+        }] : []),
+        { k: '値の形', v: shapeText },
+        { k: '値の保存', v: '表示された値そのものは保存していません' },
+      ],
+      source: SOURCE_OF.domRead,
+      evidence: ['この要素自身の属性（要素識別子の有無）だけを読んだ'],
+    }));
+    cuts.push({
+      from: 1,
+      head: 'この要素のソースは特定できません',
+      sub: label,
+      where: 'React コンポーネント / ソース位置',
+      kind: '根拠が無いため、コンポーネントを作らない（推測で埋めない）',
+    });
+    skipped.push({ what: `選択 <${sel.tag}>`, why: `特定不能: ${why.reason}${why.detail ? ` — ${why.detail}` : ''}` });
+  }
+
+  const dataset: Dataset = {
+    origin: 'measured',
+    project: input.project,
+    runtime: { command: 'next dev', port: input.port, instrumentation: LIVE_METHOD },
+    nodes, hops, cuts,
+    offPath: {
+      detail: 'unavailable',
+      label: 'なし',
+      note: '通信・SQL への経路は、この選択からは結んでいません（Phase 7B-2 の範囲外）。',
+      nodes: [],
+      caption: { text: '選択していない経路', textUnselected: 'このページの他の通信' },
+    },
+    pages: [{ icon: '▤', name: input.page.title || input.page.path, path: input.page.path, current: true }],
+    notice: `開発サーバーの実ページで選択した要素／${LIVE_METHOD}`,
+    overviewNote:
+      `${input.selectedAt} にプレビューで選択した要素です。通信・SQL は観測していないため件数は 0 と出ます`
+      + '（このページで通信が無かったという意味ではありません）。表示された値そのものは保存していません。',
+    provenance: {
+      instrumentation: LIVE_METHOD,
+      bundler: '開発サーバーの既定',
+      traceId: '—',
+      collectedAt: input.selectedAt,
+      notObserved: LIVE_NOT_OBSERVED,
+    },
+  };
+  return { dataset, skipped };
+}

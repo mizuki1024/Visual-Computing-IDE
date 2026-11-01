@@ -66,7 +66,10 @@ function Overview({ node }: { node: TraceNode }) {
               <dd className="step">
                 <button type="button" onClick={() => select(r.go!, { focus: true })}>{r.v}</button>
               </dd>
-            ) : <dd>{r.fromMetrics ? metricsText(node) : r.v}</dd>}
+            ) : (
+              // 1行で省略される。省略された全文はホバーで読めるようにする（Phase 7B-2）
+              <dd title={r.fromMetrics ? undefined : r.v}>{r.fromMetrics ? metricsText(node) : r.v}</dd>
+            )}
           </div>
         ))}
       </dl>

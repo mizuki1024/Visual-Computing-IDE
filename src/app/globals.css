@@ -175,6 +175,12 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .pvretry{margin-top:7px}
 .pvlive .rt-card{margin-top:0}
 .pvfoot b.pvbad{color:#c9a19a}
+.pvselrow{margin:-2px 0 7px;gap:6px;align-items:flex-start}
+.pvselrow .rt-b{height:22px;padding:0 8px;flex:none}
+.pvsel{margin:0;flex:1;min-width:0;color:var(--tx3)}
+.pvsel b{color:#cfc6f5;font-weight:600}
+.pvsel code{font-family:var(--mono);color:var(--tx2);word-break:break-all}
+.pvsel.pvwarn{color:#d3b887}
 .pvfoot em.pvpath{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;font-family:var(--mono)}
 
 /* 表示設定（凡例） */

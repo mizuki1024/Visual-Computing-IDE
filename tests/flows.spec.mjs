@@ -7,6 +7,7 @@
  * UI の設計には手を入れていない。データセットが増えただけである。
  * ========================================================================== */
 import { chromium } from 'playwright-core';
+import { installCanvasPrecondition, n0Shows } from './lib/canvas-precondition.mjs';
 import { createRequire } from 'node:module';
 
 const require_ = createRequire(import.meta.url);
@@ -29,6 +30,8 @@ const eq = (name, a, b) => ok(name, a === b, a);
 
 const browser = await chromium.launch({ channel: 'chrome' });
 const page = await browser.newPage({ viewport: { width: 1600, height: 1000 }, deviceScaleFactor: 1 });
+// 前提状態をそろえる: IDE の履歴で伸びる右上のパネルを、開くたびに閉じる（lib/canvas-precondition.mjs）
+installCanvasPrecondition(page);
 const pageErrors = [];
 page.on('pageerror', (e) => pageErrors.push(e.message));
 page.on('console', (m) => { if (m.type() === 'error' && !/favicon|404/.test(m.text())) pageErrors.push(m.text()); });
@@ -49,8 +52,19 @@ ok('通信を開始したコンポーネント名が札に出る', svg.includes(
 ok('値を描いたコンポーネント名も札に出る', svg.includes('RegionBadge'), svg.slice(0, 300));
 ok('実測データであることを常時表示している',
   (await page.locator('.note.synth').innerText()).includes('PoC-05 実測データ'));
-ok('応答ヘッダで対応付けたことを計装表示に出している',
-  (await page.locator('header.n0').innerText()).includes('応答ヘッダへの識別子'));
+{
+  /*
+   * N0 の計装の欄は、IDE が開発サーバーを扱った後は**実際のプロセスの状態**を出す（Phase 7A の設計）。
+   * そのとき記録の計装方式は N0 には出ないので、記録の表示（キャンバスの常時の注記）で確かめる。
+   * どちらの前提でも「記録の計装方式を画面に出している」ことを確かめる。
+   */
+  const n0 = await page.locator('header.n0').innerText();
+  const recorded = await n0Shows(page) === 'recorded';
+  ok('応答ヘッダで対応付けたことを計装表示に出している',
+    recorded ? n0.includes('応答ヘッダへの識別子')
+      : (await page.locator('.note.synth').innerText()).includes('応答ヘッダへの識別子'),
+    { recorded, n0: n0.slice(0, 200) });
+}
 ok('観測したページは /flows',
   (await page.locator('section[aria-label="このページの概要"] .claim .src').innerText()).includes('/flows'));
 

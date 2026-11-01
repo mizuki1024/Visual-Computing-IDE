@@ -56,33 +56,156 @@ export interface GatewayOptions {
 
 /* --------------------------------------------------------------- 埋め込む部品 */
 
+/** スクリプトが「親（IDE の画面）として受け入れてよい」origin の型。frame-ancestors と同じ範囲 */
+export function parentPatterns(cfg: AccessConfig): { s: string; h: string; p: string }[] {
+  return ideFrameAncestors(cfg).map((o) => {
+    const m = /^(https?:)\/\/([^/:]+)(?::(\*|\d+))?$/.exec(o);
+    return m ? { s: m[1], h: m[2].toLowerCase(), p: m[3] ?? '' } : null;
+  }).filter((x): x is { s: string; h: string; p: string } => !!x);
+}
+
 /**
- * プレビューのページから IDE の画面へ、いまの場所を知らせる小さなスクリプト。
+ * プレビューのページに差し込む小さなスクリプト（Phase 7B-1 で場所の知らせ、7B-2 で要素の選択）。
  * 中継の origin から配る（インラインにしない。対象のアプリの CSP が 'self' を許すなら動く）。
- * 送るのはパス・タイトル・最初の文書の HTTP 状態だけで、DOM の中身は送らない。
+ *
+ * 通信（src/lib/previewProtocol.ts）
+ *   1. 親へ `hello` だけを送る（中身なし）。宛先は location.ancestorOrigins が使えればその origin、
+ *      使えない（Firefox）ときだけ '*'。どちらにせよ中身を持たない
+ *   2. 親から `connect` と MessagePort を受け取る。**送り主が親の window で、origin が IDE の画面として
+ *      許した範囲**のときだけ受ける。受けた知らせはアプリのリスナーに渡さない（最初に登録した
+ *      リスナーで止める）ので、アプリのスクリプトはこの port を手にできない
+ *   3. 以後の知らせ（場所・選択）はその port だけで送る
+ *
+ * 送るもの: パス・タイトル・最初の文書の HTTP 状態・要素識別子・タグ名・何番目か・
+ * テキストの文字数と文字種。**本文・属性・フォームの値・Cookie は送らない。**
+ * 選択は、選択モードのときの利用者の本物のクリック（isTrusted）だけで起こる。
  */
-export const AGENT_JS = `(function(){
+export function agentJs(cfg: AccessConfig): string {
+  return `(function(){
   if (window.__vcidePreviewAgent) return; window.__vcidePreviewAgent = 1;
-  var s = document.currentScript, st = s && s.getAttribute('data-vcide-status');
+  var PARENTS = ${JSON.stringify(parentPatterns(cfg))};
+  var W = window, P = W.parent, D = document;
+  if (P === W) return;
+  var s = D.currentScript, st = s && s.getAttribute('data-vcide-status');
   var status = st ? Number(st) : null, soft = false;
   var from = (s && s.getAttribute('data-vcide-from')) || 'app';
-  function send(kind){
-    try {
-      parent.postMessage({ source: 'vcide-preview', v: 1, kind: kind,
-        path: location.pathname + location.search + location.hash,
-        title: document.title || '', status: soft ? null : status, soft: soft, from: from }, '*');
+  /* アプリが後から書き換えても影響を受けないよう、使う関数を先に取っておく */
+  var getAttr = Element.prototype.getAttribute, qsa = Document.prototype.querySelectorAll;
+  var rect = Element.prototype.getBoundingClientRect, addL = W.addEventListener.bind(W);
+  var ID = /^[0-9a-f]{10}$/, port = null, nonce = null, queue = [], selecting = false, seq = 0;
+  var hoverBox = null, selBox = null, hoverEl = null, selEl = null, raf = 0;
+  function allowed(o){
+    try { var u = new URL(o);
+      for (var i = 0; i < PARENTS.length; i++) { var p = PARENTS[i];
+        if (u.protocol === p.s && u.hostname === p.h && (p.p === '*' || u.port === p.p)) return true; }
     } catch (e) {}
+    return false;
   }
+  function post(m){ m.source = 'vcide-preview'; m.v = 2; m.nonce = nonce; try { port.postMessage(m); } catch (e) {} }
+  function send(m){ if (port) post(m); else if (queue.length < 20) queue.push(m); }
+  function where(kind){
+    send({ kind: kind, path: location.pathname + location.search + location.hash,
+      title: String(D.title || '').slice(0, 300), status: soft ? null : status, soft: soft, from: from });
+  }
+  /* ---------------------------------------------------------- 要素の選択 */
+  function anchorOf(el){ var v = getAttr.call(el, 'data-vcide'); return v && ID.test(v) ? v : null; }
+  function cls(t){
+    var j = /[\\u3040-\\u30ff\\u3400-\\u9fff\\uff00-\\uffef]/.test(t), l = /[A-Za-z]/.test(t), d = /[0-9]/.test(t);
+    if (j && !l && !d) return 'cjk'; if (j) return 'mixed';
+    if (l) return d ? 'mixed' : 'latin'; if (d) return 'digits'; return 'other';
+  }
+  function describe(t){
+    var el = t && t.nodeType === 3 ? t.parentElement : t;
+    if (!el || el.nodeType !== 1) return null;
+    var self = anchorOf(el), anc = [], p = el.parentElement;
+    while (p && anc.length < 32) { var a = anchorOf(p); if (a) anc.push(a); p = p.parentElement; }
+    var ord = null, cnt = 0;
+    if (self) { var all = qsa.call(D, '[data-vcide="' + self + '"]'); cnt = all.length;
+      for (var i = 0; i < all.length; i++) if (all[i] === el) ord = i;
+      if (ord === null) { self = null; cnt = 0; } }
+    var tag = String(el.localName || '').slice(0, 64);
+    var form = /^(input|textarea|select|option|button)$/.test(tag) || el.isContentEditable === true;
+    var ti = null, shape = null, k = 0, kids = el.childNodes;
+    /* 値そのものは送らない。数えるのは文字数と文字種だけ。フォームの部品は数えない */
+    if (!form) for (var j = 0; j < kids.length && ti === null; j++) {
+      if (kids[j].nodeType !== 3) continue;
+      var v = String(kids[j].nodeValue || '').trim();
+      if (v.length) { ti = k; shape = { chars: Math.min(v.length, 1000000), cls: cls(v) }; }
+      k++;
+    }
+    return { tag: tag, anchorOnSelf: self, anchorOrdinal: ord, anchorInstanceCount: cnt,
+      ancestorAnchors: anc, textNodeIndex: ti, valueShape: shape, formControl: form, path: location.pathname };
+  }
+  function box(color){
+    var b = D.createElement('div');
+    b.setAttribute('data-vcide-overlay', '');
+    b.setAttribute('aria-hidden', 'true');
+    b.style.cssText = 'position:fixed;pointer-events:none;z-index:2147483647;box-sizing:border-box;'
+      + 'border:2px solid ' + color + ';background:' + color + '1a;border-radius:2px;display:none;left:0;top:0';
+    D.documentElement.appendChild(b);
+    return b;
+  }
+  function place(b, el){
+    if (!b) return;
+    if (!el || !el.isConnected) { b.style.display = 'none'; return; }
+    var r = rect.call(el);
+    b.style.display = 'block'; b.style.left = r.left + 'px'; b.style.top = r.top + 'px';
+    b.style.width = r.width + 'px'; b.style.height = r.height + 'px';
+  }
+  function tick(){ place(hoverBox, hoverEl); place(selBox, selEl); raf = selecting ? requestAnimationFrame(tick) : 0; }
+  function setMode(on){
+    if (on === selecting) { post({ kind: 'mode', select: selecting }); return; }
+    selecting = on;
+    if (on) { hoverBox = hoverBox || box('#5a4fb0'); selBox = selBox || box('#1f7a52'); if (!raf) raf = requestAnimationFrame(tick); }
+    else {
+      hoverEl = null; selEl = null;
+      if (hoverBox) hoverBox.remove(); if (selBox) selBox.remove(); hoverBox = selBox = null;
+    }
+    post({ kind: 'mode', select: selecting });
+  }
+  function block(e){ if (!selecting) return; e.preventDefault(); e.stopImmediatePropagation(); }
+  ['pointerdown','pointerup','mousedown','mouseup','dblclick','auxclick','contextmenu','submit','touchstart','touchend']
+    .forEach(function(t){ addL(t, block, { capture: true, passive: false }); });
+  addL('click', function(e){
+    if (!selecting) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    if (!e.isTrusted || !port) return;          // 本物のクリックだけ。アプリが作ったクリックでは選ばない
+    var d = describe(e.target);
+    if (!d) return;
+    selEl = e.target && e.target.nodeType === 3 ? e.target.parentElement : e.target;
+    seq += 1;
+    post({ kind: 'select', seq: seq, selection: d });
+  }, true);
+  addL('mousemove', function(e){ if (selecting) hoverEl = e.target; }, true);
+  /* ------------------------------------------------------- 親との接続 */
+  addL('message', function(e){
+    var d = e.data;
+    if (!d || d.source !== 'vcide-ide' || d.kind !== 'connect') return;
+    e.stopImmediatePropagation();               // アプリのリスナーに port を渡さない
+    if (port || e.source !== P || !allowed(e.origin) || !e.ports || e.ports.length !== 1) return;
+    if (typeof d.nonce !== 'string' || !/^[A-Za-z0-9_-]{16,64}$/.test(d.nonce)) return;
+    port = e.ports[0]; nonce = d.nonce;
+    port.onmessage = function(m){
+      var x = m.data;
+      if (x && x.source === 'vcide-ide' && x.v === 2 && x.nonce === nonce && x.kind === 'mode' && typeof x.select === 'boolean') setMode(x.select);
+    };
+    post({ kind: 'connected' });
+    for (var i = 0; i < queue.length; i++) post(queue[i]);
+    queue = [];
+  }, true);
+  var ao = location.ancestorOrigins, target = ao && ao.length ? (allowed(ao[0]) ? ao[0] : null) : '*';
+  if (target !== null) { try { P.postMessage({ source: 'vcide-preview', v: 2, kind: 'hello' }, target); } catch (e) {} }
   var ps = history.pushState, rs = history.replaceState;
-  history.pushState = function(){ var r = ps.apply(this, arguments); soft = true; send('navigate'); return r; };
-  history.replaceState = function(){ var r = rs.apply(this, arguments); send('replace'); return r; };
-  addEventListener('popstate', function(){ soft = true; send('navigate'); });
-  addEventListener('hashchange', function(){ send('navigate'); });
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ send('ready'); });
-  else send('ready');
-  addEventListener('load', function(){ send('load'); });
+  history.pushState = function(){ var r = ps.apply(this, arguments); soft = true; where('navigate'); return r; };
+  history.replaceState = function(){ var r = rs.apply(this, arguments); where('replace'); return r; };
+  addL('popstate', function(){ soft = true; where('navigate'); });
+  addL('hashchange', function(){ where('navigate'); });
+  if (D.readyState === 'loading') D.addEventListener('DOMContentLoaded', function(){ where('ready'); });
+  else where('ready');
+  addL('load', function(){ where('load'); });
 })();
 `;
+}
 
 /** from: そのページを作ったのが開発サーバー（app）か、この中継（gateway）か */
 const agentTag = (status: number, from: 'app' | 'gateway' = 'app'): string =>
@@ -282,7 +405,7 @@ export class PreviewGateway {
           'content-type': 'text/javascript; charset=utf-8', 'cache-control': 'no-store',
           ...this.#securityHeaders(),
         });
-        res.end(AGENT_JS);
+        res.end(agentJs(this.#opts.config));
         return;
       }
       if (p === 'ping') {

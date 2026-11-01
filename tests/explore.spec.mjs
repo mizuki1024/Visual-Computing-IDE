@@ -6,6 +6,7 @@
  * Phase 5A で動いていた操作と、Phase 5B で足した段階0 の両方を見る。
  * ========================================================================== */
 import { chromium } from 'playwright-core';
+import { installCanvasPrecondition } from './lib/canvas-precondition.mjs';
 
 const BASE = process.env.BASE ?? 'http://localhost:3100';
 const SHOTS = process.env.SHOTS ?? null;
@@ -20,6 +21,8 @@ const eq = (name, actual, expected) => ok(name, actual === expected, actual);
 
 const browser = await chromium.launch({ channel: 'chrome' });
 const page = await browser.newPage({ viewport: { width: 1600, height: 1000 }, deviceScaleFactor: 1 });
+// 前提状態をそろえる: IDE の履歴で伸びる右上のパネルを、開くたびに閉じる（lib/canvas-precondition.mjs）
+installCanvasPrecondition(page);
 const pageErrors = [];
 page.on('pageerror', (e) => pageErrors.push(e.message));
 page.on('console', (m) => { if (m.type() === 'error' && !/favicon|404/.test(m.text())) pageErrors.push(m.text()); });

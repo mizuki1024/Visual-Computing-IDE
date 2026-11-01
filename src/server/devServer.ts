@@ -15,13 +15,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { runtimeDir, spanDirPath, stateFilePath } from './ide';
 import {
-  httpResponds, isPortFree, pidAlive, pidCommand, sleep, waitPortFree,
+  groupAlive, httpResponds, isPortFree, pidAlive, pidCommand, sleep, waitPortFree,
 } from './net';
 import {
   inspectProject, isStartable, START_WAIT_SEC, type Finding, type ProjectInspection,
 } from './projectInspect';
 import { redactAll } from './redact';
 import { childEnvReport } from './childEnv';
+import { anchorEnv, anchorSupport, type AnchorSupport } from './anchors';
 
 /** 指示 2.D の7状態。これ以外の状態を作らない。 */
 export type RunState =
@@ -76,6 +77,11 @@ export interface DevServerSnapshot {
    * 渡さなかった変数は数だけを持つ。引き継いだプロセスでは不明（null）
    */
   env: { passed: string[]; withheld: number; explicit: string[] } | null;
+  /**
+   * 要素識別子の注入（Phase 7B-2。PoC-03 方式1）。起動したときに決まる。
+   * 未起動なら null。IDE は対象の next.config を書き換えないので、設定が無ければ unavailable
+   */
+  anchors: AnchorSupport | null;
   updatedAt: string;
 }
 
@@ -99,6 +105,8 @@ interface OwnershipRecord {
   startedAt: string;
   readyAt: string | null;
   instrumentation: { state: InstrumentationState; reason: string | null; spanFile: string | null };
+  /** 要素識別子の注入（Phase 7B-2）。古い記録には無い */
+  anchors?: AnchorSupport;
   /** 記録を書いた IDE プロセス */
   ideOwnerPid: number;
 }
@@ -267,6 +275,7 @@ export class DevServerManager {
       logLines: this.#log.length,
       logAvailable: this.#logAvailable,
       env: this.#env,
+      anchors: r?.anchors ?? null,
       updatedAt: this.#updatedAt,
     };
   }
@@ -377,6 +386,10 @@ export class DevServerManager {
       env.POC01_SPAN_FILE = instrumentation.spanFile;
       env.NEXT_OTEL_VERBOSE = '1';
     }
+    /* 要素識別子の注入（Phase 7B-2）。対象の next.config がローダを読む設定のときだけ。
+     * 対応表は IDE 側に書かせる（対象プロジェクトには書かない） */
+    const anchors = anchorSupport(ins.root);
+    Object.assign(env, anchorEnv(ins.root, anchors));
 
     /* ---------------------------------------------------------------- 起動 */
     const args = [ins.next.binPath, 'dev', '-p', String(port), '-H', '127.0.0.1'];
@@ -431,6 +444,7 @@ export class DevServerManager {
       startedAt: new Date(t0).toISOString(),
       readyAt: null,
       instrumentation,
+      anchors,
       ideOwnerPid: process.pid,
     };
     this.#writeRecordFile();
@@ -631,19 +645,24 @@ export class DevServerManager {
     return E.noFreePort();
   }
 
-  /** プロセスグループごと止める。SIGTERM → 待つ → SIGKILL の順で、待ち時間を固定しない。 */
+  /**
+   * プロセスグループごと止める。SIGTERM → 待つ → SIGKILL の順で、待ち時間を固定しない。
+   * **先頭のプロセスだけでなく、グループが空になるまで待つ**（Phase 7B-2）。要素識別子のローダは
+   * Turbopack のワーカー（別プロセス）で走り、先頭より後に終わる。先頭だけを見て「停止した」と言わない。
+   */
   async #killOwned(): Promise<void> {
     const rec = this.#record;
     if (!rec) return;
     const pid = rec.pid;
-    if (!pidAlive(pid)) return;
+    const anyAlive = () => pidAlive(pid) || groupAlive(pid);
+    if (!anyAlive()) return;
     try { process.kill(-pid, 'SIGTERM'); } catch { try { process.kill(pid, 'SIGTERM'); } catch { /* 既に落ちている */ } }
     const t0 = Date.now();
-    while (pidAlive(pid) && Date.now() - t0 < STOP_TERM_WAIT_MS) await sleep(150);
-    if (!pidAlive(pid)) return;
+    while (anyAlive() && Date.now() - t0 < STOP_TERM_WAIT_MS) await sleep(150);
+    if (!anyAlive()) return;
     try { process.kill(-pid, 'SIGKILL'); } catch { try { process.kill(pid, 'SIGKILL'); } catch { /* 既に落ちている */ } }
     const t1 = Date.now();
-    while (pidAlive(pid) && Date.now() - t1 < STOP_KILL_WAIT_MS) await sleep(100);
+    while (anyAlive() && Date.now() - t1 < STOP_KILL_WAIT_MS) await sleep(100);
   }
 
   /** 同期で止める。プロセス終了フックからはこれしか呼べない。 */

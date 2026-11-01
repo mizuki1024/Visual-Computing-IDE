@@ -7,6 +7,7 @@
  * UI の設計には手を入れていない。データセットが2つ増えただけである。
  * ========================================================================== */
 import { chromium } from 'playwright-core';
+import { installCanvasPrecondition, n0Shows } from './lib/canvas-precondition.mjs';
 import { createRequire } from 'node:module';
 
 const require_ = createRequire(import.meta.url);
@@ -34,6 +35,8 @@ const eq = (name, a, b) => ok(name, a === b, a);
 
 const browser = await chromium.launch({ channel: 'chrome' });
 const page = await browser.newPage({ viewport: { width: 1600, height: 1000 }, deviceScaleFactor: 1 });
+// 前提状態をそろえる: IDE の履歴で伸びる右上のパネルを、開くたびに閉じる（lib/canvas-precondition.mjs）
+installCanvasPrecondition(page);
 const pageErrors = [];
 page.on('pageerror', (e) => pageErrors.push(e.message));
 page.on('console', (m) => {
@@ -57,8 +60,10 @@ const svg = await sceneText();
 ok('Server Component の名前が札に出る', svg.includes('RscDb'), svg.slice(0, 400));
 ok('実測データであることを常時表示している',
   (await page.locator('.note.synth').innerText()).includes('PoC-02 実測データ'));
+// N0 が実際の開発サーバーの状態を出しているとき（起動・停止の後。7A の設計）は、記録の表示（常時の注記）で確かめる
 ok('伝播と呼び出しスタックを使ったことを計装表示に出している',
-  (await page.locator('header.n0').innerText()).includes('W3C 伝播'));
+  (await n0Shows(page) === 'recorded' ? await page.locator('header.n0').innerText()
+    : await page.locator('.note.synth').innerText()).includes('W3C 伝播'));
 ok('観測したページは /rsc-db',
   (await page.locator('section[aria-label="このページの概要"] .claim .src').innerText())
     .includes('/rsc-db'));
