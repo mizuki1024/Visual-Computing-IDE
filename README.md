@@ -17,10 +17,15 @@
 | Phase 6 | PoC-01〜05。計装・要素特定・通信・SQL・由来推定の実測検証 | 完了（`docs/06a`〜`06e`） |
 | Phase 6F | PoC 成果の整合性修正（SQL 射影解析の作り直し） | 完了（`docs/06f`） |
 | M1 | 関係モデルの最小仕様の確定と機械的検査 | 完了（`docs/06g`） |
-| **Phase 7A** | **ローカル Next.js プロジェクトの選択・起動・停止** | **実装済み / 検証途中** |
+| **Phase 7A** | **ローカル Next.js プロジェクトの選択・起動・停止** | **実装済み。実ブラウザでの通し検証が途中** |
 | Phase 7B | プレビュー・要素選択・観測情報の統合 | 未着手 |
 
-Phase 7A の実装状況と残件は `docs/07a-implementation-report.md` を参照。
+Phase 7A は自動テスト（`tests/project-inspect.spec.mjs` 91 件 /
+`tests/devserver.spec.mjs` 105 件）で起動・停止・二重起動の防止・ポート競合・
+所有の引き継ぎまで検証済み。**実ブラウザでの通し検証（`tests/runtime-e2e.spec.mjs`）
+は途中であり、既知の残件が3件ある** — `docs/07a-implementation-report.md`（未作成）に
+まとめる予定。残件は `tests/runtime-e2e.spec.mjs` の冒頭コメントと
+リポジトリの最新コミットメッセージを参照。
 
 ---
 
