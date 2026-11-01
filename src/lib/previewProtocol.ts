@@ -59,7 +59,24 @@ export type AgentMessage =
     path: string; title: string; status: number | null; soft: boolean; from: 'app' | 'gateway';
   }
   | { kind: 'mode'; nonce: string; select: boolean }
-  | { kind: 'select'; nonce: string; seq: number; selection: ElementSelection };
+  | {
+    kind: 'select'; nonce: string; seq: number; selection: ElementSelection;
+    /** 7B-3B-2: 選んだ要素の文書の識別子と、その文書の中でクライアント側の遷移があったか */
+    document: SelectionDocument;
+  };
+
+/**
+ * 7B-3B-2: 選択が起きた文書について、スクリプトが知らせるもの。
+ * `token` は中継がその文書の応答に付けた識別子（無ければ null）。`soft` はその文書の中で
+ * クライアント側の遷移（pushState / popstate）があったか。
+ *
+ * **ページのスクリプトはアプリと同じ JavaScript の世界で動く。** アプリのコードはこの値を
+ * 書き換えられる（偽れる）。IDE はこれを「いまの起動の、中継が実際に返した応答の識別子か」
+ * 「そのパスか」で照合するが、悪意のあるアプリに対する保証にはならない。
+ */
+export interface SelectionDocument { token: string | null; soft: boolean | null }
+
+export const DOC_TOKEN_RE = /^[0-9a-f]{32}$/;
 
 const isObj = (v: unknown): v is Record<string, unknown> =>
   !!v && typeof v === 'object' && !Array.isArray(v) && Object.getPrototypeOf(v) === Object.prototype;
@@ -142,9 +159,16 @@ export function parseAgentMessage(d: unknown, nonce: string): AgentMessage | nul
       return onlyKeys(d, [...base, 'select']) && typeof d.select === 'boolean'
         ? { kind: 'mode', nonce, select: d.select } : null;
     case 'select': {
-      if (!onlyKeys(d, [...base, 'seq', 'selection']) || !isInt(d.seq, 1, Number.MAX_SAFE_INTEGER)) return null;
+      if (!onlyKeys(d, [...base, 'seq', 'selection', 'doc', 'soft']) || !isInt(d.seq, 1, Number.MAX_SAFE_INTEGER)) return null;
       const selection = parseSelection(d.selection);
-      return selection ? { kind: 'select', nonce, seq: d.seq, selection } : null;
+      /* 7B-3B-2: 文書の識別子と遷移の有無。無い（古いスクリプト）・形が違うものは「知らせが無い」として扱う */
+      if (d.doc !== undefined && d.doc !== null && (typeof d.doc !== 'string' || !DOC_TOKEN_RE.test(d.doc))) return null;
+      if (d.soft !== undefined && typeof d.soft !== 'boolean') return null;
+      const document: SelectionDocument = {
+        token: typeof d.doc === 'string' ? d.doc : null,
+        soft: typeof d.soft === 'boolean' ? d.soft : null,
+      };
+      return selection ? { kind: 'select', nonce, seq: d.seq, selection, document } : null;
     }
     default:
       return null;

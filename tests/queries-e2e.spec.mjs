@@ -561,7 +561,9 @@ try {
   await showExchange(ex8.seq);
   eq('観測の表示に、選択した要素を並べた', await obsAttr('data-obs-with-sel'), 'on');
   eq('選択の行は残る（解除していない）', await pv().getAttribute('data-selection'), 'resolved');
-  ok('「両者は結んでいません」の注記', (await pv().innerText()).includes('両者は結んでいません'));
+  /* 7B-3B-2 で変更: 選択した要素の文書をこの通信に同定でき、静的解析と実測が一致するので、由来を推定で結ぶ。
+   * 「評価を持たない並べ方では結ばない」ことは、下の Node の変換（lineage を渡さない）で引き続き確かめる */
+  ok('注記（7B-3B-2）: 要素を描いた文書の通信と並べ、由来は静的解析による推定で結んでいる', (await pv().innerText()).includes('静的解析による推定'), (await pv().innerText()).slice(-300));
   {
     const call = anchorCalls.at(-1);
     const input = {
@@ -589,7 +591,8 @@ try {
     ok('描いた位置の詳細: 同じ定義の中にあることは根拠にしていない', drew.overview.some((r) => r.k === 'SQL との関係' && r.v.includes('同じ定義の中にあることは根拠にしていません')));
     ok('選択した値の詳細: この要素を描いた文書取得がこの通信かは特定していない', value.overview.some((r) => r.k === '通信との関係' && r.v.includes('特定していません')));
     await page.keyboard.press(String(drew.id));
-    ok('右ドック（描いた位置）: 同じ定義の中にあることは根拠にしていない', (await dockText()).includes('同じ定義の中にあることは根拠にしていません'));
+    /* 7B-3B-2 で変更: 画面は由来の評価つきで描くので、描いた位置の詳細は「推定で結んだ」になる（同じ定義の中にあることは根拠にしていない点は同じ） */
+    ok('右ドック（描いた位置・7B-3B-2）: 由来は静的解析による推定（supplies・L2）', (await dockText()).includes('supplies・L2'));
     await shot('03-selection-and-site');
     await shotCanvas('03b-selection-and-site-canvas');
     await page.keyboard.press(String(ran.id));

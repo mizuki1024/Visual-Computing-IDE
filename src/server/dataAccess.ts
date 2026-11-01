@@ -10,7 +10,8 @@
  *
  * この段階で足した照合（どれか1つでも欠ければ位置を断定しない）:
  *   A. その SQL のスパンに呼び出し位置の記録が**ちょうど1件**ある（0件 / 2件以上は断定しない）
- *   B. 記録のトレース・プロセス・種類が、その SQL のスパンと同じ（spanId が偶然同じ別の記録を使わない）
+ *   B. 記録のトレース・プロセス・種類が、その SQL のスパンと同じ（spanId が偶然同じ別の記録を使わない）。
+ *      PID は記録とスパンの**両方に存在して**一致すること（7B-3B-2。片方が欠ければ断定しない）
  *   C. 戻した位置が対象プロジェクトの src/ の中にある（`..`・シンボリックリンクで外へ出ない）
  *   D. SQL の実行の**後に**、生成物（とソースマップ）も、ソースファイルも書き換わっていない
  *      （書き換わっていれば、戻した位置・読み直した行が、実行したコードのものとは限らない）
@@ -129,7 +130,7 @@ const CHECKS_POC02 = [
   '戻した位置のソース行を読み直し、データ取得の呼び出しが書かれていることを確認',
   '囲むコンポーネントが、ソースの読み直しとビルド時の対応表で一致',
 ];
-const CHECK_RECORD = 'この SQL のスパンに呼び出し位置の記録がちょうど1件あり、同じトレース・同じプロセスのもの';
+const CHECK_RECORD = 'この SQL のスパンに呼び出し位置の記録がちょうど1件あり、同じトレースのもの。書いたプロセスの PID が記録とスパンの両方にあり一致する';
 const CHECK_SCOPE = '戻した位置が対象プロジェクトの src/ の中（シンボリックリンクで外へ出ない）';
 const CHECK_FRESH = 'SQL の実行の後に、生成物・ソースマップ・ソースファイルのどれも書き換わっていない';
 
@@ -181,11 +182,26 @@ export async function resolveDataAccess(input: DataAccessInput): Promise<LiveDat
     if (!recs.length) { out.push(fail(span, 'no-callsite-record', 'この SQL のスパン ID の記録が収集ファイルにありません')); continue; }
     if (recs.length > 1) { out.push(fail(span, 'multiple-callsite-records', `記録が ${recs.length} 件あります`)); continue; }
     const rec = recs[0];
-    /* B. 同じトレース・同じプロセス・SQL の記録 */
-    if (rec.traceId !== span.traceId || rec.target !== 'sql' || (rec.pid !== null && pid !== null && rec.pid !== pid)) {
+    /* B. 同じトレース・同じプロセス・SQL の記録。
+     * 7B-3B-2: **PID は両方が存在して一致するときだけ通す。** 片方でも欠けていれば「同じプロセス」を
+     * 確かめられないので、比べずに通すのではなく断定しない（7B-3B-1 は片方が欠けると照合を飛ばしていた） */
+    if (rec.traceId !== span.traceId || rec.target !== 'sql') {
       out.push(fail(span, 'callsite-mismatch',
         rec.traceId !== span.traceId ? '記録のトレース ID が SQL のスパンと違います'
-          : rec.target !== 'sql' ? `記録の種類が SQL ではありません（${rec.target}）` : '記録を書いたプロセスが SQL のスパンと違います',
+          : `記録の種類が SQL ではありません（${rec.target}）`,
+        { at: rec.entry?.at ?? null }));
+      continue;
+    }
+    if (rec.pid === null || pid === null) {
+      out.push(fail(span, 'callsite-pid-missing',
+        rec.pid === null && pid === null ? '呼び出し位置の記録にも SQL のスパンにも、書いたプロセスの PID がありません'
+          : rec.pid === null ? '呼び出し位置の記録に、書いたプロセスの PID がありません'
+            : 'SQL のスパンに、書いたプロセスの PID がありません',
+        { at: rec.entry?.at ?? null }));
+      continue;
+    }
+    if (rec.pid !== pid) {
+      out.push(fail(span, 'callsite-mismatch', `記録を書いたプロセス（PID ${rec.pid}）が SQL のスパン（PID ${pid}）と違います`,
         { at: rec.entry?.at ?? null }));
       continue;
     }

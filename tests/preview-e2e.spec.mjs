@@ -23,6 +23,7 @@ import fs from 'node:fs';
 import http from 'node:http';
 import net from 'node:net';
 import path from 'node:path';
+import { assertDistinguishable, classifyEnviron, parseEnviron, projectDotenv } from './lib/envOrigin.mjs';
 
 const REPO = path.resolve(import.meta.dirname, '..');
 const PROJECT = process.env.VCIDE_E2E_PROJECT ?? path.join(REPO, 'poc', 'fixture-app');
@@ -339,15 +340,37 @@ try {
     ok('前提: IDE のプロセスにはダミーの秘密情報が入っている', ideEnv.includes(MARK));
     const pids = groupPids(s.runtime.pid);
     ok('開発サーバーのプロセス（グループ）を見つける', pids.length >= 1, pids);
+    /*
+     * 7B-3B-2: 名前ではなく**値と出所**で判定する（tests/lib/envOrigin.mjs）。
+     * `next dev` は対象プロジェクト自身の .env* を読み、その後に生む作業プロセスはそれを受け継ぐ。
+     * 名前だけの検査は、その正常な動作（プロジェクトの DATABASE_URL）と、IDE からの漏えいを区別できなかった
+     * （7B-3B-1 第9.3節）。**検査を緩めたのではない**: IDE の値は名前を問わず検出し、秘密情報の名前で
+     * 値がプロジェクトの .env* と一致しないものも失敗にする。否定の確認は tests/childenv-origin.spec.mjs。
+     */
+    const dotenv = projectDotenv(PROJECT);
+    assertDistinguishable(DUMMY_SECRETS, dotenv);
+    {
+      /* IDE が**直接**起動したプロセスの起動時の環境は、IDE が渡したものそのもの。ここは名前でも検査する */
+      const e = environOf(s.runtime.pid);
+      ok(`PID ${s.runtime.pid}（IDE が直接起動したプロセス）: 起動時の環境に秘密情報の名前が1つも無い`,
+        e !== null && ![...parseEnviron(e).keys()].some((k) => k in DUMMY_SECRETS),
+        e && [...parseEnviron(e).keys()].filter((k) => k in DUMMY_SECRETS));
+    }
+    const projectOwned = new Set();
     for (const pid of pids) {
       const e = environOf(pid);
       if (e === null) continue;
       ok(`PID ${pid}: どの値にもダミーの秘密情報が無い`, !e.includes(MARK));
-      const names = e.split('\0').map((kv) => kv.split('=')[0]);
-      ok(`PID ${pid}: 秘密情報の名前（${Object.keys(DUMMY_SECRETS).length} 個）を1つも受け取っていない`,
-        !Object.keys(DUMMY_SECRETS).some((k) => names.includes(k)), names.filter((k) => k in DUMMY_SECRETS));
-      ok(`PID ${pid}: IDE の設定（VCIDE_*）を受け取っていない`, !names.some((k) => k.startsWith('VCIDE_')));
+      const env = parseEnviron(e);
+      const c = classifyEnviron({ environ: env, ideSecrets: DUMMY_SECRETS, mark: MARK, dotenv });
+      ok(`PID ${pid}: IDE の秘密情報（${Object.keys(DUMMY_SECRETS).length} 個の値・名前を問わない）を1つも受け取っていない`,
+        c.ideSecret.length === 0, c.ideSecret);
+      ok(`PID ${pid}: 秘密情報の名前を持つなら、値は対象プロジェクトの .env* の値である（出所を説明できない値が無い）`,
+        c.unexplained.length === 0, c.unexplained);
+      for (const k of c.projectDotenv) projectOwned.add(k);
+      ok(`PID ${pid}: IDE の設定（VCIDE_*）を受け取っていない`, ![...env.keys()].some((k) => k.startsWith('VCIDE_')));
     }
+    console.log(`  （記録）対象プロジェクトの .env* から読まれて作業プロセスに在った名前: ${[...projectOwned].join(', ') || 'なし'}`);
     ok('画面に「渡した数・渡していない数」を出す', /個を渡しました/.test(await rtPanel().locator('.rt-env').innerText()));
     const html = await (await browser.newPage()).goto(`http://${PV_HOST}/`).then((r) => r.text());
     ok('プレビューのページにダミーの秘密情報が出ない', !html.includes(MARK));

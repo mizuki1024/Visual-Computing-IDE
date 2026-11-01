@@ -23,8 +23,8 @@ import type {
   ObsSqlAnalysis, ObservationBundle,
 } from './observation';
 import {
-  DATA_ACCESS_FAILURE_LABEL, RELAY_ID_ATTR, RELAY_KIND_LABEL,
-  type HandlesBasis, type LiveDataAccess, type LiveExchange, type LiveRunObservation,
+  DATA_ACCESS_FAILURE_LABEL, DOC_UNBOUND_LABEL, LINEAGE_CUT_LABEL, LINEAGE_STAGE_LABEL, RELAY_ID_ATTR, RELAY_KIND_LABEL,
+  type DocBinding, type HandlesBasis, type LiveDataAccess, type LiveExchange, type LiveLineage, type LiveRunObservation,
 } from './liveObservation';
 
 /* -------------------------------------------------------------------------- */
@@ -1611,6 +1611,13 @@ export interface LiveSelectionInput {
   resolution: LiveResolution;
   /** 選択した時刻（ISO）。画面に出すだけ */
   selectedAt: string;
+  /** 7B-3B-2: 選択が起きた文書について、プレビューのスクリプトが知らせたもの（文書の識別子・遷移の有無） */
+  document?: { token: string | null; soft: boolean | null };
+  /**
+   * 7B-3B-2: 値の由来の評価。選択だけを描くとき（文書を同定できなかったときなど）に、
+   * 切断の理由として出す。**選択だけの描画では supplies を作らない**（SQL の側を描かないため）
+   */
+  lineage?: LiveLineage;
 }
 
 /** 特定できなかった理由の見出し（anchors.ts の UnresolvedReason） */
@@ -1686,6 +1693,15 @@ export function fromLiveSelection(input: LiveSelectionInput): AdapterResult {
       const row = value.overview.find((r) => r.k === '値の形');
       if (row) row.v = shapeText;
       value.overview.splice(1, 0, { k: 'ページ', v: input.page.path });
+      if (input.lineage) {
+        const b = input.lineage.binding;
+        value.overview.push({
+          k: '文書の同定',
+          v: b.status === 'identified'
+            ? `この要素を描いた文書は、いまの起動の通信 #${b.seq} の応答です（中継が応答ごとに付けた識別子で照合）`
+            : `同定できません — ${DOC_UNBOUND_LABEL[b.reason]}${b.detail ? `（${b.detail}）` : ''}`,
+        });
+      }
     }
     if (comp) {
       const a = res.anchor;
@@ -1708,7 +1724,7 @@ export function fromLiveSelection(input: LiveSelectionInput): AdapterResult {
       cuts.push({
         from: comp.id,
         head: 'ここから先は観測していません',
-        sub: 'props の由来（この値がどこから来たか）',
+        sub: input.lineage?.cut ? lineageCutText(input.lineage) : 'props の由来（この値がどこから来たか）',
         where: 'コンポーネントの props / 通信の応答',
         kind: 'derives は構造的に推定（02a 3.5.1）。7B-2 では関係を作らない',
       });
@@ -1925,10 +1941,45 @@ function liveSiteNode(id: number, d: LiveDataAccess, server: ObsSpan, firstSqlId
 /** 7B-3B-1: 選択した要素（7B-2）を同じキャンバスに並べるときの入力 */
 export interface LiveRunOptions {
   /**
-   * いまプレビューで選択している要素。**関係は作らない。** 同じ画面に並べるだけで、
+   * いまプレビューで選択している要素。`lineage` が無ければ**関係は作らない。** 同じ画面に並べるだけで、
    * 選択した値と SQL の間には線を引かず、値の由来は未確認と書く
    */
   selection?: LiveSelectionInput;
+  /** 7B-3B-2: 選択した要素を描いた文書の同定（bindDocument） */
+  binding?: DocBinding;
+  /**
+   * 7B-3B-2: 値の由来の評価（evaluateLineage）。`status: 'linked'` で、**この通信が同定した文書のもの**であり、
+   * その SQL の呼び出し位置のノードを描けたときだけ `supplies` を作る。それ以外は理由つきの切断にする
+   */
+  lineage?: LiveLineage;
+}
+
+/** 7B-3B-2: 由来の評価を、この通信の描画に使えるか */
+function lineageFor(opts: LiveRunOptions, seq: number): LiveLineage | null {
+  const l = opts.lineage;
+  if (!l || !opts.selection) return null;
+  return l.binding.status === 'identified' && l.binding.seq === seq && l.exchangeSeq === seq ? l : null;
+}
+
+/** 7B-3B-2: 由来を結ばなかった理由の1行（段と理由） */
+export function lineageCutText(l: LiveLineage): string {
+  if (!l.cut) return '';
+  const c = LINEAGE_CUT_LABEL[l.cut.reason];
+  return `${LINEAGE_STAGE_LABEL[c.stage]}: ${c.text}${l.cut.detail ? `（${l.cut.detail}）` : ''}`;
+}
+
+/** 7B-3B-2: 文書の同定の1行 */
+export function docBindingText(b: DocBinding | undefined, ex: LiveExchange): string {
+  if (!b) {
+    return `この要素を描いた文書の取得が、通信 #${ex.seq}（${ex.method} ${ex.path}）かどうかは特定していません。同じパスのページであることだけで並べています`;
+  }
+  if (b.status === 'identified') {
+    return b.seq === ex.seq
+      ? `この要素を描いた文書は、通信 #${ex.seq}（${ex.method} ${ex.path}）の応答です（中継が応答ごとに付けた文書の識別子で照合）。`
+        + '**通信と文書の対応であって、表示された値と SQL の結果の対応ではありません**'
+      : `この要素を描いた文書は通信 #${b.seq} の応答です。いま表示している通信 #${ex.seq} ではありません（同じパスでも別の文書です）`;
+  }
+  return `この要素を描いた文書を同定できません — ${DOC_UNBOUND_LABEL[b.reason]}${b.detail ? `（${b.detail}）` : ''}`;
 }
 
 export function fromLiveRun(obs: LiveRunObservation, seq: number, opts: LiveRunOptions = {}): AdapterResult {
@@ -1944,6 +1995,8 @@ export function fromLiveRun(obs: LiveRunObservation, seq: number, opts: LiveRunO
   const { root, server } = links;
 
   let nextId = 1;
+  /* 7B-3B-2: この通信について使える由来の評価（同定した文書の通信で、結べたもの） */
+  const linFor = lineageFor(opts, seq)?.status === 'linked' ? lineageFor(opts, seq) : null;
   /* ------------------------------------------- 7B-3B-1: 選択した要素（① ②。7B-2 の変換をそのまま使う） */
   let selComp: ModelNode | undefined;
   if (opts.selection) {
@@ -1953,22 +2006,23 @@ export function fromLiveRun(obs: LiveRunObservation, seq: number, opts: LiveRunO
     skipped.push(...sd.skipped);
     selComp = sd.dataset.nodes.find((n) => n.kind === 'component');
     for (const c of sd.dataset.cuts) {
+      if (c.from === selComp?.id && linFor) continue;    // 由来を結べたら、7B-2 の「props の由来」の切断は付けない（下で必要なら付け直す）
       /* 7B-2 の切断（props の由来）を、SQL と並べたときの言い方にする。**結ばないことは同じ** */
       cuts.push(c.from === selComp?.id
         ? {
           ...c,
           head: 'この値の由来は未確認です',
-          sub: 'この値が右の SQL の結果から来たかは確認していません（props の由来）',
+          sub: opts.lineage?.cut
+            ? lineageCutText(opts.lineage)
+            : opts.lineage && opts.lineage.status === 'linked'
+              ? '由来の評価は別の通信（この要素を描いた文書）について行いました。この通信の SQL とは結びません'
+              : 'この値が右の SQL の結果から来たかは確認していません（props の由来）',
           kind: 'supplies / derives を作らない。同じコンポーネントの中にあることを根拠にしない',
         }
         : c);
     }
     const value = sd.dataset.nodes.find((n) => n.kind === 'value');
-    value?.overview.push({
-      k: '通信との関係',
-      v: `この要素を描いた文書の取得が、通信 #${ex.seq}（${ex.method} ${ex.path}）かどうかは特定していません。`
-        + '同じパスのページであることだけで並べています',
-    });
+    value?.overview.push({ k: '通信との関係', v: docBindingText(opts.binding ?? opts.lineage?.binding, ex) });
     nextId = Math.max(0, ...nodes.map((n) => n.id)) + 1;
   }
   const httpId = nextId++;
@@ -2023,7 +2077,10 @@ export function fromLiveRun(obs: LiveRunObservation, seq: number, opts: LiveRunO
    * 番号は経路の順に振る: ②''（実行した位置）→ ⑤（実行されたSQL）。PoC-02 と同じ規約。
    * `queries` を作るのは、照合（dataAccess.ts）が通った SQL だけ。同じ位置から2本の SQL が出たら、
    * 位置のノードは1つで線が2本（どの描画インスタンスかは同定しない — 決定 G） */
-  const drawnSql = links.sql.slice(0, LIVE_MAX_SQL);
+  /* 7B-3B-2: 由来を結べた SQL は、配置の上限があっても必ず描く（先頭に置く） */
+  const linSql = new Set(linFor?.sqlSpanIds ?? []);
+  const drawnSql = [...links.sql.filter((x) => linSql.has(x.spanId)), ...links.sql.filter((x) => !linSql.has(x.spanId))]
+    .slice(0, LIVE_MAX_SQL);
   const siteBudget = LIVE_MAX_COMPONENTS - (selComp ? 1 : 0);
   const siteIdOf = new Map<string, number>();
   const plan = drawnSql.map((sp) => {
@@ -2113,7 +2170,7 @@ export function fromLiveRun(obs: LiveRunObservation, seq: number, opts: LiveRunO
   }
 
   /* ------------------------------------------------------------ ⑤ 実行SQL */
-  for (const s of links.sql.slice(LIVE_MAX_SQL)) {
+  for (const s of links.sql.filter((x) => !drawnSql.includes(x))) {
     skipped.push({ what: `実行SQL ${s.spanId}`, why: 'キャンバスの配置の上限のため描いていない（観測はしている）' });
   }
   const sqlNodes: { id: number; a: ObsSqlAnalysis | null; span: ObsSpan }[] = [];
@@ -2173,7 +2230,12 @@ export function fromLiveRun(obs: LiveRunObservation, seq: number, opts: LiveRunO
         { k: '取得件数', v: '計装から取得できていません' },
         ...accessRow,
         ...(p.siteId !== undefined
-          ? [{ k: '表示された値との関係', v: 'この SQL の結果が画面のどの値になったかは確認していません（supplies / derives を作っていません）' }]
+          ? [{
+            k: '表示された値との関係',
+            v: linFor && linSql.has(s.spanId)
+              ? '選択した要素の値は、この SQL を実行した呼び出しの結果から来ていると**静的解析で推定**しました（supplies・推定）。実行時に値を観測したものではありません'
+              : 'この SQL の結果が画面のどの値になったかは確認していません（supplies / derives を作っていません）',
+          }]
           : []),
       ],
       source: 'orm-instrumentation',
@@ -2228,18 +2290,116 @@ export function fromLiveRun(obs: LiveRunObservation, seq: number, opts: LiveRunO
       });
     }
   }
-  /* 選択した要素のコンポーネントに、SQL の位置との関係を書く（**関係は作らない**） */
+  /* ------------------------------------------------ 7B-3B-2: 値の由来（supplies）
+   * 作るのは evaluateLineage が全条件を通し（linFor）、その SQL の呼び出し位置のノードを描けたときだけ。
+   * 向きはデータの供給方向（取得位置 → 描画位置）で定義し、画面は逆向きに探索する（against-data）。 */
+  let suppliesMade = false;
+  if (selComp && linFor && linFor.site && linFor.fetch) {
+    const target = plan.find((p) => linSql.has(p.span.spanId) && p.siteId !== undefined && p.d?.site
+      && p.d.site.file === linFor.fetch!.file && p.d.site.line === linFor.fetch!.line && p.d.site.col === linFor.fetch!.col);
+    if (!target) {
+      skipped.push({ what: '値の由来（supplies）', why: '由来の取得位置のノードを、キャンバスの配置の上限のため描けませんでした（評価は通っています）' });
+    } else {
+      suppliesMade = true;
+      const l = linFor;
+      const cands = l.candidates.map((c) => ({
+        identifier: `${c.schema}.${c.table}.${c.column}`,
+        label: `${c.table} の ${c.column} 列`,
+        evidence: [
+          `実行された SQL の SELECT 句にこの列がある${c.note ? `（${c.note}）` : ''}`,
+          `参照の連鎖 ${c.trail.length} 段（${c.query.file}:${c.query.line}:${c.query.col} の取得結果）`,
+          ...(c.via === 'anyfield' ? ['参照のキーが動的なため、この SQL の全列が候補になる'] : []),
+        ],
+        ...(c.note ? { note: c.note } : {}),
+      }));
+      const linkStatus: NonNullable<ModelHopInput['linkStatus']> = cands.length === 1
+        ? 'resolved' : cands.length > 1 ? 'multiple-candidates' : 'untraceable';
+      const trail = l.candidates[0]?.trail ?? [];
+      hops.push(hop({
+        /* supplies | DataAccessSite → PropBindingSite | L2 | static-analysis（M1 決定 B） */
+        id: 'supplies', order: hops.length + 1,
+        from: selComp.id, to: target.siteId!, relation: 'supplies',
+        label: 'この表示値の由来（取得結果のどの項目か）',
+        orientation: 'against-data',
+        endpoints: {
+          from: {
+            type: 'PropBindingSite', file: l.site!.file, line: l.site!.line, col: l.site!.col,
+            ...(l.site!.component ? { inComponent: l.site!.component } : {}),
+          },
+          to: {
+            /* 実測した呼び出し位置（静的解析の位置と列まで一致していることは評価の条件） */
+            type: 'DataAccessSite', file: l.fetch!.file, line: l.fetch!.line, col: l.fetch!.col,
+            inComponent: l.fetch!.component,
+          },
+        },
+        source: SOURCE_OF.staticAnalysis,
+        linkStatus,
+        ...(cands.length ? { candidates: cands } : {}),
+        evidence: [
+          'ソースの静的解析（PoC-04。TypeScript の AST と記号解決）による参照の連鎖',
+          ...(cands.length
+            ? [`実行された SQL の SELECT 句で解決した列 ${cands.length} 件（${cands.map((c) => c.identifier).join(' / ')}）`]
+            : [`列は特定できていません（テーブルまで: ${l.tableCandidates.map((t) => `${t.schema}.${t.name}`).join(' / ')}）`]),
+          `静的解析が見た取得の呼び出し位置と、実測した呼び出し位置（${l.fetch!.file}:${l.fetch!.line}:${l.fetch!.col}）が列まで一致`,
+          `選択した要素を描いた文書は通信 #${seq}（中継が応答ごとに付けた識別子で同定）`,
+        ],
+        tagLabel: '由来は静的解析による推定',
+        weakness: [
+          '取得結果のどの項目がこの表示値になったかは、**ソースの静的解析による推定**です。',
+          '実行時に観測したものではありません（表示された値も、取得した行も読んでいません）。',
+          '文書・呼び出し位置・SQL は実測ですが、それで推定が実測に変わることはありません。',
+          l.reasons.length ? `推定の状態: ${l.reasons.join('／')}。` : '',
+          trail.length ? `参照の連鎖: ${trail.join(' ← ')}。` : '',
+          l.transformed ? '表示までに加工（連結・型変換など）を通っています。由来の列は推定できても、表示値がその列の値そのままとは限りません。' : '',
+          l.literalPaths ? `条件分岐で固定値になる経路が ${l.literalPaths} 本あります。` : '',
+          l.untracked.length ? `追えなかった経路 ${l.untracked.length} 件: ${l.untracked.map((u) => u.why).join('／')}。` : '',
+          l.unresolved.length ? `解決できなかった参照: ${l.unresolved.map((u) => u.text).join('／')}。` : '',
+          '同じ定義が複数回描かれている場合、どの行の値かは同定していません。',
+        ].filter(Boolean).join(''),
+      }));
+      if (l.outcome === 'table-only') {
+        cuts.push({
+          from: target.siteId!,
+          head: '由来の列は特定していません',
+          sub: l.unresolved.map((u) => u.text).join('／') || '列を解決できなかった',
+          where: '実行SQLの SELECT 句 / 由来のカラム',
+          kind: 'テーブルまでに粒度を落としている（01b Q-04.5 代替1）',
+        });
+      }
+    }
+  }
+  if (selComp && linFor && !suppliesMade) {
+    cuts.push({
+      from: selComp.id,
+      head: 'この値の由来は未確認です',
+      sub: '由来の取得位置のノードを描けなかったため、線を引いていません',
+      where: 'コンポーネントの props / 取得結果の項目',
+      kind: '描けない端点に線を引かない',
+    });
+  }
+  /* 選択した要素のコンポーネントに、SQL の位置との関係を書く */
   if (selComp) {
     const sites = plan.filter((p) => p.d?.site).map((p) => p.d!.site!);
     const same = sites.find((x) => x.component.file === selComp!.identifier.split(':')[0]
       && selComp!.chipSub === x.component.name);
     selComp.overview.push({
       k: 'SQL との関係',
-      v: same
-        ? `同じコンポーネント定義（${same.component.name}）の中に、SQL の呼び出し位置（${same.file}:${same.line}）があります。`
-          + '**同じ定義の中にあることは根拠にしていません。** この値がその SQL の結果から来たかは未確認です'
-        : 'この選択と SQL の呼び出し位置は結んでいません。この値の由来は未確認です',
+      v: suppliesMade && linFor
+        ? `静的解析で、この値（${linFor.site!.expr} — ${linFor.site!.file}:${linFor.site!.line}:${linFor.site!.col}）は `
+          + `${linFor.fetch!.file}:${linFor.fetch!.line}:${linFor.fetch!.col} の取得結果から来ていると**推定**しました（supplies・L2）`
+        : opts.lineage?.cut
+          ? `由来を結んでいません — ${lineageCutText(opts.lineage)}`
+          : same
+            ? `同じコンポーネント定義（${same.component.name}）の中に、SQL の呼び出し位置（${same.file}:${same.line}）があります。`
+              + '**同じ定義の中にあることは根拠にしていません。** この値がその SQL の結果から来たかは未確認です'
+            : 'この選択と SQL の呼び出し位置は結んでいません。この値の由来は未確認です',
     });
+    if (opts.lineage) {
+      selComp.overview.push({
+        k: '由来の評価',
+        v: opts.lineage.checks.length ? `通った条件: ${opts.lineage.checks.join(' / ')}` : '通った条件はありません',
+      });
+    }
   }
 
   /* --------------------------------------------- ⑥ テーブル ⑦ カラム（構文解析だけ） */
@@ -2354,10 +2514,12 @@ export function fromLiveRun(obs: LiveRunObservation, seq: number, opts: LiveRunO
     overviewNote:
       `${obs.collectedAt} に取得した、いまの起動の観測です（記録済みデータではありません）。`
       + `静的資材の通信 ${obs.session.excludedStatic} 件は数えていません。`
-      + (siteSqlCount
-        ? 'SQL を実行した呼び出し位置は呼び出しスタックで特定しました。表示された値とその SQL は結んでいません（値の由来は未確認）。'
-        : '表示された値・コンポーネントとは結んでいません。')
-      + (opts.selection ? `選択した要素は同じパス（${ex.path}）のページのものですが、それを描いた文書取得がこの通信かは特定していません。` : ''),
+      + (suppliesMade
+        ? 'SQL を実行した呼び出し位置は呼び出しスタックで特定しました。選択した値とその取得の結果は、静的解析で推定して結んでいます（推定）。'
+        : siteSqlCount
+          ? 'SQL を実行した呼び出し位置は呼び出しスタックで特定しました。表示された値とその SQL は結んでいません（値の由来は未確認）。'
+          : '表示された値・コンポーネントとは結んでいません。')
+      + (opts.selection ? ` ${docBindingText(opts.binding ?? opts.lineage?.binding, ex).replace(/\*\*/g, '')}。` : ''),
     provenance: {
       instrumentation: obs.dataAccess ? LIVE_RUN_METHOD_CALLSITE : LIVE_RUN_METHOD,
       bundler: '開発サーバーの既定',
@@ -2365,8 +2527,15 @@ export function fromLiveRun(obs: LiveRunObservation, seq: number, opts: LiveRunO
       collectedAt: obs.collectedAt,
       notObserved: [
         { what: 'この通信を起こしたコード（requests）', why: '中継の記録は開始元を語らない。ブラウザの呼び出しスタック（request-initiator）を IDE は持たない' },
-        { what: '表示された値と SQL の対応（supplies / derives / maps）', why: '取得結果・応答本文・表示値を読まない。同じコンポーネントの中にあることは根拠にしない' },
-        ...(opts.selection ? [{ what: '選択した要素を描いた文書取得の同定', why: '同じパスの通信のどれがこの DOM を描いたかを示す証拠を取っていない' }] : []),
+        suppliesMade
+          ? { what: '表示された値と SQL の結果の対応（実測）', why: 'supplies は静的解析による推定（L2）。取得結果・表示値を読まないため、実行時の値の受け渡しは観測していない' }
+          : { what: '表示された値と SQL の対応（supplies / derives / maps）', why: '取得結果・応答本文・表示値を読まない。同じコンポーネントの中にあることは根拠にしない' },
+        ...(opts.selection && !((opts.binding ?? opts.lineage?.binding)?.status === 'identified')
+          ? [{ what: '選択した要素を描いた文書取得の同定', why: (opts.binding ?? opts.lineage?.binding)?.status === 'unidentified'
+            ? DOC_UNBOUND_LABEL[((opts.binding ?? opts.lineage?.binding) as Extract<DocBinding, { status: 'unidentified' }>).reason]
+            : '同じパスの通信のどれがこの DOM を描いたかを示す証拠を取っていない' }]
+          : []),
+        { what: 'どの描画インスタンス（どの行）の値か', why: '同じ定義が複数回描かれるとき、DOM の何番目かと取得結果の何行目かを結ぶ観測手段が無い（決定 G）' },
         ...(obs.dataAccess ? [{ what: 'Prisma など、入口を包んでいないドライバの SQL の呼び出し位置', why: '計装が呼び出しの入口でスタックを取るのは pg の Pool.query / Client.query だけ（PoC-02）' }] : []),
         { what: '中継を通らない通信', why: 'ブラウザのキャッシュで済んだもの・別 origin への通信は中継に現れない' },
         { what: 'カラムの型・テーブルの行数', why: 'DB の情報スキーマに照会していない' },

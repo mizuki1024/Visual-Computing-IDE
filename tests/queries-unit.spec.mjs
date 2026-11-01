@@ -265,6 +265,17 @@ const resolve1 = async ({ span = sqlSpan(10), pid = 42, recs = [callsite(10)], m
   eq('記録が2件 → multiple-callsite-records（断定しない）', (await resolve1({ recs: [callsite(10), callsite(10)] })).failure?.reason, 'multiple-callsite-records');
   eq('記録のトレースが違う → callsite-mismatch', (await resolve1({ recs: [callsite(10, { traceId: TR(9) })] })).failure?.reason, 'callsite-mismatch');
   eq('記録を書いたプロセスが違う → callsite-mismatch', (await resolve1({ pid: 43 })).failure?.reason, 'callsite-mismatch');
+  /* 7B-3B-2: PID の欠損。7B-3B-1 は片方が欠けると比べずに通していた（下の3件はその時点では成立になった） */
+  {
+    const noRecPid = await resolve1({ recs: [callsite(10, { proc: undefined })] });
+    eq('7B-3B-2: 記録に PID が無い → callsite-pid-missing（比べずに通さない）', noRecPid.failure?.reason, 'callsite-pid-missing');
+    eq('7B-3B-2: 記録に PID が無いとき位置を出さない', noRecPid.site, null);
+    eq('7B-3B-2: SQL のスパンに PID が無い → callsite-pid-missing', (await resolve1({ pid: null })).failure?.reason, 'callsite-pid-missing');
+    eq('7B-3B-2: 両方に PID が無い → callsite-pid-missing', (await resolve1({ pid: null, recs: [callsite(10, { proc: undefined })] })).failure?.reason, 'callsite-pid-missing');
+    eq('7B-3B-2: PID の形が違う（文字列）記録 → 欠損として断定しない', (await resolve1({ recs: [callsite(10, { proc: { pid: '42' } })] })).failure?.reason, 'callsite-pid-missing');
+    eq('7B-3B-2: 両方に PID があり一致 → 成立', (await resolve1()).failure, null);
+    eq('7B-3B-2: 照合の項目に「PID が両方にあり一致」を書く', (await resolve1()).checks.some((c) => c.includes('PID が記録とスパンの両方にあり一致')), true);
+  }
   eq('記録の種類が SQL でない → callsite-mismatch', (await resolve1({ recs: [callsite(10, { target: 'server-fetch' })] })).failure?.reason, 'callsite-mismatch');
   eq('入口のスタックが無い → no-entry-callsite', (await resolve1({ recs: [callsite(10, { entry: null })] })).failure?.reason, 'no-entry-callsite');
   eq('記録を有効にしていない起動 → callsite-disabled', (await resolve1({ enabled: false })).failure?.reason, 'callsite-disabled');

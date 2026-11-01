@@ -46,6 +46,7 @@ export type HandlesBasis = 'relay-id' | 'trace-header';
  */
 export type DataAccessFailureReason =
   | 'callsite-disabled' | 'no-callsite-record' | 'multiple-callsite-records' | 'callsite-mismatch'
+  | 'callsite-pid-missing'
   | 'no-entry-callsite' | 'no-app-frame' | 'source-line-mismatch' | 'component-not-agreed'
   | 'outside-scope' | 'build-changed-after-call' | 'source-changed-after-call' | 'build-freshness-unverified'
   | 'manifest-unavailable' | 'resolver-unavailable';
@@ -55,6 +56,7 @@ export const DATA_ACCESS_FAILURE_LABEL: Record<DataAccessFailureReason, string> 
   'no-callsite-record': 'この SQL のスパンには、呼び出し位置の記録がありません',
   'multiple-callsite-records': 'この SQL のスパンに呼び出し位置の記録が2件以上あり、1つに決まりません',
   'callsite-mismatch': '呼び出し位置の記録が、この SQL のスパンと別のトレース・別のプロセス・別の種類を指しています',
+  'callsite-pid-missing': '呼び出し位置の記録か SQL のスパンに、書いたプロセスの PID が無く、同じプロセスの記録だと確かめられません',
   'no-entry-callsite': '呼び出しの入口でスタックを記録できていません（この計装が入口を包んでいないドライバ — Prisma など）',
   'no-app-frame': 'スタックに、注入範囲（src/）のソースへ戻せるフレームがありません',
   'source-line-mismatch': 'ソースマップで戻した位置のソース行に、データ取得の呼び出しがありません',
@@ -138,6 +140,12 @@ export interface LiveExchange {
    * ブラウザには渡していない。中継を通った記録には必ず入る（入っていない記録は 7B-3A の形）
    */
   relayId?: string;
+  /**
+   * 7B-3B-2: 中継がこの応答（HTML）に差し込んだスクリプトに書いた、**文書の識別子**。
+   * HTML を差し込んだ応答にだけある。`relayId` とは別の乱数で、開発サーバーには送らない。
+   * iframe の文書がこの値を知らせてくることで、表示中の文書がどの通信の応答かを照合する（`bindDocument`）
+   */
+  docToken?: string;
 }
 
 export interface LiveRunObservation {
@@ -225,4 +233,159 @@ export function parseTraceparent(v: unknown): { traceId: string; spanId: string 
   const m = TRACEPARENT.exec(v.trim());
   if (!m || /^0+$/.test(m[1]) || /^0+$/.test(m[2])) return null;
   return { traceId: m[1], spanId: m[2] };
+}
+
+/* ============================================================================
+ * Phase 7B-3B-2 — 選択した要素を描いた文書と、中継が観測した通信の同定
+ * ========================================================================== */
+
+/** 選んだ要素の文書について、プレビューのスクリプトが知らせたもの（previewProtocol の SelectionDocument と同じ形） */
+export interface SelectionDocumentInput { token: string | null; soft: boolean | null }
+
+export type DocUnboundReason =
+  | 'no-document-token' | 'client-navigation' | 'token-not-in-session' | 'token-duplicated'
+  | 'path-mismatch' | 'document-failed' | 'refetched-after-document';
+
+export const DOC_UNBOUND_LABEL: Record<DocUnboundReason, string> = {
+  'no-document-token': 'この文書から、中継が応答に付けた識別子の知らせがありません（中継が返した説明のページ・識別子を付ける前の起動・HTML 以外の応答など）',
+  'client-navigation': 'この文書の中でクライアント側の遷移（React のページ内の遷移）がありました。表示中の DOM は文書の取得が描いたものとは限りません',
+  'token-not-in-session': 'この文書の識別子は、いまの起動の観測セッションの通信にありません（別の起動・停止の前の文書、またはまだ応答を送り終えていない）',
+  'token-duplicated': 'この文書の識別子を持つ通信が2件以上あり、1つに決まりません',
+  'path-mismatch': '識別子が指す通信のパスが、選択したページのパスと違います',
+  'document-failed': '識別子が指す通信は、正常な応答（2xx）を送り終えていません',
+  'refetched-after-document': 'この文書の取得の後に、同じパスのページの再取得（RSC）がありました。表示中の DOM はその再取得で描き直された可能性があります',
+};
+
+/**
+ * 選択した要素を描いた文書の同定の結果。
+ *
+ * `identified` が言うのは「**いま iframe に表示している文書は、中継が記録した通信 #seq の応答である**」までである。
+ * 表示された値がその通信のどの SQL の結果から来たかは、これだけでは言えない（別に `supplies` の条件で調べる）。
+ */
+export type DocBinding =
+  | { status: 'identified'; seq: number; checks: string[] }
+  | { status: 'unidentified'; reason: DocUnboundReason; detail: string };
+
+const DOC_CHECKS = [
+  'iframe の文書のスクリプトが、中継がその応答に付けた識別子を知らせてきた（IDE が開いている接続・いまの起動の文書）',
+  'その識別子を持つ通信が、いまの起動の観測セッションにちょうど1件ある',
+  'その通信のパスが、選択したページのパスと同じ',
+  'その通信は正常な応答（2xx）を送り終えている',
+  'その文書の中でクライアント側の遷移が無く、同じパスの再取得（RSC）も無い',
+];
+
+/**
+ * 選択した要素を描いた文書を、中継の記録の1件に同定する。**照合だけで決める**（時刻の近さ・パスだけでは結ばない）。
+ * 1つでも欠ければ同定しない（理由を返す）。
+ */
+export function bindDocument(
+  obs: LiveRunObservation, doc: SelectionDocumentInput | null | undefined, selPath: string,
+): DocBinding {
+  const no = (reason: DocUnboundReason, detail = ''): DocBinding => ({ status: 'unidentified', reason, detail });
+  if (!doc || !doc.token) return no('no-document-token');
+  if (doc.soft !== false) {
+    return no('client-navigation', doc.soft === null ? 'スクリプトが遷移の有無を知らせていません' : '');
+  }
+  const hits = obs.exchanges.filter((e) => e.docToken === doc.token);
+  if (!hits.length) return no('token-not-in-session');
+  if (hits.length > 1) return no('token-duplicated', `${hits.length} 件`);
+  const ex = hits[0];
+  if (ex.path !== selPath) return no('path-mismatch', `通信 #${ex.seq} は ${ex.path}、選択は ${selPath}`);
+  if (ex.failure || ex.status === null || ex.status < 200 || ex.status > 299) {
+    return no('document-failed', `通信 #${ex.seq} の応答: ${ex.status ?? 'なし'}`);
+  }
+  /* 文書の後に、同じパスのページを RSC で取り直した通信があれば、DOM が描き直された可能性がある（保守的に断る） */
+  const re = obs.exchanges.find((e) => e.seq !== ex.seq && e.kind === 'rsc' && e.path === ex.path && e.startMs >= ex.startMs);
+  if (re) return no('refetched-after-document', `通信 #${re.seq}`);
+  return { status: 'identified', seq: ex.seq, checks: DOC_CHECKS };
+}
+
+/* ============================================================================
+ * Phase 7B-3B-2 — 表示値の由来（`supplies`）の評価結果
+ * ========================================================================== */
+
+/**
+ * 由来を結ばなかった理由。**どの段の条件が欠けたか**を分ける（document / static / measured / select-list）。
+ */
+export type LineageCutReason =
+  /* 文書の同定 */
+  | 'document-unidentified'
+  /* 静的解析 */
+  | 'selection-unresolved' | 'analyzer-unavailable' | 'source-changed-after-run'
+  | 'no-value-site' | 'mixed-text-children' | 'multiple-value-sites'
+  | 'no-reference' | 'multiple-fetch-sites'
+  /* 実測との照合 */
+  | 'no-server-link' | 'fetch-not-measured' | 'fetch-site-unverified' | 'select-list-differs'
+  /* SELECT 句 */
+  | 'no-column';
+
+export type LineageStage = 'document' | 'static' | 'measured' | 'select-list';
+
+export const LINEAGE_STAGE_LABEL: Record<LineageStage, string> = {
+  document: '文書の同定',
+  static: '静的解析',
+  measured: '実測との照合',
+  'select-list': '実行SQLの SELECT 句',
+};
+
+export const LINEAGE_CUT_LABEL: Record<LineageCutReason, { stage: LineageStage; text: string }> = {
+  'document-unidentified': { stage: 'document', text: '選択した要素を描いた文書を、観測した通信に同定できません' },
+  'selection-unresolved': { stage: 'static', text: '選択した要素の描画位置（JSX）を特定できていません' },
+  'analyzer-unavailable': { stage: 'static', text: '静的解析器（PoC-04 の lineage.mjs）を使えません' },
+  'source-changed-after-run': { stage: 'static', text: 'その文書を取得した後にソースが書き換わったため、静的解析が実行したコードを見ているとは限りません' },
+  'no-value-site': { stage: 'static', text: '選択した要素の直下に、値を描く式（JSX の {…}）がありません' },
+  'mixed-text-children': { stage: 'static', text: '選択した要素の直下に固定の文字と式が混在し、選んだテキストがどれかを決めません' },
+  'multiple-value-sites': { stage: 'static', text: '選択した要素の直下に値を描く式が2つ以上あり、選んだテキストがどれかを決めません' },
+  'no-reference': { stage: 'static', text: '静的解析で、この値からデータ取得の結果への参照の連鎖を解けません（定数・追えない関数・条件の判定など）' },
+  'multiple-fetch-sites': { stage: 'static', text: 'この値は2つ以上のデータ取得の結果を参照しうるため、取得位置を1つに決めません' },
+  'no-server-link': { stage: 'measured', text: '同定した文書の通信を、サーバー処理・SQL に結べていません' },
+  'fetch-not-measured': { stage: 'measured', text: '静的解析が見たデータ取得の呼び出しで実行された SQL を、この文書の通信で観測していません（走っていない SQL の列は由来にしない）' },
+  'fetch-site-unverified': { stage: 'measured', text: '静的解析が見た呼び出し位置で SQL が実行されたことを、実測の呼び出し位置（server-call-stack）で確かめられません' },
+  'select-list-differs': { stage: 'measured', text: '同じ呼び出し位置から SELECT 句の構成が違う SQL が複数走っており、どれの列かを決めません' },
+  'no-column': { stage: 'select-list', text: '参照している項目が、実行された SQL の SELECT 句にありません（テーブルも主張しない）' },
+};
+
+export interface LiveLineageCandidate {
+  schema: string; table: string; column: string;
+  via: 'field' | 'anyfield';
+  note: string | null;
+  /** どの取得の呼び出しの結果を参照したか（静的解析が見た位置。列はメソッド名の位置） */
+  query: { file: string; line: number; col: number };
+  trail: string[];
+}
+
+/**
+ * 選んだ要素の値の由来（`supplies: DataAccessSite → PropBindingSite`、L2・static-analysis）の評価。
+ *
+ * `status: 'linked'` は、文書の同定・静的解析・実測の呼び出し位置・実行SQL の SELECT 句の
+ * **すべての条件が通った**ときだけ。結論はつねに推定（L2）であり、実測の照合を通っても昇格しない。
+ */
+export interface LiveLineage {
+  method: string;
+  scope: string;
+  status: 'linked' | 'cut';
+  cut: { reason: LineageCutReason; stage: LineageStage; detail: string } | null;
+  binding: DocBinding;
+  /** 値を描く式（PropBindingSite）。要素の位置と、式そのものの位置 */
+  site: {
+    file: string; line: number; col: number; component: string | null; expr: string;
+    element: { file: string; line: number; col: number; tag: string };
+  } | null;
+  /** 実測した呼び出し位置（DataAccessSite）。静的解析の位置と列まで一致したもの */
+  fetch: { file: string; line: number; col: number; component: string } | null;
+  /** 候補になった取得の呼び出し（静的解析）。2つ以上なら取得位置を決めない */
+  staticFetches: { file: string; line: number; col: number; measured: boolean }[];
+  exchangeSeq: number | null;
+  /** 結びついた実測 SQL のスパン */
+  sqlSpanIds: string[];
+  outcome: 'confirmed' | 'candidates' | 'table-only' | 'none';
+  candidates: LiveLineageCandidate[];
+  tableCandidates: { schema: string; name: string; why: string }[];
+  transformed: boolean;
+  literalPaths: number;
+  untracked: { why: string; detail: string | null }[];
+  unresolved: { why: string; text: string }[];
+  reasons: string[];
+  /** 通った条件（画面の根拠に出す） */
+  checks: string[];
 }

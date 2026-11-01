@@ -219,9 +219,12 @@ console.log('\n4. 差し込むスクリプトの宛先');
     ]), pats);
   const js = GW.agentJs(cfg);
   ok('宛先の origin を埋め込む', js.includes('"ide.example.test"'));
+  /* 7B-3B-2: port への送信は、読み込み時に取っておいた MessagePort.prototype.postMessage で行う
+   * （`pm.call(port, m)`）。window への postMessage は従来どおり hello の1か所だけ */
   ok("'*' 宛てに送るのは中身の無い hello だけ（ancestorOrigins が使えない場合）",
-    (js.match(/postMessage\(/g) ?? []).length === 2 && /P\.postMessage\(\{ source: 'vcide-preview', v: 2, kind: 'hello' \}, target\)/.test(js));
-  ok('以後は MessagePort で送る', /port\.postMessage\(m\)/.test(js));
+    (js.match(/postMessage\(/g) ?? []).length === 1 && /P\.postMessage\(\{ source: 'vcide-preview', v: 2, kind: 'hello' \}, target\)/.test(js));
+  ok('以後は MessagePort で送る（読み込み時に取っておいた送信の関数で）',
+    /var pm = MessagePort\.prototype\.postMessage;/.test(js) && /pm\.call\(port, m\)/.test(js) && (js.match(/pm\.call\(/g) ?? []).length === 1);
   ok('本物のクリックだけで選ぶ（isTrusted）', js.includes('e.isTrusted'));
   ok('接続の知らせをアプリのリスナーに渡さない（stopImmediatePropagation）', js.includes('stopImmediatePropagation'));
   ok('送り主が親の window で、許した origin のときだけ接続する', js.includes('e.source !== P') && js.includes('allowed(e.origin)'));

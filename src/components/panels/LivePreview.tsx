@@ -19,13 +19,13 @@ import { RUN_STATE_LABEL, useRuntime, type Finding } from '@/state/RuntimeStore'
 import { useExplore } from '@/state/ExploreStore';
 import {
   IDE_SOURCE, PROTOCOL_VERSION, isAgentHello, parseAgentMessage,
-  type AgentMessage, type ElementSelection,
+  type AgentMessage, type ElementSelection, type SelectionDocument,
 } from '@/lib/previewProtocol';
 import {
-  LIVE_UNRESOLVED_LABEL, fromLiveRun, fromLiveSelection, liveExchangeLabel, liveExchangeLinks,
+  LIVE_UNRESOLVED_LABEL, fromLiveRun, fromLiveSelection, liveExchangeLabel, liveExchangeLinks, lineageCutText,
   type LiveResolution, type LiveSelectionInput,
 } from '@/lib/adapter';
-import type { LiveRunObservation } from '@/lib/liveObservation';
+import { DOC_UNBOUND_LABEL, type DocBinding, type LiveLineage, type LiveRunObservation } from '@/lib/liveObservation';
 import { layout } from '@/lib/layout';
 
 /** 場所の知らせ（previewGateway.ts の agentJs。形は previewProtocol.ts） */
@@ -57,6 +57,27 @@ const PING_TIMEOUT_MS = 5000;
 const OBS_POLL_MS = 1500;
 /** iframe の load から、知らせを待つ時間 */
 const AGENT_WAIT_MS = 2500;
+/** 7B-3B-2: 由来の評価を取り直す回数と間隔（応答を送り終える前・スパンを書く前の一時的な未観測のため） */
+const LINEAGE_RETRIES = 6;
+const LINEAGE_RETRY_MS = 1000;
+/** 一時的でありうる理由（時間が経てば観測に入る）。それ以外は取り直さない */
+const LINEAGE_TRANSIENT = new Set(['no-server-link', 'fetch-not-measured', 'fetch-site-unverified']);
+const DOC_TRANSIENT = new Set(['token-not-in-session']);
+
+/** 選択の行に出す、文書の同定と由来の1行 */
+function lineageLine(l: LiveLineage): string {
+  const b = l.binding;
+  const doc = b.status === 'identified' ? `文書: 通信 #${b.seq} の応答と同定` : `文書: 同定できません（${DOC_UNBOUND_LABEL[b.reason]}）`;
+  if (l.status === 'linked') {
+    const what = l.candidates.length === 1
+      ? `${l.candidates[0].schema}.${l.candidates[0].table}.${l.candidates[0].column}`
+      : l.candidates.length > 1
+        ? `${l.candidates.length} 候補のいずれか（${l.candidates.map((c) => `${c.table}.${c.column}`).join(' / ')}）。1つに決めていません`
+        : `テーブル ${l.tableCandidates.map((t) => `${t.schema}.${t.name}`).join(' / ')} まで（列は決まりません）`;
+    return `${doc}。由来（静的解析による推定）: ${what}`;
+  }
+  return b.status === 'identified' ? `${doc}。由来は結んでいません — ${lineageCutText(l)}` : `${doc}。由来は結んでいません`;
+}
 
 function FindingCard({ f }: { f: Finding }) {
   return (
@@ -184,6 +205,10 @@ export default function LivePreview() {
   const [obsNote, setObsNote] = useState<string | null>(null);
   /** 7B-3B-1: いま選択している要素（7B-2 の解決の入力）。観測と同じキャンバスに**並べるだけ**に使う */
   const lastSelRef = useRef<LiveSelectionInput | null>(null);
+  /** 7B-3B-2: いまの選択の、文書の同定と値の由来の評価 */
+  const [lin, setLin] = useState<LiveLineage | null>(null);
+  const linRef = useRef<LiveLineage | null>(null);
+  linRef.current = lin;
   useEffect(() => {
     setObs(null); setObsError(null); setObsPick(null); setObsShown(null);
     if (!serverKey) return undefined;
@@ -227,7 +252,9 @@ export default function LivePreview() {
   /** 利用者が選ぶまでは、SQL まで結べた最新の通信（無ければ最新）を既定にする。
    * 要素を選んでいれば、そのページと同じパスの通信を優先する（**並べるだけ。結ばない**） */
   const selPath = liveSel && liveSel.status !== 'cleared' ? liveSel.path : null;
-  const obsDefault = ((selPath ? obsRows.find((r) => r.e.path === selPath && r.links.sql.length) : undefined)
+  const boundSeq = lin?.binding.status === 'identified' ? lin.binding.seq : null;
+  const obsDefault = ((boundSeq !== null ? obsRows.find((r) => r.e.seq === boundSeq) : undefined)
+    ?? (selPath ? obsRows.find((r) => r.e.path === selPath && r.links.sql.length) : undefined)
     ?? obsRows.find((r) => r.links.sql.length) ?? obsRows[0])?.e.seq ?? null;
   const obsSel = obsPick !== null && obsRows.some((r) => r.e.seq === obsPick) ? obsPick : obsDefault;
 
@@ -238,13 +265,22 @@ export default function LivePreview() {
     return sel && ex && sel.page.path === ex.path ? sel : undefined;
   };
 
+  /** 7B-3B-2: 並べる選択に、文書の同定と由来の評価を添える（使えるかは変換が通信の番号で判定する） */
+  const runOpts = (selection: LiveSelectionInput | undefined) => {
+    const l = linRef.current;
+    if (!selection) return {};
+    const { lineage: _l, ...sel } = selection;
+    void _l;
+    return { selection: sel, ...(l ? { binding: l.binding as DocBinding, lineage: l } : {}) };
+  };
+
   const showObs = useCallback((seq: number, data: LiveRunObservation, key: string) => {
     const selection = selectionFor(data, seq);
-    const { dataset } = fromLiveRun(data, seq, { selection });
+    const { dataset } = fromLiveRun(data, seq, runOpts(selection));
     const ds = layout(dataset);
     const focus = ds.nodes.find((n) => n.kind === 'server')?.id ?? ds.nodes[0].id;
     selSeqRef.current += 1;             // 待っている要素の解決は捨てる（後から上書きさせない）
-    if (!selection) { setLiveSel(null); lastSelRef.current = null; }
+    if (!selection) { setLiveSel(null); lastSelRef.current = null; setLin(null); }
     setObsNote(null);
     showLive(ds, `${key}#obs${seq}`, focus);
     setObsShown({ seq, sig: `${ds.nodes.length}/${ds.hops.length}`, withSel: !!selection });
@@ -257,7 +293,7 @@ export default function LivePreview() {
   useEffect(() => {
     if (!obsShown || !obs || !serverKey) return;
     if (!obs.exchanges.some((e) => e.seq === obsShown.seq)) return;
-    const { dataset } = fromLiveRun(obs, obsShown.seq, { selection: obsShown.withSel ? selectionFor(obs, obsShown.seq) : undefined });
+    const { dataset } = fromLiveRun(obs, obsShown.seq, runOpts(obsShown.withSel ? selectionFor(obs, obsShown.seq) : undefined));
     if (`${dataset.nodes.length}/${dataset.hops.length}` !== obsShown.sig) showObs(obsShown.seq, obs, serverKey);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [obs, obsShown, serverKey, showObs]);
@@ -276,10 +312,67 @@ export default function LivePreview() {
   }, []);
 
   /** 選択を IDE の対応表で解決する。位置は受け取らない（送ってくるのは識別子だけ） */
-  const resolve = useCallback(async (sel: ElementSelection, key: string) => {
+  /**
+   * 7B-3B-2: 文書の同定と値の由来を評価する（IDE のサーバーが要素の位置を照合し直し、静的解析と実測を突き合わせる）。
+   * 文書を同定できたら、その通信の観測と選択を**同じ1回の取得から**並べて描く。
+   * 一時的な未観測（応答を送り終える前・スパンを書く前）なら、少し待って取り直す
+   */
+  const evaluate = useCallback(async (input: LiveSelectionInput, key: string, mySeq: number, attempt = 0): Promise<void> => {
+    const rt = runRef.current;
+    if (!rt?.pid || !rt.startedAt) return;
+    let j: { observation?: LiveRunObservation; lineage?: LiveLineage; error?: { message: string } };
+    try {
+      const r = await fetch('/api/runtime/lineage', {
+        method: 'POST', headers: POST_HEADERS,
+        body: JSON.stringify({
+          run: { instance: rt.instance, pid: rt.pid, startedAt: rt.startedAt },
+          selection: input.selection, document: input.document ?? null,
+        }),
+      });
+      j = await r.json() as typeof j;
+    } catch (e) {
+      j = { error: { message: e instanceof Error ? e.message : String(e) } };
+    }
+    if (mySeq !== selSeqRef.current || serverKeyRef.current !== key) return;
+    if (!j.lineage || !j.observation) return;
+    const l = j.lineage;
+    setLin(l);
+    linRef.current = l;
+    const withLin: LiveSelectionInput = { ...input, lineage: l };
+    lastSelRef.current = withLin;
+    /* 自動で並べるのは、由来を結べたときだけ（結べないときは選択の表示のまま、切断に理由を出す。
+     * 文書を同定できていれば、利用者が［表示］でその通信を並べられる） */
+    if (l.binding.status === 'identified' && l.status === 'linked') {
+      const seq = l.binding.seq;
+      const { lineage: _x, ...sel } = withLin;
+      void _x;
+      const { dataset } = fromLiveRun(j.observation, seq, { selection: sel, binding: l.binding, lineage: l });
+      const ds = layout(dataset);
+      const focus = ds.nodes.find((n) => n.kind === 'component')?.id ?? ds.nodes[0].id;
+      setObs(j.observation);
+      showLive(ds, `${key}#${mySeq}#lin${attempt}`, focus);
+      setObsShown({ seq, sig: `${ds.nodes.length}/${ds.hops.length}`, withSel: true });
+      setObsPick(seq);
+    } else {
+      const { dataset } = fromLiveSelection(withLin);
+      const ds = layout(dataset);
+      showLive(ds, `${key}#${mySeq}#lin${attempt}`, ds.nodes.find((n) => n.kind === 'component')?.id ?? ds.nodes[0].id);
+    }
+    const transient = l.binding.status === 'unidentified'
+      ? DOC_TRANSIENT.has(l.binding.reason)
+      : l.status === 'cut' && !!l.cut && LINEAGE_TRANSIENT.has(l.cut.reason);
+    if (transient && attempt < LINEAGE_RETRIES) {
+      window.setTimeout(() => { void evaluate(input, key, mySeq, attempt + 1); }, LINEAGE_RETRY_MS);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showLive]);
+
+  const resolve = useCallback(async (sel: ElementSelection, key: string, document: SelectionDocument | null = null) => {
     const rt = runRef.current;
     if (!rt?.pid || !rt.startedAt) return;
     const mySeq = ++selSeqRef.current;
+    setLin(null);
+    setObsPick(null);                     // 一覧の既定を、この選択の文書の通信（同定できれば）に戻す
     setLiveSel({ status: 'resolving', tag: sel.tag, path: sel.path });
     let j: { resolution?: LiveResolution; error?: { code: string; message: string } };
     try {
@@ -303,6 +396,7 @@ export default function LivePreview() {
       project: rt.project?.name ?? '—', port: rt.port ?? 0,
       page: { path: sel.path, title: msg?.title ?? '' },
       selection: sel, resolution: res, selectedAt: new Date().toISOString(),
+      ...(document ? { document } : {}),
     };
     lastSelRef.current = input;
     const { dataset } = fromLiveSelection(input);
@@ -315,6 +409,7 @@ export default function LivePreview() {
         at: `${res.anchor.file}:${res.anchor.line}:${res.anchor.col}`,
         ordinal: sel.anchorOrdinal ?? 0, count: sel.anchorInstanceCount,
       });
+      void evaluate(input, key, mySeq);
     } else {
       setLiveSel({
         status: 'unresolved', tag: sel.tag, path: sel.path, reason: res.reason,
@@ -323,7 +418,7 @@ export default function LivePreview() {
     }
   // msg の title は表示用。古くても判定には使わない
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showLive]);
+  }, [showLive, evaluate]);
 
   const onPortMessage = useCallback((c: Conn, data: unknown) => {
     const m = parseAgentMessage(data, c.nonce);
@@ -347,7 +442,7 @@ export default function LivePreview() {
     if (m.kind === 'select') {
       // 選択モードでないときの選択は受けない（利用者が選ぶと決めたときだけ）
       if (!selectModeRef.current) { setRejected((n) => n + 1); return; }
-      void resolve(m.selection, c.serverKey);
+      void resolve(m.selection, c.serverKey, m.document);
       return;
     }
     setSilent(false);
@@ -387,6 +482,7 @@ export default function LivePreview() {
     closeAll();
     selSeqRef.current += 1;              // 返事を待っている解決も捨てる
     lastSelRef.current = null;
+    setLin(null);
     setSelectMode(false);
     if (prev !== null) {
       setObsNote(serverKey ? '開発サーバーが起動し直されたため、前の起動の観測を消しました。' : '開発サーバーが実行中ではなくなったため、観測の表示を消しました（実測中ではありません）。');
@@ -398,7 +494,7 @@ export default function LivePreview() {
   }, [serverKey, closeAll, clearLive]);
   useEffect(() => () => { closeAll(); clearLive(); }, [closeAll, clearLive]);
 
-  const clearSel = () => { selSeqRef.current += 1; lastSelRef.current = null; clearLive(); setLiveSel(null); setObsShown(null); };
+  const clearSel = () => { selSeqRef.current += 1; lastSelRef.current = null; setLin(null); clearLive(); setLiveSel(null); setObsShown(null); };
 
   const onFrameLoad = useCallback(() => {
     // 知らせは文書の DOMContentLoaded で来るので、load より先に届いている。
@@ -451,7 +547,12 @@ export default function LivePreview() {
         data-agent-mode={agentMode ? 'on' : 'off'} data-selection={liveSel?.status ?? ''}
         data-sel-at={liveSel?.status === 'resolved' ? liveSel.at : ''}
         data-sel-component={liveSel?.status === 'resolved' ? liveSel.component : ''}
-        data-sel-reason={liveSel?.status === 'unresolved' ? liveSel.reason : ''}>
+        data-sel-reason={liveSel?.status === 'unresolved' ? liveSel.reason : ''}
+        data-doc-binding={lin ? (lin.binding.status === 'identified' ? 'identified' : lin.binding.reason) : ''}
+        data-doc-seq={lin?.binding.status === 'identified' ? lin.binding.seq : ''}
+        data-lineage={lin?.status ?? ''} data-lineage-reason={lin?.cut?.reason ?? ''}
+        data-lineage-stage={lin?.cut?.stage ?? ''} data-lineage-outcome={lin?.status === 'linked' ? lin.outcome : ''}
+        data-lineage-cands={lin?.status === 'linked' ? lin.candidates.map((c) => `${c.schema}.${c.table}.${c.column}`).join(',') : ''}>
         <div className="rt-row pvbar">
           {canNav
             ? <button type="button" className="rt-b" title="再読み込み" aria-label="再読み込み" onClick={reload}>↻</button>
@@ -484,6 +585,9 @@ export default function LivePreview() {
             </p>
             {liveSel.status !== 'cleared' && <button type="button" className="rt-b" onClick={clearSel}>解除</button>}
           </div>
+        )}
+        {liveSel?.status === 'resolved' && lin && (
+          <p className={`rt-note pvlin${lin.status === 'cut' ? ' pvwarn' : ''}`}>{lineageLine(lin)}</p>
         )}
         {selectMode && !liveSel && view === 'live' && (
           <p className="rt-note pvsel">選択モード: プレビューの中の要素をクリックしてください（ページは操作されません）。</p>
@@ -520,7 +624,11 @@ export default function LivePreview() {
           </div>
         )}
         {view === 'live' && obsShown?.withSel && (
-          <p className="rt-note pvobs pvobspair">選択した要素と、この通信の SQL を並べています。<b>両者は結んでいません</b>（値の由来は未確認。この要素を描いた文書取得がこの通信かも特定していません）。</p>
+          lin?.status === 'linked' && boundSeq === obsShown.seq
+            ? <p className="rt-note pvobs pvobspair">選択した要素と、それを描いた文書の通信 #{obsShown.seq} を並べています。値の由来は<b>静的解析による推定</b>で結んでいます（実行時に値を観測したものではありません）。</p>
+            : boundSeq === obsShown.seq
+              ? <p className="rt-note pvobs pvobspair">選択した要素と、それを描いた文書の通信 #{obsShown.seq} を並べています。<b>値の由来は結んでいません</b>（理由は上の行と右の詳細）。</p>
+              : <p className="rt-note pvobs pvobspair">選択した要素と、この通信の SQL を並べています。<b>両者は結んでいません</b>（{boundSeq !== null ? `この要素を描いた文書は通信 #${boundSeq} です` : 'この要素を描いた文書取得がこの通信かは特定していません'}）。</p>
         )}
         {obsNote && view !== 'live' && <p className="rt-note pvobs pvobsnote">{obsNote}</p>}
         {view === 'live' && origin && (

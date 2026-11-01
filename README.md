@@ -22,7 +22,8 @@
 | **Phase 7B-2** | **実ページの要素選択と React ソースの特定（根拠つき）** | **完了（`docs/07b2`）。実物の Codespaces では未確認** |
 | **Phase 7B-3A** | **いまの起動の HTTP・サーバー処理・SQL を既存のキャンバスに（証拠つき）** | **完了（`docs/07b3a`）。実物の Codespaces では未確認。題材は `poc/fixture-app` のみ** |
 | **Phase 7B-3B-1** | **RSC のデータ取得位置と SQL の関係づけ（`queries` / `server-call-stack`）** | **完了（`docs/07b3b1`）。題材は `poc/fixture-app` の RSC 直接取得（pg）のみ。値の由来（`supplies`）は未証明のまま** |
-| Phase 7B-3B-2 以降 | 表示値と SQL の関係・client-fetch の開始元 | 未着手（7B-3B-1 で停止中） |
+| **Phase 7B-3B-2** | **画面の値 → 取得位置 → 実行SQL → DB カラム（`supplies` / 静的解析 ＋ 実測の照合）と、選択した文書と通信の同定** | **完了（`docs/07b3b2`）。題材は `poc/fixture-app` の RSC 直接取得（pg）のみ。由来はつねに推定（L2）** |
+| Phase 7B-3B-3 以降 | client-fetch の開始元・由来（G1 / G2） | 未着手（7B-3B-2 で停止中） |
 | Phase 7C 以降 | 受入テスト | 未着手 |
 
 Phase 7A は、実ブラウザで「IDE を開く → プロジェクトを指定する → 起動する →
@@ -57,6 +58,13 @@ Phase 7B-3B-1 は、Server Component の実行中に起きた SQL について�
 実行の後に書き換わっていないことを足して確かめる。通信と受付スパンは、中継が要求ごとに作る識別子で結ぶ
 （同じパスの別の要求への付け替えを検出する）。**選択した値と SQL は結ばない**（値の由来は未確認と書く）。
 詳細は `docs/07b3b1-implementation-report.md`。
+
+Phase 7B-3B-2 は、プレビューで選んだ要素の値について、**その要素を描いた文書の通信**を中継が応答ごとに付ける識別子で同定し、
+PoC-04 の静的解析（`lineage.mjs`）が見た「値 → データ取得の呼び出し」を、**その文書の通信で実測した呼び出し位置**（列まで）と
+**実行された SQL の SELECT 句**に照合してから `supplies`（`DataAccessSite → PropBindingSite`・L2）を作る。
+どれか1つでも欠ければ線を作らず、欠けた段（文書の同定／静的解析／実測との照合／SELECT 句）と理由を出す。
+候補が複数なら候補のまま出す。あわせて preview-e2e の環境変数の検査を「名前」から「値と出所」に直し、
+呼び出し位置の照合で PID が片方でも欠ければ `queries` を作らないようにした。詳細は `docs/07b3b2-implementation-report.md`。
 
 ---
 

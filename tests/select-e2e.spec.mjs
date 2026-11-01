@@ -471,7 +471,8 @@ try {
     ok('知らせに HTML（タグの文字列）が無い', !log.some((x) => /<[a-z][^>]*>/i.test(x)));
     const keys = new Set();
     for (const x of log) { try { const o = JSON.parse(x); Object.keys(o).forEach((k) => keys.add(k)); if (o.selection) Object.keys(o.selection).forEach((k) => keys.add(`selection.${k}`)); } catch { /* 文字列 */ } }
-    const allowedKeys = ['source', 'v', 'kind', 'nonce', 'path', 'title', 'status', 'soft', 'from', 'select', 'seq', 'selection',
+    /* 7B-3B-2: select に doc（中継がこの文書の応答に付けた識別子。16 進 32 桁の乱数で、ページの内容を含まない）を足した */
+    const allowedKeys = ['source', 'v', 'kind', 'nonce', 'path', 'title', 'status', 'soft', 'from', 'select', 'seq', 'selection', 'doc',
       'selection.tag', 'selection.anchorOnSelf', 'selection.anchorOrdinal', 'selection.anchorInstanceCount', 'selection.ancestorAnchors',
       'selection.textNodeIndex', 'selection.valueShape', 'selection.formControl', 'selection.path'];
     ok('知らせのキーは決めたものだけ', [...keys].every((k) => allowedKeys.includes(k)), [...keys]);

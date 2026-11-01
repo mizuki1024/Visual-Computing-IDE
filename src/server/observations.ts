@@ -31,6 +31,7 @@ import {
   type LiveDataAccess, type LiveExchange, type LiveRunKey, type LiveRunObservation,
 } from '../lib/liveObservation';
 import type { ObsSpan, ObsSqlAnalysis } from '../lib/observation';
+import { DOC_TOKEN_RE } from '../lib/previewProtocol';
 import {
   parseCallsiteRecord, resetDataAccess, resolveDataAccess, resolverStatus, type CallsiteRecord,
 } from './dataAccess';
@@ -189,12 +190,17 @@ export class ObservationStore implements RelayObserver {
   }
 
   /** **いまのセッションの起動からの記録だけ**を受ける。違う起動の記録は捨てる */
-  record(run: string, rec: RelayRecord, meta?: { relayId: string }): void {
+  record(run: string, rec: RelayRecord, meta?: { relayId?: string; docToken?: string }): void {
     const s = this.#session;
     if (!s || s.run !== run) return;
     if (s.exchanges.length >= MAX_EXCHANGES) { s.overflow += 1; return; }
-    const relayId = meta && RELAY_ID_RE.test(meta.relayId) ? meta.relayId : null;
-    s.exchanges.push({ ...rec, seq: s.exchanges.length + s.overflow + 1, ...(relayId ? { relayId } : {}) });
+    const relayId = meta?.relayId && RELAY_ID_RE.test(meta.relayId) ? meta.relayId : null;
+    /* 7B-3B-2: 文書の識別子。中継の識別子と同じ値は持たない（別の乱数であることを形の上でも確かめる） */
+    const docToken = meta?.docToken && DOC_TOKEN_RE.test(meta.docToken) && meta.docToken !== relayId ? meta.docToken : null;
+    s.exchanges.push({
+      ...rec, seq: s.exchanges.length + s.overflow + 1,
+      ...(relayId ? { relayId } : {}), ...(docToken ? { docToken } : {}),
+    });
   }
 
   excludeStatic(run: string): void {

@@ -53,7 +53,6 @@ const PURE_CALLS = new Set([
 ]);
 
 const isPascal = (s) => /^[A-Z]/.test(s);
-const rel = (abs) => path.relative(APP, abs).split(path.sep).join('/');
 
 function collectFiles(dir, out = []) {
   if (!fs.existsSync(dir)) return out;
@@ -97,9 +96,13 @@ const push = (a, step) => ({ ...a, trail: [...a.trail, step] });
  */
 export function analyzeLineage(opt = {}) {
   const scope = opt.scope ?? 'src/';
+  /* Phase 7B-3B-2: 対象プロジェクトの場所を引数で渡せる（既定は従来どおり PoC の題材）。
+   * IDE は起動したプロジェクトの場所を渡す（rscattr.mjs / srvmap.mjs と同じ直し方） */
+  const ROOT = opt.root ?? APP;
+  const rel = (abs) => path.relative(ROOT, abs).split(path.sep).join('/');
   const roots = [
-    ...collectFiles(path.join(APP, 'src')),
-    ...collectFiles(path.join(APP, 'vendor-ui')),
+    ...collectFiles(path.join(ROOT, 'src')),
+    ...collectFiles(path.join(ROOT, 'vendor-ui')),
   ];
   const program = ts.createProgram({
     rootNames: roots,
@@ -115,7 +118,7 @@ export function analyzeLineage(opt = {}) {
       skipLibCheck: true,
       esModuleInterop: true,
       resolveJsonModule: true,
-      baseUrl: APP,
+      baseUrl: ROOT,
       paths: { '@/*': ['src/*'] },
     },
   });
@@ -171,9 +174,13 @@ export function analyzeLineage(opt = {}) {
     const arg0 = call.arguments[0];
     const literal = arg0 && (ts.isStringLiteral(arg0) || ts.isNoSubstitutionTemplateLiteral(arg0))
       ? arg0.text : null;
+    /* 7B-3B-2: メソッド名の位置。V8 の呼び出しスタックが指すのはこの列である（`pool.query(` の `query`）。
+     * 実測した呼び出し位置（DataAccessSite）と**列まで**照合するために持つ */
+    const nm = posOf(call.expression.name);
     const q = {
       id: `q${queries.length + 1}`,
       file: p.file, line: p.line, col: p.col,
+      nameLine: nm.line, nameCol: nm.col,
       method: call.expression.name.text,
       /** pg は `{rows}` を返す。ORM は行の配列そのものを返す */
       shape,
@@ -563,6 +570,20 @@ export function analyzeLineage(opt = {}) {
           /* いちばん内側の、注記（data-poc-field）を持つ祖先要素 */
           let field = null;
           let tag = null;
+          /* 7B-3B-2: この式を**直接の子に持つ** JSX 要素の位置（要素識別子の位置と同じ規則: 要素の開始）。
+           * 要素の直下にある他の子（固定の文字・別の式）の数も持つ。選んだ要素のテキストが
+           * どの式かを、IDE が1つに決められるかの判断に使う */
+          let element = null;
+          if (ts.isJsxElement(n.parent)) {
+            const ep = posOf(n.parent);
+            const kids = n.parent.children;
+            element = {
+              file: ep.file, line: ep.line, col: ep.col,
+              tag: n.parent.openingElement.tagName.getText(sf),
+              textChildren: kids.filter((k) => ts.isJsxText(k) && k.text.trim() !== '').length,
+              exprChildren: kids.filter((k) => ts.isJsxExpression(k) && !!k.expression).length,
+            };
+          }
           for (let a = n.parent; a; a = a.parent) {
             const open = ts.isJsxElement(a) ? a.openingElement
               : ts.isJsxSelfClosingElement(a) ? a : null;
@@ -598,7 +619,7 @@ export function analyzeLineage(opt = {}) {
           }
           sites.push({
             file: p.file, line: p.line, col: p.col,
-            component: comp, field, tag,
+            component: comp, field, tag, element,
             expr: textOf(n.expression),
             transformed: v.transformed,
             refs: [...refs.values()],

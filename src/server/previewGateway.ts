@@ -56,13 +56,18 @@ export interface GatewayTarget {
 }
 
 /** Phase 7B-3A: 中継が転送した通信1件の記録。**パス・状態・時刻・トレース識別子だけ** */
-export type RelayRecord = Omit<LiveExchange, 'seq' | 'relayId'>;
+export type RelayRecord = Omit<LiveExchange, 'seq' | 'relayId' | 'docToken'>;
 export interface RelayObserver {
   /**
    * `meta.relayId`（7B-3B-1）は、中継がこの要求のために作って開発サーバーへ載せた識別子。
    * 記録そのもの（`rec`）とは別に渡す（記録の形は 7B-3A のまま）
+   *
+   * `meta.docToken`（7B-3B-2）は、中継が **HTML の応答1つごと**に作り、その応答に差し込んだ
+   * スクリプトの属性に書いた識別子。iframe の文書がこの値を知らせてくるので、
+   * 「いま表示している文書は、どの通信の応答か」を照合できる。`relayId` とは別の乱数で、
+   * 開発サーバーには送らない（ブラウザには文書の識別子だけが渡り、中継の内部の識別子は渡らない）
    */
-  record(run: string, rec: RelayRecord, meta?: { relayId: string }): void;
+  record(run: string, rec: RelayRecord, meta?: { relayId?: string; docToken?: string }): void;
   /** 静的資材。通信として数えず、件数だけ */
   excludeStatic(run: string): void;
 }
@@ -111,6 +116,10 @@ export function agentJs(cfg: AccessConfig): string {
   if (P === W) return;
   var s = D.currentScript, st = s && s.getAttribute('data-vcide-status');
   var status = st ? Number(st) : null, soft = false;
+  /* 7B-3B-2: この文書の応答に中継が付けた識別子（応答ごとに別）。アプリのスクリプトより先に読む */
+  var doc = s && s.getAttribute('data-vcide-doc');
+  if (!doc || !/^[0-9a-f]{32}$/.test(doc)) doc = null;
+  var pm = MessagePort.prototype.postMessage;
   var from = (s && s.getAttribute('data-vcide-from')) || 'app';
   /* アプリが後から書き換えても影響を受けないよう、使う関数を先に取っておく */
   var getAttr = Element.prototype.getAttribute, qsa = Document.prototype.querySelectorAll;
@@ -124,7 +133,7 @@ export function agentJs(cfg: AccessConfig): string {
     } catch (e) {}
     return false;
   }
-  function post(m){ m.source = 'vcide-preview'; m.v = 2; m.nonce = nonce; try { port.postMessage(m); } catch (e) {} }
+  function post(m){ m.source = 'vcide-preview'; m.v = 2; m.nonce = nonce; try { pm.call(port, m); } catch (e) {} }
   function send(m){ if (port) post(m); else if (queue.length < 20) queue.push(m); }
   function where(kind){
     send({ kind: kind, path: location.pathname + location.search + location.hash,
@@ -197,7 +206,9 @@ export function agentJs(cfg: AccessConfig): string {
     if (!d) return;
     selEl = e.target && e.target.nodeType === 3 ? e.target.parentElement : e.target;
     seq += 1;
-    post({ kind: 'select', seq: seq, selection: d });
+    /* doc: この文書の応答の識別子。soft: この文書の中でクライアント側の遷移（pushState / popstate）があったか。
+     * 遷移の後の DOM は文書の取得が描いたものではない（IDE は文書と同一視しない） */
+    post({ kind: 'select', seq: seq, selection: d, doc: doc, soft: soft });
   }, true);
   addL('mousemove', function(e){ if (selecting) hoverEl = e.target; }, true);
   /* ------------------------------------------------------- 親との接続 */
@@ -231,8 +242,8 @@ export function agentJs(cfg: AccessConfig): string {
 }
 
 /** from: そのページを作ったのが開発サーバー（app）か、この中継（gateway）か */
-const agentTag = (status: number, from: 'app' | 'gateway' = 'app'): string =>
-  `<script src="${AGENT_PREFIX}agent.js" data-vcide-status="${status}" data-vcide-from="${from}"></script>`;
+const agentTag = (status: number, from: 'app' | 'gateway' = 'app', doc: string | null = null): string =>
+  `<script src="${AGENT_PREFIX}agent.js" data-vcide-status="${status}" data-vcide-from="${from}"${doc ? ` data-vcide-doc="${doc}"` : ''}></script>`;
 
 /** IDE が作る説明のページ。03d 1.1節の4要素で書く。エスケープしてから埋める */
 const esc = (s: string): string => s.replace(/[&<>"']/g, (c) => ({
@@ -478,6 +489,8 @@ export class PreviewGateway {
     let traced: RelayRecord['trace'] = null;
     let status: number | null = null;
     let recorded = false;
+    /* 7B-3B-2: HTML を差し込んだ応答にだけ作る文書の識別子（下の応答の処理で決める） */
+    let docToken: string | null = null;
     /* 7B-3B-1: 記録する通信には、中継が自分で作った識別子を載せる（要求ごとに新しい乱数）。
      * 計装が受付スパンに写すので、応答のトレース識別子が別の要求を指していても見分けられる */
     const relayId = observer && run && cls && !cls.static ? randomBytes(16).toString('hex') : null;
@@ -489,7 +502,7 @@ export class PreviewGateway {
         path: cls.path, hasQuery: cls.hasQuery, kind: cls.kind,
         status, startMs: t0, durationMs: failure ? null : Date.now() - t0,
         trace: traced, failure,
-      }, relayId ? { relayId } : undefined);
+      }, relayId || docToken ? { ...(relayId ? { relayId } : {}), ...(docToken ? { docToken } : {}) } : undefined);
     };
     res.once('finish', () => finish(null));
     res.once('close', () => { if (!res.writableFinished) finish({ kind: 'aborted', detail: '応答を送り終える前に接続が閉じられました' }); });
@@ -524,7 +537,9 @@ export class PreviewGateway {
         && req.method === 'GET' && !up.headers['content-encoding'];
       if (html) delete headers['content-length'];
       res.writeHead(up.statusCode ?? 502, up.statusMessage ?? '', headers);
-      if (html) up.pipe(new InjectAgent(agentTag(up.statusCode ?? 0))).pipe(res);
+      /* 記録する通信の HTML にだけ、文書の識別子を付ける（要求ごとの relayId とは別の乱数） */
+      if (html && relayId) docToken = randomBytes(16).toString('hex');
+      if (html) up.pipe(new InjectAgent(agentTag(up.statusCode ?? 0, 'app', docToken))).pipe(res);
       else up.pipe(res);
     });
     upstream.on('error', (e) => {
