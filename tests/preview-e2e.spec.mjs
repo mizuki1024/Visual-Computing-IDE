@@ -160,7 +160,9 @@ await page.addInitScript(() => {
 /** プレビューの中で出た、**IDE の中継が原因になりうる**エラー（CSP の書き方・差し込んだスクリプト）。アプリ自身のエラーとは分ける */
 const gatewayErrors = [];
 page.on('console', (m) => {
-  if (/Content-Security-Policy|frame-ancestors|__vcide_preview|agent\.js/.test(m.text())) gatewayErrors.push(m.text());
+  // 第6節で転送をわざと止めている間の「ping に届かない」は期待どおりなので除く
+  if (/Content-Security-Policy|frame-ancestors|__vcide_preview|agent\.js/.test(m.text())
+    && !(phase.expectUnreachable && m.text().includes('/__vcide_preview/ping'))) gatewayErrors.push(m.text());
   if (m.type() !== 'error' || !(m.location().url ?? '').startsWith(`http://${IDE_HOST}`) || /favicon/.test(m.text())) return;
   if (phase.expectUnreachable && m.text().includes(`http://${PV_HOST}`)) return;
   ideErrors.push(m.text());

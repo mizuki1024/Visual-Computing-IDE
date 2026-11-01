@@ -191,7 +191,7 @@ HTTP の状態が**わからない**場合は、わからないと書く:
 
 ## 5. 検証の結果
 
-### 5.1 実ブラウザの E2E（`tests/preview-e2e.spec.mjs`）— **70 件通過 / 0 件失敗**
+### 5.1 実ブラウザの E2E（`tests/preview-e2e.spec.mjs`）— **71 件通過 / 0 件失敗**
 
 Chrome 153（playwright-core / channel: chrome）。**クラウドの転送を模した**構成で行った:
 
@@ -210,14 +210,35 @@ Chrome 153（playwright-core / channel: chrome）。**クラウドの転送を�
 | 6 | 転送を止める → 「中継に届きません」（開発サーバーは実行中のまま）→ 戻す → 表示に戻る / 開発サーバーを `SIGKILL` → 「起動できていません」・iframe を外す・中継 503 |
 | 7 | 起動し直す → 実プレビューに戻る / 停止 → プレビューも停止状態・中継 503・停止の途中で iframe を残さない |
 | 8 | 同じ機械のブラウザ（ループバック）で開いた IDE には `http://127.0.0.1:<中継のポート>` を返す |
-| 他 | IDE の画面に例外が無い（拾えることを試験の最初に自分で確かめている）/ 対象の `tsconfig.json` は変わっていない |
+| 他 | IDE の画面に例外が無い（拾えることを試験の最初に自分で確かめている）/ **中継が原因のエラー（CSP・差し込んだスクリプト）がプレビューの中に出ていない** / 対象の `tsconfig.json` は変わっていない |
 
 > 題材の fixture-app は DB（Postgres）が無いと `/api/stats` などが失敗し、**プレビューの中で**アプリ自身の例外が出る。
 > これは IDE の不具合ではないので、IDE の画面（最上位の文書）の例外とは分けて数えている。
 
 ### 5.2 自動テスト（`BASE=http://127.0.0.1:3101 npm test`、新しく起動した IDE に対して）
 
-<!-- 件数は下で埋める -->
+| | 件数 |
+| --- | --- |
+| 既存の13本（PoC・探索画面・モデル） | 1,120（変更前と同じ。全件通過） |
+| `project-inspect.spec.mjs` | 126（変更なし） |
+| `devserver.spec.mjs` | 107（7A の報告は 108。第4節の分岐が「`next-env.d.ts` が起動前から在るか」で1件か2件になる。7A は新しい clone で2件、今回は既に在るので1件。試験は変えていない） |
+| `devserver-stub.spec.mjs` | 71（前回 55。第3節にダミーの秘密情報の否定テストを追加） |
+| `preview-gateway.spec.mjs`（新規） | 132 |
+| `runtime-e2e.spec.mjs` | 55（変更前と同じ件数。エラーの数え方だけ変えた。下記） |
+| `preview-e2e.spec.mjs`（新規） | 71 |
+| **合計** | **1,682 件通過 / 0 件失敗 / 0 件 skip**（前回 1,464） |
+
+**回帰テストで見つけて直した不具合（1件）。** 既存の `runtime-e2e` が、中継の付ける CSP について Chrome の警告
+「`frame-ancestors` does not support the source expression `http://[::1]:*`」を拾った。IPv6 のアドレスは CSP の host-source に書けない。
+`[::1]` を外し、単体（書かないこと）と新しい E2E（中継が原因のエラーが出ないこと）の両方に検査を足した。
+ループバックの IPv6（`http://[::1]:3100`）で開いた IDE はプレビューを埋め込めない（未検証事項 11）。
+
+**既存のテストで変えたもの（理由つき）。**
+
+| テスト | 変更 | 理由 |
+| --- | --- | --- |
+| `runtime-e2e`「JS エラーなし」 | iframe の中の例外を数えない（IDE の最上位の文書の例外と、出所が IDE の console だけを数える） | 実行中はプレビューに対象のアプリが入る。題材は DB が無いと `/api/stats` が 500 になり、**アプリ自身の**例外が出る。IDE の不具合ではない。中継が原因になりうるもの（CSP・差し込み）は `preview-e2e` が別に数える |
+| `devserver-stub` 第3節「利用者の環境変数は届く」 | 「名前を許可していない変数は渡さない」「明示した変数は渡す」に置き換えた | 第2.2節の方針の変更 |
 
 `npm run typecheck` 通過。`npm run build` 成功（Turbopack の追跡範囲の警告は従来どおり 3 件）。
 
@@ -250,10 +271,11 @@ RuntimePanel（右上）が検出の所見で縦に長くなり、探索の試�
 | `src/app/globals.css` | 実プレビューの寸法（12 行）。既存の規則は変えていない |
 | `tests/preview-gateway.spec.mjs` | **新規**。接続の許可・入口の防御・環境変数（ダミー）・中継（代役の転送先）・ブラウザから見た URL |
 | `tests/preview-e2e.spec.mjs` | **新規**。クラウドを模した実ブラウザの E2E |
+| `tests/runtime-e2e.spec.mjs` | 「JS エラーなし」で iframe の中のアプリの例外を数えない（第5.2節） |
 | `tests/devserver-stub.spec.mjs` | 第3節: ダミーの秘密情報が実際に起動した子へ渡らないこと。方針の変更に合わせて「利用者の変数は届く」を置き換えた（第2.2節） |
 | `package.json` | `npm test` に `preview-gateway` と `preview-e2e` を追加 |
 | `README.md` | 状態表と、クラウドでの起動方法 |
-| `docs/07b1-implementation-report.md` / `docs/07b1-screenshots/` | 本書と画面 |
+| `docs/07b1-implementation-report.md` / `docs/07b1-screenshots/` | 本書と画面（01〜06。`SHOTS=docs/07b1-screenshots node tests/preview-e2e.spec.mjs` で撮った） |
 
 ---
 
@@ -273,6 +295,8 @@ RuntimePanel（右上）が検出の所見で縦に長くなり、探索の試�
 8. iframe の高さは 300px 固定、幅はパネルの幅（約 360px）。広い画面向けのページは狭い幅で表示される（UI を変えない方針のため）
 9. 中継が埋め込みを許す相手は「ループバックの任意のポート」と明示したホストである。同じ機械の別のローカルのページはプレビューを埋め込めうる（受け取れるのはパスとタイトルと HTTP 状態だけ）
 10. Windows は未確認（7A と同じ）
+11. ループバックの IPv6（`[::1]`）で開いた IDE ではプレビューを埋め込めない（CSP に書けないため外した）
+12. 題材の画面に出る Next.js の開発用の表示（「1 Issue」）は、題材の `/api/stats` が DB 無しで失敗していることによる。IDE は消さない（アプリの開発用の表示はアプリのもの）
 
 ---
 
