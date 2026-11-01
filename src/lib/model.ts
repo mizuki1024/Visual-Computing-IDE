@@ -45,7 +45,19 @@ export type SourceId =
    *
    * **02d 1.3節の一覧に無い。報告書で追加を提案している取得手段である。**
    */
-  | 'server-call-stack';
+  | 'server-call-stack'
+  /**
+   * Phase 7B-3A で追加（02d 1.3 / 1.3.3）。**IDE のプレビュー中継が、ブラウザから受けて
+   * 開発サーバーへ転送した HTTP の要求と応答**を、転送したその場で記録したもの。
+   *
+   * `browser-network` とは**別の手段である。** 記録の取り手はブラウザではなく中継であり、
+   *   * 中継を通らない通信（ブラウザのキャッシュ・別 origin への通信）は現れない
+   *   * 所要時間は中継が受けてから応答を送り終えるまで（ブラウザが測った値ではない）
+   * したがって `browser-network` を名乗らない。通信そのものを直接見ているので L0 である。
+   * **開始元（どのコードが送ったか）は語らない。** `requests` の根拠にはならない
+   * （`RELATION_SPEC.requests.sources` に入れない）。
+   */
+  | 'preview-relay';
 
 /** 02d 1.3節の既定レベル。`L1-equivalent` は sql-ast-parse の「L1相当」。 */
 export type Level = 'L0' | 'L1' | 'L1-equivalent' | 'L2' | 'L3' | 'unknown';
@@ -72,6 +84,8 @@ export const SOURCE_LEVEL: Record<SourceId, Level> = {
   'request-initiator': 'L1-equivalent',
   // 計装が呼び出しの入口で取った記録 + 同じ写像 + 同じ照合
   'server-call-stack': 'L1-equivalent',
+  // 転送した通信そのものの直接の記録（方法・パス・状態・時刻）。推論を含まない
+  'preview-relay': 'L0',
 };
 
 /** UI に出す取得手段の文言。L0〜L3 の記号は出さない（UXR-12 / 02d 3.2節）。 */
@@ -95,6 +109,7 @@ export const SOURCE_LABEL: Record<SourceId, string> = {
   none: '取得できていない',
   'request-initiator': 'ブラウザが記録した通信開始時の呼び出しスタック',
   'server-call-stack': 'サーバー側でデータ取得の呼び出し時に記録したスタック',
+  'preview-relay': 'IDE のプレビュー中継が転送した通信の記録',
 };
 
 /** 観測性の二値。A群では L0〜L3 を出さない（UXR-12）。 */

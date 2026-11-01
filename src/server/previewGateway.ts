@@ -29,6 +29,9 @@ import { Transform, type TransformCallback } from 'node:stream';
 import {
   ideFrameAncestors, isAllowedPreviewHost, isIdeOrigin, type AccessConfig,
 } from './access';
+import {
+  RELAY_TRACE_HEADER, classifyRelayRequest, parseTraceparent, type LiveExchange,
+} from '../lib/liveObservation';
 
 /** 中継が自分で答えるパス。対象のアプリのパスと重ならない名前にする */
 export const AGENT_PREFIX = '/__vcide_preview/';
@@ -44,6 +47,19 @@ export interface GatewayInfo {
 
 export interface GatewayTarget {
   port: number;
+  /**
+   * Phase 7B-3A: 転送先の起動の鍵（instance:pid:startedAt）。観測の記録をこの起動に紐づける。
+   * 省略時は記録しない
+   */
+  run?: string;
+}
+
+/** Phase 7B-3A: 中継が転送した通信1件の記録。**パス・状態・時刻・トレース識別子だけ** */
+export type RelayRecord = Omit<LiveExchange, 'seq'>;
+export interface RelayObserver {
+  record(run: string, rec: RelayRecord): void;
+  /** 静的資材。通信として数えず、件数だけ */
+  excludeStatic(run: string): void;
 }
 
 export interface GatewayOptions {
@@ -52,6 +68,8 @@ export interface GatewayOptions {
   target: () => { target: GatewayTarget | null; reason: string };
   /** テスト用。省略時は config.previewPort から探す */
   port?: number;
+  /** Phase 7B-3A: 転送した通信の記録先。省略時は記録しない */
+  observer?: RelayObserver;
 }
 
 /* --------------------------------------------------------------- 埋め込む部品 */
@@ -270,6 +288,9 @@ const DROP_RES = new Set([
   'connection', 'keep-alive', 'proxy-connection', 'transfer-encoding', 'trailer', 'upgrade',
 ]);
 
+const headerOne = (v: string | string[] | undefined): string | undefined =>
+  (Array.isArray(v) ? v[0] : v);
+
 function sameHost(value: string | undefined, host: string): boolean {
   if (!value || value === 'null') return false;
   try { return new URL(value).host === host.toLowerCase(); } catch { return false; }
@@ -437,13 +458,43 @@ export class PreviewGateway {
       return;
     }
 
+    /* ------------------------------------------- Phase 7B-3A: 転送した通信の記録
+     * 読む要求ヘッダは sec-fetch-dest と rsc の2つだけ（分類に使い、保存しない）。
+     * URL はパスとクエリの有無だけにして、値は持たない */
+    const observer = this.#opts.observer;
+    const run = target.run;
+    const cls = observer && run ? classifyRelayRequest(
+      url, headerOne(req.headers['sec-fetch-dest']), headerOne(req.headers.rsc),
+    ) : null;
+    if (cls?.static && observer && run) observer.excludeStatic(run);
+    const t0 = Date.now();
+    let traced: RelayRecord['trace'] = null;
+    let status: number | null = null;
+    let recorded = false;
+    const finish = (failure: RelayRecord['failure']) => {
+      if (recorded || !observer || !run || !cls || cls.static) return;
+      recorded = true;
+      observer.record(run, {
+        method: String(req.method ?? 'GET').toUpperCase().slice(0, 10),
+        path: cls.path, hasQuery: cls.hasQuery, kind: cls.kind,
+        status, startMs: t0, durationMs: failure ? null : Date.now() - t0,
+        trace: traced, failure,
+      });
+    };
+    res.once('finish', () => finish(null));
+    res.once('close', () => { if (!res.writableFinished) finish({ kind: 'aborted', detail: '応答を送り終える前に接続が閉じられました' }); });
+
     const upstream = http.request({
       host: '127.0.0.1', port: target.port, method: req.method, path: url,
       headers: forwardHeaders(req.headers, target.port),
     }, (up) => {
+      status = up.statusCode ?? null;
       const headers: Record<string, string | string[] | number> = {};
       for (const [k, v] of Object.entries(up.headers)) {
         if (v === undefined || DROP_RES.has(k)) continue;
+        /* 計装が付けたトレース識別子の専用ヘッダは、中継が読んで**ブラウザへは渡さない**。
+         * ページの中のスクリプトからは見えない（PoC-05 で Server-Timing の公開範囲が広いと実測した） */
+        if (k === RELAY_TRACE_HEADER) { traced = parseTraceparent(headerOne(v)); continue; }
         headers[k] = v;
       }
       // 転送先の絶対 URL へのリダイレクトは、パスだけにする（ブラウザに 127.0.0.1 を踏ませない）
@@ -465,6 +516,8 @@ export class PreviewGateway {
       else up.pipe(res);
     });
     upstream.on('error', (e) => {
+      // 開発サーバーから応答が無かった。中継の説明（502）は開発サーバーの応答ではないので状態は持たない
+      finish({ kind: 'upstream-error', detail: (e as NodeJS.ErrnoException).code ?? 'connect-failed' });
       this.#explain(res, 502, {
         fact: '開発サーバーに接続できませんでした。',
         reason: `127.0.0.1:${target.port} への接続が失敗しました（${(e as NodeJS.ErrnoException).code ?? e.message}）。`,

@@ -9,6 +9,7 @@ import { devServer } from './devServer';
 import { pidAlive } from './net';
 import type { Finding } from './projectInspect';
 import { PreviewGateway, type GatewayInfo } from './previewGateway';
+import { observations } from './observations';
 
 export interface PreviewInfo {
   gateway: GatewayInfo;
@@ -44,8 +45,10 @@ function makeGateway(cfg: AccessConfig): PreviewGateway {
       if (s.pid && !pidAlive(s.pid)) {
         return { target: null, reason: `開発サーバーのプロセス（PID ${s.pid}）は終了しています。` };
       }
-      return { target: { port: s.port }, reason: '' };
+      // 観測の記録をこの起動に紐づける（Phase 7B-3A）。鍵は 7B-2 の選択と同じ3つ組
+      return { target: { port: s.port, run: `${s.instance}:${s.pid}:${s.startedAt}` }, reason: '' };
     },
+    observer: observations(),
   });
 }
 

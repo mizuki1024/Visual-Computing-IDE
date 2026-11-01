@@ -249,7 +249,7 @@ graph TD
 >
 > | 値 | 意味 | 取得手段 |
 > | --- | --- | --- |
-> | `browser` | ブラウザのネットワーク記録に現れた通信 | `browser-network` |
+> | `browser` | ブラウザのネットワーク記録に現れた通信（ブラウザが送った通信） | `browser-network` / `preview-relay`（Phase 7B-3A。IDE のプレビュー中継を通った通信。`02d` 1.3.3） |
 > | `server-internal` | サーバーの中から出た通信。**ブラウザからは観測できない** | `trace-span`（送信側の client スパン） |
 >
 > 区別をモデルに置かず文言だけで行うと、**2種類を同じ数え方で合計する実装が書ける。**
@@ -404,7 +404,7 @@ LineageHop
 
 | 区別 | 対象 | 取得手段 | 観測性 |
 | --- | --- | --- | --- |
-| **通信そのものの観測** | `HttpExchange` ノード | `browser-network`（ブラウザ）/ `trace-span`（サーバー内部） | **L0 / L1** |
+| **通信そのものの観測** | `HttpExchange` ノード | `browser-network`（ブラウザ）/ `preview-relay`（IDE の中継。7B-3A）/ `trace-span`（サーバー内部） | **L0 / L1** |
 | **開始元の帰属** | `requests` 関係 | `request-initiator` / `server-call-stack` | **L1相当** |
 
 > **ノードの観測性と関係の観測性は別に書く**（`02d` 1.1節の3単位）。

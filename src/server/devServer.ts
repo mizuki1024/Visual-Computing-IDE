@@ -23,6 +23,7 @@ import {
 import { redactAll } from './redact';
 import { childEnvReport } from './childEnv';
 import { anchorEnv, anchorSupport, type AnchorSupport } from './anchors';
+import { observations } from './observations';
 
 /** 指示 2.D の7状態。これ以外の状態を作らない。 */
 export type RunState =
@@ -385,6 +386,12 @@ export class DevServerManager {
       env.POC01_RUN = runId;
       env.POC01_SPAN_FILE = instrumentation.spanFile;
       env.NEXT_OTEL_VERBOSE = '1';
+      /* Phase 7B-3A: トレース識別子は **専用ヘッダ**（X-Vcide-Trace）だけで返させる。
+       * Server-Timing はページ上の任意のスクリプトが読める（PoC-05 の実測）ので止める。
+       * 専用ヘッダは中継が読み、ブラウザへは渡さない（previewGateway.ts）。
+       * どちらもループバック宛の応答にしか付かない（ide-instrumentation/otel.cjs） */
+      env.POC05_TRACE_HEADER = '1';
+      env.POC05_SERVER_TIMING = '0';
     }
     /* 要素識別子の注入（Phase 7B-2）。対象の next.config がローダを読む設定のときだけ。
      * 対応表は IDE 側に書かせる（対象プロジェクトには書かない） */
@@ -619,7 +626,15 @@ export class DevServerManager {
     };
   }
 
-  #set(s: RunState): void { this.#state = s; this.#bump(); }
+  #set(s: RunState): void {
+    this.#state = s;
+    this.#bump();
+    /* Phase 7B-3A: 観測セッションは起動ごとに1つ。running で作り、それ以外の状態で閉じる
+     * （停止後に実測中であるかのように見せない。起動をまたいで混ぜない） */
+    const r = this.#record;
+    if (s === 'running' && r) observations().begin(`${this.#instance}:${r.pid}:${r.startedAt}`);
+    else if (s !== 'running') observations().end();
+  }
 
   #bump(): void { this.#seq += 1; this.#updatedAt = new Date().toISOString(); }
 
@@ -707,6 +722,8 @@ export class DevServerManager {
     this.#logAvailable = false;         // 出力は引き継げない
     this.#state = 'running';
     this.#bump();
+    // 引き継いだ起動にも新しい観測セッションを作る。前の IDE プロセスの中継の記録は持っていない
+    observations().begin(`${this.#instance}:${rec.pid}:${rec.startedAt}`);
     // PID 再利用の確認は非同期になるため、ここでは待たずに行う
     void pidCommand(rec.pid).then((cmd) => {
       if (cmd && !cmd.includes(rec.fingerprint) && !/next/i.test(cmd)) {
@@ -715,6 +732,7 @@ export class DevServerManager {
         this.#owner = null;
         this.#state = 'idle';
         this.#bump();
+        observations().end();
         this.#clearRecordFile();
       }
     });

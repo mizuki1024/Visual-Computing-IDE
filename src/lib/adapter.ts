@@ -22,6 +22,7 @@ import type {
   ObsBrowserRequest, ObsElementAnchor, ObsElements, ObsServerCallsite, ObsSpan,
   ObsSqlAnalysis, ObservationBundle,
 } from './observation';
+import { RELAY_KIND_LABEL, type LiveExchange, type LiveRunObservation } from './liveObservation';
 
 /* -------------------------------------------------------------------------- */
 /* 記録の種別 → 取得手段。この表が「根拠に従う」の実体である（05c 6章）         */
@@ -1771,6 +1772,374 @@ export function fromLiveSelection(input: LiveSelectionInput): AdapterResult {
       traceId: '—',
       collectedAt: input.selectedAt,
       notObserved: LIVE_NOT_OBSERVED,
+    },
+  };
+  return { dataset, skipped };
+}
+
+/* ========================================================================== */
+/* Phase 7B-3A — いまの起動で観測した通信・サーバー処理・SQL                      */
+/*                                                                            */
+/* PoC-01（`fromObservation`）と同じ形の経路（③通信 → ④サーバー処理 → ⑤SQL →    */
+/* ⑥テーブル／⑦カラム）を、**記録済みデータではなく、いまの起動の観測**から作る。  */
+/*                                                                            */
+/* PoC-01 との違い（すべて「観測していないものを作らない」ための違い）:          */
+/*   1. 通信は中継の記録（preview-relay）。ブラウザ自身の記録ではない             */
+/*   2. 通信とサーバー処理は **トレース識別子の一致だけ** で結ぶ。取れなければ     */
+/*      時間の重なりに降格せず、結ばない（PoC-01 は time-window に降格していた）   */
+/*   3. テーブル・カラムは **実行された SQL の構文解析だけ** で決める。            */
+/*      情報スキーマに照会していないので、型・NULL 可否は「未取得」と書く          */
+/*   4. 書き込み先のテーブル（INSERT / UPDATE / DELETE）は reads にしない         */
+/*   5. 表示された値・コンポーネントとは結ばない（7B-3B で証拠を評価する）         */
+/* ========================================================================== */
+
+/** 同じトレースの中で「サーバー処理」として描くスパンの種類（Next.js の計装の名前） */
+const ROUTE_SPAN_TYPES = ['AppRouteRouteHandlers.runHandler', 'AppRender.getBodyResult'];
+/** キャンバスに描く SQL・カラムの上限（02a M4 の配置の制約。超えた分は数と理由を出す） */
+const LIVE_MAX_SQL = 2;
+const LIVE_MAX_COLUMNS = 5;
+
+export const LIVE_RUN_METHOD = '方式2 NODE_OPTIONS=--require（PoC-01）＋ プレビュー中継の記録';
+
+/** 一覧の1行。通信を選ぶための見出し */
+export function liveExchangeLabel(e: LiveExchange): string {
+  return `#${e.seq} ${e.method} ${e.path}${e.hasQuery ? '?…' : ''} — ${e.status ?? (e.failure ? '応答なし' : '—')}`;
+}
+
+/** 通信ごとに、サーバー処理と SQL がどこまで結べるか（一覧と変換が同じ判定を使う） */
+export function liveExchangeLinks(obs: LiveRunObservation, e: LiveExchange): {
+  root: ObsSpan | null; server: ObsSpan | null; sql: ObsSpan[]; reason: string | null;
+} {
+  if (obs.instrumentation.state !== 'enabled') {
+    return { root: null, server: null, sql: [], reason: `計装が有効ではありません（${obs.instrumentation.reason ?? obs.instrumentation.state}）` };
+  }
+  if (!e.trace) {
+    return {
+      root: null, server: null, sql: [],
+      reason: e.failure
+        ? '開発サーバーから応答が返らなかったため、トレース識別子がありません'
+        : '応答にトレース識別子の専用ヘッダがありませんでした',
+    };
+  }
+  const inTrace = obs.spans.filter((s) => s.traceId === e.trace!.traceId);
+  const byId = new Map(inTrace.map((s) => [s.spanId, s]));
+  const root = byId.get(e.trace.spanId) ?? null;
+  if (!root) {
+    return { root: null, server: null, sql: [], reason: '応答のトレース識別子が指すスパンが、まだ収集ファイルに書かれていません' };
+  }
+  /* 照合（断るだけ。結ぶ根拠を足さない）: 識別子はアプリのプロセスの中で付くので、
+   * アプリのコードが書き換えうる。指した受付スパンのパスが、中継が転送したパスと違えば結ばない */
+  const target = root.attrs['http.target'] ?? root.attrs['url.path'];
+  if (typeof target === 'string' && target.split('?')[0] !== e.path) {
+    return { root: null, server: null, sql: [], reason: 'トレース識別子が指す受付スパンのパスが、この通信のパスと一致しません' };
+  }
+  const descends = (s: ObsSpan, targetId: string) => s.spanId === targetId || ancestry(byId, s, targetId) !== null;
+  const route = inTrace
+    .filter((s) => ROUTE_SPAN_TYPES.includes(String(s.attrs['next.span_type'] ?? '')) && descends(s, root.spanId))
+    .sort((a, b) => a.startMs - b.startMs)[0];
+  const server = route ?? root;
+  const sqlIds = new Set(obs.sqlAnalyses.map((a) => a.spanId));
+  const sqlTextual = inTrace.filter((s) => typeof (s.attrs['db.statement'] ?? s.attrs['db.query.text']) === 'string');
+  const sql = sqlTextual
+    .filter((s) => s.spanId !== server.spanId && descends(s, server.spanId))
+    .filter((s) => sqlIds.has(s.spanId) || !obs.parser.available)
+    .sort((a, b) => a.startMs - b.startMs);
+  return { root, server, sql, reason: null };
+}
+
+export function fromLiveRun(obs: LiveRunObservation, seq: number): AdapterResult {
+  const ex = obs.exchanges.find((e) => e.seq === seq);
+  if (!ex) throw new Error(`exchange #${seq} not observed in this session`);
+  const skipped: { what: string; why: string }[] = [];
+  const nodes: ModelNode[] = [];
+  const hops: ModelHop[] = [];
+  const cuts: Cut[] = [];
+  const t0 = ex.startMs;
+  const rel = (ms: number) => +(ms - t0).toFixed(1);
+  const links = liveExchangeLinks(obs, ex);
+  const { root, server } = links;
+
+  let nextId = 1;
+  const httpId = nextId++;
+  const serverId = server ? nextId++ : undefined;
+
+  /* ------------------------------------------------------------- ③ 通信 */
+  nodes.push(node({
+    id: httpId, kind: 'http', form: 'module',
+    // ブラウザが送った通信（中継を通った）。サーバーの中から出た通信ではない
+    exchangeScope: 'browser',
+    title: '通信', identifier: `${ex.method} ${ex.path}`,
+    chipSub: `${ex.method} ${ex.path}`,
+    metrics: {
+      ...(ex.status !== null ? { status: ex.status } : {}),
+      ...(ex.durationMs !== null ? { durationMs: fmtMs(ex.durationMs) } : {}),
+    },
+    span: { startMs: 0, endMs: ex.durationMs ?? 0 },
+    hover: 'プレビューから開発サーバーへ実際に送られた通信（いまの起動で観測）',
+    overview: [
+      { k: '取得手段', v: 'IDE のプレビュー中継が転送した通信の記録（ブラウザ自身の記録ではありません）' },
+      { k: '応答', v: ex.status !== null ? '' : `応答なし（${ex.failure?.detail ?? '理由不明'}）`, ...(ex.status !== null ? { fromMetrics: true } : {}) },
+      { k: '種類', v: RELAY_KIND_LABEL[ex.kind] },
+      { k: 'クエリ文字列', v: ex.hasQuery ? '付いていました（値は保存していません）' : 'ありません' },
+      { k: '所要時間の意味', v: '中継が要求を受けてから応答を送り終えるまで。ブラウザが測った値ではありません' },
+      { k: '読んだヘッダ', v: `要求 ${obs.session.readRequestHeaders.join(' / ')}・応答 ${obs.session.readResponseHeaders.join(' / ')} だけ。本文・Cookie は読んでいません` },
+      ...(ex.trace ? [{ k: 'トレース識別子', v: `${ex.trace.traceId}（応答の専用ヘッダ。ブラウザには渡していません）` }] : []),
+      { k: '観測した起動', v: `いまの起動（${obs.session.startedAt} から）の #${ex.seq}` },
+      {
+        k: '開始元',
+        v: 'この通信を起こしたコード・この応答で描かれた値とは結んでいません（証拠の評価は 7B-3B）',
+      },
+      ...(serverId !== undefined
+        ? [{ k: '次の一歩', v: 'サーバー処理を見る', go: { type: 'node' as const, id: serverId } }]
+        : [{ k: 'サーバー処理', v: `結んでいません — ${links.reason}` }]),
+    ],
+    source: 'preview-relay',
+    evidence: [
+      'IDE のプレビュー中継が転送したその場で記録した方法・パス・状態・時刻',
+      ...(ex.trace ? ['開発サーバーの応答の専用ヘッダに載ったトレース識別子'] : []),
+    ],
+  }));
+
+  cuts.push({
+    from: httpId,
+    head: 'ここより上流は結んでいません',
+    sub: 'この通信を起こしたコード・表示された値',
+    where: 'ブラウザの呼び出し元 / コンポーネント',
+    kind: '証拠が無いため関係を作らない（requests / derives）。選択した要素との関係は 7B-3B で評価',
+  });
+
+  /* ------------------------------------------------------- ④ サーバー処理 */
+  if (!server || serverId === undefined) {
+    skipped.push({ what: 'サーバー処理', why: links.reason ?? '観測していない' });
+  } else {
+    const isRoute = server !== root;
+    const route = String(server.attrs['next.route'] ?? server.attrs['http.target'] ?? '—');
+    const chain = isRoute ? ancestry(new Map(obs.spans.filter((s) => s.traceId === server.traceId).map((s) => [s.spanId, s])), server, root!.spanId) : null;
+    nodes.push(node({
+      id: serverId, kind: 'server', form: 'physical',
+      title: 'サーバー処理', identifier: server.name,
+      chipSub: route,
+      metrics: { durationMs: fmtMs(server.durationMs) },
+      span: { startMs: rel(server.startMs), endMs: rel(server.endMs) },
+      hover: 'この通信を受けたサーバーの処理（いまの起動で観測）',
+      overview: [
+        { k: '取得手段', v: '計装が生成したスパン' },
+        { k: '区間', v: '', fromMetrics: true },
+        { k: 'ルート', v: route },
+        {
+          k: 'スパン',
+          v: isRoute
+            ? `${server.name}（HTTP の受付スパンから ${chain?.depth ?? '?'} 段下の、Next.js のルート単位の処理）`
+            : `${server.name}（HTTP の受付スパン。ルート単位の処理のスパンは見つかりませんでした）`,
+        },
+        { k: 'SQL', v: links.sql.length ? `${links.sql.length} 本（このスパンの子孫）` : 'このスパンの子孫に SQL のスパンはありません' },
+        ...(links.sql.length > LIVE_MAX_SQL
+          ? [{ k: '描いていない SQL', v: `${links.sql.length - LIVE_MAX_SQL} 本。キャンバスの配置の上限のため（観測はしています）` }]
+          : []),
+        { k: '主張の範囲', v: 'ルート単位の処理です。どのコンポーネント・どの行が SQL を実行したかは観測していません' },
+        ...(links.sql.length
+          ? [{ k: '次の一歩', v: '実行SQLを見る', go: { type: 'node' as const, id: serverId + 1 } }]
+          : []),
+      ],
+      source: 'trace-span',
+      evidence: ['スパンの名前と区間', `トレースID ${server.traceId.slice(0, 8)}…`],
+    }));
+    hops.push(hop({
+      id: 'handles', order: hops.length + 1, from: httpId, to: serverId, relation: 'handles',
+      label: 'この通信を受けたサーバーの処理',
+      source: 'trace-context',
+      evidence: [
+        '中継が応答の専用ヘッダから読んだトレース識別子と、サーバー側スパンの識別子の一致',
+        ...(isRoute ? ['HTTP の受付スパンからこの処理のスパンへの親子の連鎖'] : []),
+      ],
+    }));
+    if (!links.sql.length) {
+      cuts.push({
+        from: serverId,
+        head: 'この処理の下で SQL は観測されませんでした',
+        sub: 'SQL を実行していないか、計装の対象外のドライバです',
+        where: 'DB への問い合わせ',
+        kind: '観測していないものは描かない（OBS-05）',
+      });
+    }
+  }
+
+  /* ------------------------------------------------------------ ⑤ 実行SQL */
+  const drawnSql = links.sql.slice(0, LIVE_MAX_SQL);
+  for (const s of links.sql.slice(LIVE_MAX_SQL)) {
+    skipped.push({ what: `実行SQL ${s.spanId}`, why: 'キャンバスの配置の上限のため描いていない（観測はしている）' });
+  }
+  const sqlNodes: { id: number; a: ObsSqlAnalysis | null; span: ObsSpan }[] = [];
+  for (const s of drawnSql) {
+    const id = nextId++;
+    const a = obs.sqlAnalyses.find((x) => x.spanId === s.spanId) ?? null;
+    const text = String(s.attrs['db.statement'] ?? s.attrs['db.query.text']);
+    const chain = ancestry(new Map(obs.spans.filter((x) => x.traceId === s.traceId).map((x) => [x.spanId, x])), s, server!.spanId);
+    sqlNodes.push({ id, a, span: s });
+    nodes.push(node({
+      id, kind: 'sql', form: 'module',
+      title: '実行SQL', identifier: shortSql(text),
+      chipSub: '',
+      metrics: { durationMs: fmtMs(s.durationMs) },
+      span: { startMs: rel(s.startMs), endMs: rel(s.endMs) },
+      hover: 'その処理が実行したSQL（いまの起動で観測）',
+      overview: [
+        { k: '取得手段', v: s.scope.includes('prisma') ? 'ORM計装のスパン属性' : 'DBドライバ計装のスパン属性' },
+        { k: '区間', v: '', fromMetrics: true },
+        { k: 'SQL', v: text },
+        {
+          k: 'パラメータ',
+          v: a?.redacted
+            ? `収集しません（文字列 ${a.redacted.strings} 件・数値 ${a.redacted.numbers} 件を取得時点で除去）`
+            : '収集しません',
+        },
+        {
+          k: '構文解析',
+          v: !obs.parser.available ? (obs.parser.reason ?? '解析器を使えません')
+            : a?.parseOk ? `成功（${a.statementType ?? '種別不明'}）。Phase 6F の解析器（SELECT 句の結果列だけを射影にする）`
+              : `できませんでした（${a?.parseError ?? '理由不明'}）`,
+        },
+        { k: '取得件数', v: '計装から取得できていません' },
+      ],
+      source: 'orm-instrumentation',
+      evidence: [
+        `計装 ${s.scope} のスパン属性`,
+        chain?.depth === 1 ? 'サーバー処理のスパンの直接の子' : `サーバー処理のスパンからの親子の連鎖（${chain?.depth ?? '?'} 段）`,
+      ],
+    }));
+    hops.push(hop({
+      id: `executes-${id}`, order: hops.length + 1, from: serverId!, to: id, relation: 'executes',
+      label: 'その処理が実行したSQL',
+      source: 'trace-span',
+      evidence: ['スパンの親子関係', `同一トレース ${s.traceId.slice(0, 8)}…`],
+    }));
+  }
+
+  /* --------------------------------------------- ⑥ テーブル ⑦ カラム（構文解析だけ） */
+  const tableNodeId = new Map<string, number>();
+  const readsInto = new Map<number, ModelHop[]>();
+  let columnsDrawn = 0;
+  for (const { id: sqlId, a } of sqlNodes) {
+    if (!a) {
+      skipped.push({ what: 'テーブル・カラム', why: obs.parser.reason ?? '構文解析の結果がありません' });
+      continue;
+    }
+    if (!a.parseOk) {
+      skipped.push({ what: 'テーブル・カラム', why: `SQL を構文解析できなかった（${a.parseError ?? '理由不明'}）。推測で埋めない` });
+      continue;
+    }
+    for (const t of a.tables) {
+      /* reads は「読んだ」。書き込み先（INSERT / UPDATE / DELETE の対象）を reads にしない */
+      if (t.op && t.op !== 'select') {
+        skipped.push({ what: `テーブル ${t.schema ?? '?'}.${t.name}`, why: `書き込み先（${t.op}）であり、reads（読み取り）の関係にはしない` });
+        continue;
+      }
+      const key = `${t.schema ?? ''}.${t.name}`;
+      let tid = tableNodeId.get(key);
+      if (tid === undefined) {
+        tid = nextId++;
+        tableNodeId.set(key, tid);
+        nodes.push(node({
+          id: tid, kind: 'table', form: 'physical',
+          title: 'テーブル', identifier: t.schema ? `${t.schema}.${t.name}` : t.name, chipSub: t.name,
+          hover: 'そのSQLが読んだテーブル（実行された SQL の構文解析）',
+          overview: [
+            { k: '取得手段', v: '実行されたSQL文の構文解析' },
+            { k: '名前', v: t.schema ? `${t.schema}.${t.name}` : `${t.name}（スキーマは SQL に書かれておらず、決まっていません）` },
+            { k: '定義', v: 'DB の情報スキーマには照会していません（行数・列の一覧は未取得）' },
+          ],
+          source: 'sql-ast-parse',
+          evidence: ['実行されたSQL文の FROM 句'],
+        }));
+      }
+      const h = hop({
+        id: `reads-${sqlId}-${tid}`, order: hops.length + 1, from: sqlId, to: tid, relation: 'reads',
+        label: 'そのSQLが読んだテーブル',
+        source: 'sql-ast-parse',
+        evidence: ['SQL文の FROM 句'],
+      });
+      hops.push(h);
+      readsInto.set(tid, [...(readsInto.get(tid) ?? []), h]);
+    }
+
+    /* projects の始点は SqlStatement。テーブルからカラムへの辺は作らない（規約1） */
+    for (const p of a.projections) {
+      if (columnsDrawn >= LIVE_MAX_COLUMNS) {
+        skipped.push({ what: `カラム ${p.schema}.${p.table}.${p.column}`, why: 'キャンバスの配置の上限のため描いていない（解析はしている）' });
+        continue;
+      }
+      columnsDrawn += 1;
+      const cid = nextId++;
+      nodes.push(node({
+        id: cid, kind: 'column', form: 'module',
+        title: 'カラム', identifier: `${p.schema}.${p.table}.${p.column}`, chipSub: p.column,
+        hover: 'そのSQLが取り出した列（SELECT 句の結果列）',
+        overview: [
+          { k: '取得手段', v: '実行されたSQL文の構文解析' },
+          { k: '定義', v: `${p.schema}.${p.table}.${p.column}` },
+          { k: '型・NULL', v: '未取得（DB の情報スキーマには照会していません）' },
+          { k: '主張の範囲', v: 'この SQL の結果の行に含まれる列であることまでです。画面のどの値になったかは観測していません' },
+        ],
+        source: 'sql-ast-parse',
+        evidence: ['SQL文の SELECT 句（結果列）'],
+      }));
+      hops.push(hop({
+        id: `projects-${sqlId}-${cid}`, order: hops.length + 1, from: sqlId, to: cid, relation: 'projects',
+        label: 'そのSQLが取り出した列',
+        source: 'sql-ast-parse',
+        evidence: ['SQL文の SELECT 句'],
+      }));
+    }
+    for (const u of a.unresolved) {
+      skipped.push({ what: `射影 ${u.column ?? '(不明)'}`, why: whyOfUnresolvedProjection(u.why) });
+    }
+  }
+  /* 同じテーブルに2本以上の reads が入るとき、それは同じ対象への別々の観測である（合流ではない） */
+  for (const list of readsInto.values()) {
+    if (list.length < 2) continue;
+    for (const h of list) {
+      const i = hops.indexOf(h);
+      hops[i] = { ...h, convergence: 'shared-object' as Convergence };
+    }
+  }
+
+  /* -------------------------------------------------------------- 経路外 */
+  const others = obs.exchanges.filter((e) => e !== ex).slice(-4);
+  const dataset: Dataset = {
+    origin: 'measured',
+    project: obs.project,
+    runtime: { command: 'next dev', port: obs.port, instrumentation: LIVE_RUN_METHOD },
+    nodes, hops, cuts,
+    offPath: {
+      detail: 'not-retrieved',
+      label: others.map((e) => `${e.method} ${e.path}`).join(' / ') || 'なし',
+      note: others.length
+        ? 'いまの起動で観測した、いま描いていない通信です。プレビューパネルの一覧から選べます。'
+        : 'いまの起動で観測した他の通信はありません。',
+      nodes: others.map((e) => ({
+        kind: 'http' as const, label: e.path,
+        ...(e.durationMs !== null ? { durationMs: fmtMs(e.durationMs) } : {}),
+      })),
+      caption: { text: '選択していない経路（いまの起動の他の通信）', textUnselected: 'いまの起動の他の通信' },
+    },
+    pages: [{ icon: '▤', name: ex.path, path: ex.path, current: true }],
+    notice: `いまの起動の実測（${obs.session.startedAt} 以降）／${LIVE_RUN_METHOD}`,
+    overviewNote:
+      `${obs.collectedAt} に取得した、いまの起動の観測です（記録済みデータではありません）。`
+      + `静的資材の通信 ${obs.session.excludedStatic} 件は数えていません。`
+      + '表示された値・コンポーネントとは結んでいません。',
+    provenance: {
+      instrumentation: LIVE_RUN_METHOD,
+      bundler: '開発サーバーの既定',
+      traceId: ex.trace?.traceId ?? '—',
+      collectedAt: obs.collectedAt,
+      notObserved: [
+        { what: 'この通信を起こしたコード（requests）', why: '中継の記録は開始元を語らない。7B-3B で証拠を評価する' },
+        { what: '表示された値との対応（derives / maps）', why: '応答本文を読まない。構造的に推定（02a 3.5.1）' },
+        { what: '中継を通らない通信', why: 'ブラウザのキャッシュで済んだもの・別 origin への通信は中継に現れない' },
+        { what: 'カラムの型・テーブルの行数', why: 'DB の情報スキーマに照会していない' },
+        { what: 'SQL のパラメータ値・取得件数', why: '方針として収集しない／計装が付けない' },
+      ],
     },
   };
   return { dataset, skipped };

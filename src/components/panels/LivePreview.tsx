@@ -12,7 +12,7 @@
  *   - HTTP の状態はページの中の小さなスクリプト（中継が差し込む）が知らせる。
  *     知らせが無いページ（HTML 以外の応答など）では、わからないと書く
  * ========================================================================== */
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import FloatingPanel from './FloatingPanel';
 import Why from '../common/Why';
 import { RUN_STATE_LABEL, useRuntime, type Finding } from '@/state/RuntimeStore';
@@ -21,7 +21,11 @@ import {
   IDE_SOURCE, PROTOCOL_VERSION, isAgentHello, parseAgentMessage,
   type AgentMessage, type ElementSelection,
 } from '@/lib/previewProtocol';
-import { LIVE_UNRESOLVED_LABEL, fromLiveSelection, type LiveResolution } from '@/lib/adapter';
+import {
+  LIVE_UNRESOLVED_LABEL, fromLiveRun, fromLiveSelection, liveExchangeLabel, liveExchangeLinks,
+  type LiveResolution,
+} from '@/lib/adapter';
+import type { LiveRunObservation } from '@/lib/liveObservation';
 import { layout } from '@/lib/layout';
 
 /** 場所の知らせ（previewGateway.ts の agentJs。形は previewProtocol.ts） */
@@ -49,6 +53,8 @@ function newNonce(): string {
 type View = 'starting' | 'stopping' | 'stopped' | 'error' | 'unavailable' | 'checking' | 'unreachable' | 'live';
 
 const PING_TIMEOUT_MS = 5000;
+/** Phase 7B-3A: いまの起動の観測を取り直す間隔 */
+const OBS_POLL_MS = 1500;
 /** iframe の load から、知らせを待つ時間 */
 const AGENT_WAIT_MS = 2500;
 
@@ -168,6 +174,75 @@ export default function LivePreview() {
   const runRef = useRef(runtime);
   runRef.current = runtime;
 
+  /* ----------------------------------------- Phase 7B-3A: いまの起動の観測（HTTP・SQL）
+   * 起動の鍵（instance・PID・開始時刻）を付けて取りに行く。いまの起動と違えば 409 が返り、
+   * 前の起動の観測は出さない。停止・再起動で消す（下の serverKey の効果） */
+  const [obs, setObs] = useState<LiveRunObservation | null>(null);
+  const [obsError, setObsError] = useState<string | null>(null);
+  const [obsPick, setObsPick] = useState<number | null>(null);
+  const [obsShown, setObsShown] = useState<{ seq: number; sig: string } | null>(null);
+  const [obsNote, setObsNote] = useState<string | null>(null);
+  useEffect(() => {
+    setObs(null); setObsError(null); setObsPick(null); setObsShown(null);
+    if (!serverKey) return undefined;
+    const key = serverKey;
+    let alive = true;
+    let timer = 0;
+    const tick = async () => {
+      const rt = runRef.current;
+      if (!alive || !rt?.pid || !rt.startedAt) return;
+      try {
+        const r = await fetch('/api/runtime/observations', {
+          method: 'POST', headers: POST_HEADERS,
+          body: JSON.stringify({ run: { instance: rt.instance, pid: rt.pid, startedAt: rt.startedAt } }),
+        });
+        const j = await r.json() as {
+          observation?: LiveRunObservation | null;
+          stale?: { message: string }; error?: { message: string };
+        };
+        if (!alive || serverKeyRef.current !== key) return;
+        if (j.observation) { setObs(j.observation); setObsError(null); }
+        else { setObs(null); setObsError(j.stale?.message ?? j.error?.message ?? `HTTP ${r.status}`); }
+      } catch (e) {
+        if (alive) setObsError(e instanceof Error ? e.message : String(e));
+      }
+      if (alive) timer = window.setTimeout(() => { void tick(); }, OBS_POLL_MS);
+    };
+    void tick();
+    return () => { alive = false; window.clearTimeout(timer); };
+  }, [serverKey]);
+
+  /** 通信ごとに、サーバー処理・SQL まで結べたか（一覧と変換が同じ判定を使う） */
+  const obsRows = useMemo(() => (obs ? [...obs.exchanges].reverse().map((e) => ({
+    e, links: liveExchangeLinks(obs, e),
+  })) : []), [obs]);
+  const obsSqlCount = obsRows.reduce((n, r) => n + r.links.sql.length, 0);
+  /** 利用者が選ぶまでは、SQL まで結べた最新の通信（無ければ最新）を既定にする */
+  const obsDefault = (obsRows.find((r) => r.links.sql.length) ?? obsRows[0])?.e.seq ?? null;
+  const obsSel = obsPick !== null && obsRows.some((r) => r.e.seq === obsPick) ? obsPick : obsDefault;
+
+  const showObs = useCallback((seq: number, data: LiveRunObservation, key: string) => {
+    const { dataset } = fromLiveRun(data, seq);
+    const ds = layout(dataset);
+    const focus = ds.nodes.find((n) => n.kind === 'server')?.id ?? ds.nodes[0].id;
+    selSeqRef.current += 1;             // 待っている要素の解決は捨てる（後から上書きさせない）
+    setLiveSel(null);
+    setObsNote(null);
+    showLive(ds, `${key}#obs${seq}`, focus);
+    setObsShown({ seq, sig: `${ds.nodes.length}/${ds.hops.length}` });
+    setObsPick(seq);                    // 一覧の選択を、描いている通信に固定する（新しい通信で動かさない）
+  }, [showLive]);
+
+  /* 表示中の通信のスパンが後から書かれたら（応答の後に閉じるスパンがある）、描き直す */
+  useEffect(() => {
+    if (!obsShown || !obs || !serverKey) return;
+    if (!obs.exchanges.some((e) => e.seq === obsShown.seq)) return;
+    const { dataset } = fromLiveRun(obs, obsShown.seq);
+    if (`${dataset.nodes.length}/${dataset.hops.length}` !== obsShown.sig) showObs(obsShown.seq, obs, serverKey);
+  }, [obs, obsShown, serverKey, showObs]);
+
+  const clearObs = () => { setObsShown(null); clearLive(); };
+
   const closeAll = useCallback(() => {
     for (const c of [connRef.current, ...pendingRef.current]) { try { c?.port.close(); } catch { /* 閉じている */ } }
     connRef.current = null;
@@ -202,6 +277,7 @@ export default function LivePreview() {
       return;
     }
     const res = j.resolution;
+    setObsShown(null);                    // 観測の表示は、この選択の表示で置き換わる
     const { dataset } = fromLiveSelection({
       project: rt.project?.name ?? '—', port: rt.port ?? 0,
       page: { path: sel.path, title: msg?.title ?? '' },
@@ -289,6 +365,7 @@ export default function LivePreview() {
     selSeqRef.current += 1;              // 返事を待っている解決も捨てる
     setSelectMode(false);
     if (prev !== null) {
+      setObsNote(serverKey ? '開発サーバーが起動し直されたため、前の起動の観測を消しました。' : '開発サーバーが実行中ではなくなったため、観測の表示を消しました（実測中ではありません）。');
       clearLive();
       setLiveSel((cur) => (cur && cur.status !== 'cleared'
         ? { status: 'cleared', message: serverKey ? '開発サーバーが起動し直されたため、前の選択を解除しました。' : '開発サーバーが実行中ではなくなったため、選択を解除しました。' }
@@ -388,6 +465,36 @@ export default function LivePreview() {
           <p className="rt-note pvsel">選択モード: プレビューの中の要素をクリックしてください（ページは操作されません）。</p>
         )}
 
+        {view === 'live' && (
+          <div className="rt-row pvselrow pvobsrow" data-obs-state={obs ? (obs.exchanges.length ? 'some' : 'none') : obsError ? 'error' : 'loading'}
+            data-obs-count={obs?.exchanges.length ?? ''} data-obs-sql={obs ? obsSqlCount : ''}
+            data-obs-shown={obsShown?.seq ?? ''} data-obs-session={obs?.session.startedAt ?? ''}>
+            <p className="rt-note pvsel pvobs">
+              {!obs && !obsError && <>観測（いまの起動）: 取得しています…</>}
+              {!obs && obsError && <>観測（いまの起動）: 取得できません — {obsError}</>}
+              {obs && !obs.exchanges.length && <>観測（いまの起動）: まだ通信はありません（未観測）。</>}
+              {obs && obs.exchanges.length > 0 && <>観測（いまの起動）: 通信 <b>{obs.exchanges.length}</b> 件・SQL <b>{obsSqlCount}</b> 本{obs.session.overflow ? `（上限を超えた ${obs.session.overflow} 件は記録していません）` : ''}</>}
+              {obs && obs.instrumentation.state !== 'enabled' && <> サーバー処理・SQL は観測していません（{obs.instrumentation.reason ?? '計装なし'}）。</>}
+            </p>
+            {obs && obs.exchanges.length > 0 && (
+              <>
+                <select className="rt-in pvobssel" aria-label="観測した通信" value={obsSel ?? ''}
+                  onChange={(e) => setObsPick(Number(e.target.value))}>
+                  {obsRows.map(({ e, links }) => (
+                    <option key={e.seq} value={e.seq}>
+                      {liveExchangeLabel(e)}{links.server ? ` / SQL ${links.sql.length}` : ' / 処理と未接続'}
+                    </option>
+                  ))}
+                </select>
+                <button type="button" className="rt-b" disabled={obsSel === null}
+                  title="選んだ通信と、そのサーバー処理・SQL・テーブル・カラムをキャンバスと右の詳細に出します"
+                  onClick={() => { if (obsSel !== null && obs && serverKey) showObs(obsSel, obs, serverKey); }}>表示</button>
+                {obsShown && <button type="button" className="rt-b" onClick={clearObs}>解除</button>}
+              </>
+            )}
+          </div>
+        )}
+        {obsNote && view !== 'live' && <p className="rt-note pvsel">{obsNote}</p>}
         {view === 'live' && origin && (
           <div className="site pvsite">
             <iframe key={nav.n} ref={frameRef} className="pvframe" title="開発サーバーのプレビュー"
