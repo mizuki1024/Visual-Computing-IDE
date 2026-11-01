@@ -186,8 +186,8 @@ L0 にした理由: 方法・パス・状態は転送した当事者として直
 | `src/app/globals.css` | 観測の行の寸法（3行） |
 | `docs/02d-observability-information-model.md` | 1.3 の表に `preview-relay`、1.3.3 節を新設、要件の対応表に1行 |
 | `docs/02a-object-model.md` | 3.2 / 3.5.1.1 の表の取得手段の欄に `preview-relay` |
-| `tests/observe-unit.spec.mjs` | **新規**（86件） |
-| `tests/observe-e2e.spec.mjs` | **新規**（83件） |
+| `tests/observe-unit.spec.mjs` | **新規**（88件） |
+| `tests/observe-e2e.spec.mjs` | **新規**（84件） |
 | `package.json` | `npm test` に2本を追加 |
 | `README.md` | 状態表と使い方 |
 | `docs/07b3a-implementation-report.md` / `docs/07b3a-screenshots/` | 本書と画面 |
@@ -197,7 +197,7 @@ L0 にした理由: 方法・パス・状態は転送した当事者として直
 
 ---
 
-## 6. E2E（`tests/observe-e2e.spec.mjs`）— **83 件通過 / 0 件失敗**
+## 6. E2E（`tests/observe-e2e.spec.mjs`）— **84 件通過 / 0 件失敗**
 
 Chrome 153（playwright-core）、クラウドの転送を模した構成（7B-1 / 7B-2 と同じ。ブラウザの 127.0.0.1 はサーバーに届かない）、実物の IDE（`next start`）・実物の `next dev`・実物の PostgreSQL 16。
 
@@ -212,10 +212,10 @@ Chrome 153（playwright-core）、クラウドの転送を模した構成（7B-1
 | 7 | 計装なしで起動 → 通信だけ観測。トレース識別子なし・サーバー処理と SQL を作らない・ホップ0本・理由を書く |
 | 他 | IDE の画面に例外が無い / 中継が原因のエラー（CSP・差し込み）が無い |
 
-**E2E の最初の実行で見つけて直したこと。** 通信の「種類」の判定を `Sec-Fetch-Dest` に頼っていたが、Chrome は Sec-Fetch-* を**信頼できる origin（https・localhost）にしか送らない**。模擬の転送ホスト（`http://preview.cloud.test`）では送られず、文書の取得が「その他」と出ていた。
+**E2E の最初の実行で見つけて直したこと（7B-3A の中の不具合）。** 通信の「種類」の判定を `Sec-Fetch-Dest` に頼っていたが、Chrome は Sec-Fetch-* を**信頼できる origin（https・localhost）にしか送らない**。模擬の転送ホスト（`http://preview.cloud.test`）では送られず、文書の取得が「その他」と出ていた。
 **推測で埋めず、`unknown`（「種類はわかりません（ブラウザが Sec-Fetch-Dest を送っていません）」）を足した。** https の実物の Codespaces では送られるはずだが、未検証（第8節）。
 
-## 7. 単体（`tests/observe-unit.spec.mjs`）— **86 件通過 / 0 件失敗**
+## 7. 単体（`tests/observe-unit.spec.mjs`）— **88 件通過 / 0 件失敗**
 
 | 節 | 内容 |
 | --- | --- |
@@ -224,13 +224,34 @@ Chrome 153（playwright-core）、クラウドの転送を模した構成（7B-1
 | 3 | 台帳: セッションが無ければ記録しない・別の起動の記録を捨てる・新しい起動で空・停止で閉じる・上限 |
 | 4 | 収集ファイル: 通信のトレースのスパンだけ・書きかけの行・中継を通らない処理は数だけ・Phase 6F の射影 |
 | 5 | 本物の `PreviewGateway` ＋ 代役の開発サーバー: 記録のキー・ヘッダを落とす・秘密の印が記録に無い・404・HTML への差し込みは従来どおり・転送先に届かない・実行中でなければ記録しない |
-| 6 | 変換の否定例: トレースなし／スパン未着／計装なし／解析器なし／解析失敗／書き込み先／別トレースの同時刻の SQL。契約を破った複製を `validateDataset` が検出する |
+| 6 | 変換の否定例: トレースなし／スパン未着／**識別子が別のパスの受付スパンを指す**／計装なし／解析器なし／解析失敗／書き込み先／別トレースの同時刻の SQL。契約を破った複製を `validateDataset` が検出する |
 
 ---
 
 ## 8. 回帰（`BASE=http://127.0.0.1:3101 npm test`、新しく起動した IDE に対して）
 
-<!-- REGRESSION -->
+| | 1回目（新しく起動した IDE） | 2回目（同じ IDE を続けて） |
+| --- | --- | --- |
+| 既存の14本（PoC・探索画面・SQL・モデル） | 1,120 | 1,120 |
+| `project-inspect` / `devserver` / `devserver-stub` | 126 / 107 / 71 | 126 / 107 / 71 |
+| `preview-gateway` / `preview-e2e`（7B-1） | 132 / 71 | 132 / 71 |
+| `runtime-e2e`（7A） | 55 | 54 ＋ **3 件 skip** |
+| `select-unit` / `select-e2e`（7B-2） | 85 / 81 | 85 / 81 |
+| `observe-unit`（新規） | 88 | 88 |
+| `observe-e2e`（新規） | 84 | 84 |
+| **合計** | **2,020 件通過 / 0 件失敗 / 0 件 skip** | **2,019 件通過 / 0 件失敗 / 3 件 skip** |
+
+**既存の件数は 7B-2 の報告と1件も変わっていない**（1,848 = 1,120 + 126 + 107 + 71 + 132 + 85 + 55 + 71 + 81）。**既存の試験は1つも書き換えていない。**
+2回目の skip 3件は `runtime-e2e` の「開いた直後」の項目で、新しく起動した IDE でしか成り立たない前提を試験自身が判定して skip するもの（7A からの既存の仕組み）。失敗ではない。
+
+**回帰テストで見つけて直した不具合（2件。どちらも 7B-3A の変更が原因）**
+
+| 見つけた試験 | 症状 | 原因と修正 |
+| --- | --- | --- |
+| `preview-e2e`（7B-1）「IDE の画面にエラーが出ていない」 | 停止・再起動の直後、IDE の画面の console に `409 (Conflict)` が2件 | 画面は観測を 1.5 秒ごとに取りに来るので、停止・再起動の直後に前の起動の鍵で届くのは**正常な行き違い**である。409 を返すとブラウザがエラーとして記録する。**状態として 200 で `observation: null` と理由（`stale-run`）を返す**ように変えた（観測を返さないことは同じ）。7B-2 の選択の解決（利用者の操作）は 409 のまま |
+| `select-e2e`（7B-2） | `.pvsel` の検索が2つの要素に当たる（strict mode violation） | 観測の行が 7B-2 の選択の行と同じクラス（`.pvsel` / `.pvselrow`）を使っていた。見た目は同じまま**専用のクラスに分け**、`observe-e2e` に取り違えない検査を足した |
+
+新しい2本の件数は、最初の実行時の E2E 83・単体 86 から、上の検査と第9節の12の照合を足して **E2E 84・単体 88** になった（第6・7節は足した後の件数）。
 
 `npm run typecheck` 通過。`npm run build` 成功（Turbopack の追跡範囲の警告は従来どおり 3 件）。
 
