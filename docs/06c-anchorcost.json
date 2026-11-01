@@ -1,0 +1,725 @@
+{
+  "collectedAt": "2026-10-31T16:22:20Z",
+  "n": 5,
+  "parserLoad": {
+    "runs": [
+      120,
+      118,
+      120,
+      121,
+      122,
+      124,
+      123
+    ],
+    "medianMs": 121
+  },
+  "perFile": {
+    "files": [
+      {
+        "file": "src/app/cards/page.tsx",
+        "bytes": 2044,
+        "firstMs": 8.937,
+        "warmMedianMs": 0.363
+      },
+      {
+        "file": "src/app/cards-rsc/page.tsx",
+        "bytes": 867,
+        "firstMs": 0.773,
+        "warmMedianMs": 0.129
+      },
+      {
+        "file": "src/app/flows/page.tsx",
+        "bytes": 3924,
+        "firstMs": 2.114,
+        "warmMedianMs": 0.511
+      },
+      {
+        "file": "src/app/flows-rsc/page.tsx",
+        "bytes": 987,
+        "firstMs": 0.507,
+        "warmMedianMs": 0.109
+      },
+      {
+        "file": "src/app/layout.tsx",
+        "bytes": 309,
+        "firstMs": 0.344,
+        "warmMedianMs": 0.047
+      },
+      {
+        "file": "src/app/listings/[id]/page.tsx",
+        "bytes": 556,
+        "firstMs": 0.255,
+        "warmMedianMs": 0.1
+      },
+      {
+        "file": "src/app/listings/page.tsx",
+        "bytes": 691,
+        "firstMs": 0.38,
+        "warmMedianMs": 0.114
+      },
+      {
+        "file": "src/app/page.tsx",
+        "bytes": 559,
+        "firstMs": 0.373,
+        "warmMedianMs": 0.117
+      },
+      {
+        "file": "src/components/FetchButton.tsx",
+        "bytes": 471,
+        "firstMs": 0.334,
+        "warmMedianMs": 0.056
+      },
+      {
+        "file": "src/components/ListingCard.tsx",
+        "bytes": 588,
+        "firstMs": 0.152,
+        "warmMedianMs": 0.059
+      },
+      {
+        "file": "src/components/RegionBadge.tsx",
+        "bytes": 362,
+        "firstMs": 0.076,
+        "warmMedianMs": 0.038
+      }
+    ],
+    "totalWarmMs": 1.643,
+    "firstFileMs": 8.937
+  },
+  "dev": {
+    "turbopack-off": {
+      "cold": {
+        "readyMs": 1257,
+        "firstCompileMs": 832,
+        "servedMs": 29,
+        "recompileMs": 27
+      },
+      "warmCache": {
+        "readyMs": 1179,
+        "firstCompileMs": 759,
+        "servedMs": 27,
+        "recompileMs": 34
+      },
+      "runs": {
+        "cold": [
+          {
+            "readyMs": 1328,
+            "firstCompileMs": 842,
+            "servedMs": 33,
+            "recompileMs": 24,
+            "status": 200
+          },
+          {
+            "readyMs": 1230,
+            "firstCompileMs": 832,
+            "servedMs": 29,
+            "recompileMs": 27,
+            "status": 200
+          },
+          {
+            "readyMs": 1228,
+            "firstCompileMs": 834,
+            "servedMs": 29,
+            "recompileMs": 26,
+            "status": 200
+          },
+          {
+            "readyMs": 1257,
+            "firstCompileMs": 780,
+            "servedMs": 28,
+            "recompileMs": 31,
+            "status": 200
+          },
+          {
+            "readyMs": 1265,
+            "firstCompileMs": 751,
+            "servedMs": 25,
+            "recompileMs": 27,
+            "status": 200
+          }
+        ],
+        "warm": [
+          {
+            "readyMs": 1212,
+            "firstCompileMs": 759,
+            "servedMs": 27,
+            "recompileMs": 38,
+            "status": 200
+          },
+          {
+            "readyMs": 1187,
+            "firstCompileMs": 793,
+            "servedMs": 29,
+            "recompileMs": 34,
+            "status": 200
+          },
+          {
+            "readyMs": 1179,
+            "firstCompileMs": 760,
+            "servedMs": 29,
+            "recompileMs": 35,
+            "status": 200
+          },
+          {
+            "readyMs": 1142,
+            "firstCompileMs": 696,
+            "servedMs": 26,
+            "recompileMs": 22,
+            "status": 200
+          },
+          {
+            "readyMs": 1153,
+            "firstCompileMs": 713,
+            "servedMs": 27,
+            "recompileMs": 29,
+            "status": 200
+          }
+        ]
+      }
+    },
+    "turbopack-noop": {
+      "cold": {
+        "readyMs": 1262,
+        "firstCompileMs": 873,
+        "servedMs": 26,
+        "recompileMs": 32
+      },
+      "warmCache": {
+        "readyMs": 1162,
+        "firstCompileMs": 835,
+        "servedMs": 28,
+        "recompileMs": 31
+      },
+      "runs": {
+        "cold": [
+          {
+            "readyMs": 1312,
+            "firstCompileMs": 839,
+            "servedMs": 26,
+            "recompileMs": 29,
+            "status": 200
+          },
+          {
+            "readyMs": 1262,
+            "firstCompileMs": 983,
+            "servedMs": 26,
+            "recompileMs": 32,
+            "status": 200
+          },
+          {
+            "readyMs": 1306,
+            "firstCompileMs": 853,
+            "servedMs": 25,
+            "recompileMs": 25,
+            "status": 200
+          },
+          {
+            "readyMs": 1213,
+            "firstCompileMs": 892,
+            "servedMs": 29,
+            "recompileMs": 37,
+            "status": 200
+          },
+          {
+            "readyMs": 1236,
+            "firstCompileMs": 873,
+            "servedMs": 28,
+            "recompileMs": 32,
+            "status": 200
+          }
+        ],
+        "warm": [
+          {
+            "readyMs": 1162,
+            "firstCompileMs": 830,
+            "servedMs": 25,
+            "recompileMs": 32,
+            "status": 200
+          },
+          {
+            "readyMs": 1143,
+            "firstCompileMs": 825,
+            "servedMs": 26,
+            "recompileMs": 31,
+            "status": 200
+          },
+          {
+            "readyMs": 1128,
+            "firstCompileMs": 835,
+            "servedMs": 28,
+            "recompileMs": 30,
+            "status": 200
+          },
+          {
+            "readyMs": 1190,
+            "firstCompileMs": 870,
+            "servedMs": 28,
+            "recompileMs": 36,
+            "status": 200
+          },
+          {
+            "readyMs": 1174,
+            "firstCompileMs": 870,
+            "servedMs": 28,
+            "recompileMs": 29,
+            "status": 200
+          }
+        ]
+      }
+    },
+    "turbopack-on": {
+      "cold": {
+        "readyMs": 1263,
+        "firstCompileMs": 1063,
+        "servedMs": 26,
+        "recompileMs": 32
+      },
+      "warmCache": {
+        "readyMs": 1189,
+        "firstCompileMs": 987,
+        "servedMs": 26,
+        "recompileMs": 28
+      },
+      "runs": {
+        "cold": [
+          {
+            "readyMs": 1199,
+            "firstCompileMs": 1063,
+            "servedMs": 26,
+            "recompileMs": 24,
+            "status": 200
+          },
+          {
+            "readyMs": 1277,
+            "firstCompileMs": 1054,
+            "servedMs": 25,
+            "recompileMs": 33,
+            "status": 200
+          },
+          {
+            "readyMs": 1263,
+            "firstCompileMs": 1022,
+            "servedMs": 26,
+            "recompileMs": 23,
+            "status": 200
+          },
+          {
+            "readyMs": 1339,
+            "firstCompileMs": 1187,
+            "servedMs": 26,
+            "recompileMs": 36,
+            "status": 200
+          },
+          {
+            "readyMs": 1263,
+            "firstCompileMs": 1090,
+            "servedMs": 25,
+            "recompileMs": 32,
+            "status": 200
+          }
+        ],
+        "warm": [
+          {
+            "readyMs": 1189,
+            "firstCompileMs": 962,
+            "servedMs": 26,
+            "recompileMs": 34,
+            "status": 200
+          },
+          {
+            "readyMs": 1158,
+            "firstCompileMs": 987,
+            "servedMs": 25,
+            "recompileMs": 28,
+            "status": 200
+          },
+          {
+            "readyMs": 1189,
+            "firstCompileMs": 1006,
+            "servedMs": 26,
+            "recompileMs": 26,
+            "status": 200
+          },
+          {
+            "readyMs": 1189,
+            "firstCompileMs": 987,
+            "servedMs": 25,
+            "recompileMs": 26,
+            "status": 200
+          },
+          {
+            "readyMs": 1192,
+            "firstCompileMs": 1001,
+            "servedMs": 26,
+            "recompileMs": 30,
+            "status": 200
+          }
+        ]
+      }
+    },
+    "webpack-off": {
+      "cold": {
+        "readyMs": 2986,
+        "firstCompileMs": 1057,
+        "servedMs": 19,
+        "recompileMs": 182
+      },
+      "warmCache": {
+        "readyMs": 2803,
+        "firstCompileMs": 955,
+        "servedMs": 20,
+        "recompileMs": 191
+      },
+      "runs": {
+        "cold": [
+          {
+            "readyMs": 3093,
+            "firstCompileMs": 1035,
+            "servedMs": 19,
+            "recompileMs": 182,
+            "status": 200
+          },
+          {
+            "readyMs": 2963,
+            "firstCompileMs": 1081,
+            "servedMs": 19,
+            "recompileMs": 190,
+            "status": 200
+          },
+          {
+            "readyMs": 3130,
+            "firstCompileMs": 1113,
+            "servedMs": 22,
+            "recompileMs": 195,
+            "status": 200
+          },
+          {
+            "readyMs": 2986,
+            "firstCompileMs": 1057,
+            "servedMs": 19,
+            "recompileMs": 179,
+            "status": 200
+          },
+          {
+            "readyMs": 2984,
+            "firstCompileMs": 899,
+            "servedMs": 19,
+            "recompileMs": 179,
+            "status": 200
+          }
+        ],
+        "warm": [
+          {
+            "readyMs": 2854,
+            "firstCompileMs": 933,
+            "servedMs": 20,
+            "recompileMs": 187,
+            "status": 200
+          },
+          {
+            "readyMs": 2698,
+            "firstCompileMs": 914,
+            "servedMs": 21,
+            "recompileMs": 191,
+            "status": 200
+          },
+          {
+            "readyMs": 2803,
+            "firstCompileMs": 1089,
+            "servedMs": 21,
+            "recompileMs": 196,
+            "status": 200
+          },
+          {
+            "readyMs": 2722,
+            "firstCompileMs": 955,
+            "servedMs": 20,
+            "recompileMs": 202,
+            "status": 200
+          },
+          {
+            "readyMs": 3092,
+            "firstCompileMs": 1032,
+            "servedMs": 19,
+            "recompileMs": 185,
+            "status": 200
+          }
+        ]
+      }
+    },
+    "webpack-noop": {
+      "cold": {
+        "readyMs": 3200,
+        "firstCompileMs": 1065,
+        "servedMs": 20,
+        "recompileMs": 191
+      },
+      "warmCache": {
+        "readyMs": 2793,
+        "firstCompileMs": 971,
+        "servedMs": 21,
+        "recompileMs": 205
+      },
+      "runs": {
+        "cold": [
+          {
+            "readyMs": 3070,
+            "firstCompileMs": 1027,
+            "servedMs": 19,
+            "recompileMs": 195,
+            "status": 200
+          },
+          {
+            "readyMs": 3030,
+            "firstCompileMs": 886,
+            "servedMs": 19,
+            "recompileMs": 188,
+            "status": 200
+          },
+          {
+            "readyMs": 3210,
+            "firstCompileMs": 1130,
+            "servedMs": 21,
+            "recompileMs": 191,
+            "status": 200
+          },
+          {
+            "readyMs": 3200,
+            "firstCompileMs": 1065,
+            "servedMs": 20,
+            "recompileMs": 181,
+            "status": 200
+          },
+          {
+            "readyMs": 3286,
+            "firstCompileMs": 1100,
+            "servedMs": 20,
+            "recompileMs": 191,
+            "status": 200
+          }
+        ],
+        "warm": [
+          {
+            "readyMs": 2703,
+            "firstCompileMs": 910,
+            "servedMs": 19,
+            "recompileMs": 207,
+            "status": 200
+          },
+          {
+            "readyMs": 2932,
+            "firstCompileMs": 876,
+            "servedMs": 19,
+            "recompileMs": 183,
+            "status": 200
+          },
+          {
+            "readyMs": 2793,
+            "firstCompileMs": 985,
+            "servedMs": 21,
+            "recompileMs": 205,
+            "status": 200
+          },
+          {
+            "readyMs": 2757,
+            "firstCompileMs": 1037,
+            "servedMs": 22,
+            "recompileMs": 197,
+            "status": 200
+          },
+          {
+            "readyMs": 2858,
+            "firstCompileMs": 971,
+            "servedMs": 22,
+            "recompileMs": 260,
+            "status": 200
+          }
+        ]
+      }
+    },
+    "webpack-on": {
+      "cold": {
+        "readyMs": 3183,
+        "firstCompileMs": 2124,
+        "servedMs": 22,
+        "recompileMs": 683
+      },
+      "warmCache": {
+        "readyMs": 2276,
+        "firstCompileMs": 977,
+        "servedMs": 22,
+        "recompileMs": 205
+      },
+      "runs": {
+        "cold": [
+          {
+            "readyMs": 3229,
+            "firstCompileMs": 2175,
+            "servedMs": 22,
+            "recompileMs": 716,
+            "status": 200
+          },
+          {
+            "readyMs": 3183,
+            "firstCompileMs": 2133,
+            "servedMs": 26,
+            "recompileMs": 186,
+            "status": 200
+          },
+          {
+            "readyMs": 3240,
+            "firstCompileMs": 2124,
+            "servedMs": 23,
+            "recompileMs": 693,
+            "status": 200
+          },
+          {
+            "readyMs": 3063,
+            "firstCompileMs": 1051,
+            "servedMs": 19,
+            "recompileMs": 180,
+            "status": 200
+          },
+          {
+            "readyMs": 3141,
+            "firstCompileMs": 2119,
+            "servedMs": 22,
+            "recompileMs": 683,
+            "status": 200
+          }
+        ],
+        "warm": [
+          {
+            "readyMs": 2297,
+            "firstCompileMs": 977,
+            "servedMs": 22,
+            "recompileMs": 200,
+            "status": 200
+          },
+          {
+            "readyMs": 2276,
+            "firstCompileMs": 1362,
+            "servedMs": 24,
+            "recompileMs": 205,
+            "status": 200
+          },
+          {
+            "readyMs": 2123,
+            "firstCompileMs": 897,
+            "servedMs": 21,
+            "recompileMs": 207,
+            "status": 200
+          },
+          {
+            "readyMs": 3036,
+            "firstCompileMs": 2088,
+            "servedMs": 22,
+            "recompileMs": 690,
+            "status": 200
+          },
+          {
+            "readyMs": 2038,
+            "firstCompileMs": 901,
+            "servedMs": 21,
+            "recompileMs": 198,
+            "status": 200
+          }
+        ]
+      }
+    }
+  },
+  "loader": {
+    "workerProcesses": 20,
+    "tsLoadMsPerWorker": [
+      155,
+      143,
+      144,
+      143,
+      145,
+      142,
+      149,
+      148,
+      153,
+      141,
+      149,
+      161,
+      151,
+      150,
+      144,
+      151,
+      135,
+      143,
+      141,
+      146
+    ],
+    "tsLoadTotalMs": 2934,
+    "transformCount": 181,
+    "transformTotalMs": 330.32,
+    "transformMedianMs": 1.081,
+    "byFile": [
+      [
+        "src/app/cards/page.tsx",
+        90
+      ],
+      [
+        "src/components/ListingCard.tsx",
+        37
+      ],
+      [
+        "src/components/RegionBadge.tsx",
+        37
+      ],
+      [
+        "src/app/layout.tsx",
+        17
+      ]
+    ]
+  },
+  "comparison": {
+    "turbopack": {
+      "cold": {
+        "readyPct": 0.5,
+        "readyDeltaMs": 6,
+        "firstCompilePct": 27.8,
+        "firstCompileDeltaMs": 231,
+        "recompilePct": 18.5,
+        "recompileDeltaMs": 5
+      },
+      "warmCache": {
+        "readyPct": 0.8,
+        "firstCompilePct": 30,
+        "firstCompileDeltaMs": 228
+      },
+      "split": {
+        "loaderItselfMs": 41,
+        "injectionMs": 190,
+        "loaderItselfPct": 4.9,
+        "injectionPct": 21.8,
+        "recompileLoaderItselfMs": 5,
+        "recompileInjectionMs": 0
+      }
+    },
+    "webpack": {
+      "cold": {
+        "readyPct": 6.6,
+        "readyDeltaMs": 197,
+        "firstCompilePct": 100.9,
+        "firstCompileDeltaMs": 1067,
+        "recompilePct": 275.3,
+        "recompileDeltaMs": 501
+      },
+      "warmCache": {
+        "readyPct": -18.8,
+        "firstCompilePct": 2.3,
+        "firstCompileDeltaMs": 22
+      },
+      "split": {
+        "loaderItselfMs": 8,
+        "injectionMs": 1059,
+        "loaderItselfPct": 0.8,
+        "injectionPct": 99.4,
+        "recompileLoaderItselfMs": 9,
+        "recompileInjectionMs": 492
+      }
+    }
+  }
+}

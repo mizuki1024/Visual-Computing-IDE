@@ -1,0 +1,4471 @@
+{
+  "collectedAt": "2026-10-31T17:05:42Z",
+  "app": {
+    "framework": "Next.js",
+    "service": "poc01-fixture-app",
+    "port": 3200
+  },
+  "svc": {
+    "service": "poc02-fixture-svc",
+    "origin": "http://127.0.0.1:3300",
+    "note": "ループバックにのみ listen する隔離した2つ目の検証用サービス"
+  },
+  "byRun": {
+    "turbopack-propagation-on": {
+      "bundler": "turbopack",
+      "propagation": "on",
+      "pages": {
+        "/rsc-db": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/rsc-db",
+              "status": 200,
+              "isDocument": true,
+              "hasQuery": false,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "initiatorType": "other",
+              "server": {
+                "traceId": "6a3222ed1590c0978c15f9e7eb3ffee5",
+                "spanId": "2883b608345cf91d"
+              }
+            }
+          ],
+          "excludedAssets": 16
+        },
+        "/rsc-parallel": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/rsc-parallel",
+              "status": 200,
+              "isDocument": true,
+              "hasQuery": false,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "initiatorType": "other",
+              "server": {
+                "traceId": "2984da3a29cd1639fa6b9ff4368d35ca",
+                "spanId": "284b2cab1c8feb49"
+              }
+            }
+          ],
+          "excludedAssets": 16
+        },
+        "/rsc-dup": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/rsc-dup",
+              "status": 200,
+              "isDocument": true,
+              "hasQuery": false,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "initiatorType": "other",
+              "server": {
+                "traceId": "f72643b83aab32677085277aad1803ce",
+                "spanId": "d572708afe5397a7"
+              }
+            }
+          ],
+          "excludedAssets": 16
+        },
+        "/rsc-fail": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/rsc-fail",
+              "status": 200,
+              "isDocument": true,
+              "hasQuery": false,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "initiatorType": "other",
+              "server": {
+                "traceId": "77a0a5b3e2e60e362ac0597f4cf5ed09",
+                "spanId": "207b9bfe8e04ae55"
+              }
+            }
+          ],
+          "excludedAssets": 16
+        },
+        "/rsc-helper": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/rsc-helper",
+              "status": 200,
+              "isDocument": true,
+              "hasQuery": false,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "initiatorType": "other",
+              "server": {
+                "traceId": "debfb1ccfaee5399b2e9e52d34d3c4f9",
+                "spanId": "d058db31e8f3203c"
+              }
+            }
+          ],
+          "excludedAssets": 16
+        },
+        "/rsc-svc": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/rsc-svc",
+              "status": 200,
+              "isDocument": true,
+              "hasQuery": false,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "initiatorType": "other",
+              "server": {
+                "traceId": "29e6d55c757f9ee8f441cd5148e39f93",
+                "spanId": "af7affb62887d07d"
+              }
+            }
+          ],
+          "excludedAssets": 16
+        },
+        "/rsc-svc-fail": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/rsc-svc-fail",
+              "status": 200,
+              "isDocument": true,
+              "hasQuery": false,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "initiatorType": "other",
+              "server": {
+                "traceId": "6876992a79b0f62aedf75ff866fcabe5",
+                "spanId": "f981e74504c8b02c"
+              }
+            }
+          ],
+          "excludedAssets": 16
+        },
+        "/flows-rsc": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/flows-rsc",
+              "status": 200,
+              "isDocument": true,
+              "hasQuery": false,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "initiatorType": "other",
+              "server": {
+                "traceId": "d64724ed99cfcb5025ae8ad41f11af46",
+                "spanId": "47082ffce7c53b2f"
+              }
+            }
+          ],
+          "excludedAssets": 16
+        }
+      },
+      "notes": [],
+      "svcSeen": {
+        "total": 8,
+        "withTraceparent": 6,
+        "byPath": {
+          "/echo": {
+            "total": 3,
+            "withTraceparent": 2
+          },
+          "/rows": {
+            "total": 2,
+            "withTraceparent": 2
+          },
+          "/boom": {
+            "total": 2,
+            "withTraceparent": 2
+          },
+          "/__seen": {
+            "total": 1,
+            "withTraceparent": 0
+          }
+        }
+      },
+      "summary": {
+        "spans": 251,
+        "callsites": 40,
+        "entrySpans": 13,
+        "clientSpans": 5,
+        "sqlSpans": 11,
+        "distinctTraces": 10,
+        "crossServiceTraces": 2,
+        "svcRequestsWithTraceparent": 6,
+        "svcRequestsTotal": 8,
+        "svcTraceparentByPath": {
+          "/echo": {
+            "total": 3,
+            "withTraceparent": 2
+          },
+          "/rows": {
+            "total": 2,
+            "withTraceparent": 2
+          },
+          "/boom": {
+            "total": 2,
+            "withTraceparent": 2
+          },
+          "/__seen": {
+            "total": 1,
+            "withTraceparent": 0
+          }
+        },
+        "gateAPass": true,
+        "gateBPass": true,
+        "attribution": {
+          "total": 8,
+          "resolved": 7,
+          "verified": 8,
+          "refused": 1,
+          "reasons": {
+            "component-not-agreed": 1
+          },
+          "appFrameAtSpanStart": 0
+        }
+      },
+      "srvMapStats": {
+        "evalModules": 0,
+        "diskMaps": 8
+      },
+      "gateA": [
+        {
+          "key": "svc-echo",
+          "label": "別プロセスのサービスへの要求（相手は何もしない）",
+          "page": "/rsc-svc",
+          "documentCorrelated": true,
+          "documentTraceId": "29e6d55c757f9ee8f441cd5148e39f93",
+          "senderCount": 2,
+          "observed": [
+            {
+              "senderSpanId": "f7c8f51d6335f8ee",
+              "senderName": "GET",
+              "senderService": "app",
+              "destPath": "/echo",
+              "destHost": "127.0.0.1",
+              "destPort": 3300,
+              "status": 200,
+              "statusCode": 0,
+              "propagated": true,
+              "propagationFailure": null,
+              "entrySpanId": "78bcd5efd65cbb5e",
+              "entryService": "svc",
+              "entryTraceId": "29e6d55c757f9ee8f441cd5148e39f93",
+              "sameTrace": true,
+              "crossProcess": true,
+              "childSqlCount": 0,
+              "initiator": {
+                "file": "src/app/rsc-svc/page.tsx",
+                "line": 15,
+                "component": "RscSvc",
+                "verified": true,
+                "sourceLine": "fetch(`${SVC}/echo`, { cache: 'no-store' }),",
+                "reason": null,
+                "appFrameAtSpanStart": true
+              },
+              "parentChainDepth": 11
+            },
+            {
+              "senderSpanId": "b12a724b82a342a1",
+              "senderName": "GET",
+              "senderService": "app",
+              "destPath": "/rows",
+              "destHost": "127.0.0.1",
+              "destPort": 3300,
+              "status": 200,
+              "statusCode": 0,
+              "propagated": true,
+              "propagationFailure": null,
+              "entrySpanId": "1ccc2f645a5eed21",
+              "entryService": "svc",
+              "entryTraceId": "29e6d55c757f9ee8f441cd5148e39f93",
+              "sameTrace": true,
+              "crossProcess": true,
+              "childSqlCount": 1,
+              "initiator": {
+                "file": "src/app/rsc-svc/page.tsx",
+                "line": 16,
+                "component": "RscSvc",
+                "verified": true,
+                "sourceLine": "fetch(`${SVC}/rows`, { cache: 'no-store' }),",
+                "reason": null,
+                "appFrameAtSpanStart": true
+              },
+              "parentChainDepth": 11
+            }
+          ],
+          "checks": [
+            {
+              "expect": {
+                "destPath": "/echo",
+                "destService": "poc02-fixture-svc",
+                "status": 200,
+                "propagated": true,
+                "childSql": 0,
+                "initiator": {
+                  "file": "src/app/rsc-svc/page.tsx",
+                  "line": 15,
+                  "component": "RscSvc"
+                }
+              },
+              "found": true,
+              "propagationOk": true,
+              "statusOk": true,
+              "childSqlOk": true,
+              "initiatorOk": true
+            },
+            {
+              "expect": {
+                "destPath": "/rows",
+                "destService": "poc02-fixture-svc",
+                "status": 200,
+                "propagated": true,
+                "childSql": 1,
+                "initiator": {
+                  "file": "src/app/rsc-svc/page.tsx",
+                  "line": 16,
+                  "component": "RscSvc"
+                }
+              },
+              "found": true,
+              "propagationOk": true,
+              "statusOk": true,
+              "childSqlOk": true,
+              "initiatorOk": true
+            }
+          ],
+          "rules": [
+            {
+              "clientSpanId": "f7c8f51d6335f8ee",
+              "traceId": "29e6d55c757f9ee8f441cd5148e39f93",
+              "path": "/echo",
+              "status": 200,
+              "parentage": 1,
+              "parentageReason": null,
+              "entrySpanId": "78bcd5efd65cbb5e",
+              "entryIsOtherTrace": false,
+              "pathOnly": 1,
+              "timeWindow": 1,
+              "timeWindowAgrees": true
+            },
+            {
+              "clientSpanId": "b12a724b82a342a1",
+              "traceId": "29e6d55c757f9ee8f441cd5148e39f93",
+              "path": "/rows",
+              "status": 200,
+              "parentage": 1,
+              "parentageReason": null,
+              "entrySpanId": "1ccc2f645a5eed21",
+              "entryIsOtherTrace": false,
+              "pathOnly": 1,
+              "timeWindow": 1,
+              "timeWindowAgrees": true
+            }
+          ],
+          "duplicateEntryClaims": [],
+          "timeWindowWouldMatch": 0,
+          "pathOnlyAmbiguous": 0,
+          "pass": true
+        },
+        {
+          "key": "svc-fail",
+          "label": "別プロセスのサービスへの要求が 500 で返る",
+          "page": "/rsc-svc-fail",
+          "documentCorrelated": true,
+          "documentTraceId": "6876992a79b0f62aedf75ff866fcabe5",
+          "senderCount": 1,
+          "observed": [
+            {
+              "senderSpanId": "ac0c7861857d9bf0",
+              "senderName": "GET",
+              "senderService": "app",
+              "destPath": "/boom",
+              "destHost": "127.0.0.1",
+              "destPort": 3300,
+              "status": 500,
+              "statusCode": 2,
+              "propagated": true,
+              "propagationFailure": null,
+              "entrySpanId": "252790d545edc7e4",
+              "entryService": "svc",
+              "entryTraceId": "6876992a79b0f62aedf75ff866fcabe5",
+              "sameTrace": true,
+              "crossProcess": true,
+              "childSqlCount": 0,
+              "initiator": {
+                "file": "src/app/rsc-svc-fail/page.tsx",
+                "line": 12,
+                "component": "RscSvcFail",
+                "verified": true,
+                "sourceLine": "const res = await fetch(`${SVC}/boom`, { cache: 'no-store' });",
+                "reason": null,
+                "appFrameAtSpanStart": true
+              },
+              "parentChainDepth": 11
+            }
+          ],
+          "checks": [
+            {
+              "expect": {
+                "destPath": "/boom",
+                "destService": "poc02-fixture-svc",
+                "status": 500,
+                "propagated": true,
+                "childSql": 0,
+                "initiator": {
+                  "file": "src/app/rsc-svc-fail/page.tsx",
+                  "line": 12,
+                  "component": "RscSvcFail"
+                }
+              },
+              "found": true,
+              "propagationOk": true,
+              "statusOk": true,
+              "childSqlOk": true,
+              "initiatorOk": true
+            }
+          ],
+          "rules": [
+            {
+              "clientSpanId": "ac0c7861857d9bf0",
+              "traceId": "6876992a79b0f62aedf75ff866fcabe5",
+              "path": "/boom",
+              "status": 500,
+              "parentage": 1,
+              "parentageReason": null,
+              "entrySpanId": "252790d545edc7e4",
+              "entryIsOtherTrace": false,
+              "pathOnly": 1,
+              "timeWindow": 1,
+              "timeWindowAgrees": true
+            }
+          ],
+          "duplicateEntryClaims": [],
+          "timeWindowWouldMatch": 0,
+          "pathOnlyAmbiguous": 0,
+          "pass": true
+        },
+        {
+          "key": "self-api",
+          "label": "自分の API ルートへの要求（同一プロセス）",
+          "page": "/flows-rsc",
+          "documentCorrelated": true,
+          "documentTraceId": "d64724ed99cfcb5025ae8ad41f11af46",
+          "senderCount": 1,
+          "observed": [
+            {
+              "senderSpanId": "d98ac8b958a5236a",
+              "senderName": "GET",
+              "senderService": "app",
+              "destPath": "/api/listings",
+              "destHost": "localhost",
+              "destPort": 3200,
+              "status": 200,
+              "statusCode": 0,
+              "propagated": true,
+              "propagationFailure": null,
+              "entrySpanId": "2a16bbcd0411a328",
+              "entryService": "app",
+              "entryTraceId": "d64724ed99cfcb5025ae8ad41f11af46",
+              "sameTrace": true,
+              "crossProcess": false,
+              "childSqlCount": 2,
+              "initiator": {
+                "file": "src/app/flows-rsc/page.tsx",
+                "line": 15,
+                "component": "FlowsRsc",
+                "verified": true,
+                "sourceLine": "const res = await fetch(`${ORIGIN}/api/listings`, { cache: 'no-store' });",
+                "reason": null,
+                "appFrameAtSpanStart": true
+              },
+              "parentChainDepth": 11
+            }
+          ],
+          "checks": [
+            {
+              "expect": {
+                "destPath": "/api/listings",
+                "destService": "poc01-fixture-app",
+                "status": 200,
+                "propagated": true,
+                "childSql": 2,
+                "initiator": {
+                  "file": "src/app/flows-rsc/page.tsx",
+                  "line": 15,
+                  "component": "FlowsRsc"
+                }
+              },
+              "found": true,
+              "propagationOk": true,
+              "statusOk": true,
+              "childSqlOk": true,
+              "initiatorOk": true
+            }
+          ],
+          "rules": [
+            {
+              "clientSpanId": "d98ac8b958a5236a",
+              "traceId": "d64724ed99cfcb5025ae8ad41f11af46",
+              "path": "/api/listings",
+              "status": 200,
+              "parentage": 1,
+              "parentageReason": null,
+              "entrySpanId": "2a16bbcd0411a328",
+              "entryIsOtherTrace": false,
+              "pathOnly": 1,
+              "timeWindow": 1,
+              "timeWindowAgrees": true
+            }
+          ],
+          "duplicateEntryClaims": [],
+          "timeWindowWouldMatch": 0,
+          "pathOnlyAmbiguous": 0,
+          "pass": true
+        },
+        {
+          "key": "dead-port",
+          "label": "応答が返らない（開いていないポート）",
+          "page": "/rsc-fail",
+          "documentCorrelated": true,
+          "documentTraceId": "77a0a5b3e2e60e362ac0597f4cf5ed09",
+          "senderCount": 1,
+          "observed": [
+            {
+              "senderSpanId": "8c4444e3d5334446",
+              "senderName": "GET",
+              "senderService": "app",
+              "destPath": "/echo",
+              "destHost": "127.0.0.1",
+              "destPort": 3399,
+              "status": null,
+              "statusCode": 2,
+              "propagated": false,
+              "propagationFailure": "no-child-entry-span",
+              "entrySpanId": null,
+              "entryService": null,
+              "entryTraceId": null,
+              "sameTrace": null,
+              "crossProcess": null,
+              "childSqlCount": 0,
+              "initiator": {
+                "file": "src/app/rsc-fail/page.tsx",
+                "line": 23,
+                "component": "RscFail",
+                "verified": true,
+                "sourceLine": "await fetch(`${DEAD}/echo`, { cache: 'no-store' });",
+                "reason": null,
+                "appFrameAtSpanStart": true
+              },
+              "parentChainDepth": null
+            }
+          ],
+          "checks": [
+            {
+              "expect": {
+                "destPath": "/echo",
+                "destService": null,
+                "status": null,
+                "propagated": false,
+                "propagationFailure": "no-child-entry-span",
+                "childSql": 0,
+                "initiator": {
+                  "file": "src/app/rsc-fail/page.tsx",
+                  "line": 23,
+                  "component": "RscFail"
+                }
+              },
+              "found": true,
+              "propagationOk": true,
+              "statusOk": true,
+              "childSqlOk": true,
+              "initiatorOk": true
+            }
+          ],
+          "rules": [
+            {
+              "clientSpanId": "8c4444e3d5334446",
+              "traceId": "77a0a5b3e2e60e362ac0597f4cf5ed09",
+              "path": "/echo",
+              "status": null,
+              "parentage": 0,
+              "parentageReason": "no-child-entry-span",
+              "entrySpanId": null,
+              "entryIsOtherTrace": false,
+              "pathOnly": 1,
+              "timeWindow": 0,
+              "timeWindowAgrees": null
+            }
+          ],
+          "duplicateEntryClaims": [],
+          "timeWindowWouldMatch": 0,
+          "pathOnlyAmbiguous": 0,
+          "pass": true
+        }
+      ],
+      "gateB": [
+        {
+          "key": "rsc-db",
+          "label": "Server Component からの直接 DB アクセス（1本）",
+          "page": "/rsc-db",
+          "documentCorrelated": true,
+          "documentTraceId": "6a3222ed1590c0978c15f9e7eb3ffee5",
+          "browserRequests": 1,
+          "browserApiRequests": 0,
+          "documentInitiatorType": "other",
+          "renderSpanObserved": true,
+          "renderSpanName": "render route (app) /rsc-db",
+          "renderRoute": "/rsc-db",
+          "spansInTrace": 26,
+          "sqlInTrace": 1,
+          "sqlUnderRender": 1,
+          "overlaps": [],
+          "sql": [
+            {
+              "spanId": "224f130f6f6b6e9f",
+              "scope": "@opentelemetry/instrumentation-pg",
+              "depthFromRender": 1,
+              "durationMs": 5.82,
+              "failed": false,
+              "parseOk": true,
+              "tables": [
+                "listings"
+              ],
+              "tablesInSchema": [
+                "listings"
+              ],
+              "columns": [
+                "id",
+                "code",
+                "plan"
+              ],
+              "unresolved": [],
+              "attribution": {
+                "at": "pg-pool.Pool.query",
+                "file": "src/app/rsc-db/page.tsx",
+                "line": 12,
+                "functionName": "RscDb",
+                "component": "RscDb",
+                "verified": true,
+                "sourceLine": "const r = await pool.query('SELECT id, code, plan FROM poc.listings ORDER BY id LIMIT 6');",
+                "reason": null,
+                "appFrameAtSpanStart": false
+              }
+            }
+          ],
+          "checks": [
+            {
+              "expect": {
+                "table": "listings",
+                "columns": [
+                  "id",
+                  "code",
+                  "plan"
+                ],
+                "file": "src/app/rsc-db/page.tsx",
+                "line": 12,
+                "component": "RscDb",
+                "ok": true
+              },
+              "found": true,
+              "locatedOk": true,
+              "attributionOk": true,
+              "tableOk": true,
+              "columnsOk": true,
+              "failedOk": true,
+              "underRenderOk": true
+            }
+          ],
+          "unexpected": 0,
+          "pass": true
+        },
+        {
+          "key": "rsc-parallel",
+          "label": "複数の並列データ取得（3本・別々の行）",
+          "page": "/rsc-parallel",
+          "documentCorrelated": true,
+          "documentTraceId": "2984da3a29cd1639fa6b9ff4368d35ca",
+          "browserRequests": 1,
+          "browserApiRequests": 0,
+          "documentInitiatorType": "other",
+          "renderSpanObserved": true,
+          "renderSpanName": "render route (app) /rsc-parallel",
+          "renderRoute": "/rsc-parallel",
+          "spansInTrace": 32,
+          "sqlInTrace": 3,
+          "sqlUnderRender": 3,
+          "overlaps": [
+            {
+              "a": "8d2c1ef0b4cd2c23",
+              "b": "68d612a289d084ab",
+              "overlapMs": 1.32
+            }
+          ],
+          "sql": [
+            {
+              "spanId": "58738442bfe61806",
+              "scope": "@opentelemetry/instrumentation-pg",
+              "depthFromRender": 1,
+              "durationMs": 4.63,
+              "failed": false,
+              "parseOk": true,
+              "tables": [
+                "listings"
+              ],
+              "tablesInSchema": [
+                "listings"
+              ],
+              "columns": [],
+              "unresolved": [],
+              "attribution": {
+                "at": "pg-pool.Pool.query",
+                "file": "src/app/rsc-parallel/page.tsx",
+                "line": 13,
+                "functionName": "RscParallel",
+                "component": "RscParallel",
+                "verified": true,
+                "sourceLine": "pool.query('SELECT count(*) AS n FROM poc.listings'),",
+                "reason": null,
+                "appFrameAtSpanStart": false
+              }
+            },
+            {
+              "spanId": "8d2c1ef0b4cd2c23",
+              "scope": "@opentelemetry/instrumentation-pg",
+              "depthFromRender": 1,
+              "durationMs": 2.32,
+              "failed": false,
+              "parseOk": true,
+              "tables": [
+                "listing_views"
+              ],
+              "tablesInSchema": [
+                "listing_views"
+              ],
+              "columns": [],
+              "unresolved": [],
+              "attribution": {
+                "at": "pg-pool.Pool.query",
+                "file": "src/app/rsc-parallel/page.tsx",
+                "line": 15,
+                "functionName": "RscParallel",
+                "component": "RscParallel",
+                "verified": true,
+                "sourceLine": "pool.query('SELECT count(*) AS n FROM poc.listing_views'),",
+                "reason": null,
+                "appFrameAtSpanStart": false
+              }
+            },
+            {
+              "spanId": "68d612a289d084ab",
+              "scope": "@opentelemetry/instrumentation-pg",
+              "depthFromRender": 1,
+              "durationMs": 2.35,
+              "failed": false,
+              "parseOk": true,
+              "tables": [
+                "regions"
+              ],
+              "tablesInSchema": [
+                "regions"
+              ],
+              "columns": [],
+              "unresolved": [],
+              "attribution": {
+                "at": "pg-pool.Pool.query",
+                "file": "src/app/rsc-parallel/page.tsx",
+                "line": 14,
+                "functionName": "RscParallel",
+                "component": "RscParallel",
+                "verified": true,
+                "sourceLine": "pool.query('SELECT count(*) AS n FROM poc.regions'),",
+                "reason": null,
+                "appFrameAtSpanStart": false
+              }
+            }
+          ],
+          "checks": [
+            {
+              "expect": {
+                "table": "listings",
+                "file": "src/app/rsc-parallel/page.tsx",
+                "line": 13,
+                "component": "RscParallel",
+                "ok": true
+              },
+              "found": true,
+              "locatedOk": true,
+              "attributionOk": true,
+              "tableOk": true,
+              "columnsOk": true,
+              "failedOk": true,
+              "underRenderOk": true
+            },
+            {
+              "expect": {
+                "table": "regions",
+                "file": "src/app/rsc-parallel/page.tsx",
+                "line": 14,
+                "component": "RscParallel",
+                "ok": true
+              },
+              "found": true,
+              "locatedOk": true,
+              "attributionOk": true,
+              "tableOk": true,
+              "columnsOk": true,
+              "failedOk": true,
+              "underRenderOk": true
+            },
+            {
+              "expect": {
+                "table": "listing_views",
+                "file": "src/app/rsc-parallel/page.tsx",
+                "line": 15,
+                "component": "RscParallel",
+                "ok": true
+              },
+              "found": true,
+              "locatedOk": true,
+              "attributionOk": true,
+              "tableOk": true,
+              "columnsOk": true,
+              "failedOk": true,
+              "underRenderOk": true
+            }
+          ],
+          "unexpected": 0,
+          "pass": true
+        },
+        {
+          "key": "rsc-dup",
+          "label": "同じ SQL を複数箇所から実行（別ファイル・別コンポーネント）",
+          "page": "/rsc-dup",
+          "documentCorrelated": true,
+          "documentTraceId": "f72643b83aab32677085277aad1803ce",
+          "browserRequests": 1,
+          "browserApiRequests": 0,
+          "documentInitiatorType": "other",
+          "renderSpanObserved": true,
+          "renderSpanName": "render route (app) /rsc-dup",
+          "renderRoute": "/rsc-dup",
+          "spansInTrace": 28,
+          "sqlInTrace": 2,
+          "sqlUnderRender": 2,
+          "overlaps": [],
+          "sql": [
+            {
+              "spanId": "f4f51d4bb0e6b0da",
+              "scope": "@opentelemetry/instrumentation-pg",
+              "depthFromRender": 1,
+              "durationMs": 6.85,
+              "failed": false,
+              "parseOk": true,
+              "tables": [
+                "listings"
+              ],
+              "tablesInSchema": [
+                "listings"
+              ],
+              "columns": [],
+              "unresolved": [],
+              "attribution": {
+                "at": "pg-pool.Pool.query",
+                "file": "src/app/rsc-dup/page.tsx",
+                "line": 13,
+                "functionName": "RscDup",
+                "component": "RscDup",
+                "verified": true,
+                "sourceLine": "const r = await pool.query('SELECT count(*) AS n FROM poc.listings');",
+                "reason": null,
+                "appFrameAtSpanStart": false
+              }
+            },
+            {
+              "spanId": "f30984e8b4c88e4d",
+              "scope": "@opentelemetry/instrumentation-pg",
+              "depthFromRender": 1,
+              "durationMs": 1.38,
+              "failed": false,
+              "parseOk": true,
+              "tables": [
+                "listings"
+              ],
+              "tablesInSchema": [
+                "listings"
+              ],
+              "columns": [],
+              "unresolved": [],
+              "attribution": {
+                "at": "pg-pool.Pool.query",
+                "file": "src/components/ListingCount.tsx",
+                "line": 6,
+                "functionName": "ListingCount",
+                "component": "ListingCount",
+                "verified": true,
+                "sourceLine": "const r = await pool.query('SELECT count(*) AS n FROM poc.listings');",
+                "reason": null,
+                "appFrameAtSpanStart": false
+              }
+            }
+          ],
+          "checks": [
+            {
+              "expect": {
+                "table": "listings",
+                "file": "src/app/rsc-dup/page.tsx",
+                "line": 13,
+                "component": "RscDup",
+                "ok": true
+              },
+              "found": true,
+              "locatedOk": true,
+              "attributionOk": true,
+              "tableOk": true,
+              "columnsOk": true,
+              "failedOk": true,
+              "underRenderOk": true
+            },
+            {
+              "expect": {
+                "table": "listings",
+                "file": "src/components/ListingCount.tsx",
+                "line": 6,
+                "component": "ListingCount",
+                "ok": true
+              },
+              "found": true,
+              "locatedOk": true,
+              "attributionOk": true,
+              "tableOk": true,
+              "columnsOk": true,
+              "failedOk": true,
+              "underRenderOk": true
+            }
+          ],
+          "unexpected": 0,
+          "pass": true
+        },
+        {
+          "key": "rsc-fail",
+          "label": "SQL の失敗と、サーバー内部通信の失敗",
+          "page": "/rsc-fail",
+          "documentCorrelated": true,
+          "documentTraceId": "77a0a5b3e2e60e362ac0597f4cf5ed09",
+          "browserRequests": 1,
+          "browserApiRequests": 0,
+          "documentInitiatorType": "other",
+          "renderSpanObserved": true,
+          "renderSpanName": "render route (app) /rsc-fail",
+          "renderRoute": "/rsc-fail",
+          "spansInTrace": 28,
+          "sqlInTrace": 1,
+          "sqlUnderRender": 1,
+          "overlaps": [],
+          "sql": [
+            {
+              "spanId": "e5b13c79111c12cf",
+              "scope": "@opentelemetry/instrumentation-pg",
+              "depthFromRender": 1,
+              "durationMs": 6.87,
+              "failed": true,
+              "parseOk": true,
+              "tables": [
+                "table_that_does_not_exist"
+              ],
+              "tablesInSchema": [],
+              "columns": [
+                "id"
+              ],
+              "unresolved": [],
+              "attribution": {
+                "at": "pg-pool.Pool.query",
+                "file": "src/app/rsc-fail/page.tsx",
+                "line": 17,
+                "functionName": "RscFail",
+                "component": "RscFail",
+                "verified": true,
+                "sourceLine": "await pool.query('SELECT id FROM poc.table_that_does_not_exist');",
+                "reason": null,
+                "appFrameAtSpanStart": false
+              }
+            }
+          ],
+          "checks": [
+            {
+              "expect": {
+                "table": "table_that_does_not_exist",
+                "failed": true,
+                "file": "src/app/rsc-fail/page.tsx",
+                "line": 17,
+                "component": "RscFail",
+                "ok": true,
+                "tableInSchema": false
+              },
+              "found": true,
+              "locatedOk": true,
+              "attributionOk": true,
+              "tableOk": true,
+              "columnsOk": true,
+              "failedOk": true,
+              "underRenderOk": true
+            }
+          ],
+          "unexpected": 0,
+          "pass": true
+        },
+        {
+          "key": "rsc-helper",
+          "label": "コンポーネントではない関数の中の SQL（帰属できないのが正解）",
+          "page": "/rsc-helper",
+          "documentCorrelated": true,
+          "documentTraceId": "debfb1ccfaee5399b2e9e52d34d3c4f9",
+          "browserRequests": 1,
+          "browserApiRequests": 0,
+          "documentInitiatorType": "other",
+          "renderSpanObserved": true,
+          "renderSpanName": "render route (app) /rsc-helper",
+          "renderRoute": "/rsc-helper",
+          "spansInTrace": 26,
+          "sqlInTrace": 1,
+          "sqlUnderRender": 1,
+          "overlaps": [],
+          "sql": [
+            {
+              "spanId": "e9ae9e2f25c67715",
+              "scope": "@opentelemetry/instrumentation-pg",
+              "depthFromRender": 1,
+              "durationMs": 6.73,
+              "failed": false,
+              "parseOk": true,
+              "tables": [
+                "listings"
+              ],
+              "tablesInSchema": [
+                "listings"
+              ],
+              "columns": [
+                "scale"
+              ],
+              "unresolved": [],
+              "attribution": {
+                "at": "pg-pool.Pool.query",
+                "file": "src/app/rsc-helper/page.tsx",
+                "line": 13,
+                "functionName": "loadScaleCounts",
+                "component": null,
+                "verified": true,
+                "sourceLine": "const r = await pool.query('SELECT scale, count(*) AS n FROM poc.listings GROUP BY scale');",
+                "reason": "component-not-agreed",
+                "appFrameAtSpanStart": false
+              }
+            }
+          ],
+          "checks": [
+            {
+              "expect": {
+                "table": "listings",
+                "file": "src/app/rsc-helper/page.tsx",
+                "line": 13,
+                "component": null,
+                "ok": false,
+                "failureReason": "component-not-agreed"
+              },
+              "found": true,
+              "locatedOk": true,
+              "attributionOk": true,
+              "tableOk": true,
+              "columnsOk": true,
+              "failedOk": true,
+              "underRenderOk": true
+            }
+          ],
+          "unexpected": 0,
+          "pass": true
+        }
+      ]
+    },
+    "turbopack-propagation-off": {
+      "bundler": "turbopack",
+      "propagation": "off",
+      "pages": {
+        "/rsc-db": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/rsc-db",
+              "status": 200,
+              "isDocument": true,
+              "hasQuery": false,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "initiatorType": "other",
+              "server": {
+                "traceId": "1544da5ea6b86340b1465805a5d93364",
+                "spanId": "2997fbec139caff6"
+              }
+            }
+          ],
+          "excludedAssets": 16
+        },
+        "/rsc-parallel": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/rsc-parallel",
+              "status": 200,
+              "isDocument": true,
+              "hasQuery": false,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "initiatorType": "other",
+              "server": {
+                "traceId": "33bc9305203faab4ffae21d873136f59",
+                "spanId": "f8bff5f849837c2b"
+              }
+            }
+          ],
+          "excludedAssets": 16
+        },
+        "/rsc-dup": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/rsc-dup",
+              "status": 200,
+              "isDocument": true,
+              "hasQuery": false,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "initiatorType": "other",
+              "server": {
+                "traceId": "e2096b6123fc693e3a5167f7df2d7d8d",
+                "spanId": "0c663d055eadce76"
+              }
+            }
+          ],
+          "excludedAssets": 16
+        },
+        "/rsc-fail": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/rsc-fail",
+              "status": 200,
+              "isDocument": true,
+              "hasQuery": false,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "initiatorType": "other",
+              "server": {
+                "traceId": "1673991693bea7b7fe9312f6eebafb07",
+                "spanId": "c35a6fb45e5e14a9"
+              }
+            }
+          ],
+          "excludedAssets": 16
+        },
+        "/rsc-helper": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/rsc-helper",
+              "status": 200,
+              "isDocument": true,
+              "hasQuery": false,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "initiatorType": "other",
+              "server": {
+                "traceId": "86dd32c8cb1e683cbd6f55e1832945ea",
+                "spanId": "b16f1ef753d982a0"
+              }
+            }
+          ],
+          "excludedAssets": 16
+        },
+        "/rsc-svc": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/rsc-svc",
+              "status": 200,
+              "isDocument": true,
+              "hasQuery": false,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "initiatorType": "other",
+              "server": {
+                "traceId": "10ba3f789faac232167bc5323ca4df6a",
+                "spanId": "3afa89e7967a5e97"
+              }
+            }
+          ],
+          "excludedAssets": 16
+        },
+        "/rsc-svc-fail": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/rsc-svc-fail",
+              "status": 200,
+              "isDocument": true,
+              "hasQuery": false,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "initiatorType": "other",
+              "server": {
+                "traceId": "0112750eef89a16b731f7766a8b8c3b1",
+                "spanId": "dd2132575b33ff5b"
+              }
+            }
+          ],
+          "excludedAssets": 16
+        },
+        "/flows-rsc": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/flows-rsc",
+              "status": 200,
+              "isDocument": true,
+              "hasQuery": false,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "initiatorType": "other",
+              "server": {
+                "traceId": "17f50b4b154223ba4ee04098392bacc5",
+                "spanId": "6dd1d822df85b7d8"
+              }
+            }
+          ],
+          "excludedAssets": 16
+        }
+      },
+      "notes": [],
+      "svcSeen": {
+        "total": 8,
+        "withTraceparent": 0,
+        "byPath": {
+          "/echo": {
+            "total": 3,
+            "withTraceparent": 0
+          },
+          "/rows": {
+            "total": 2,
+            "withTraceparent": 0
+          },
+          "/boom": {
+            "total": 2,
+            "withTraceparent": 0
+          },
+          "/__seen": {
+            "total": 1,
+            "withTraceparent": 0
+          }
+        }
+      },
+      "summary": {
+        "spans": 246,
+        "callsites": 35,
+        "entrySpans": 13,
+        "clientSpans": 0,
+        "sqlSpans": 11,
+        "distinctTraces": 14,
+        "crossServiceTraces": 0,
+        "svcRequestsWithTraceparent": 0,
+        "svcRequestsTotal": 8,
+        "svcTraceparentByPath": {
+          "/echo": {
+            "total": 3,
+            "withTraceparent": 0
+          },
+          "/rows": {
+            "total": 2,
+            "withTraceparent": 0
+          },
+          "/boom": {
+            "total": 2,
+            "withTraceparent": 0
+          },
+          "/__seen": {
+            "total": 1,
+            "withTraceparent": 0
+          }
+        },
+        "gateAPass": true,
+        "gateBPass": true,
+        "attribution": {
+          "total": 8,
+          "resolved": 7,
+          "verified": 8,
+          "refused": 1,
+          "reasons": {
+            "component-not-agreed": 1
+          },
+          "appFrameAtSpanStart": 0
+        }
+      },
+      "srvMapStats": {
+        "evalModules": 0,
+        "diskMaps": 8
+      },
+      "gateA": [
+        {
+          "key": "svc-echo",
+          "label": "別プロセスのサービスへの要求（相手は何もしない）",
+          "page": "/rsc-svc",
+          "documentCorrelated": true,
+          "documentTraceId": "10ba3f789faac232167bc5323ca4df6a",
+          "senderCount": 2,
+          "observed": [
+            {
+              "senderSpanId": "a5fce2e0d5a8df17",
+              "senderName": "fetch GET http://127.0.0.1:3300/echo",
+              "senderService": "app",
+              "destPath": "/echo",
+              "destHost": null,
+              "destPort": null,
+              "status": 200,
+              "statusCode": 0,
+              "propagated": false,
+              "propagationFailure": "no-child-entry-span",
+              "entrySpanId": null,
+              "entryService": null,
+              "entryTraceId": null,
+              "sameTrace": null,
+              "crossProcess": null,
+              "childSqlCount": 0,
+              "initiator": {
+                "file": "src/app/rsc-svc/page.tsx",
+                "line": 15,
+                "component": "RscSvc",
+                "verified": true,
+                "sourceLine": "fetch(`${SVC}/echo`, { cache: 'no-store' }),",
+                "reason": null,
+                "appFrameAtSpanStart": true
+              },
+              "parentChainDepth": null
+            },
+            {
+              "senderSpanId": "e4e5ab29fccef79b",
+              "senderName": "fetch GET http://127.0.0.1:3300/rows",
+              "senderService": "app",
+              "destPath": "/rows",
+              "destHost": null,
+              "destPort": null,
+              "status": 200,
+              "statusCode": 0,
+              "propagated": false,
+              "propagationFailure": "no-child-entry-span",
+              "entrySpanId": null,
+              "entryService": null,
+              "entryTraceId": null,
+              "sameTrace": null,
+              "crossProcess": null,
+              "childSqlCount": 0,
+              "initiator": {
+                "file": "src/app/rsc-svc/page.tsx",
+                "line": 16,
+                "component": "RscSvc",
+                "verified": true,
+                "sourceLine": "fetch(`${SVC}/rows`, { cache: 'no-store' }),",
+                "reason": null,
+                "appFrameAtSpanStart": true
+              },
+              "parentChainDepth": null
+            }
+          ],
+          "checks": [
+            {
+              "expect": {
+                "destPath": "/echo",
+                "destService": "poc02-fixture-svc",
+                "status": 200,
+                "propagated": true,
+                "childSql": 0,
+                "initiator": {
+                  "file": "src/app/rsc-svc/page.tsx",
+                  "line": 15,
+                  "component": "RscSvc"
+                }
+              },
+              "found": true,
+              "propagationOk": true,
+              "statusOk": true,
+              "childSqlOk": true,
+              "initiatorOk": true
+            },
+            {
+              "expect": {
+                "destPath": "/rows",
+                "destService": "poc02-fixture-svc",
+                "status": 200,
+                "propagated": true,
+                "childSql": 1,
+                "initiator": {
+                  "file": "src/app/rsc-svc/page.tsx",
+                  "line": 16,
+                  "component": "RscSvc"
+                }
+              },
+              "found": true,
+              "propagationOk": true,
+              "statusOk": true,
+              "childSqlOk": true,
+              "initiatorOk": true
+            }
+          ],
+          "rules": [
+            {
+              "clientSpanId": "a5fce2e0d5a8df17",
+              "traceId": "10ba3f789faac232167bc5323ca4df6a",
+              "path": "/echo",
+              "status": 200,
+              "parentage": 0,
+              "parentageReason": "no-child-entry-span",
+              "entrySpanId": null,
+              "entryIsOtherTrace": true,
+              "pathOnly": 1,
+              "timeWindow": 1,
+              "timeWindowAgrees": null
+            },
+            {
+              "clientSpanId": "e4e5ab29fccef79b",
+              "traceId": "10ba3f789faac232167bc5323ca4df6a",
+              "path": "/rows",
+              "status": 200,
+              "parentage": 0,
+              "parentageReason": "no-child-entry-span",
+              "entrySpanId": null,
+              "entryIsOtherTrace": true,
+              "pathOnly": 1,
+              "timeWindow": 1,
+              "timeWindowAgrees": null
+            }
+          ],
+          "duplicateEntryClaims": [],
+          "timeWindowWouldMatch": 2,
+          "pathOnlyAmbiguous": 0,
+          "pass": true
+        },
+        {
+          "key": "svc-fail",
+          "label": "別プロセスのサービスへの要求が 500 で返る",
+          "page": "/rsc-svc-fail",
+          "documentCorrelated": true,
+          "documentTraceId": "0112750eef89a16b731f7766a8b8c3b1",
+          "senderCount": 1,
+          "observed": [
+            {
+              "senderSpanId": "f3efc5e8f7ab2b65",
+              "senderName": "fetch GET http://127.0.0.1:3300/boom",
+              "senderService": "app",
+              "destPath": "/boom",
+              "destHost": null,
+              "destPort": null,
+              "status": 500,
+              "statusCode": 0,
+              "propagated": false,
+              "propagationFailure": "no-child-entry-span",
+              "entrySpanId": null,
+              "entryService": null,
+              "entryTraceId": null,
+              "sameTrace": null,
+              "crossProcess": null,
+              "childSqlCount": 0,
+              "initiator": {
+                "file": "src/app/rsc-svc-fail/page.tsx",
+                "line": 12,
+                "component": "RscSvcFail",
+                "verified": true,
+                "sourceLine": "const res = await fetch(`${SVC}/boom`, { cache: 'no-store' });",
+                "reason": null,
+                "appFrameAtSpanStart": true
+              },
+              "parentChainDepth": null
+            }
+          ],
+          "checks": [
+            {
+              "expect": {
+                "destPath": "/boom",
+                "destService": "poc02-fixture-svc",
+                "status": 500,
+                "propagated": true,
+                "childSql": 0,
+                "initiator": {
+                  "file": "src/app/rsc-svc-fail/page.tsx",
+                  "line": 12,
+                  "component": "RscSvcFail"
+                }
+              },
+              "found": true,
+              "propagationOk": true,
+              "statusOk": true,
+              "childSqlOk": true,
+              "initiatorOk": true
+            }
+          ],
+          "rules": [
+            {
+              "clientSpanId": "f3efc5e8f7ab2b65",
+              "traceId": "0112750eef89a16b731f7766a8b8c3b1",
+              "path": "/boom",
+              "status": 500,
+              "parentage": 0,
+              "parentageReason": "no-child-entry-span",
+              "entrySpanId": null,
+              "entryIsOtherTrace": true,
+              "pathOnly": 1,
+              "timeWindow": 1,
+              "timeWindowAgrees": null
+            }
+          ],
+          "duplicateEntryClaims": [],
+          "timeWindowWouldMatch": 1,
+          "pathOnlyAmbiguous": 0,
+          "pass": true
+        },
+        {
+          "key": "self-api",
+          "label": "自分の API ルートへの要求（同一プロセス）",
+          "page": "/flows-rsc",
+          "documentCorrelated": true,
+          "documentTraceId": "17f50b4b154223ba4ee04098392bacc5",
+          "senderCount": 1,
+          "observed": [
+            {
+              "senderSpanId": "10165c9488551a13",
+              "senderName": "fetch GET http://localhost:3200/api/listings",
+              "senderService": "app",
+              "destPath": "/api/listings",
+              "destHost": null,
+              "destPort": null,
+              "status": 200,
+              "statusCode": 0,
+              "propagated": false,
+              "propagationFailure": "no-child-entry-span",
+              "entrySpanId": null,
+              "entryService": null,
+              "entryTraceId": null,
+              "sameTrace": null,
+              "crossProcess": null,
+              "childSqlCount": 0,
+              "initiator": {
+                "file": "src/app/flows-rsc/page.tsx",
+                "line": 15,
+                "component": "FlowsRsc",
+                "verified": true,
+                "sourceLine": "const res = await fetch(`${ORIGIN}/api/listings`, { cache: 'no-store' });",
+                "reason": null,
+                "appFrameAtSpanStart": true
+              },
+              "parentChainDepth": null
+            }
+          ],
+          "checks": [
+            {
+              "expect": {
+                "destPath": "/api/listings",
+                "destService": "poc01-fixture-app",
+                "status": 200,
+                "propagated": true,
+                "childSql": 2,
+                "initiator": {
+                  "file": "src/app/flows-rsc/page.tsx",
+                  "line": 15,
+                  "component": "FlowsRsc"
+                }
+              },
+              "found": true,
+              "propagationOk": true,
+              "statusOk": true,
+              "childSqlOk": true,
+              "initiatorOk": true
+            }
+          ],
+          "rules": [
+            {
+              "clientSpanId": "10165c9488551a13",
+              "traceId": "17f50b4b154223ba4ee04098392bacc5",
+              "path": "/api/listings",
+              "status": 200,
+              "parentage": 0,
+              "parentageReason": "no-child-entry-span",
+              "entrySpanId": null,
+              "entryIsOtherTrace": true,
+              "pathOnly": 1,
+              "timeWindow": 1,
+              "timeWindowAgrees": null
+            }
+          ],
+          "duplicateEntryClaims": [],
+          "timeWindowWouldMatch": 1,
+          "pathOnlyAmbiguous": 0,
+          "pass": true
+        },
+        {
+          "key": "dead-port",
+          "label": "応答が返らない（開いていないポート）",
+          "page": "/rsc-fail",
+          "documentCorrelated": true,
+          "documentTraceId": "1673991693bea7b7fe9312f6eebafb07",
+          "senderCount": 1,
+          "observed": [
+            {
+              "senderSpanId": "214abd011530d423",
+              "senderName": "fetch GET http://127.0.0.1:3399/echo",
+              "senderService": "app",
+              "destPath": "/echo",
+              "destHost": null,
+              "destPort": null,
+              "status": null,
+              "statusCode": 2,
+              "propagated": false,
+              "propagationFailure": "no-child-entry-span",
+              "entrySpanId": null,
+              "entryService": null,
+              "entryTraceId": null,
+              "sameTrace": null,
+              "crossProcess": null,
+              "childSqlCount": 0,
+              "initiator": {
+                "file": "src/app/rsc-fail/page.tsx",
+                "line": 23,
+                "component": "RscFail",
+                "verified": true,
+                "sourceLine": "await fetch(`${DEAD}/echo`, { cache: 'no-store' });",
+                "reason": null,
+                "appFrameAtSpanStart": true
+              },
+              "parentChainDepth": null
+            }
+          ],
+          "checks": [
+            {
+              "expect": {
+                "destPath": "/echo",
+                "destService": null,
+                "status": null,
+                "propagated": false,
+                "propagationFailure": "no-child-entry-span",
+                "childSql": 0,
+                "initiator": {
+                  "file": "src/app/rsc-fail/page.tsx",
+                  "line": 23,
+                  "component": "RscFail"
+                }
+              },
+              "found": true,
+              "propagationOk": true,
+              "statusOk": true,
+              "childSqlOk": true,
+              "initiatorOk": true
+            }
+          ],
+          "rules": [
+            {
+              "clientSpanId": "214abd011530d423",
+              "traceId": "1673991693bea7b7fe9312f6eebafb07",
+              "path": "/echo",
+              "status": null,
+              "parentage": 0,
+              "parentageReason": "no-child-entry-span",
+              "entrySpanId": null,
+              "entryIsOtherTrace": false,
+              "pathOnly": 1,
+              "timeWindow": 0,
+              "timeWindowAgrees": null
+            }
+          ],
+          "duplicateEntryClaims": [],
+          "timeWindowWouldMatch": 0,
+          "pathOnlyAmbiguous": 0,
+          "pass": true
+        }
+      ],
+      "gateB": [
+        {
+          "key": "rsc-db",
+          "label": "Server Component からの直接 DB アクセス（1本）",
+          "page": "/rsc-db",
+          "documentCorrelated": true,
+          "documentTraceId": "1544da5ea6b86340b1465805a5d93364",
+          "browserRequests": 1,
+          "browserApiRequests": 0,
+          "documentInitiatorType": "other",
+          "renderSpanObserved": true,
+          "renderSpanName": "render route (app) /rsc-db",
+          "renderRoute": "/rsc-db",
+          "spansInTrace": 26,
+          "sqlInTrace": 1,
+          "sqlUnderRender": 1,
+          "overlaps": [],
+          "sql": [
+            {
+              "spanId": "de0757b67d811144",
+              "scope": "@opentelemetry/instrumentation-pg",
+              "depthFromRender": 1,
+              "durationMs": 6.08,
+              "failed": false,
+              "parseOk": true,
+              "tables": [
+                "listings"
+              ],
+              "tablesInSchema": [
+                "listings"
+              ],
+              "columns": [
+                "id",
+                "code",
+                "plan"
+              ],
+              "unresolved": [],
+              "attribution": {
+                "at": "pg-pool.Pool.query",
+                "file": "src/app/rsc-db/page.tsx",
+                "line": 12,
+                "functionName": "RscDb",
+                "component": "RscDb",
+                "verified": true,
+                "sourceLine": "const r = await pool.query('SELECT id, code, plan FROM poc.listings ORDER BY id LIMIT 6');",
+                "reason": null,
+                "appFrameAtSpanStart": false
+              }
+            }
+          ],
+          "checks": [
+            {
+              "expect": {
+                "table": "listings",
+                "columns": [
+                  "id",
+                  "code",
+                  "plan"
+                ],
+                "file": "src/app/rsc-db/page.tsx",
+                "line": 12,
+                "component": "RscDb",
+                "ok": true
+              },
+              "found": true,
+              "locatedOk": true,
+              "attributionOk": true,
+              "tableOk": true,
+              "columnsOk": true,
+              "failedOk": true,
+              "underRenderOk": true
+            }
+          ],
+          "unexpected": 0,
+          "pass": true
+        },
+        {
+          "key": "rsc-parallel",
+          "label": "複数の並列データ取得（3本・別々の行）",
+          "page": "/rsc-parallel",
+          "documentCorrelated": true,
+          "documentTraceId": "33bc9305203faab4ffae21d873136f59",
+          "browserRequests": 1,
+          "browserApiRequests": 0,
+          "documentInitiatorType": "other",
+          "renderSpanObserved": true,
+          "renderSpanName": "render route (app) /rsc-parallel",
+          "renderRoute": "/rsc-parallel",
+          "spansInTrace": 32,
+          "sqlInTrace": 3,
+          "sqlUnderRender": 3,
+          "overlaps": [
+            {
+              "a": "ecaf6e84f746c936",
+              "b": "bb48e34169ab504b",
+              "overlapMs": 1.06
+            }
+          ],
+          "sql": [
+            {
+              "spanId": "5fa6205efc973b4d",
+              "scope": "@opentelemetry/instrumentation-pg",
+              "depthFromRender": 1,
+              "durationMs": 4.82,
+              "failed": false,
+              "parseOk": true,
+              "tables": [
+                "listings"
+              ],
+              "tablesInSchema": [
+                "listings"
+              ],
+              "columns": [],
+              "unresolved": [],
+              "attribution": {
+                "at": "pg-pool.Pool.query",
+                "file": "src/app/rsc-parallel/page.tsx",
+                "line": 13,
+                "functionName": "RscParallel",
+                "component": "RscParallel",
+                "verified": true,
+                "sourceLine": "pool.query('SELECT count(*) AS n FROM poc.listings'),",
+                "reason": null,
+                "appFrameAtSpanStart": false
+              }
+            },
+            {
+              "spanId": "ecaf6e84f746c936",
+              "scope": "@opentelemetry/instrumentation-pg",
+              "depthFromRender": 1,
+              "durationMs": 2.06,
+              "failed": false,
+              "parseOk": true,
+              "tables": [
+                "listing_views"
+              ],
+              "tablesInSchema": [
+                "listing_views"
+              ],
+              "columns": [],
+              "unresolved": [],
+              "attribution": {
+                "at": "pg-pool.Pool.query",
+                "file": "src/app/rsc-parallel/page.tsx",
+                "line": 15,
+                "functionName": "RscParallel",
+                "component": "RscParallel",
+                "verified": true,
+                "sourceLine": "pool.query('SELECT count(*) AS n FROM poc.listing_views'),",
+                "reason": null,
+                "appFrameAtSpanStart": false
+              }
+            },
+            {
+              "spanId": "bb48e34169ab504b",
+              "scope": "@opentelemetry/instrumentation-pg",
+              "depthFromRender": 1,
+              "durationMs": 2.25,
+              "failed": false,
+              "parseOk": true,
+              "tables": [
+                "regions"
+              ],
+              "tablesInSchema": [
+                "regions"
+              ],
+              "columns": [],
+              "unresolved": [],
+              "attribution": {
+                "at": "pg-pool.Pool.query",
+                "file": "src/app/rsc-parallel/page.tsx",
+                "line": 14,
+                "functionName": "RscParallel",
+                "component": "RscParallel",
+                "verified": true,
+                "sourceLine": "pool.query('SELECT count(*) AS n FROM poc.regions'),",
+                "reason": null,
+                "appFrameAtSpanStart": false
+              }
+            }
+          ],
+          "checks": [
+            {
+              "expect": {
+                "table": "listings",
+                "file": "src/app/rsc-parallel/page.tsx",
+                "line": 13,
+                "component": "RscParallel",
+                "ok": true
+              },
+              "found": true,
+              "locatedOk": true,
+              "attributionOk": true,
+              "tableOk": true,
+              "columnsOk": true,
+              "failedOk": true,
+              "underRenderOk": true
+            },
+            {
+              "expect": {
+                "table": "regions",
+                "file": "src/app/rsc-parallel/page.tsx",
+                "line": 14,
+                "component": "RscParallel",
+                "ok": true
+              },
+              "found": true,
+              "locatedOk": true,
+              "attributionOk": true,
+              "tableOk": true,
+              "columnsOk": true,
+              "failedOk": true,
+              "underRenderOk": true
+            },
+            {
+              "expect": {
+                "table": "listing_views",
+                "file": "src/app/rsc-parallel/page.tsx",
+                "line": 15,
+                "component": "RscParallel",
+                "ok": true
+              },
+              "found": true,
+              "locatedOk": true,
+              "attributionOk": true,
+              "tableOk": true,
+              "columnsOk": true,
+              "failedOk": true,
+              "underRenderOk": true
+            }
+          ],
+          "unexpected": 0,
+          "pass": true
+        },
+        {
+          "key": "rsc-dup",
+          "label": "同じ SQL を複数箇所から実行（別ファイル・別コンポーネント）",
+          "page": "/rsc-dup",
+          "documentCorrelated": true,
+          "documentTraceId": "e2096b6123fc693e3a5167f7df2d7d8d",
+          "browserRequests": 1,
+          "browserApiRequests": 0,
+          "documentInitiatorType": "other",
+          "renderSpanObserved": true,
+          "renderSpanName": "render route (app) /rsc-dup",
+          "renderRoute": "/rsc-dup",
+          "spansInTrace": 28,
+          "sqlInTrace": 2,
+          "sqlUnderRender": 2,
+          "overlaps": [],
+          "sql": [
+            {
+              "spanId": "1272f3e43326ff62",
+              "scope": "@opentelemetry/instrumentation-pg",
+              "depthFromRender": 1,
+              "durationMs": 4.32,
+              "failed": false,
+              "parseOk": true,
+              "tables": [
+                "listings"
+              ],
+              "tablesInSchema": [
+                "listings"
+              ],
+              "columns": [],
+              "unresolved": [],
+              "attribution": {
+                "at": "pg-pool.Pool.query",
+                "file": "src/app/rsc-dup/page.tsx",
+                "line": 13,
+                "functionName": "RscDup",
+                "component": "RscDup",
+                "verified": true,
+                "sourceLine": "const r = await pool.query('SELECT count(*) AS n FROM poc.listings');",
+                "reason": null,
+                "appFrameAtSpanStart": false
+              }
+            },
+            {
+              "spanId": "4f36b733bbd58dbc",
+              "scope": "@opentelemetry/instrumentation-pg",
+              "depthFromRender": 1,
+              "durationMs": 1.13,
+              "failed": false,
+              "parseOk": true,
+              "tables": [
+                "listings"
+              ],
+              "tablesInSchema": [
+                "listings"
+              ],
+              "columns": [],
+              "unresolved": [],
+              "attribution": {
+                "at": "pg-pool.Pool.query",
+                "file": "src/components/ListingCount.tsx",
+                "line": 6,
+                "functionName": "ListingCount",
+                "component": "ListingCount",
+                "verified": true,
+                "sourceLine": "const r = await pool.query('SELECT count(*) AS n FROM poc.listings');",
+                "reason": null,
+                "appFrameAtSpanStart": false
+              }
+            }
+          ],
+          "checks": [
+            {
+              "expect": {
+                "table": "listings",
+                "file": "src/app/rsc-dup/page.tsx",
+                "line": 13,
+                "component": "RscDup",
+                "ok": true
+              },
+              "found": true,
+              "locatedOk": true,
+              "attributionOk": true,
+              "tableOk": true,
+              "columnsOk": true,
+              "failedOk": true,
+              "underRenderOk": true
+            },
+            {
+              "expect": {
+                "table": "listings",
+                "file": "src/components/ListingCount.tsx",
+                "line": 6,
+                "component": "ListingCount",
+                "ok": true
+              },
+              "found": true,
+              "locatedOk": true,
+              "attributionOk": true,
+              "tableOk": true,
+              "columnsOk": true,
+              "failedOk": true,
+              "underRenderOk": true
+            }
+          ],
+          "unexpected": 0,
+          "pass": true
+        },
+        {
+          "key": "rsc-fail",
+          "label": "SQL の失敗と、サーバー内部通信の失敗",
+          "page": "/rsc-fail",
+          "documentCorrelated": true,
+          "documentTraceId": "1673991693bea7b7fe9312f6eebafb07",
+          "browserRequests": 1,
+          "browserApiRequests": 0,
+          "documentInitiatorType": "other",
+          "renderSpanObserved": true,
+          "renderSpanName": "render route (app) /rsc-fail",
+          "renderRoute": "/rsc-fail",
+          "spansInTrace": 27,
+          "sqlInTrace": 1,
+          "sqlUnderRender": 1,
+          "overlaps": [],
+          "sql": [
+            {
+              "spanId": "2e284a07fd3a6231",
+              "scope": "@opentelemetry/instrumentation-pg",
+              "depthFromRender": 1,
+              "durationMs": 11.38,
+              "failed": true,
+              "parseOk": true,
+              "tables": [
+                "table_that_does_not_exist"
+              ],
+              "tablesInSchema": [],
+              "columns": [
+                "id"
+              ],
+              "unresolved": [],
+              "attribution": {
+                "at": "pg-pool.Pool.query",
+                "file": "src/app/rsc-fail/page.tsx",
+                "line": 17,
+                "functionName": "RscFail",
+                "component": "RscFail",
+                "verified": true,
+                "sourceLine": "await pool.query('SELECT id FROM poc.table_that_does_not_exist');",
+                "reason": null,
+                "appFrameAtSpanStart": false
+              }
+            }
+          ],
+          "checks": [
+            {
+              "expect": {
+                "table": "table_that_does_not_exist",
+                "failed": true,
+                "file": "src/app/rsc-fail/page.tsx",
+                "line": 17,
+                "component": "RscFail",
+                "ok": true,
+                "tableInSchema": false
+              },
+              "found": true,
+              "locatedOk": true,
+              "attributionOk": true,
+              "tableOk": true,
+              "columnsOk": true,
+              "failedOk": true,
+              "underRenderOk": true
+            }
+          ],
+          "unexpected": 0,
+          "pass": true
+        },
+        {
+          "key": "rsc-helper",
+          "label": "コンポーネントではない関数の中の SQL（帰属できないのが正解）",
+          "page": "/rsc-helper",
+          "documentCorrelated": true,
+          "documentTraceId": "86dd32c8cb1e683cbd6f55e1832945ea",
+          "browserRequests": 1,
+          "browserApiRequests": 0,
+          "documentInitiatorType": "other",
+          "renderSpanObserved": true,
+          "renderSpanName": "render route (app) /rsc-helper",
+          "renderRoute": "/rsc-helper",
+          "spansInTrace": 26,
+          "sqlInTrace": 1,
+          "sqlUnderRender": 1,
+          "overlaps": [],
+          "sql": [
+            {
+              "spanId": "5e1bdfb870d76780",
+              "scope": "@opentelemetry/instrumentation-pg",
+              "depthFromRender": 1,
+              "durationMs": 6.47,
+              "failed": false,
+              "parseOk": true,
+              "tables": [
+                "listings"
+              ],
+              "tablesInSchema": [
+                "listings"
+              ],
+              "columns": [
+                "scale"
+              ],
+              "unresolved": [],
+              "attribution": {
+                "at": "pg-pool.Pool.query",
+                "file": "src/app/rsc-helper/page.tsx",
+                "line": 13,
+                "functionName": "loadScaleCounts",
+                "component": null,
+                "verified": true,
+                "sourceLine": "const r = await pool.query('SELECT scale, count(*) AS n FROM poc.listings GROUP BY scale');",
+                "reason": "component-not-agreed",
+                "appFrameAtSpanStart": false
+              }
+            }
+          ],
+          "checks": [
+            {
+              "expect": {
+                "table": "listings",
+                "file": "src/app/rsc-helper/page.tsx",
+                "line": 13,
+                "component": null,
+                "ok": false,
+                "failureReason": "component-not-agreed"
+              },
+              "found": true,
+              "locatedOk": true,
+              "attributionOk": true,
+              "tableOk": true,
+              "columnsOk": true,
+              "failedOk": true,
+              "underRenderOk": true
+            }
+          ],
+          "unexpected": 0,
+          "pass": true
+        }
+      ]
+    },
+    "webpack-propagation-on": {
+      "bundler": "webpack",
+      "propagation": "on",
+      "pages": {
+        "/rsc-db": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/rsc-db",
+              "status": 200,
+              "isDocument": true,
+              "hasQuery": false,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "initiatorType": "other",
+              "server": {
+                "traceId": "736b3eb618f18d7effff2528fc814a37",
+                "spanId": "fcb858c1d4cfcded"
+              }
+            }
+          ],
+          "excludedAssets": 4
+        },
+        "/rsc-parallel": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/rsc-parallel",
+              "status": 200,
+              "isDocument": true,
+              "hasQuery": false,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "initiatorType": "other",
+              "server": {
+                "traceId": "ea5238b46cc253ada8f67e5c7b47f37e",
+                "spanId": "bd1f86b05009a315"
+              }
+            }
+          ],
+          "excludedAssets": 4
+        },
+        "/rsc-dup": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/rsc-dup",
+              "status": 200,
+              "isDocument": true,
+              "hasQuery": false,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "initiatorType": "other",
+              "server": {
+                "traceId": "415dcd3e1a64b64b239238f1573b2edd",
+                "spanId": "a0ad45837ed2237d"
+              }
+            }
+          ],
+          "excludedAssets": 4
+        },
+        "/rsc-fail": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/rsc-fail",
+              "status": 200,
+              "isDocument": true,
+              "hasQuery": false,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "initiatorType": "other",
+              "server": {
+                "traceId": "8720f125bd5bd31732d1781121522f5d",
+                "spanId": "e042d861b195a13a"
+              }
+            }
+          ],
+          "excludedAssets": 4
+        },
+        "/rsc-helper": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/rsc-helper",
+              "status": 200,
+              "isDocument": true,
+              "hasQuery": false,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "initiatorType": "other",
+              "server": {
+                "traceId": "81fa0c8847d7ad2eb69898e13ddfbc06",
+                "spanId": "94ffa02c515e0cd3"
+              }
+            }
+          ],
+          "excludedAssets": 4
+        },
+        "/rsc-svc": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/rsc-svc",
+              "status": 200,
+              "isDocument": true,
+              "hasQuery": false,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "initiatorType": "other",
+              "server": {
+                "traceId": "99affb096edfafb302f327eb39ac78ab",
+                "spanId": "33d501ca2ef43660"
+              }
+            }
+          ],
+          "excludedAssets": 4
+        },
+        "/rsc-svc-fail": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/rsc-svc-fail",
+              "status": 200,
+              "isDocument": true,
+              "hasQuery": false,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "initiatorType": "other",
+              "server": {
+                "traceId": "4224104c3ab5ec64a66b19bd328a455c",
+                "spanId": "2e9365e24aecdb89"
+              }
+            }
+          ],
+          "excludedAssets": 4
+        },
+        "/flows-rsc": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/flows-rsc",
+              "status": 200,
+              "isDocument": true,
+              "hasQuery": false,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "initiatorType": "other",
+              "server": {
+                "traceId": "806e51293e06da2dc144f0fe46dcfd73",
+                "spanId": "bc61f46da8869d00"
+              }
+            }
+          ],
+          "excludedAssets": 4
+        }
+      },
+      "notes": [],
+      "svcSeen": {
+        "total": 8,
+        "withTraceparent": 6,
+        "byPath": {
+          "/echo": {
+            "total": 3,
+            "withTraceparent": 2
+          },
+          "/rows": {
+            "total": 2,
+            "withTraceparent": 2
+          },
+          "/boom": {
+            "total": 2,
+            "withTraceparent": 2
+          },
+          "/__seen": {
+            "total": 1,
+            "withTraceparent": 0
+          }
+        }
+      },
+      "summary": {
+        "spans": 251,
+        "callsites": 40,
+        "entrySpans": 13,
+        "clientSpans": 5,
+        "sqlSpans": 11,
+        "distinctTraces": 9,
+        "crossServiceTraces": 2,
+        "svcRequestsWithTraceparent": 6,
+        "svcRequestsTotal": 8,
+        "svcTraceparentByPath": {
+          "/echo": {
+            "total": 3,
+            "withTraceparent": 2
+          },
+          "/rows": {
+            "total": 2,
+            "withTraceparent": 2
+          },
+          "/boom": {
+            "total": 2,
+            "withTraceparent": 2
+          },
+          "/__seen": {
+            "total": 1,
+            "withTraceparent": 0
+          }
+        },
+        "gateAPass": true,
+        "gateBPass": true,
+        "attribution": {
+          "total": 8,
+          "resolved": 7,
+          "verified": 8,
+          "refused": 1,
+          "reasons": {
+            "component-not-agreed": 1
+          },
+          "appFrameAtSpanStart": 0
+        }
+      },
+      "srvMapStats": {
+        "evalModules": 491,
+        "diskMaps": 0
+      },
+      "gateA": [
+        {
+          "key": "svc-echo",
+          "label": "別プロセスのサービスへの要求（相手は何もしない）",
+          "page": "/rsc-svc",
+          "documentCorrelated": true,
+          "documentTraceId": "99affb096edfafb302f327eb39ac78ab",
+          "senderCount": 2,
+          "observed": [
+            {
+              "senderSpanId": "271de06732632f58",
+              "senderName": "GET",
+              "senderService": "app",
+              "destPath": "/echo",
+              "destHost": "127.0.0.1",
+              "destPort": 3300,
+              "status": 200,
+              "statusCode": 0,
+              "propagated": true,
+              "propagationFailure": null,
+              "entrySpanId": "bea09fd3d27f6d6a",
+              "entryService": "svc",
+              "entryTraceId": "99affb096edfafb302f327eb39ac78ab",
+              "sameTrace": true,
+              "crossProcess": true,
+              "childSqlCount": 0,
+              "initiator": {
+                "file": "src/app/rsc-svc/page.tsx",
+                "line": 15,
+                "component": "RscSvc",
+                "verified": true,
+                "sourceLine": "fetch(`${SVC}/echo`, { cache: 'no-store' }),",
+                "reason": null,
+                "appFrameAtSpanStart": true
+              },
+              "parentChainDepth": 11
+            },
+            {
+              "senderSpanId": "9309ad0c13341b64",
+              "senderName": "GET",
+              "senderService": "app",
+              "destPath": "/rows",
+              "destHost": "127.0.0.1",
+              "destPort": 3300,
+              "status": 200,
+              "statusCode": 0,
+              "propagated": true,
+              "propagationFailure": null,
+              "entrySpanId": "4180445a76a9d1ca",
+              "entryService": "svc",
+              "entryTraceId": "99affb096edfafb302f327eb39ac78ab",
+              "sameTrace": true,
+              "crossProcess": true,
+              "childSqlCount": 1,
+              "initiator": {
+                "file": "src/app/rsc-svc/page.tsx",
+                "line": 16,
+                "component": "RscSvc",
+                "verified": true,
+                "sourceLine": "fetch(`${SVC}/rows`, { cache: 'no-store' }),",
+                "reason": null,
+                "appFrameAtSpanStart": true
+              },
+              "parentChainDepth": 11
+            }
+          ],
+          "checks": [
+            {
+              "expect": {
+                "destPath": "/echo",
+                "destService": "poc02-fixture-svc",
+                "status": 200,
+                "propagated": true,
+                "childSql": 0,
+                "initiator": {
+                  "file": "src/app/rsc-svc/page.tsx",
+                  "line": 15,
+                  "component": "RscSvc"
+                }
+              },
+              "found": true,
+              "propagationOk": true,
+              "statusOk": true,
+              "childSqlOk": true,
+              "initiatorOk": true
+            },
+            {
+              "expect": {
+                "destPath": "/rows",
+                "destService": "poc02-fixture-svc",
+                "status": 200,
+                "propagated": true,
+                "childSql": 1,
+                "initiator": {
+                  "file": "src/app/rsc-svc/page.tsx",
+                  "line": 16,
+                  "component": "RscSvc"
+                }
+              },
+              "found": true,
+              "propagationOk": true,
+              "statusOk": true,
+              "childSqlOk": true,
+              "initiatorOk": true
+            }
+          ],
+          "rules": [
+            {
+              "clientSpanId": "271de06732632f58",
+              "traceId": "99affb096edfafb302f327eb39ac78ab",
+              "path": "/echo",
+              "status": 200,
+              "parentage": 1,
+              "parentageReason": null,
+              "entrySpanId": "bea09fd3d27f6d6a",
+              "entryIsOtherTrace": false,
+              "pathOnly": 1,
+              "timeWindow": 1,
+              "timeWindowAgrees": true
+            },
+            {
+              "clientSpanId": "9309ad0c13341b64",
+              "traceId": "99affb096edfafb302f327eb39ac78ab",
+              "path": "/rows",
+              "status": 200,
+              "parentage": 1,
+              "parentageReason": null,
+              "entrySpanId": "4180445a76a9d1ca",
+              "entryIsOtherTrace": false,
+              "pathOnly": 1,
+              "timeWindow": 1,
+              "timeWindowAgrees": true
+            }
+          ],
+          "duplicateEntryClaims": [],
+          "timeWindowWouldMatch": 0,
+          "pathOnlyAmbiguous": 0,
+          "pass": true
+        },
+        {
+          "key": "svc-fail",
+          "label": "別プロセスのサービスへの要求が 500 で返る",
+          "page": "/rsc-svc-fail",
+          "documentCorrelated": true,
+          "documentTraceId": "4224104c3ab5ec64a66b19bd328a455c",
+          "senderCount": 1,
+          "observed": [
+            {
+              "senderSpanId": "d4695c7db620e510",
+              "senderName": "GET",
+              "senderService": "app",
+              "destPath": "/boom",
+              "destHost": "127.0.0.1",
+              "destPort": 3300,
+              "status": 500,
+              "statusCode": 2,
+              "propagated": true,
+              "propagationFailure": null,
+              "entrySpanId": "aeb3f8e790f633fe",
+              "entryService": "svc",
+              "entryTraceId": "4224104c3ab5ec64a66b19bd328a455c",
+              "sameTrace": true,
+              "crossProcess": true,
+              "childSqlCount": 0,
+              "initiator": {
+                "file": "src/app/rsc-svc-fail/page.tsx",
+                "line": 12,
+                "component": "RscSvcFail",
+                "verified": true,
+                "sourceLine": "const res = await fetch(`${SVC}/boom`, { cache: 'no-store' });",
+                "reason": null,
+                "appFrameAtSpanStart": true
+              },
+              "parentChainDepth": 11
+            }
+          ],
+          "checks": [
+            {
+              "expect": {
+                "destPath": "/boom",
+                "destService": "poc02-fixture-svc",
+                "status": 500,
+                "propagated": true,
+                "childSql": 0,
+                "initiator": {
+                  "file": "src/app/rsc-svc-fail/page.tsx",
+                  "line": 12,
+                  "component": "RscSvcFail"
+                }
+              },
+              "found": true,
+              "propagationOk": true,
+              "statusOk": true,
+              "childSqlOk": true,
+              "initiatorOk": true
+            }
+          ],
+          "rules": [
+            {
+              "clientSpanId": "d4695c7db620e510",
+              "traceId": "4224104c3ab5ec64a66b19bd328a455c",
+              "path": "/boom",
+              "status": 500,
+              "parentage": 1,
+              "parentageReason": null,
+              "entrySpanId": "aeb3f8e790f633fe",
+              "entryIsOtherTrace": false,
+              "pathOnly": 1,
+              "timeWindow": 1,
+              "timeWindowAgrees": true
+            }
+          ],
+          "duplicateEntryClaims": [],
+          "timeWindowWouldMatch": 0,
+          "pathOnlyAmbiguous": 0,
+          "pass": true
+        },
+        {
+          "key": "self-api",
+          "label": "自分の API ルートへの要求（同一プロセス）",
+          "page": "/flows-rsc",
+          "documentCorrelated": true,
+          "documentTraceId": "806e51293e06da2dc144f0fe46dcfd73",
+          "senderCount": 1,
+          "observed": [
+            {
+              "senderSpanId": "dcdf23bebefabfb8",
+              "senderName": "GET",
+              "senderService": "app",
+              "destPath": "/api/listings",
+              "destHost": "localhost",
+              "destPort": 3200,
+              "status": 200,
+              "statusCode": 0,
+              "propagated": true,
+              "propagationFailure": null,
+              "entrySpanId": "ba30e37ccfccb329",
+              "entryService": "app",
+              "entryTraceId": "806e51293e06da2dc144f0fe46dcfd73",
+              "sameTrace": true,
+              "crossProcess": false,
+              "childSqlCount": 2,
+              "initiator": {
+                "file": "src/app/flows-rsc/page.tsx",
+                "line": 15,
+                "component": "FlowsRsc",
+                "verified": true,
+                "sourceLine": "const res = await fetch(`${ORIGIN}/api/listings`, { cache: 'no-store' });",
+                "reason": null,
+                "appFrameAtSpanStart": true
+              },
+              "parentChainDepth": 11
+            }
+          ],
+          "checks": [
+            {
+              "expect": {
+                "destPath": "/api/listings",
+                "destService": "poc01-fixture-app",
+                "status": 200,
+                "propagated": true,
+                "childSql": 2,
+                "initiator": {
+                  "file": "src/app/flows-rsc/page.tsx",
+                  "line": 15,
+                  "component": "FlowsRsc"
+                }
+              },
+              "found": true,
+              "propagationOk": true,
+              "statusOk": true,
+              "childSqlOk": true,
+              "initiatorOk": true
+            }
+          ],
+          "rules": [
+            {
+              "clientSpanId": "dcdf23bebefabfb8",
+              "traceId": "806e51293e06da2dc144f0fe46dcfd73",
+              "path": "/api/listings",
+              "status": 200,
+              "parentage": 1,
+              "parentageReason": null,
+              "entrySpanId": "ba30e37ccfccb329",
+              "entryIsOtherTrace": false,
+              "pathOnly": 1,
+              "timeWindow": 1,
+              "timeWindowAgrees": true
+            }
+          ],
+          "duplicateEntryClaims": [],
+          "timeWindowWouldMatch": 0,
+          "pathOnlyAmbiguous": 0,
+          "pass": true
+        },
+        {
+          "key": "dead-port",
+          "label": "応答が返らない（開いていないポート）",
+          "page": "/rsc-fail",
+          "documentCorrelated": true,
+          "documentTraceId": "8720f125bd5bd31732d1781121522f5d",
+          "senderCount": 1,
+          "observed": [
+            {
+              "senderSpanId": "2801c553edabf2b0",
+              "senderName": "GET",
+              "senderService": "app",
+              "destPath": "/echo",
+              "destHost": "127.0.0.1",
+              "destPort": 3399,
+              "status": null,
+              "statusCode": 2,
+              "propagated": false,
+              "propagationFailure": "no-child-entry-span",
+              "entrySpanId": null,
+              "entryService": null,
+              "entryTraceId": null,
+              "sameTrace": null,
+              "crossProcess": null,
+              "childSqlCount": 0,
+              "initiator": {
+                "file": "src/app/rsc-fail/page.tsx",
+                "line": 23,
+                "component": "RscFail",
+                "verified": true,
+                "sourceLine": "await fetch(`${DEAD}/echo`, { cache: 'no-store' });",
+                "reason": null,
+                "appFrameAtSpanStart": true
+              },
+              "parentChainDepth": null
+            }
+          ],
+          "checks": [
+            {
+              "expect": {
+                "destPath": "/echo",
+                "destService": null,
+                "status": null,
+                "propagated": false,
+                "propagationFailure": "no-child-entry-span",
+                "childSql": 0,
+                "initiator": {
+                  "file": "src/app/rsc-fail/page.tsx",
+                  "line": 23,
+                  "component": "RscFail"
+                }
+              },
+              "found": true,
+              "propagationOk": true,
+              "statusOk": true,
+              "childSqlOk": true,
+              "initiatorOk": true
+            }
+          ],
+          "rules": [
+            {
+              "clientSpanId": "2801c553edabf2b0",
+              "traceId": "8720f125bd5bd31732d1781121522f5d",
+              "path": "/echo",
+              "status": null,
+              "parentage": 0,
+              "parentageReason": "no-child-entry-span",
+              "entrySpanId": null,
+              "entryIsOtherTrace": false,
+              "pathOnly": 1,
+              "timeWindow": 0,
+              "timeWindowAgrees": null
+            }
+          ],
+          "duplicateEntryClaims": [],
+          "timeWindowWouldMatch": 0,
+          "pathOnlyAmbiguous": 0,
+          "pass": true
+        }
+      ],
+      "gateB": [
+        {
+          "key": "rsc-db",
+          "label": "Server Component からの直接 DB アクセス（1本）",
+          "page": "/rsc-db",
+          "documentCorrelated": true,
+          "documentTraceId": "736b3eb618f18d7effff2528fc814a37",
+          "browserRequests": 1,
+          "browserApiRequests": 0,
+          "documentInitiatorType": "other",
+          "renderSpanObserved": true,
+          "renderSpanName": "render route (app) /rsc-db",
+          "renderRoute": "/rsc-db",
+          "spansInTrace": 26,
+          "sqlInTrace": 1,
+          "sqlUnderRender": 1,
+          "overlaps": [],
+          "sql": [
+            {
+              "spanId": "6799c8f41adacd07",
+              "scope": "@opentelemetry/instrumentation-pg",
+              "depthFromRender": 1,
+              "durationMs": 14.81,
+              "failed": false,
+              "parseOk": true,
+              "tables": [
+                "listings"
+              ],
+              "tablesInSchema": [
+                "listings"
+              ],
+              "columns": [
+                "id",
+                "code",
+                "plan"
+              ],
+              "unresolved": [],
+              "attribution": {
+                "at": "pg-pool.Pool.query",
+                "file": "src/app/rsc-db/page.tsx",
+                "line": 12,
+                "functionName": "RscDb",
+                "component": "RscDb",
+                "verified": true,
+                "sourceLine": "const r = await pool.query('SELECT id, code, plan FROM poc.listings ORDER BY id LIMIT 6');",
+                "reason": null,
+                "appFrameAtSpanStart": false
+              }
+            }
+          ],
+          "checks": [
+            {
+              "expect": {
+                "table": "listings",
+                "columns": [
+                  "id",
+                  "code",
+                  "plan"
+                ],
+                "file": "src/app/rsc-db/page.tsx",
+                "line": 12,
+                "component": "RscDb",
+                "ok": true
+              },
+              "found": true,
+              "locatedOk": true,
+              "attributionOk": true,
+              "tableOk": true,
+              "columnsOk": true,
+              "failedOk": true,
+              "underRenderOk": true
+            }
+          ],
+          "unexpected": 0,
+          "pass": true
+        },
+        {
+          "key": "rsc-parallel",
+          "label": "複数の並列データ取得（3本・別々の行）",
+          "page": "/rsc-parallel",
+          "documentCorrelated": true,
+          "documentTraceId": "ea5238b46cc253ada8f67e5c7b47f37e",
+          "browserRequests": 1,
+          "browserApiRequests": 0,
+          "documentInitiatorType": "other",
+          "renderSpanObserved": true,
+          "renderSpanName": "render route (app) /rsc-parallel",
+          "renderRoute": "/rsc-parallel",
+          "spansInTrace": 32,
+          "sqlInTrace": 3,
+          "sqlUnderRender": 3,
+          "overlaps": [
+            {
+              "a": "2e024d3bec65e0b1",
+              "b": "3df469ff0080c7a2",
+              "overlapMs": 0.8
+            }
+          ],
+          "sql": [
+            {
+              "spanId": "2da393493cee08a3",
+              "scope": "@opentelemetry/instrumentation-pg",
+              "depthFromRender": 1,
+              "durationMs": 5,
+              "failed": false,
+              "parseOk": true,
+              "tables": [
+                "listings"
+              ],
+              "tablesInSchema": [
+                "listings"
+              ],
+              "columns": [],
+              "unresolved": [],
+              "attribution": {
+                "at": "pg-pool.Pool.query",
+                "file": "src/app/rsc-parallel/page.tsx",
+                "line": 13,
+                "functionName": "RscParallel",
+                "component": "RscParallel",
+                "verified": true,
+                "sourceLine": "pool.query('SELECT count(*) AS n FROM poc.listings'),",
+                "reason": null,
+                "appFrameAtSpanStart": false
+              }
+            },
+            {
+              "spanId": "2e024d3bec65e0b1",
+              "scope": "@opentelemetry/instrumentation-pg",
+              "depthFromRender": 1,
+              "durationMs": 1.8,
+              "failed": false,
+              "parseOk": true,
+              "tables": [
+                "regions"
+              ],
+              "tablesInSchema": [
+                "regions"
+              ],
+              "columns": [],
+              "unresolved": [],
+              "attribution": {
+                "at": "pg-pool.Pool.query",
+                "file": "src/app/rsc-parallel/page.tsx",
+                "line": 14,
+                "functionName": "RscParallel",
+                "component": "RscParallel",
+                "verified": true,
+                "sourceLine": "pool.query('SELECT count(*) AS n FROM poc.regions'),",
+                "reason": null,
+                "appFrameAtSpanStart": false
+              }
+            },
+            {
+              "spanId": "3df469ff0080c7a2",
+              "scope": "@opentelemetry/instrumentation-pg",
+              "depthFromRender": 1,
+              "durationMs": 1.52,
+              "failed": false,
+              "parseOk": true,
+              "tables": [
+                "listing_views"
+              ],
+              "tablesInSchema": [
+                "listing_views"
+              ],
+              "columns": [],
+              "unresolved": [],
+              "attribution": {
+                "at": "pg-pool.Pool.query",
+                "file": "src/app/rsc-parallel/page.tsx",
+                "line": 15,
+                "functionName": "RscParallel",
+                "component": "RscParallel",
+                "verified": true,
+                "sourceLine": "pool.query('SELECT count(*) AS n FROM poc.listing_views'),",
+                "reason": null,
+                "appFrameAtSpanStart": false
+              }
+            }
+          ],
+          "checks": [
+            {
+              "expect": {
+                "table": "listings",
+                "file": "src/app/rsc-parallel/page.tsx",
+                "line": 13,
+                "component": "RscParallel",
+                "ok": true
+              },
+              "found": true,
+              "locatedOk": true,
+              "attributionOk": true,
+              "tableOk": true,
+              "columnsOk": true,
+              "failedOk": true,
+              "underRenderOk": true
+            },
+            {
+              "expect": {
+                "table": "regions",
+                "file": "src/app/rsc-parallel/page.tsx",
+                "line": 14,
+                "component": "RscParallel",
+                "ok": true
+              },
+              "found": true,
+              "locatedOk": true,
+              "attributionOk": true,
+              "tableOk": true,
+              "columnsOk": true,
+              "failedOk": true,
+              "underRenderOk": true
+            },
+            {
+              "expect": {
+                "table": "listing_views",
+                "file": "src/app/rsc-parallel/page.tsx",
+                "line": 15,
+                "component": "RscParallel",
+                "ok": true
+              },
+              "found": true,
+              "locatedOk": true,
+              "attributionOk": true,
+              "tableOk": true,
+              "columnsOk": true,
+              "failedOk": true,
+              "underRenderOk": true
+            }
+          ],
+          "unexpected": 0,
+          "pass": true
+        },
+        {
+          "key": "rsc-dup",
+          "label": "同じ SQL を複数箇所から実行（別ファイル・別コンポーネント）",
+          "page": "/rsc-dup",
+          "documentCorrelated": true,
+          "documentTraceId": "415dcd3e1a64b64b239238f1573b2edd",
+          "browserRequests": 1,
+          "browserApiRequests": 0,
+          "documentInitiatorType": "other",
+          "renderSpanObserved": true,
+          "renderSpanName": "render route (app) /rsc-dup",
+          "renderRoute": "/rsc-dup",
+          "spansInTrace": 28,
+          "sqlInTrace": 2,
+          "sqlUnderRender": 2,
+          "overlaps": [],
+          "sql": [
+            {
+              "spanId": "3e132fab40f194b0",
+              "scope": "@opentelemetry/instrumentation-pg",
+              "depthFromRender": 1,
+              "durationMs": 5.12,
+              "failed": false,
+              "parseOk": true,
+              "tables": [
+                "listings"
+              ],
+              "tablesInSchema": [
+                "listings"
+              ],
+              "columns": [],
+              "unresolved": [],
+              "attribution": {
+                "at": "pg-pool.Pool.query",
+                "file": "src/app/rsc-dup/page.tsx",
+                "line": 13,
+                "functionName": "RscDup",
+                "component": "RscDup",
+                "verified": true,
+                "sourceLine": "const r = await pool.query('SELECT count(*) AS n FROM poc.listings');",
+                "reason": null,
+                "appFrameAtSpanStart": false
+              }
+            },
+            {
+              "spanId": "a21f48f81f90d257",
+              "scope": "@opentelemetry/instrumentation-pg",
+              "depthFromRender": 1,
+              "durationMs": 2.01,
+              "failed": false,
+              "parseOk": true,
+              "tables": [
+                "listings"
+              ],
+              "tablesInSchema": [
+                "listings"
+              ],
+              "columns": [],
+              "unresolved": [],
+              "attribution": {
+                "at": "pg-pool.Pool.query",
+                "file": "src/components/ListingCount.tsx",
+                "line": 6,
+                "functionName": "ListingCount",
+                "component": "ListingCount",
+                "verified": true,
+                "sourceLine": "const r = await pool.query('SELECT count(*) AS n FROM poc.listings');",
+                "reason": null,
+                "appFrameAtSpanStart": false
+              }
+            }
+          ],
+          "checks": [
+            {
+              "expect": {
+                "table": "listings",
+                "file": "src/app/rsc-dup/page.tsx",
+                "line": 13,
+                "component": "RscDup",
+                "ok": true
+              },
+              "found": true,
+              "locatedOk": true,
+              "attributionOk": true,
+              "tableOk": true,
+              "columnsOk": true,
+              "failedOk": true,
+              "underRenderOk": true
+            },
+            {
+              "expect": {
+                "table": "listings",
+                "file": "src/components/ListingCount.tsx",
+                "line": 6,
+                "component": "ListingCount",
+                "ok": true
+              },
+              "found": true,
+              "locatedOk": true,
+              "attributionOk": true,
+              "tableOk": true,
+              "columnsOk": true,
+              "failedOk": true,
+              "underRenderOk": true
+            }
+          ],
+          "unexpected": 0,
+          "pass": true
+        },
+        {
+          "key": "rsc-fail",
+          "label": "SQL の失敗と、サーバー内部通信の失敗",
+          "page": "/rsc-fail",
+          "documentCorrelated": true,
+          "documentTraceId": "8720f125bd5bd31732d1781121522f5d",
+          "browserRequests": 1,
+          "browserApiRequests": 0,
+          "documentInitiatorType": "other",
+          "renderSpanObserved": true,
+          "renderSpanName": "render route (app) /rsc-fail",
+          "renderRoute": "/rsc-fail",
+          "spansInTrace": 28,
+          "sqlInTrace": 1,
+          "sqlUnderRender": 1,
+          "overlaps": [],
+          "sql": [
+            {
+              "spanId": "9a71979c8bce1ef7",
+              "scope": "@opentelemetry/instrumentation-pg",
+              "depthFromRender": 1,
+              "durationMs": 6.47,
+              "failed": true,
+              "parseOk": true,
+              "tables": [
+                "table_that_does_not_exist"
+              ],
+              "tablesInSchema": [],
+              "columns": [
+                "id"
+              ],
+              "unresolved": [],
+              "attribution": {
+                "at": "pg-pool.Pool.query",
+                "file": "src/app/rsc-fail/page.tsx",
+                "line": 17,
+                "functionName": "RscFail",
+                "component": "RscFail",
+                "verified": true,
+                "sourceLine": "await pool.query('SELECT id FROM poc.table_that_does_not_exist');",
+                "reason": null,
+                "appFrameAtSpanStart": false
+              }
+            }
+          ],
+          "checks": [
+            {
+              "expect": {
+                "table": "table_that_does_not_exist",
+                "failed": true,
+                "file": "src/app/rsc-fail/page.tsx",
+                "line": 17,
+                "component": "RscFail",
+                "ok": true,
+                "tableInSchema": false
+              },
+              "found": true,
+              "locatedOk": true,
+              "attributionOk": true,
+              "tableOk": true,
+              "columnsOk": true,
+              "failedOk": true,
+              "underRenderOk": true
+            }
+          ],
+          "unexpected": 0,
+          "pass": true
+        },
+        {
+          "key": "rsc-helper",
+          "label": "コンポーネントではない関数の中の SQL（帰属できないのが正解）",
+          "page": "/rsc-helper",
+          "documentCorrelated": true,
+          "documentTraceId": "81fa0c8847d7ad2eb69898e13ddfbc06",
+          "browserRequests": 1,
+          "browserApiRequests": 0,
+          "documentInitiatorType": "other",
+          "renderSpanObserved": true,
+          "renderSpanName": "render route (app) /rsc-helper",
+          "renderRoute": "/rsc-helper",
+          "spansInTrace": 27,
+          "sqlInTrace": 1,
+          "sqlUnderRender": 1,
+          "overlaps": [],
+          "sql": [
+            {
+              "spanId": "aa84e9f6d472415c",
+              "scope": "@opentelemetry/instrumentation-pg",
+              "depthFromRender": 1,
+              "durationMs": 3.67,
+              "failed": false,
+              "parseOk": true,
+              "tables": [
+                "listings"
+              ],
+              "tablesInSchema": [
+                "listings"
+              ],
+              "columns": [
+                "scale"
+              ],
+              "unresolved": [],
+              "attribution": {
+                "at": "pg-pool.Pool.query",
+                "file": "src/app/rsc-helper/page.tsx",
+                "line": 13,
+                "functionName": "loadScaleCounts",
+                "component": null,
+                "verified": true,
+                "sourceLine": "const r = await pool.query('SELECT scale, count(*) AS n FROM poc.listings GROUP BY scale');",
+                "reason": "component-not-agreed",
+                "appFrameAtSpanStart": false
+              }
+            }
+          ],
+          "checks": [
+            {
+              "expect": {
+                "table": "listings",
+                "file": "src/app/rsc-helper/page.tsx",
+                "line": 13,
+                "component": null,
+                "ok": false,
+                "failureReason": "component-not-agreed"
+              },
+              "found": true,
+              "locatedOk": true,
+              "attributionOk": true,
+              "tableOk": true,
+              "columnsOk": true,
+              "failedOk": true,
+              "underRenderOk": true
+            }
+          ],
+          "unexpected": 0,
+          "pass": true
+        }
+      ]
+    },
+    "webpack-propagation-off": {
+      "bundler": "webpack",
+      "propagation": "off",
+      "pages": {
+        "/rsc-db": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/rsc-db",
+              "status": 200,
+              "isDocument": true,
+              "hasQuery": false,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "initiatorType": "other",
+              "server": {
+                "traceId": "4535c6eb70ac28570b711c7d88780de7",
+                "spanId": "0f745bf01e07bd26"
+              }
+            }
+          ],
+          "excludedAssets": 4
+        },
+        "/rsc-parallel": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/rsc-parallel",
+              "status": 200,
+              "isDocument": true,
+              "hasQuery": false,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "initiatorType": "other",
+              "server": {
+                "traceId": "3425a85b4b6a5a76495ce26cfd522bfe",
+                "spanId": "5dc5ac38446bef8a"
+              }
+            }
+          ],
+          "excludedAssets": 4
+        },
+        "/rsc-dup": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/rsc-dup",
+              "status": 200,
+              "isDocument": true,
+              "hasQuery": false,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "initiatorType": "other",
+              "server": {
+                "traceId": "5c32c610a3c90fa82eee6ba25d6cc8e9",
+                "spanId": "7fabb9382b8419c4"
+              }
+            }
+          ],
+          "excludedAssets": 4
+        },
+        "/rsc-fail": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/rsc-fail",
+              "status": 200,
+              "isDocument": true,
+              "hasQuery": false,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "initiatorType": "other",
+              "server": {
+                "traceId": "24267c1c7ad205d2d8dc990cb176b026",
+                "spanId": "9d94fcb7b79aeaa0"
+              }
+            }
+          ],
+          "excludedAssets": 4
+        },
+        "/rsc-helper": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/rsc-helper",
+              "status": 200,
+              "isDocument": true,
+              "hasQuery": false,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "initiatorType": "other",
+              "server": {
+                "traceId": "7bfc478b5134e594beff7f286302f119",
+                "spanId": "5e857826e0f489df"
+              }
+            }
+          ],
+          "excludedAssets": 4
+        },
+        "/rsc-svc": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/rsc-svc",
+              "status": 200,
+              "isDocument": true,
+              "hasQuery": false,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "initiatorType": "other",
+              "server": {
+                "traceId": "8a1cfc07f5c2c4acc4885b762cd62c3b",
+                "spanId": "a05b0b6d29e006cf"
+              }
+            }
+          ],
+          "excludedAssets": 4
+        },
+        "/rsc-svc-fail": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/rsc-svc-fail",
+              "status": 200,
+              "isDocument": true,
+              "hasQuery": false,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "initiatorType": "other",
+              "server": {
+                "traceId": "2480dc08fb23e4e85db0fd040ed29f50",
+                "spanId": "8b122654ab8ab38a"
+              }
+            }
+          ],
+          "excludedAssets": 4
+        },
+        "/flows-rsc": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/flows-rsc",
+              "status": 200,
+              "isDocument": true,
+              "hasQuery": false,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "initiatorType": "other",
+              "server": {
+                "traceId": "bd1aa7d6df2b0fb931efa0a7e3a45c1a",
+                "spanId": "e8a5ad70bee43c26"
+              }
+            }
+          ],
+          "excludedAssets": 4
+        }
+      },
+      "notes": [],
+      "svcSeen": {
+        "total": 8,
+        "withTraceparent": 0,
+        "byPath": {
+          "/echo": {
+            "total": 3,
+            "withTraceparent": 0
+          },
+          "/rows": {
+            "total": 2,
+            "withTraceparent": 0
+          },
+          "/boom": {
+            "total": 2,
+            "withTraceparent": 0
+          },
+          "/__seen": {
+            "total": 1,
+            "withTraceparent": 0
+          }
+        }
+      },
+      "summary": {
+        "spans": 246,
+        "callsites": 35,
+        "entrySpans": 13,
+        "clientSpans": 0,
+        "sqlSpans": 11,
+        "distinctTraces": 13,
+        "crossServiceTraces": 0,
+        "svcRequestsWithTraceparent": 0,
+        "svcRequestsTotal": 8,
+        "svcTraceparentByPath": {
+          "/echo": {
+            "total": 3,
+            "withTraceparent": 0
+          },
+          "/rows": {
+            "total": 2,
+            "withTraceparent": 0
+          },
+          "/boom": {
+            "total": 2,
+            "withTraceparent": 0
+          },
+          "/__seen": {
+            "total": 1,
+            "withTraceparent": 0
+          }
+        },
+        "gateAPass": true,
+        "gateBPass": true,
+        "attribution": {
+          "total": 8,
+          "resolved": 7,
+          "verified": 8,
+          "refused": 1,
+          "reasons": {
+            "component-not-agreed": 1
+          },
+          "appFrameAtSpanStart": 0
+        }
+      },
+      "srvMapStats": {
+        "evalModules": 491,
+        "diskMaps": 0
+      },
+      "gateA": [
+        {
+          "key": "svc-echo",
+          "label": "別プロセスのサービスへの要求（相手は何もしない）",
+          "page": "/rsc-svc",
+          "documentCorrelated": true,
+          "documentTraceId": "8a1cfc07f5c2c4acc4885b762cd62c3b",
+          "senderCount": 2,
+          "observed": [
+            {
+              "senderSpanId": "6b089ef93c9cbd39",
+              "senderName": "fetch GET http://127.0.0.1:3300/echo",
+              "senderService": "app",
+              "destPath": "/echo",
+              "destHost": null,
+              "destPort": null,
+              "status": 200,
+              "statusCode": 0,
+              "propagated": false,
+              "propagationFailure": "no-child-entry-span",
+              "entrySpanId": null,
+              "entryService": null,
+              "entryTraceId": null,
+              "sameTrace": null,
+              "crossProcess": null,
+              "childSqlCount": 0,
+              "initiator": {
+                "file": "src/app/rsc-svc/page.tsx",
+                "line": 15,
+                "component": "RscSvc",
+                "verified": true,
+                "sourceLine": "fetch(`${SVC}/echo`, { cache: 'no-store' }),",
+                "reason": null,
+                "appFrameAtSpanStart": true
+              },
+              "parentChainDepth": null
+            },
+            {
+              "senderSpanId": "9c50ed97b42e2429",
+              "senderName": "fetch GET http://127.0.0.1:3300/rows",
+              "senderService": "app",
+              "destPath": "/rows",
+              "destHost": null,
+              "destPort": null,
+              "status": 200,
+              "statusCode": 0,
+              "propagated": false,
+              "propagationFailure": "no-child-entry-span",
+              "entrySpanId": null,
+              "entryService": null,
+              "entryTraceId": null,
+              "sameTrace": null,
+              "crossProcess": null,
+              "childSqlCount": 0,
+              "initiator": {
+                "file": "src/app/rsc-svc/page.tsx",
+                "line": 16,
+                "component": "RscSvc",
+                "verified": true,
+                "sourceLine": "fetch(`${SVC}/rows`, { cache: 'no-store' }),",
+                "reason": null,
+                "appFrameAtSpanStart": true
+              },
+              "parentChainDepth": null
+            }
+          ],
+          "checks": [
+            {
+              "expect": {
+                "destPath": "/echo",
+                "destService": "poc02-fixture-svc",
+                "status": 200,
+                "propagated": true,
+                "childSql": 0,
+                "initiator": {
+                  "file": "src/app/rsc-svc/page.tsx",
+                  "line": 15,
+                  "component": "RscSvc"
+                }
+              },
+              "found": true,
+              "propagationOk": true,
+              "statusOk": true,
+              "childSqlOk": true,
+              "initiatorOk": true
+            },
+            {
+              "expect": {
+                "destPath": "/rows",
+                "destService": "poc02-fixture-svc",
+                "status": 200,
+                "propagated": true,
+                "childSql": 1,
+                "initiator": {
+                  "file": "src/app/rsc-svc/page.tsx",
+                  "line": 16,
+                  "component": "RscSvc"
+                }
+              },
+              "found": true,
+              "propagationOk": true,
+              "statusOk": true,
+              "childSqlOk": true,
+              "initiatorOk": true
+            }
+          ],
+          "rules": [
+            {
+              "clientSpanId": "6b089ef93c9cbd39",
+              "traceId": "8a1cfc07f5c2c4acc4885b762cd62c3b",
+              "path": "/echo",
+              "status": 200,
+              "parentage": 0,
+              "parentageReason": "no-child-entry-span",
+              "entrySpanId": null,
+              "entryIsOtherTrace": true,
+              "pathOnly": 1,
+              "timeWindow": 1,
+              "timeWindowAgrees": null
+            },
+            {
+              "clientSpanId": "9c50ed97b42e2429",
+              "traceId": "8a1cfc07f5c2c4acc4885b762cd62c3b",
+              "path": "/rows",
+              "status": 200,
+              "parentage": 0,
+              "parentageReason": "no-child-entry-span",
+              "entrySpanId": null,
+              "entryIsOtherTrace": true,
+              "pathOnly": 1,
+              "timeWindow": 1,
+              "timeWindowAgrees": null
+            }
+          ],
+          "duplicateEntryClaims": [],
+          "timeWindowWouldMatch": 2,
+          "pathOnlyAmbiguous": 0,
+          "pass": true
+        },
+        {
+          "key": "svc-fail",
+          "label": "別プロセスのサービスへの要求が 500 で返る",
+          "page": "/rsc-svc-fail",
+          "documentCorrelated": true,
+          "documentTraceId": "2480dc08fb23e4e85db0fd040ed29f50",
+          "senderCount": 1,
+          "observed": [
+            {
+              "senderSpanId": "d07ea9dfec7f2127",
+              "senderName": "fetch GET http://127.0.0.1:3300/boom",
+              "senderService": "app",
+              "destPath": "/boom",
+              "destHost": null,
+              "destPort": null,
+              "status": 500,
+              "statusCode": 0,
+              "propagated": false,
+              "propagationFailure": "no-child-entry-span",
+              "entrySpanId": null,
+              "entryService": null,
+              "entryTraceId": null,
+              "sameTrace": null,
+              "crossProcess": null,
+              "childSqlCount": 0,
+              "initiator": {
+                "file": "src/app/rsc-svc-fail/page.tsx",
+                "line": 12,
+                "component": "RscSvcFail",
+                "verified": true,
+                "sourceLine": "const res = await fetch(`${SVC}/boom`, { cache: 'no-store' });",
+                "reason": null,
+                "appFrameAtSpanStart": true
+              },
+              "parentChainDepth": null
+            }
+          ],
+          "checks": [
+            {
+              "expect": {
+                "destPath": "/boom",
+                "destService": "poc02-fixture-svc",
+                "status": 500,
+                "propagated": true,
+                "childSql": 0,
+                "initiator": {
+                  "file": "src/app/rsc-svc-fail/page.tsx",
+                  "line": 12,
+                  "component": "RscSvcFail"
+                }
+              },
+              "found": true,
+              "propagationOk": true,
+              "statusOk": true,
+              "childSqlOk": true,
+              "initiatorOk": true
+            }
+          ],
+          "rules": [
+            {
+              "clientSpanId": "d07ea9dfec7f2127",
+              "traceId": "2480dc08fb23e4e85db0fd040ed29f50",
+              "path": "/boom",
+              "status": 500,
+              "parentage": 0,
+              "parentageReason": "no-child-entry-span",
+              "entrySpanId": null,
+              "entryIsOtherTrace": true,
+              "pathOnly": 1,
+              "timeWindow": 1,
+              "timeWindowAgrees": null
+            }
+          ],
+          "duplicateEntryClaims": [],
+          "timeWindowWouldMatch": 1,
+          "pathOnlyAmbiguous": 0,
+          "pass": true
+        },
+        {
+          "key": "self-api",
+          "label": "自分の API ルートへの要求（同一プロセス）",
+          "page": "/flows-rsc",
+          "documentCorrelated": true,
+          "documentTraceId": "bd1aa7d6df2b0fb931efa0a7e3a45c1a",
+          "senderCount": 1,
+          "observed": [
+            {
+              "senderSpanId": "74c7c5817e10955b",
+              "senderName": "fetch GET http://localhost:3200/api/listings",
+              "senderService": "app",
+              "destPath": "/api/listings",
+              "destHost": null,
+              "destPort": null,
+              "status": 200,
+              "statusCode": 0,
+              "propagated": false,
+              "propagationFailure": "no-child-entry-span",
+              "entrySpanId": null,
+              "entryService": null,
+              "entryTraceId": null,
+              "sameTrace": null,
+              "crossProcess": null,
+              "childSqlCount": 0,
+              "initiator": {
+                "file": "src/app/flows-rsc/page.tsx",
+                "line": 15,
+                "component": "FlowsRsc",
+                "verified": true,
+                "sourceLine": "const res = await fetch(`${ORIGIN}/api/listings`, { cache: 'no-store' });",
+                "reason": null,
+                "appFrameAtSpanStart": true
+              },
+              "parentChainDepth": null
+            }
+          ],
+          "checks": [
+            {
+              "expect": {
+                "destPath": "/api/listings",
+                "destService": "poc01-fixture-app",
+                "status": 200,
+                "propagated": true,
+                "childSql": 2,
+                "initiator": {
+                  "file": "src/app/flows-rsc/page.tsx",
+                  "line": 15,
+                  "component": "FlowsRsc"
+                }
+              },
+              "found": true,
+              "propagationOk": true,
+              "statusOk": true,
+              "childSqlOk": true,
+              "initiatorOk": true
+            }
+          ],
+          "rules": [
+            {
+              "clientSpanId": "74c7c5817e10955b",
+              "traceId": "bd1aa7d6df2b0fb931efa0a7e3a45c1a",
+              "path": "/api/listings",
+              "status": 200,
+              "parentage": 0,
+              "parentageReason": "no-child-entry-span",
+              "entrySpanId": null,
+              "entryIsOtherTrace": true,
+              "pathOnly": 1,
+              "timeWindow": 1,
+              "timeWindowAgrees": null
+            }
+          ],
+          "duplicateEntryClaims": [],
+          "timeWindowWouldMatch": 1,
+          "pathOnlyAmbiguous": 0,
+          "pass": true
+        },
+        {
+          "key": "dead-port",
+          "label": "応答が返らない（開いていないポート）",
+          "page": "/rsc-fail",
+          "documentCorrelated": true,
+          "documentTraceId": "24267c1c7ad205d2d8dc990cb176b026",
+          "senderCount": 1,
+          "observed": [
+            {
+              "senderSpanId": "9e6f9e4cfe02eab6",
+              "senderName": "fetch GET http://127.0.0.1:3399/echo",
+              "senderService": "app",
+              "destPath": "/echo",
+              "destHost": null,
+              "destPort": null,
+              "status": null,
+              "statusCode": 2,
+              "propagated": false,
+              "propagationFailure": "no-child-entry-span",
+              "entrySpanId": null,
+              "entryService": null,
+              "entryTraceId": null,
+              "sameTrace": null,
+              "crossProcess": null,
+              "childSqlCount": 0,
+              "initiator": {
+                "file": "src/app/rsc-fail/page.tsx",
+                "line": 23,
+                "component": "RscFail",
+                "verified": true,
+                "sourceLine": "await fetch(`${DEAD}/echo`, { cache: 'no-store' });",
+                "reason": null,
+                "appFrameAtSpanStart": true
+              },
+              "parentChainDepth": null
+            }
+          ],
+          "checks": [
+            {
+              "expect": {
+                "destPath": "/echo",
+                "destService": null,
+                "status": null,
+                "propagated": false,
+                "propagationFailure": "no-child-entry-span",
+                "childSql": 0,
+                "initiator": {
+                  "file": "src/app/rsc-fail/page.tsx",
+                  "line": 23,
+                  "component": "RscFail"
+                }
+              },
+              "found": true,
+              "propagationOk": true,
+              "statusOk": true,
+              "childSqlOk": true,
+              "initiatorOk": true
+            }
+          ],
+          "rules": [
+            {
+              "clientSpanId": "9e6f9e4cfe02eab6",
+              "traceId": "24267c1c7ad205d2d8dc990cb176b026",
+              "path": "/echo",
+              "status": null,
+              "parentage": 0,
+              "parentageReason": "no-child-entry-span",
+              "entrySpanId": null,
+              "entryIsOtherTrace": false,
+              "pathOnly": 1,
+              "timeWindow": 0,
+              "timeWindowAgrees": null
+            }
+          ],
+          "duplicateEntryClaims": [],
+          "timeWindowWouldMatch": 0,
+          "pathOnlyAmbiguous": 0,
+          "pass": true
+        }
+      ],
+      "gateB": [
+        {
+          "key": "rsc-db",
+          "label": "Server Component からの直接 DB アクセス（1本）",
+          "page": "/rsc-db",
+          "documentCorrelated": true,
+          "documentTraceId": "4535c6eb70ac28570b711c7d88780de7",
+          "browserRequests": 1,
+          "browserApiRequests": 0,
+          "documentInitiatorType": "other",
+          "renderSpanObserved": true,
+          "renderSpanName": "render route (app) /rsc-db",
+          "renderRoute": "/rsc-db",
+          "spansInTrace": 26,
+          "sqlInTrace": 1,
+          "sqlUnderRender": 1,
+          "overlaps": [],
+          "sql": [
+            {
+              "spanId": "956ee47a628dec74",
+              "scope": "@opentelemetry/instrumentation-pg",
+              "depthFromRender": 1,
+              "durationMs": 7.63,
+              "failed": false,
+              "parseOk": true,
+              "tables": [
+                "listings"
+              ],
+              "tablesInSchema": [
+                "listings"
+              ],
+              "columns": [
+                "id",
+                "code",
+                "plan"
+              ],
+              "unresolved": [],
+              "attribution": {
+                "at": "pg-pool.Pool.query",
+                "file": "src/app/rsc-db/page.tsx",
+                "line": 12,
+                "functionName": "RscDb",
+                "component": "RscDb",
+                "verified": true,
+                "sourceLine": "const r = await pool.query('SELECT id, code, plan FROM poc.listings ORDER BY id LIMIT 6');",
+                "reason": null,
+                "appFrameAtSpanStart": false
+              }
+            }
+          ],
+          "checks": [
+            {
+              "expect": {
+                "table": "listings",
+                "columns": [
+                  "id",
+                  "code",
+                  "plan"
+                ],
+                "file": "src/app/rsc-db/page.tsx",
+                "line": 12,
+                "component": "RscDb",
+                "ok": true
+              },
+              "found": true,
+              "locatedOk": true,
+              "attributionOk": true,
+              "tableOk": true,
+              "columnsOk": true,
+              "failedOk": true,
+              "underRenderOk": true
+            }
+          ],
+          "unexpected": 0,
+          "pass": true
+        },
+        {
+          "key": "rsc-parallel",
+          "label": "複数の並列データ取得（3本・別々の行）",
+          "page": "/rsc-parallel",
+          "documentCorrelated": true,
+          "documentTraceId": "3425a85b4b6a5a76495ce26cfd522bfe",
+          "browserRequests": 1,
+          "browserApiRequests": 0,
+          "documentInitiatorType": "other",
+          "renderSpanObserved": true,
+          "renderSpanName": "render route (app) /rsc-parallel",
+          "renderRoute": "/rsc-parallel",
+          "spansInTrace": 32,
+          "sqlInTrace": 3,
+          "sqlUnderRender": 3,
+          "overlaps": [
+            {
+              "a": "16e5ca2a4e8d12b4",
+              "b": "bd3af3ca6e99a33a",
+              "overlapMs": 3.62
+            }
+          ],
+          "sql": [
+            {
+              "spanId": "b9dbac52933fead4",
+              "scope": "@opentelemetry/instrumentation-pg",
+              "depthFromRender": 1,
+              "durationMs": 13.46,
+              "failed": false,
+              "parseOk": true,
+              "tables": [
+                "listings"
+              ],
+              "tablesInSchema": [
+                "listings"
+              ],
+              "columns": [],
+              "unresolved": [],
+              "attribution": {
+                "at": "pg-pool.Pool.query",
+                "file": "src/app/rsc-parallel/page.tsx",
+                "line": 13,
+                "functionName": "RscParallel",
+                "component": "RscParallel",
+                "verified": true,
+                "sourceLine": "pool.query('SELECT count(*) AS n FROM poc.listings'),",
+                "reason": null,
+                "appFrameAtSpanStart": false
+              }
+            },
+            {
+              "spanId": "16e5ca2a4e8d12b4",
+              "scope": "@opentelemetry/instrumentation-pg",
+              "depthFromRender": 1,
+              "durationMs": 5.62,
+              "failed": false,
+              "parseOk": true,
+              "tables": [
+                "listing_views"
+              ],
+              "tablesInSchema": [
+                "listing_views"
+              ],
+              "columns": [],
+              "unresolved": [],
+              "attribution": {
+                "at": "pg-pool.Pool.query",
+                "file": "src/app/rsc-parallel/page.tsx",
+                "line": 15,
+                "functionName": "RscParallel",
+                "component": "RscParallel",
+                "verified": true,
+                "sourceLine": "pool.query('SELECT count(*) AS n FROM poc.listing_views'),",
+                "reason": null,
+                "appFrameAtSpanStart": false
+              }
+            },
+            {
+              "spanId": "bd3af3ca6e99a33a",
+              "scope": "@opentelemetry/instrumentation-pg",
+              "depthFromRender": 1,
+              "durationMs": 4.34,
+              "failed": false,
+              "parseOk": true,
+              "tables": [
+                "regions"
+              ],
+              "tablesInSchema": [
+                "regions"
+              ],
+              "columns": [],
+              "unresolved": [],
+              "attribution": {
+                "at": "pg-pool.Pool.query",
+                "file": "src/app/rsc-parallel/page.tsx",
+                "line": 14,
+                "functionName": "RscParallel",
+                "component": "RscParallel",
+                "verified": true,
+                "sourceLine": "pool.query('SELECT count(*) AS n FROM poc.regions'),",
+                "reason": null,
+                "appFrameAtSpanStart": false
+              }
+            }
+          ],
+          "checks": [
+            {
+              "expect": {
+                "table": "listings",
+                "file": "src/app/rsc-parallel/page.tsx",
+                "line": 13,
+                "component": "RscParallel",
+                "ok": true
+              },
+              "found": true,
+              "locatedOk": true,
+              "attributionOk": true,
+              "tableOk": true,
+              "columnsOk": true,
+              "failedOk": true,
+              "underRenderOk": true
+            },
+            {
+              "expect": {
+                "table": "regions",
+                "file": "src/app/rsc-parallel/page.tsx",
+                "line": 14,
+                "component": "RscParallel",
+                "ok": true
+              },
+              "found": true,
+              "locatedOk": true,
+              "attributionOk": true,
+              "tableOk": true,
+              "columnsOk": true,
+              "failedOk": true,
+              "underRenderOk": true
+            },
+            {
+              "expect": {
+                "table": "listing_views",
+                "file": "src/app/rsc-parallel/page.tsx",
+                "line": 15,
+                "component": "RscParallel",
+                "ok": true
+              },
+              "found": true,
+              "locatedOk": true,
+              "attributionOk": true,
+              "tableOk": true,
+              "columnsOk": true,
+              "failedOk": true,
+              "underRenderOk": true
+            }
+          ],
+          "unexpected": 0,
+          "pass": true
+        },
+        {
+          "key": "rsc-dup",
+          "label": "同じ SQL を複数箇所から実行（別ファイル・別コンポーネント）",
+          "page": "/rsc-dup",
+          "documentCorrelated": true,
+          "documentTraceId": "5c32c610a3c90fa82eee6ba25d6cc8e9",
+          "browserRequests": 1,
+          "browserApiRequests": 0,
+          "documentInitiatorType": "other",
+          "renderSpanObserved": true,
+          "renderSpanName": "render route (app) /rsc-dup",
+          "renderRoute": "/rsc-dup",
+          "spansInTrace": 28,
+          "sqlInTrace": 2,
+          "sqlUnderRender": 2,
+          "overlaps": [],
+          "sql": [
+            {
+              "spanId": "94ba0eb06f6e03c9",
+              "scope": "@opentelemetry/instrumentation-pg",
+              "depthFromRender": 1,
+              "durationMs": 5.11,
+              "failed": false,
+              "parseOk": true,
+              "tables": [
+                "listings"
+              ],
+              "tablesInSchema": [
+                "listings"
+              ],
+              "columns": [],
+              "unresolved": [],
+              "attribution": {
+                "at": "pg-pool.Pool.query",
+                "file": "src/app/rsc-dup/page.tsx",
+                "line": 13,
+                "functionName": "RscDup",
+                "component": "RscDup",
+                "verified": true,
+                "sourceLine": "const r = await pool.query('SELECT count(*) AS n FROM poc.listings');",
+                "reason": null,
+                "appFrameAtSpanStart": false
+              }
+            },
+            {
+              "spanId": "1da61442a8b96b8b",
+              "scope": "@opentelemetry/instrumentation-pg",
+              "depthFromRender": 1,
+              "durationMs": 1.39,
+              "failed": false,
+              "parseOk": true,
+              "tables": [
+                "listings"
+              ],
+              "tablesInSchema": [
+                "listings"
+              ],
+              "columns": [],
+              "unresolved": [],
+              "attribution": {
+                "at": "pg-pool.Pool.query",
+                "file": "src/components/ListingCount.tsx",
+                "line": 6,
+                "functionName": "ListingCount",
+                "component": "ListingCount",
+                "verified": true,
+                "sourceLine": "const r = await pool.query('SELECT count(*) AS n FROM poc.listings');",
+                "reason": null,
+                "appFrameAtSpanStart": false
+              }
+            }
+          ],
+          "checks": [
+            {
+              "expect": {
+                "table": "listings",
+                "file": "src/app/rsc-dup/page.tsx",
+                "line": 13,
+                "component": "RscDup",
+                "ok": true
+              },
+              "found": true,
+              "locatedOk": true,
+              "attributionOk": true,
+              "tableOk": true,
+              "columnsOk": true,
+              "failedOk": true,
+              "underRenderOk": true
+            },
+            {
+              "expect": {
+                "table": "listings",
+                "file": "src/components/ListingCount.tsx",
+                "line": 6,
+                "component": "ListingCount",
+                "ok": true
+              },
+              "found": true,
+              "locatedOk": true,
+              "attributionOk": true,
+              "tableOk": true,
+              "columnsOk": true,
+              "failedOk": true,
+              "underRenderOk": true
+            }
+          ],
+          "unexpected": 0,
+          "pass": true
+        },
+        {
+          "key": "rsc-fail",
+          "label": "SQL の失敗と、サーバー内部通信の失敗",
+          "page": "/rsc-fail",
+          "documentCorrelated": true,
+          "documentTraceId": "24267c1c7ad205d2d8dc990cb176b026",
+          "browserRequests": 1,
+          "browserApiRequests": 0,
+          "documentInitiatorType": "other",
+          "renderSpanObserved": true,
+          "renderSpanName": "render route (app) /rsc-fail",
+          "renderRoute": "/rsc-fail",
+          "spansInTrace": 27,
+          "sqlInTrace": 1,
+          "sqlUnderRender": 1,
+          "overlaps": [],
+          "sql": [
+            {
+              "spanId": "172e41af51327556",
+              "scope": "@opentelemetry/instrumentation-pg",
+              "depthFromRender": 1,
+              "durationMs": 7.61,
+              "failed": true,
+              "parseOk": true,
+              "tables": [
+                "table_that_does_not_exist"
+              ],
+              "tablesInSchema": [],
+              "columns": [
+                "id"
+              ],
+              "unresolved": [],
+              "attribution": {
+                "at": "pg-pool.Pool.query",
+                "file": "src/app/rsc-fail/page.tsx",
+                "line": 17,
+                "functionName": "RscFail",
+                "component": "RscFail",
+                "verified": true,
+                "sourceLine": "await pool.query('SELECT id FROM poc.table_that_does_not_exist');",
+                "reason": null,
+                "appFrameAtSpanStart": false
+              }
+            }
+          ],
+          "checks": [
+            {
+              "expect": {
+                "table": "table_that_does_not_exist",
+                "failed": true,
+                "file": "src/app/rsc-fail/page.tsx",
+                "line": 17,
+                "component": "RscFail",
+                "ok": true,
+                "tableInSchema": false
+              },
+              "found": true,
+              "locatedOk": true,
+              "attributionOk": true,
+              "tableOk": true,
+              "columnsOk": true,
+              "failedOk": true,
+              "underRenderOk": true
+            }
+          ],
+          "unexpected": 0,
+          "pass": true
+        },
+        {
+          "key": "rsc-helper",
+          "label": "コンポーネントではない関数の中の SQL（帰属できないのが正解）",
+          "page": "/rsc-helper",
+          "documentCorrelated": true,
+          "documentTraceId": "7bfc478b5134e594beff7f286302f119",
+          "browserRequests": 1,
+          "browserApiRequests": 0,
+          "documentInitiatorType": "other",
+          "renderSpanObserved": true,
+          "renderSpanName": "render route (app) /rsc-helper",
+          "renderRoute": "/rsc-helper",
+          "spansInTrace": 27,
+          "sqlInTrace": 1,
+          "sqlUnderRender": 1,
+          "overlaps": [],
+          "sql": [
+            {
+              "spanId": "192fc425d5d189ef",
+              "scope": "@opentelemetry/instrumentation-pg",
+              "depthFromRender": 1,
+              "durationMs": 3.92,
+              "failed": false,
+              "parseOk": true,
+              "tables": [
+                "listings"
+              ],
+              "tablesInSchema": [
+                "listings"
+              ],
+              "columns": [
+                "scale"
+              ],
+              "unresolved": [],
+              "attribution": {
+                "at": "pg-pool.Pool.query",
+                "file": "src/app/rsc-helper/page.tsx",
+                "line": 13,
+                "functionName": "loadScaleCounts",
+                "component": null,
+                "verified": true,
+                "sourceLine": "const r = await pool.query('SELECT scale, count(*) AS n FROM poc.listings GROUP BY scale');",
+                "reason": "component-not-agreed",
+                "appFrameAtSpanStart": false
+              }
+            }
+          ],
+          "checks": [
+            {
+              "expect": {
+                "table": "listings",
+                "file": "src/app/rsc-helper/page.tsx",
+                "line": 13,
+                "component": null,
+                "ok": false,
+                "failureReason": "component-not-agreed"
+              },
+              "found": true,
+              "locatedOk": true,
+              "attributionOk": true,
+              "tableOk": true,
+              "columnsOk": true,
+              "failedOk": true,
+              "underRenderOk": true
+            }
+          ],
+          "unexpected": 0,
+          "pass": true
+        }
+      ]
+    }
+  }
+}

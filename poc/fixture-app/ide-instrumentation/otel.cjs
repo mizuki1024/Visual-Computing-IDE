@@ -1,0 +1,399 @@
+/* =============================================================================
+ * 計装の本体。CJS で書く — 方式2（NODE_OPTIONS=--require）でも読めるようにするため。
+ *
+ * 取得するもの: スパンの名前・種別・開始/終了時刻・親子関係・許可リストの属性
+ * 取得しないもの: ヘッダ・本文・パラメータ値・接続文字列（mask.cjs が落とす）
+ * 送信先: ローカルファイルのみ
+ * ========================================================================== */
+const { maskAttributes } = require('./mask.cjs');
+const sink = require('./sink.cjs');
+
+if (globalThis.__poc01_otel_started__) {
+  sink.note('duplicate-register', 'このプロセスでは既に計装が初期化されている');
+} else {
+  globalThis.__poc01_otel_started__ = true;
+  start();
+}
+
+function start() {
+  const {
+    trace, context, createContextKey, SpanStatusCode, diag, DiagConsoleLogger, DiagLogLevel,
+  } = require('@opentelemetry/api');
+  if (process.env.POC01_DIAG === '1') {
+    diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
+  }
+  /* -------------------------------------------------------------- PoC-02
+   * 既定では**どちらも無効**である。PoC-01 / PoC-03 / PoC-05 の計測条件を
+   * 変えないため、環境変数が立っているときだけ振る舞いを足す。
+   *
+   *   POC02_UNDICI    サーバー内部の fetch を計装する（Gate A）。
+   *                   client スパンを作り、**ループバック宛に限り**
+   *                   W3C traceparent を注入する
+   *   POC02_CALLSITE  スパン開始時の呼び出しスタックを記録する（Gate B）。
+   *                   SQL スパンとサーバー内部 fetch スパンだけが対象
+   * ------------------------------------------------------------------- */
+  const UNDICI = process.env.POC02_UNDICI === '1';
+  const CALLSITE = process.env.POC02_CALLSITE === '1';
+
+  const { NodeTracerProvider } = require('@opentelemetry/sdk-trace-node');
+  const { SimpleSpanProcessor } = require('@opentelemetry/sdk-trace-base');
+  const { resourceFromAttributes } = require('@opentelemetry/resources');
+  const { registerInstrumentations } = require('@opentelemetry/instrumentation');
+  const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
+  const { PgInstrumentation } = require('@opentelemetry/instrumentation-pg');
+
+  /* ---------------------------------------------- 書き出し用のエクスポータ */
+  /** 親スパンIDの取り出し。SDK の世代で形が違う（プロパティ / 旧 parentSpanId） */
+  const parentIdOf = (s) => {
+    const p = s.parentSpanContext;
+    if (p && typeof p === 'object' && p.spanId) return p.spanId;
+    if (typeof p === 'function') { try { return p.call(s)?.spanId ?? null; } catch { return null; } }
+    return s.parentSpanId ?? null;
+  };
+
+  const exporter = {
+    export(spans, done) {
+      for (const s of spans) {
+        try {
+        const masked = maskAttributes(s.attributes);
+        sink.write({
+          type: 'span',
+          traceId: s.spanContext().traceId,
+          spanId: s.spanContext().spanId,
+          parentSpanId: parentIdOf(s),
+          name: s.name,
+          kind: s.kind,
+          // hrTime [秒, ナノ秒] → エポックからのミリ秒（小数つき）
+          startMs: s.startTime[0] * 1e3 + s.startTime[1] / 1e6,
+          endMs: s.endTime[0] * 1e3 + s.endTime[1] / 1e6,
+          durationMs: s.duration[0] * 1e3 + s.duration[1] / 1e6,
+          statusCode: s.status?.code ?? 0,
+          scope: s.instrumentationScope?.name ?? s.instrumentationLibrary?.name ?? null,
+          attrs: masked.attrs,
+          droppedAttributeKeys: masked.droppedKeys,
+          sqlRedacted: masked.redacted,
+        });
+        } catch (e) {
+          // 1本の取りこぼしで全部を失わない。取れなかったことを記録する
+          sink.note('export-failed', String(e && e.message).slice(0, 200));
+        }
+      }
+      done({ code: 0 });
+    },
+    shutdown() { return Promise.resolve(); },
+    forceFlush() { return Promise.resolve(); },
+  };
+
+  /* --------------------------------------------------------------- PoC-02
+   * 呼び出しスタックの記録（Gate B）。
+   *
+   * **スパンが始まったその瞬間**に、同じ同期スタックの上で `Error.stack` を
+   * 取る。これは「誰がこの SQL を実行したか」そのものの記録であり、
+   * 時刻の近さや名前の一致による推測ではない。
+   *
+   * 収集するのは「ファイル・行・列・関数名」だけである。引数も変数も読まない。
+   * 絶対パスは出さない（アプリ以下は相対パス、外は分類名に置き換える）。
+   * ------------------------------------------------------------------- */
+  const APP_DIR = process.cwd();
+  /** スタック1行の解析。`at fn (file:line:col)` と `at file:line:col` の両形 */
+  const FRAME_RE = /^\s*at\s+(?:(.+?)\s+\()?(.+?):(\d+):(\d+)\)?\s*$/;
+
+  /** 絶対パスを出さない。アプリ以下は相対化し、外は分類名にする */
+  function classifyFile(raw) {
+    let f = String(raw);
+    if (f.startsWith('file://')) { try { f = require('node:url').fileURLToPath(f); } catch { /* そのまま */ } }
+    if (f.startsWith('node:')) return { file: f, scope: 'node-builtin' };
+    if (/^(webpack-internal:|turbopack:|rsc:|\[turbopack\])/.test(f)) {
+      /* バンドラの仮想URL。**そのまま残す。** この文字列がソースマップを
+       * 引くときの鍵になる（行・列は生成物のものなので、後で戻す必要がある）。
+       * 絶対パスは含まれない形式である。長すぎるものは切る */
+      return { file: f.slice(0, 300), scope: 'bundler-virtual' };
+    }
+    if (f.startsWith(APP_DIR)) {
+      const rel = f.slice(APP_DIR.length).replace(/^[/\\]/, '').split('\\').join('/');
+      if (rel.startsWith('node_modules/')) return { file: '<node_modules>', scope: 'node_modules' };
+      if (rel.startsWith('.next/')) return { file: rel, scope: 'build-output' };
+      return { file: rel, scope: 'app-source' };
+    }
+    if (f.includes('node_modules')) return { file: '<node_modules>', scope: 'node_modules' };
+    return { file: '<outside-app>', scope: 'outside' };
+  }
+
+  function captureFrames(limit) {
+    const prev = Error.stackTraceLimit;
+    Error.stackTraceLimit = limit;
+    const raw = new Error().stack || '';
+    Error.stackTraceLimit = prev;
+    const out = [];
+    for (const line of raw.split('\n').slice(1)) {
+      const m = FRAME_RE.exec(line);
+      if (!m) continue;
+      const c = classifyFile(m[2]);
+      out.push({
+        functionName: m[1] ? String(m[1]).slice(0, 80) : null,
+        file: c.file, scope: c.scope,
+        line: Number(m[3]), col: Number(m[4]),
+      });
+    }
+    return out;
+  }
+
+  /**
+   * この種のスパンだけスタックを取る。全スパンで取ると重く、要らない。
+   *
+   * 計装によって「属性をいつ付けるか」が違う（pg は startSpan のあとに
+   * setAttribute する）ため、属性ではなく**計装の名前**で判定する。
+   */
+  const wantsCallsite = (span) => {
+    const scope = span.instrumentationScope?.name ?? span.instrumentationLibrary?.name ?? '';
+    if (/instrumentation-pg|prisma/.test(scope)) return 'sql';
+    if (scope.includes('undici')) return 'server-fetch';
+    // Next.js 自身が付ける fetch スパン。undici 計装を入れない条件でも
+    // 呼び出し元を比べられるようにする（名前は作成時に決まっている）
+    if (/^fetch\s/.test(span.name ?? '')) return 'server-fetch';
+    const a = span.attributes || {};
+    if (a['db.statement'] || a['db.query.text']) return 'sql';
+    return null;
+  };
+
+  /*
+   * **スパンが始まった場所は、呼び出した場所ではない。**
+   *
+   * 実測で分かったこと: `pool.query()` を呼んだ時点ではスパンは作られない。
+   * pg の接続プールが空いた時点のコールバックの中で `Client.query` が走り、
+   * そこでスパンが作られる。スパン開始時の同期スタックには、呼び出した
+   * Server Component のフレームが**存在しない**。
+   *
+   * そこで、呼び出しの入口（`Pool.query` / `Client.query`）でスタックを取り、
+   * **OpenTelemetry のコンテキストに載せて運ぶ**。親子関係が正しく付くのと
+   * まったく同じ仕組み（計装がコールバックを包んでコンテキストを復元する）に
+   * 相乗りするので、別の推測を足していない。
+   *
+   * スパン開始時に、そのスパンの親コンテキストから取り出す。
+   */
+  const CALLSITE_KEY = createContextKey('vcide.sql.callsite');
+
+  /** 呼び出しの入口でスタックを取り、コンテキストに載せる */
+  function patchCallsiteEntry() {
+    if (!CALLSITE) return;
+    const targets = [];
+    try {
+      const PgPool = require('pg-pool');
+      targets.push(['pg-pool.Pool.query', PgPool.prototype, 'query']);
+    } catch (e) { sink.note('callsite-pg-pool-missing', String(e && e.message).slice(0, 120)); }
+    try {
+      const pg = require('pg');
+      targets.push(['pg.Client.query', pg.Client.prototype, 'query']);
+    } catch (e) { sink.note('callsite-pg-missing', String(e && e.message).slice(0, 120)); }
+
+    /*
+     * サーバー内部の `fetch` も同じ理屈で取る。ただし問題が1つある:
+     * **Next.js が自分で `globalThis.fetch` を差し替える。** こちらが先に
+     * 包むと Next のラッパが外側になり、ユーザーのコードのフレームは
+     * Next の非同期ラッパで切れてしまう（実測）。
+     *
+     * そこで `globalThis.fetch` を**アクセサにしておく**。Next が代入した
+     * 時点で、その関数をこちらが包み直す。こうすると常に外側に来る。
+     */
+    try {
+      const wrapFetch = (fn) => {
+        if (typeof fn !== 'function' || fn.__vcide_callsite__) return fn;
+        const w = function (...args) {
+          let ctx;
+          try {
+            if (context.active().getValue(CALLSITE_KEY)) return fn.apply(this, args);
+            ctx = context.active().setValue(CALLSITE_KEY, {
+              at: 'globalThis.fetch', frames: captureFrames(60),
+            });
+          } catch { return fn.apply(this, args); }
+          return context.with(ctx, () => fn.apply(this, args));
+        };
+        w.__vcide_callsite__ = true;
+        return w;
+      };
+      let held = wrapFetch(globalThis.fetch);
+      Object.defineProperty(globalThis, 'fetch', {
+        configurable: true,
+        get() { return held; },
+        set(v) { held = wrapFetch(v); },
+      });
+      sink.note('callsite-entry-patched', 'globalThis.fetch');
+    } catch (e) {
+      sink.note('callsite-fetch-patch-failed', String(e && e.message).slice(0, 120));
+    }
+
+    for (const [label, proto, key] of targets) {
+      const orig = proto[key];
+      if (typeof orig !== 'function' || orig.__vcide_callsite__) continue;
+      const wrapped = function (...args) {
+        let ctx;
+        try {
+          // **いちばん外側の呼び出しだけを残す。** Pool.query は内部で
+          // Client.query を呼ぶので、内側で上書きすると呼び出し元が消える
+          if (context.active().getValue(CALLSITE_KEY)) return orig.apply(this, args);
+          ctx = context.active().setValue(CALLSITE_KEY, {
+            at: label, frames: captureFrames(60),
+          });
+        } catch { return orig.apply(this, args); }
+        return context.with(ctx, () => orig.apply(this, args));
+      };
+      wrapped.__vcide_callsite__ = true;
+      proto[key] = wrapped;
+      sink.note('callsite-entry-patched', label);
+    }
+  }
+
+  const callsiteProcessor = {
+    onStart(span, parentContext) {
+      if (!CALLSITE) return;
+      try {
+        const kind = wantsCallsite(span);
+        if (!kind) return;
+        /* 呼び出しの入口で取ったスタック（コンテキスト経由）。
+         * 無ければ null を書く。**スパン開始時のスタックで代用しない。** */
+        let carried = null;
+        try { carried = parentContext ? parentContext.getValue(CALLSITE_KEY) : null; } catch { carried = null; }
+        sink.write({
+          type: 'callsite',
+          spanId: span.spanContext().spanId,
+          traceId: span.spanContext().traceId,
+          target: kind,
+          /** 呼び出しの入口で取れたスタック（これが根拠になる） */
+          entry: carried ? { at: carried.at, frames: carried.frames } : null,
+          /** スパン開始時のスタック。**比較のためだけに持つ**（根拠にしない） */
+          atSpanStart: captureFrames(60),
+        });
+      } catch (e) {
+        sink.note('callsite-failed', String(e && e.message).slice(0, 200));
+      }
+    },
+    onEnd() { /* noop */ },
+    shutdown() { return Promise.resolve(); },
+    forceFlush() { return Promise.resolve(); },
+  };
+
+  const provider = new NodeTracerProvider({
+    resource: resourceFromAttributes({
+      'service.name': process.env.POC02_SERVICE_NAME || 'poc01-fixture-app',
+    }),
+    spanProcessors: [callsiteProcessor, new SimpleSpanProcessor(exporter)],
+  });
+  provider.register();
+
+  /* --------------------------------------------------------------------------
+   * ブラウザとサーバーの関連付け（PoC-01 で成立。PoC-05 で公開範囲を絞った）。
+   *
+   * 応答にトレースIDを載せ返す。アプリコードには触らない（この計装ファイルの
+   * 中だけで完結する）。ブラウザ側はこのヘッダ**だけ**を読む。
+   *
+   * 2つのヘッダを選べるようにしてある。PoC-05 で公開範囲が違うことを実測した。
+   *   Server-Timing  ページ上の**任意のスクリプト**が Resource Timing API 経由で
+   *                  同一オリジンの全リソースについて読める。公開範囲が広い
+   *   X-Vcide-Trace  専用ヘッダ。Resource Timing API には出ない。
+   *                  IDE は CDP で応答ヘッダを直接読めるので、これで足りる
+   *
+   * さらに、**ループバック以外のホスト宛の応答には一切付けない。** 開発用の
+   * 識別子が意図せず外部へ出る経路を、ヘッダを付ける段階で閉じる。
+   * ------------------------------------------------------------------------ */
+  /** 専用ヘッダ（公開範囲が狭い）。PoC-05 の既定はこちらを使う */
+  const TRACE_HEADER = process.env.POC05_TRACE_HEADER === '1';
+  /** Server-Timing（PoC-01 からの既定。公開範囲が広いことを PoC-05 で実測した） */
+  const SERVER_TIMING = process.env.POC05_SERVER_TIMING !== '0';
+  /** 開発機の中だけに閉じる。実ホスト名・外部ドメイン宛には付けない */
+  const LOOPBACK = /^(localhost|127\.0\.0\.1|\[::1\]|::1)(:\d+)?$/i;
+
+  const spanOfResponse = new WeakMap();
+  patchWriteHead();
+
+  function patchWriteHead() {
+    const http = require('node:http');
+    const proto = http.ServerResponse.prototype;
+    if (proto.__poc01_patched__) return;
+    proto.__poc01_patched__ = true;
+    const orig = proto.writeHead;
+    proto.writeHead = function (...args) {
+      try {
+        const sc = spanOfResponse.get(this)
+          ?? trace.getSpan(context.active())?.spanContext();
+        // 宛先がループバックでなければ、識別子を載せない
+        const host = this.req && this.req.headers ? String(this.req.headers.host ?? '') : '';
+        if (sc && !this.headersSent && LOOPBACK.test(host)) {
+          const tp = `00-${sc.traceId}-${sc.spanId}-01`;
+          if (SERVER_TIMING) this.setHeader('Server-Timing', `traceparent;desc="${tp}"`);
+          if (TRACE_HEADER) this.setHeader('X-Vcide-Trace', tp);
+        }
+      } catch { /* 応答を壊さない。取れなければ取れないままにする */ }
+      return orig.apply(this, args);
+    };
+  }
+
+  registerInstrumentations({
+    instrumentations: [
+      new HttpInstrumentation({
+        // 本文もヘッダも読まない。応答オブジェクトとスパンの対応だけを覚える
+        responseHook(span, response) {
+          try {
+            if (response && typeof response.setHeader === 'function') {
+              spanOfResponse.set(response, span.spanContext());
+            }
+          } catch { /* noop */ }
+        },
+        ignoreIncomingRequestHook(req) {
+          const u = String(req.url ?? '');
+          return u.startsWith('/_next/') || u === '/favicon.ico';
+        },
+      }),
+      // enhancedDatabaseReporting は既定の false のまま。true にすると
+      // db.statement.parameters（＝パラメータ値）が付くため、使ってはならない
+      new PgInstrumentation({ requireParentSpan: false }),
+      ...prismaInstrumentation(),
+      ...undiciInstrumentation(),
+    ],
+  });
+
+  /* **計装の登録より後**に当てる。先に当てると計装のラッパが外側になり、
+   * コンテキストを捕まえる時点がこちらより早くなって値が運ばれない */
+  patchCallsiteEntry();
+
+  sink.note('registered', 'NodeTracerProvider と計装を登録した');
+
+  /* --------------------------------------------------------------- PoC-02
+   * サーバー内部の fetch の計装（Gate A）。
+   *
+   * Next.js の `fetch` は `node:http` を通らないため、`instrumentation-http`
+   * では client スパンも traceparent の注入も起きない（PoC-05 第3章 #2）。
+   * undici の計装は diagnostics_channel を使うので、ここを埋められる。
+   *
+   * **ループバック以外の宛先は計装しない。** 計装しなければスパンも作られず、
+   * traceparent も注入されない。開発用のトレース識別子が外部へ出る経路を、
+   * 注入する側で閉じている（指示 第2節・第6節）。
+   * ------------------------------------------------------------------- */
+  function undiciInstrumentation() {
+    if (!UNDICI) return [];
+    try {
+      const { UndiciInstrumentation } = require('@opentelemetry/instrumentation-undici');
+      const { isLoopbackOrigin } = require('./loopback.cjs');
+      sink.note('undici-instrumentation', 'loaded');
+      return [new UndiciInstrumentation({
+        // 計装しない = スパンを作らない = traceparent を注入しない
+        ignoreRequestHook: (req) => !isLoopbackOrigin(req.origin),
+      })];
+    } catch (e) {
+      sink.note('undici-instrumentation-failed', String(e && e.message).slice(0, 200));
+      return [];
+    }
+  }
+
+  function prismaInstrumentation() {
+    try {
+      const { PrismaInstrumentation } = require('@prisma/instrumentation');
+      sink.note('prisma-instrumentation', 'loaded');
+      return [new PrismaInstrumentation()];
+    } catch (e) {
+      sink.note('prisma-instrumentation-failed', String(e && e.message).slice(0, 200));
+      return [];
+    }
+  }
+
+  void SpanStatusCode;
+}

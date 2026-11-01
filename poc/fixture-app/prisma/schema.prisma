@@ -1,0 +1,38 @@
+// PoC-01 の検証用。架空のスキーマである。
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Listing {
+  id             Int      @id @default(autoincrement())
+  code           String   @unique
+  region         String
+  plan           String
+  scale          String
+  availableFrom  DateTime @map("available_from") @db.Date
+  createdAt      DateTime @map("created_at")
+
+  @@map("listings")
+}
+
+model Region {
+  id   Int    @id @default(autoincrement())
+  code String @unique
+  name String
+
+  @@map("regions")
+}
+
+model ListingView {
+  id        Int      @id @default(autoincrement())
+  listingId Int      @map("listing_id")
+  viewedOn  DateTime @map("viewed_on") @db.Date
+  views     Int
+
+  @@map("listing_views")
+}

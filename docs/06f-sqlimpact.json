@@ -1,0 +1,1009 @@
+{
+  "generatedFor": "Phase 6F",
+  "note": "既存の記録は書き換えていない。読んで比べただけである。",
+  "knownColumnDefinitions": [
+    "poc.listings.code",
+    "poc.listings.id",
+    "poc.listings.plan",
+    "poc.listings.region",
+    "poc.regions.code",
+    "poc.regions.name"
+  ],
+  "datasets": [
+    {
+      "key": "measured",
+      "poc": "PoC-01",
+      "recordedMatchesLegacy": true,
+      "recordedVsLegacyDiff": {},
+      "before": {
+        "nodeCount": 7,
+        "hopCount": 6,
+        "columns": [
+          "code (text)",
+          "id (integer)",
+          "region (text)"
+        ],
+        "columnChips": [
+          "code",
+          "id",
+          "region"
+        ],
+        "projectsHops": 3,
+        "readsHops": 1,
+        "measured": 13,
+        "estimated": 0,
+        "total": 13,
+        "pathObservability": "measured",
+        "weakestHop": null,
+        "claim": "poc.listings . 3 列",
+        "truncated": false,
+        "summaryLine": "13 か所のうち 0 か所が推定です。経路全体は、いちばん弱いところに合わせて「実測」になります。",
+        "cuts": [
+          "ここより上流は観測していません / 表示された値とコンポーネント / PoC-01 の範囲外（PoC-03 の検証対象）"
+        ],
+        "nodeObservability": {
+          "http": "measured",
+          "server": "measured",
+          "sql": "measured",
+          "table": "measured",
+          "column": "measured,measured,measured"
+        },
+        "skipped": []
+      },
+      "after": {
+        "nodeCount": 7,
+        "hopCount": 6,
+        "columns": [
+          "code (text)",
+          "id (integer)",
+          "region (text)"
+        ],
+        "columnChips": [
+          "code",
+          "id",
+          "region"
+        ],
+        "projectsHops": 3,
+        "readsHops": 1,
+        "measured": 13,
+        "estimated": 0,
+        "total": 13,
+        "pathObservability": "measured",
+        "weakestHop": null,
+        "claim": "poc.listings . 3 列",
+        "truncated": false,
+        "summaryLine": "13 か所のうち 0 か所が推定です。経路全体は、いちばん弱いところに合わせて「実測」になります。",
+        "cuts": [
+          "ここより上流は観測していません / 表示された値とコンポーネント / PoC-01 の範囲外（PoC-03 の検証対象）"
+        ],
+        "nodeObservability": {
+          "http": "measured",
+          "server": "measured",
+          "sql": "measured",
+          "table": "measured",
+          "column": "measured,measured,measured"
+        },
+        "skipped": []
+      },
+      "diff": {},
+      "changed": false
+    },
+    {
+      "key": "elements",
+      "poc": "PoC-03",
+      "recordedMatchesLegacy": true,
+      "recordedVsLegacyDiff": {},
+      "before": {
+        "nodeCount": 9,
+        "hopCount": 7,
+        "columns": [
+          "code (text)",
+          "id (integer)",
+          "region (text)"
+        ],
+        "columnChips": [
+          "code",
+          "id",
+          "region"
+        ],
+        "projectsHops": 3,
+        "readsHops": 1,
+        "measured": 16,
+        "estimated": 0,
+        "total": 16,
+        "pathObservability": "measured",
+        "weakestHop": null,
+        "claim": "src/components/RegionBadge.tsx:8",
+        "truncated": true,
+        "summaryLine": "16 か所のうち 0 か所が推定です。経路全体は、いちばん弱いところに合わせて「実測」になります。",
+        "cuts": [
+          "ここから先は観測していません / props の由来（応答のどの項目がこの値になったか） / derives は構造的に推定（02a 3.5.1）。本PoCでは関係を作らない",
+          "この通信を起こした箇所は特定していません / コンポーネントと通信を結ぶ共通の証拠が無い / 証拠が無いため関係を作らない"
+        ],
+        "nodeObservability": {
+          "value": "measured",
+          "component": "measured",
+          "http": "measured",
+          "server": "measured",
+          "sql": "measured",
+          "table": "measured",
+          "column": "measured,measured,measured"
+        },
+        "skipped": [
+          "選択 dynamic（<span>） — 特定不能: anchor-missing — 祖先には識別子があるが、この要素自身には無い",
+          "選択 vendor-root（<section>） — 特定不能: anchor-missing — 祖先には識別子があるが、この要素自身には無い",
+          "選択 vendor-slot（<div>） — 特定不能: anchor-missing — 祖先には識別子があるが、この要素自身には無い",
+          "選択 vendor-title（<h3>） — 特定不能: anchor-missing — 祖先には識別子があるが、この要素自身には無い"
+        ]
+      },
+      "after": {
+        "nodeCount": 9,
+        "hopCount": 7,
+        "columns": [
+          "code (text)",
+          "id (integer)",
+          "region (text)"
+        ],
+        "columnChips": [
+          "code",
+          "id",
+          "region"
+        ],
+        "projectsHops": 3,
+        "readsHops": 1,
+        "measured": 16,
+        "estimated": 0,
+        "total": 16,
+        "pathObservability": "measured",
+        "weakestHop": null,
+        "claim": "src/components/RegionBadge.tsx:8",
+        "truncated": true,
+        "summaryLine": "16 か所のうち 0 か所が推定です。経路全体は、いちばん弱いところに合わせて「実測」になります。",
+        "cuts": [
+          "ここから先は観測していません / props の由来（応答のどの項目がこの値になったか） / derives は構造的に推定（02a 3.5.1）。本PoCでは関係を作らない",
+          "この通信を起こした箇所は特定していません / コンポーネントと通信を結ぶ共通の証拠が無い / 証拠が無いため関係を作らない"
+        ],
+        "nodeObservability": {
+          "value": "measured",
+          "component": "measured",
+          "http": "measured",
+          "server": "measured",
+          "sql": "measured",
+          "table": "measured",
+          "column": "measured,measured,measured"
+        },
+        "skipped": [
+          "選択 dynamic（<span>） — 特定不能: anchor-missing — 祖先には識別子があるが、この要素自身には無い",
+          "選択 vendor-root（<section>） — 特定不能: anchor-missing — 祖先には識別子があるが、この要素自身には無い",
+          "選択 vendor-slot（<div>） — 特定不能: anchor-missing — 祖先には識別子があるが、この要素自身には無い",
+          "選択 vendor-title（<h3>） — 特定不能: anchor-missing — 祖先には識別子があるが、この要素自身には無い"
+        ]
+      },
+      "diff": {},
+      "changed": false
+    },
+    {
+      "key": "flows",
+      "poc": "PoC-05",
+      "recordedMatchesLegacy": true,
+      "recordedVsLegacyDiff": {},
+      "before": {
+        "nodeCount": 10,
+        "hopCount": 8,
+        "columns": [
+          "code (text)",
+          "id (integer)",
+          "region (text)"
+        ],
+        "columnChips": [
+          "code",
+          "id",
+          "region"
+        ],
+        "projectsHops": 3,
+        "readsHops": 1,
+        "measured": 18,
+        "estimated": 0,
+        "total": 18,
+        "pathObservability": "measured",
+        "weakestHop": null,
+        "claim": "src/components/RegionBadge.tsx:8",
+        "truncated": true,
+        "summaryLine": "18 か所のうち 0 か所が推定です。経路全体は、いちばん弱いところに合わせて「実測」になります。",
+        "cuts": [
+          "ここから先は観測していません / props の由来（応答のどの項目がこの値になったか） / derives は構造的に推定（02a 3.5.1）。本PoCでは関係を作らない"
+        ],
+        "nodeObservability": {
+          "value": "measured",
+          "component": "measured,measured",
+          "http": "measured",
+          "server": "measured",
+          "sql": "measured",
+          "table": "measured",
+          "column": "measured,measured,measured"
+        },
+        "skipped": []
+      },
+      "after": {
+        "nodeCount": 10,
+        "hopCount": 8,
+        "columns": [
+          "code (text)",
+          "id (integer)",
+          "region (text)"
+        ],
+        "columnChips": [
+          "code",
+          "id",
+          "region"
+        ],
+        "projectsHops": 3,
+        "readsHops": 1,
+        "measured": 18,
+        "estimated": 0,
+        "total": 18,
+        "pathObservability": "measured",
+        "weakestHop": null,
+        "claim": "src/components/RegionBadge.tsx:8",
+        "truncated": true,
+        "summaryLine": "18 か所のうち 0 か所が推定です。経路全体は、いちばん弱いところに合わせて「実測」になります。",
+        "cuts": [
+          "ここから先は観測していません / props の由来（応答のどの項目がこの値になったか） / derives は構造的に推定（02a 3.5.1）。本PoCでは関係を作らない"
+        ],
+        "nodeObservability": {
+          "value": "measured",
+          "component": "measured,measured",
+          "http": "measured",
+          "server": "measured",
+          "sql": "measured",
+          "table": "measured",
+          "column": "measured,measured,measured"
+        },
+        "skipped": []
+      },
+      "diff": {},
+      "changed": false
+    },
+    {
+      "key": "rsc",
+      "poc": "PoC-02",
+      "recordedMatchesLegacy": true,
+      "recordedVsLegacyDiff": {},
+      "before": {
+        "nodeCount": 10,
+        "hopCount": 8,
+        "columns": [
+          "code (text)",
+          "id (integer)",
+          "plan (text)"
+        ],
+        "columnChips": [
+          "code",
+          "id",
+          "plan"
+        ],
+        "projectsHops": 3,
+        "readsHops": 1,
+        "measured": 18,
+        "estimated": 0,
+        "total": 18,
+        "pathObservability": "measured",
+        "weakestHop": null,
+        "claim": "src/app/rsc-db/page.tsx:19",
+        "truncated": true,
+        "summaryLine": "18 か所のうち 0 か所が推定です。経路全体は、いちばん弱いところに合わせて「実測」になります。",
+        "cuts": [
+          "ここから先は観測していません / props の由来（取得した結果のどの項目がこの値になったか） / derives は構造的に推定（02a 3.5.1）。本PoCでは関係を作らない"
+        ],
+        "nodeObservability": {
+          "value": "measured",
+          "component": "measured,measured",
+          "http": "measured",
+          "server": "measured",
+          "sql": "measured",
+          "table": "measured",
+          "column": "measured,measured,measured"
+        },
+        "skipped": []
+      },
+      "after": {
+        "nodeCount": 10,
+        "hopCount": 8,
+        "columns": [
+          "code (text)",
+          "id (integer)",
+          "plan (text)"
+        ],
+        "columnChips": [
+          "code",
+          "id",
+          "plan"
+        ],
+        "projectsHops": 3,
+        "readsHops": 1,
+        "measured": 18,
+        "estimated": 0,
+        "total": 18,
+        "pathObservability": "measured",
+        "weakestHop": null,
+        "claim": "src/app/rsc-db/page.tsx:19",
+        "truncated": true,
+        "summaryLine": "18 か所のうち 0 か所が推定です。経路全体は、いちばん弱いところに合わせて「実測」になります。",
+        "cuts": [
+          "ここから先は観測していません / props の由来（取得した結果のどの項目がこの値になったか） / derives は構造的に推定（02a 3.5.1）。本PoCでは関係を作らない"
+        ],
+        "nodeObservability": {
+          "value": "measured",
+          "component": "measured,measured",
+          "http": "measured",
+          "server": "measured",
+          "sql": "measured",
+          "table": "measured",
+          "column": "measured,measured,measured"
+        },
+        "skipped": []
+      },
+      "diff": {},
+      "changed": false
+    },
+    {
+      "key": "rsc-svc",
+      "poc": "PoC-02(Gate A)",
+      "recordedMatchesLegacy": true,
+      "recordedVsLegacyDiff": {},
+      "before": {
+        "nodeCount": 9,
+        "hopCount": 8,
+        "columns": [
+          "code (text)",
+          "name (text)"
+        ],
+        "columnChips": [
+          "code",
+          "name"
+        ],
+        "projectsHops": 2,
+        "readsHops": 1,
+        "measured": 17,
+        "estimated": 0,
+        "total": 17,
+        "pathObservability": "measured",
+        "weakestHop": null,
+        "claim": "poc.regions . 2 列",
+        "truncated": false,
+        "summaryLine": "17 か所のうち 0 か所が推定です。経路全体は、いちばん弱いところに合わせて「実測」になります。",
+        "cuts": [
+          "ここから先は観測していません / props の由来（取得した結果のどの項目がこの値になったか） / derives は構造的に推定（02a 3.5.1）。本PoCでは関係を作らない"
+        ],
+        "nodeObservability": {
+          "component": "measured",
+          "http": "measured,measured",
+          "server": "measured,measured",
+          "sql": "measured",
+          "table": "measured",
+          "column": "measured,measured"
+        },
+        "skipped": []
+      },
+      "after": {
+        "nodeCount": 9,
+        "hopCount": 8,
+        "columns": [
+          "code (text)",
+          "name (text)"
+        ],
+        "columnChips": [
+          "code",
+          "name"
+        ],
+        "projectsHops": 2,
+        "readsHops": 1,
+        "measured": 17,
+        "estimated": 0,
+        "total": 17,
+        "pathObservability": "measured",
+        "weakestHop": null,
+        "claim": "poc.regions . 2 列",
+        "truncated": false,
+        "summaryLine": "17 か所のうち 0 か所が推定です。経路全体は、いちばん弱いところに合わせて「実測」になります。",
+        "cuts": [
+          "ここから先は観測していません / props の由来（取得した結果のどの項目がこの値になったか） / derives は構造的に推定（02a 3.5.1）。本PoCでは関係を作らない"
+        ],
+        "nodeObservability": {
+          "component": "measured",
+          "http": "measured,measured",
+          "server": "measured,measured",
+          "sql": "measured",
+          "table": "measured",
+          "column": "measured,measured"
+        },
+        "skipped": []
+      },
+      "diff": {},
+      "changed": false
+    },
+    {
+      "key": "lin-a",
+      "poc": "PoC-04 A",
+      "recordedMatchesLegacy": true,
+      "recordedVsLegacyDiff": {},
+      "before": {
+        "nodeCount": 9,
+        "hopCount": 8,
+        "columns": [
+          "id (integer)",
+          "region (text)"
+        ],
+        "columnChips": [
+          "id",
+          "region"
+        ],
+        "projectsHops": 2,
+        "readsHops": 1,
+        "measured": 16,
+        "estimated": 1,
+        "total": 17,
+        "pathObservability": "estimated",
+        "weakestHop": "supplies/supplies",
+        "claim": "poc.listings . region",
+        "truncated": false,
+        "summaryLine": "17 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。",
+        "cuts": [],
+        "nodeObservability": {
+          "value": "measured",
+          "component": "measured,measured",
+          "http": "measured",
+          "server": "measured",
+          "sql": "measured",
+          "table": "measured",
+          "column": "measured,measured"
+        },
+        "skipped": []
+      },
+      "after": {
+        "nodeCount": 9,
+        "hopCount": 8,
+        "columns": [
+          "id (integer)",
+          "region (text)"
+        ],
+        "columnChips": [
+          "id",
+          "region"
+        ],
+        "projectsHops": 2,
+        "readsHops": 1,
+        "measured": 16,
+        "estimated": 1,
+        "total": 17,
+        "pathObservability": "estimated",
+        "weakestHop": "supplies/supplies",
+        "claim": "poc.listings . region",
+        "truncated": false,
+        "summaryLine": "17 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。",
+        "cuts": [],
+        "nodeObservability": {
+          "value": "measured",
+          "component": "measured,measured",
+          "http": "measured",
+          "server": "measured",
+          "sql": "measured",
+          "table": "measured",
+          "column": "measured,measured"
+        },
+        "skipped": []
+      },
+      "diff": {},
+      "changed": false
+    },
+    {
+      "key": "lin-c",
+      "poc": "PoC-04 C",
+      "recordedMatchesLegacy": true,
+      "recordedVsLegacyDiff": {},
+      "before": {
+        "nodeCount": 10,
+        "hopCount": 9,
+        "columns": [
+          "code (text)",
+          "id (integer)",
+          "region (text)"
+        ],
+        "columnChips": [
+          "code",
+          "id",
+          "region"
+        ],
+        "projectsHops": 3,
+        "readsHops": 1,
+        "measured": 18,
+        "estimated": 1,
+        "total": 19,
+        "pathObservability": "estimated",
+        "weakestHop": "supplies/supplies",
+        "claim": "poc.listings . 2 候補のいずれか",
+        "truncated": false,
+        "summaryLine": "19 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。",
+        "cuts": [],
+        "nodeObservability": {
+          "value": "measured",
+          "component": "measured,measured",
+          "http": "measured",
+          "server": "measured",
+          "sql": "measured",
+          "table": "measured",
+          "column": "measured,measured,measured"
+        },
+        "skipped": []
+      },
+      "after": {
+        "nodeCount": 10,
+        "hopCount": 9,
+        "columns": [
+          "code (text)",
+          "id (integer)",
+          "region (text)"
+        ],
+        "columnChips": [
+          "code",
+          "id",
+          "region"
+        ],
+        "projectsHops": 3,
+        "readsHops": 1,
+        "measured": 18,
+        "estimated": 1,
+        "total": 19,
+        "pathObservability": "estimated",
+        "weakestHop": "supplies/supplies",
+        "claim": "poc.listings . 2 候補のいずれか",
+        "truncated": false,
+        "summaryLine": "19 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。",
+        "cuts": [],
+        "nodeObservability": {
+          "value": "measured",
+          "component": "measured,measured",
+          "http": "measured",
+          "server": "measured",
+          "sql": "measured",
+          "table": "measured",
+          "column": "measured,measured,measured"
+        },
+        "skipped": []
+      },
+      "diff": {},
+      "changed": false
+    },
+    {
+      "key": "lin-g",
+      "poc": "PoC-04 G",
+      "recordedMatchesLegacy": false,
+      "recordedVsLegacyDiff": {
+        "nodeCount": {
+          "before": 9,
+          "after": 10
+        },
+        "hopCount": {
+          "before": 7,
+          "after": 8
+        },
+        "columns": {
+          "before": [
+            "code (text)",
+            "region (text)"
+          ],
+          "after": [
+            "code (text)",
+            "id (integer)",
+            "region (text)"
+          ]
+        },
+        "columnChips": {
+          "before": [
+            "code",
+            "region"
+          ],
+          "after": [
+            "code",
+            "id",
+            "region"
+          ]
+        },
+        "projectsHops": {
+          "before": 2,
+          "after": 3
+        },
+        "measured": {
+          "before": 16,
+          "after": 18
+        },
+        "total": {
+          "before": 16,
+          "after": 18
+        },
+        "summaryLine": {
+          "before": "16 か所のうち 0 か所が推定です。経路全体は、いちばん弱いところに合わせて「実測」になります。",
+          "after": "18 か所のうち 0 か所が推定です。経路全体は、いちばん弱いところに合わせて「実測」になります。"
+        },
+        "nodeObservability": {
+          "before": {
+            "value": "measured",
+            "component": "measured,measured",
+            "http": "measured",
+            "server": "measured",
+            "sql": "measured",
+            "table": "measured",
+            "column": "measured,measured"
+          },
+          "after": {
+            "value": "measured",
+            "component": "measured,measured",
+            "http": "measured",
+            "server": "measured",
+            "sql": "measured",
+            "table": "measured",
+            "column": "measured,measured,measured"
+          }
+        },
+        "skipped": {
+          "before": [
+            "射影 id — SELECT句の外（ORDER BY 等）で参照された列であり、結果の行には無いため列として出さなかった"
+          ],
+          "after": []
+        }
+      },
+      "before": {
+        "nodeCount": 10,
+        "hopCount": 8,
+        "columns": [
+          "code (text)",
+          "id (integer)",
+          "region (text)"
+        ],
+        "columnChips": [
+          "code",
+          "id",
+          "region"
+        ],
+        "projectsHops": 3,
+        "readsHops": 1,
+        "measured": 18,
+        "estimated": 0,
+        "total": 18,
+        "pathObservability": "measured",
+        "weakestHop": null,
+        "claim": "src/app/lin-g/page.tsx:28",
+        "truncated": true,
+        "summaryLine": "18 か所のうち 0 か所が推定です。経路全体は、いちばん弱いところに合わせて「実測」になります。",
+        "cuts": [
+          "ここから先は観測していません / props の由来（静的解析でも候補を出せませんでした: 候補なし） / 静的解析で参照の連鎖を解けなかったため、関係を作らない（OBS-05）"
+        ],
+        "nodeObservability": {
+          "value": "measured",
+          "component": "measured,measured",
+          "http": "measured",
+          "server": "measured",
+          "sql": "measured",
+          "table": "measured",
+          "column": "measured,measured,measured"
+        },
+        "skipped": []
+      },
+      "after": {
+        "nodeCount": 9,
+        "hopCount": 7,
+        "columns": [
+          "code (text)",
+          "region (text)"
+        ],
+        "columnChips": [
+          "code",
+          "region"
+        ],
+        "projectsHops": 2,
+        "readsHops": 1,
+        "measured": 16,
+        "estimated": 0,
+        "total": 16,
+        "pathObservability": "measured",
+        "weakestHop": null,
+        "claim": "src/app/lin-g/page.tsx:28",
+        "truncated": true,
+        "summaryLine": "16 か所のうち 0 か所が推定です。経路全体は、いちばん弱いところに合わせて「実測」になります。",
+        "cuts": [
+          "ここから先は観測していません / props の由来（静的解析でも候補を出せませんでした: 候補なし） / 静的解析で参照の連鎖を解けなかったため、関係を作らない（OBS-05）"
+        ],
+        "nodeObservability": {
+          "value": "measured",
+          "component": "measured,measured",
+          "http": "measured",
+          "server": "measured",
+          "sql": "measured",
+          "table": "measured",
+          "column": "measured,measured"
+        },
+        "skipped": [
+          "射影 id — SELECT句の外（ORDER BY 等）で参照された列であり、結果の行には無いため列として出さなかった"
+        ]
+      },
+      "diff": {
+        "nodeCount": {
+          "before": 10,
+          "after": 9
+        },
+        "hopCount": {
+          "before": 8,
+          "after": 7
+        },
+        "columns": {
+          "before": [
+            "code (text)",
+            "id (integer)",
+            "region (text)"
+          ],
+          "after": [
+            "code (text)",
+            "region (text)"
+          ]
+        },
+        "columnChips": {
+          "before": [
+            "code",
+            "id",
+            "region"
+          ],
+          "after": [
+            "code",
+            "region"
+          ]
+        },
+        "projectsHops": {
+          "before": 3,
+          "after": 2
+        },
+        "measured": {
+          "before": 18,
+          "after": 16
+        },
+        "total": {
+          "before": 18,
+          "after": 16
+        },
+        "summaryLine": {
+          "before": "18 か所のうち 0 か所が推定です。経路全体は、いちばん弱いところに合わせて「実測」になります。",
+          "after": "16 か所のうち 0 か所が推定です。経路全体は、いちばん弱いところに合わせて「実測」になります。"
+        },
+        "nodeObservability": {
+          "before": {
+            "value": "measured",
+            "component": "measured,measured",
+            "http": "measured",
+            "server": "measured",
+            "sql": "measured",
+            "table": "measured",
+            "column": "measured,measured,measured"
+          },
+          "after": {
+            "value": "measured",
+            "component": "measured,measured",
+            "http": "measured",
+            "server": "measured",
+            "sql": "measured",
+            "table": "measured",
+            "column": "measured,measured"
+          }
+        },
+        "skipped": {
+          "before": [],
+          "after": [
+            "射影 id — SELECT句の外（ORDER BY 等）で参照された列であり、結果の行には無いため列として出さなかった"
+          ]
+        }
+      },
+      "changed": true
+    }
+  ],
+  "sqlStatements": [
+    {
+      "poc": "PoC-01",
+      "sql": "SELECT \"poc\".\"listings\".\"id\", \"poc\".\"listings\".\"code\", \"poc\".\"listings\".\"region\" FROM \"poc\".\"listings\" WHERE $0=$0 ORDER BY \"poc\".\"listings\".\"id\" ASC LIMIT $1 OFFSET $2",
+      "recordedProjections": [
+        "poc.listings.code",
+        "poc.listings.id",
+        "poc.listings.region"
+      ],
+      "beforeProjections": [
+        "poc.listings.code",
+        "poc.listings.id",
+        "poc.listings.region"
+      ],
+      "afterProjections": [
+        "poc.listings.code",
+        "poc.listings.id",
+        "poc.listings.region"
+      ],
+      "removed": [],
+      "added": [],
+      "beforeSelectStar": false,
+      "afterSelectStar": false,
+      "afterStatementType": "select",
+      "afterReferencesByRole": {
+        "select": [
+          "poc.listings.id",
+          "poc.listings.code",
+          "poc.listings.region"
+        ],
+        "order-by": [
+          "poc.listings.id"
+        ]
+      },
+      "afterUnresolved": []
+    },
+    {
+      "poc": "PoC-02",
+      "sql": "SELECT id, code, plan FROM poc.listings ORDER BY id LIMIT $0",
+      "recordedProjections": [
+        "poc.listings.code",
+        "poc.listings.id",
+        "poc.listings.plan"
+      ],
+      "beforeProjections": [
+        "poc.listings.code",
+        "poc.listings.id",
+        "poc.listings.plan"
+      ],
+      "afterProjections": [
+        "poc.listings.code",
+        "poc.listings.id",
+        "poc.listings.plan"
+      ],
+      "removed": [],
+      "added": [],
+      "beforeSelectStar": false,
+      "afterSelectStar": false,
+      "afterStatementType": "select",
+      "afterReferencesByRole": {
+        "select": [
+          "poc.listings.id",
+          "poc.listings.code",
+          "poc.listings.plan"
+        ],
+        "order-by": [
+          "poc.listings.id"
+        ]
+      },
+      "afterUnresolved": []
+    },
+    {
+      "poc": "PoC-02(Gate A)",
+      "sql": "SELECT code, name FROM poc.regions ORDER BY code LIMIT $0",
+      "recordedProjections": [
+        "poc.regions.code",
+        "poc.regions.name"
+      ],
+      "beforeProjections": [
+        "poc.regions.code",
+        "poc.regions.name"
+      ],
+      "afterProjections": [
+        "poc.regions.code",
+        "poc.regions.name"
+      ],
+      "removed": [],
+      "added": [],
+      "beforeSelectStar": false,
+      "afterSelectStar": false,
+      "afterStatementType": "select",
+      "afterReferencesByRole": {
+        "select": [
+          "poc.regions.code",
+          "poc.regions.name"
+        ],
+        "order-by": [
+          "poc.regions.code"
+        ]
+      },
+      "afterUnresolved": []
+    },
+    {
+      "poc": "PoC-04 A",
+      "sql": "SELECT id, region FROM poc.listings ORDER BY id LIMIT $0",
+      "recordedProjections": [
+        "poc.listings.id",
+        "poc.listings.region"
+      ],
+      "beforeProjections": [
+        "poc.listings.id",
+        "poc.listings.region"
+      ],
+      "afterProjections": [
+        "poc.listings.id",
+        "poc.listings.region"
+      ],
+      "removed": [],
+      "added": [],
+      "beforeSelectStar": false,
+      "afterSelectStar": false,
+      "afterStatementType": "select",
+      "afterReferencesByRole": {
+        "select": [
+          "poc.listings.id",
+          "poc.listings.region"
+        ],
+        "order-by": [
+          "poc.listings.id"
+        ]
+      },
+      "afterUnresolved": []
+    },
+    {
+      "poc": "PoC-04 C",
+      "sql": "SELECT id, code, region FROM poc.listings ORDER BY id LIMIT $0",
+      "recordedProjections": [
+        "poc.listings.code",
+        "poc.listings.id",
+        "poc.listings.region"
+      ],
+      "beforeProjections": [
+        "poc.listings.code",
+        "poc.listings.id",
+        "poc.listings.region"
+      ],
+      "afterProjections": [
+        "poc.listings.code",
+        "poc.listings.id",
+        "poc.listings.region"
+      ],
+      "removed": [],
+      "added": [],
+      "beforeSelectStar": false,
+      "afterSelectStar": false,
+      "afterStatementType": "select",
+      "afterReferencesByRole": {
+        "select": [
+          "poc.listings.id",
+          "poc.listings.code",
+          "poc.listings.region"
+        ],
+        "order-by": [
+          "poc.listings.id"
+        ]
+      },
+      "afterUnresolved": []
+    },
+    {
+      "poc": "PoC-04 G",
+      "sql": "SELECT code, region FROM poc.listings ORDER BY id LIMIT $0",
+      "recordedProjections": [
+        "poc.listings.code",
+        "poc.listings.region"
+      ],
+      "beforeProjections": [
+        "poc.listings.code",
+        "poc.listings.id",
+        "poc.listings.region"
+      ],
+      "afterProjections": [
+        "poc.listings.code",
+        "poc.listings.region"
+      ],
+      "removed": [
+        "poc.listings.id"
+      ],
+      "added": [],
+      "beforeSelectStar": false,
+      "afterSelectStar": false,
+      "afterStatementType": "select",
+      "afterReferencesByRole": {
+        "select": [
+          "poc.listings.code",
+          "poc.listings.region"
+        ],
+        "order-by": [
+          "poc.listings.id"
+        ]
+      },
+      "afterUnresolved": []
+    }
+  ]
+}

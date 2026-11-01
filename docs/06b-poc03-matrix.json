@@ -1,0 +1,3401 @@
+{
+  "poc": "PoC-03",
+  "collectedAt": "2026-10-31T15:09:05Z",
+  "note": "poc/runner/poc03.mjs の計測記録の要約。絶対パスは落としてある。全文は poc/out/poc03.json（.gitignore 済み）。",
+  "buildTime": {
+    "turbopack": {
+      "off": {
+        "startupMedian": 1353,
+        "firstCompileMedian": 796,
+        "starts": [
+          1389,
+          1353,
+          1352
+        ],
+        "firstPaints": [
+          844,
+          787,
+          796
+        ]
+      },
+      "on": {
+        "startupMedian": 1344,
+        "firstCompileMedian": 1101,
+        "starts": [
+          1367,
+          1344,
+          1335
+        ],
+        "firstPaints": [
+          1123,
+          1081,
+          1101
+        ]
+      },
+      "startupDeltaPct": -0.7,
+      "firstCompileDeltaPct": 38.3
+    },
+    "webpack": {
+      "off": {
+        "startupMedian": 3279,
+        "firstCompileMedian": 1180,
+        "starts": [
+          3279,
+          3185,
+          3293
+        ],
+        "firstPaints": [
+          1187,
+          1173,
+          1180
+        ]
+      },
+      "on": {
+        "startupMedian": 3207,
+        "firstCompileMedian": 2142,
+        "starts": [
+          3142,
+          3207,
+          3242
+        ],
+        "firstPaints": [
+          2142,
+          2082,
+          2191
+        ]
+      },
+      "startupDeltaPct": -2.2,
+      "firstCompileDeltaPct": 81.5
+    }
+  },
+  "byBundler": {
+    "turbopack": {
+      "facts": {
+        "startupMs": 1382,
+        "pages": {
+          "/cards": {
+            "anchoredElements": 27,
+            "totalElements": 63
+          },
+          "/cards-rsc": {
+            "anchoredElements": 13,
+            "totalElements": 44
+          }
+        },
+        "ownerStack": " |     at main (<anonymous>) |     at Cards (http://localhost:3200/_next/static/chunks/_16-xg_8rfa8sz._.js:284:214) |     at ClientPageRoot (http://localhost:3200/_next/static/chunks/node_modules_next_dist_20wefz_f1k6jn._.js:173:46)",
+        "clickCount": 21
+      },
+      "manifest": {
+        "files": [
+          {
+            "file": "src/components/ListingCard.tsx",
+            "anchors": 4,
+            "usages": 1,
+            "skipped": []
+          },
+          {
+            "file": "src/app/cards/page.tsx",
+            "anchors": 6,
+            "usages": 2,
+            "skipped": []
+          },
+          {
+            "file": "src/app/cards-rsc/page.tsx",
+            "anchors": 5,
+            "usages": 1,
+            "skipped": []
+          },
+          {
+            "file": "src/app/layout.tsx",
+            "anchors": 0,
+            "usages": 0,
+            "skipped": [
+              {
+                "tag": "html",
+                "file": "src/app/layout.tsx",
+                "line": 5,
+                "why": "framework-owned-element"
+              },
+              {
+                "tag": "body",
+                "file": "src/app/layout.tsx",
+                "line": 6,
+                "why": "framework-owned-element"
+              }
+            ]
+          },
+          {
+            "file": "src/components/RegionBadge.tsx",
+            "anchors": 3,
+            "usages": 0,
+            "skipped": []
+          }
+        ],
+        "anchorCount": 18
+      },
+      "summary": {
+        "targets": 26,
+        "own": {
+          "total": 22,
+          "correct": 22,
+          "wrong": 0,
+          "unidentifiable": 0
+        },
+        "nonOwn": {
+          "total": 4,
+          "correctUnidentifiable": 4,
+          "wrong": 0
+        },
+        "method2": {
+          "lineCorrect": 16,
+          "fileCorrectLineWrong": 0,
+          "fileWrong": 0,
+          "resolvedButShouldNot": 0,
+          "other": 10
+        }
+      },
+      "targets": [
+        {
+          "key": "main",
+          "group": "own-client",
+          "page": "/cards",
+          "sel": "main.cards",
+          "ord": 0,
+          "primary": false,
+          "expect": {
+            "file": "src/app/cards/page.tsx",
+            "line": 42,
+            "tag": "main",
+            "component": "Cards"
+          },
+          "observed": {
+            "tag": "main",
+            "anchorOnSelf": "2dbe4989ce",
+            "anchorOrdinal": 0,
+            "anchorInstanceCount": 1,
+            "ancestorAnchors": [
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": null,
+            "valueShape": null
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/app/cards/page.tsx",
+            "line": 42,
+            "col": 5,
+            "tag": "main",
+            "component": "Cards",
+            "componentLine": 17
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<main className=\"cards\" onClick={probe}>",
+          "method2": {
+            "status": "resolved",
+            "file": "src/app/cards/page.tsx",
+            "line": 42,
+            "via": "sourcemap"
+          },
+          "method2Verdict": "line-correct",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "Cards",
+            "returnChainOwnerName": "Cards",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "h1",
+          "group": "own-client",
+          "page": "/cards",
+          "sel": "main.cards > h1",
+          "ord": 0,
+          "primary": false,
+          "expect": {
+            "file": "src/app/cards/page.tsx",
+            "line": 43,
+            "tag": "h1",
+            "component": "Cards"
+          },
+          "observed": {
+            "tag": "h1",
+            "anchorOnSelf": "f57f43c8ae",
+            "anchorOrdinal": 0,
+            "anchorInstanceCount": 1,
+            "ancestorAnchors": [
+              "f57f43c8ae",
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": 0,
+            "valueShape": {
+              "chars": 5,
+              "cls": "cjk"
+            }
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/app/cards/page.tsx",
+            "line": 43,
+            "col": 7,
+            "tag": "h1",
+            "component": "Cards",
+            "componentLine": 17
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<h1>物件カード</h1>",
+          "method2": {
+            "status": "resolved",
+            "file": "src/app/cards/page.tsx",
+            "line": 43,
+            "via": "sourcemap"
+          },
+          "method2Verdict": "line-correct",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "Cards",
+            "returnChainOwnerName": "Cards",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "static-p",
+          "group": "own-client",
+          "page": "/cards",
+          "sel": "p.static",
+          "ord": 0,
+          "primary": false,
+          "expect": {
+            "file": "src/app/cards/page.tsx",
+            "line": 44,
+            "tag": "p",
+            "component": "Cards"
+          },
+          "observed": {
+            "tag": "p",
+            "anchorOnSelf": "2ec716e014",
+            "anchorOrdinal": 0,
+            "anchorInstanceCount": 1,
+            "ancestorAnchors": [
+              "2ec716e014",
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": 0,
+            "valueShape": {
+              "chars": 24,
+              "cls": "cjk"
+            }
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/app/cards/page.tsx",
+            "line": 44,
+            "col": 7,
+            "tag": "p",
+            "component": "Cards",
+            "componentLine": 17
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<p className=\"static\">合成データのみ。実在の地名も個人情報も含まない。</p>",
+          "method2": {
+            "status": "resolved",
+            "file": "src/app/cards/page.tsx",
+            "line": 44,
+            "via": "sourcemap"
+          },
+          "method2Verdict": "line-correct",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "Cards",
+            "returnChainOwnerName": "Cards",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "grid",
+          "group": "own-client",
+          "page": "/cards",
+          "sel": "div.grid",
+          "ord": 0,
+          "primary": false,
+          "expect": {
+            "file": "src/app/cards/page.tsx",
+            "line": 45,
+            "tag": "div",
+            "component": "Cards"
+          },
+          "observed": {
+            "tag": "div",
+            "anchorOnSelf": "0500ac6da8",
+            "anchorOrdinal": 0,
+            "anchorInstanceCount": 1,
+            "ancestorAnchors": [
+              "0500ac6da8",
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": null,
+            "valueShape": null
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/app/cards/page.tsx",
+            "line": 45,
+            "col": 7,
+            "tag": "div",
+            "component": "Cards",
+            "componentLine": 17
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<div className=\"grid\">",
+          "method2": {
+            "status": "resolved",
+            "file": "src/app/cards/page.tsx",
+            "line": 45,
+            "via": "sourcemap"
+          },
+          "method2Verdict": "line-correct",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "Cards",
+            "returnChainOwnerName": "Cards",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "in-slot",
+          "group": "own-client",
+          "page": "/cards",
+          "sel": "span.in-slot",
+          "ord": 0,
+          "primary": false,
+          "expect": {
+            "file": "src/app/cards/page.tsx",
+            "line": 49,
+            "tag": "span",
+            "component": "Cards"
+          },
+          "observed": {
+            "tag": "span",
+            "anchorOnSelf": "48d99ff7db",
+            "anchorOrdinal": 0,
+            "anchorInstanceCount": 1,
+            "ancestorAnchors": [
+              "48d99ff7db",
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": 0,
+            "valueShape": {
+              "chars": 20,
+              "cls": "mixed"
+            }
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/app/cards/page.tsx",
+            "line": 49,
+            "col": 9,
+            "tag": "span",
+            "component": "Cards",
+            "componentLine": 17
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<span className=\"in-slot\">枠の中身はこのファイルの JSX である</span>",
+          "method2": {
+            "status": "resolved",
+            "file": "src/app/cards/page.tsx",
+            "line": 49,
+            "via": "sourcemap"
+          },
+          "method2Verdict": "line-correct",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "Cards",
+            "returnChainOwnerName": "VendorPanel",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "slot",
+          "group": "own-client",
+          "page": "/cards",
+          "sel": "div.slot",
+          "ord": 0,
+          "primary": false,
+          "expect": {
+            "file": "src/app/cards/page.tsx",
+            "line": 51,
+            "tag": "div",
+            "component": "Cards"
+          },
+          "observed": {
+            "tag": "div",
+            "anchorOnSelf": "5d20141eb7",
+            "anchorOrdinal": 0,
+            "anchorInstanceCount": 1,
+            "ancestorAnchors": [
+              "5d20141eb7",
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": null,
+            "valueShape": null
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/app/cards/page.tsx",
+            "line": 51,
+            "col": 7,
+            "tag": "div",
+            "component": "Cards",
+            "componentLine": 17
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<div className=\"slot\" ref={slot} />",
+          "method2": {
+            "status": "resolved",
+            "file": "src/app/cards/page.tsx",
+            "line": 51,
+            "via": "sourcemap"
+          },
+          "method2Verdict": "line-correct",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "Cards",
+            "returnChainOwnerName": "Cards",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "card-0",
+          "group": "repeated",
+          "page": "/cards",
+          "sel": "article.card",
+          "ord": 0,
+          "primary": false,
+          "expect": {
+            "file": "src/components/ListingCard.tsx",
+            "line": 12,
+            "tag": "article",
+            "component": "ListingCard"
+          },
+          "observed": {
+            "tag": "article",
+            "anchorOnSelf": "91000588c3",
+            "anchorOrdinal": 0,
+            "anchorInstanceCount": 3,
+            "ancestorAnchors": [
+              "91000588c3",
+              "0500ac6da8",
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": null,
+            "valueShape": null
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/components/ListingCard.tsx",
+            "line": 12,
+            "col": 5,
+            "tag": "article",
+            "component": "ListingCard",
+            "componentLine": 10
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<article className=\"card\" data-poc-kind=\"listing-card\">",
+          "method2": {
+            "status": "resolved",
+            "file": "src/components/ListingCard.tsx",
+            "line": 12,
+            "via": "sourcemap"
+          },
+          "method2Verdict": "line-correct",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "ListingCard",
+            "returnChainOwnerName": "ListingCard",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "card-1",
+          "group": "repeated",
+          "page": "/cards",
+          "sel": "article.card",
+          "ord": 1,
+          "primary": false,
+          "expect": {
+            "file": "src/components/ListingCard.tsx",
+            "line": 12,
+            "tag": "article",
+            "component": "ListingCard"
+          },
+          "observed": {
+            "tag": "article",
+            "anchorOnSelf": "91000588c3",
+            "anchorOrdinal": 1,
+            "anchorInstanceCount": 3,
+            "ancestorAnchors": [
+              "91000588c3",
+              "0500ac6da8",
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": null,
+            "valueShape": null
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/components/ListingCard.tsx",
+            "line": 12,
+            "col": 5,
+            "tag": "article",
+            "component": "ListingCard",
+            "componentLine": 10
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<article className=\"card\" data-poc-kind=\"listing-card\">",
+          "method2": {
+            "status": "resolved",
+            "file": "src/components/ListingCard.tsx",
+            "line": 12,
+            "via": "sourcemap"
+          },
+          "method2Verdict": "line-correct",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "ListingCard",
+            "returnChainOwnerName": "ListingCard",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "card-2",
+          "group": "repeated",
+          "page": "/cards",
+          "sel": "article.card",
+          "ord": 2,
+          "primary": false,
+          "expect": {
+            "file": "src/components/ListingCard.tsx",
+            "line": 12,
+            "tag": "article",
+            "component": "ListingCard"
+          },
+          "observed": {
+            "tag": "article",
+            "anchorOnSelf": "91000588c3",
+            "anchorOrdinal": 2,
+            "anchorInstanceCount": 3,
+            "ancestorAnchors": [
+              "91000588c3",
+              "0500ac6da8",
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": null,
+            "valueShape": null
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/components/ListingCard.tsx",
+            "line": 12,
+            "col": 5,
+            "tag": "article",
+            "component": "ListingCard",
+            "componentLine": 10
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<article className=\"card\" data-poc-kind=\"listing-card\">",
+          "method2": {
+            "status": "resolved",
+            "file": "src/components/ListingCard.tsx",
+            "line": 12,
+            "via": "sourcemap"
+          },
+          "method2Verdict": "line-correct",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "ListingCard",
+            "returnChainOwnerName": "ListingCard",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "card-head",
+          "group": "props",
+          "page": "/cards",
+          "sel": "header.card-head",
+          "ord": 0,
+          "primary": false,
+          "expect": {
+            "file": "src/components/ListingCard.tsx",
+            "line": 13,
+            "tag": "header",
+            "component": "ListingCard"
+          },
+          "observed": {
+            "tag": "header",
+            "anchorOnSelf": "a5d48c1380",
+            "anchorOrdinal": 0,
+            "anchorInstanceCount": 3,
+            "ancestorAnchors": [
+              "a5d48c1380",
+              "91000588c3",
+              "0500ac6da8",
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": null,
+            "valueShape": null
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/components/ListingCard.tsx",
+            "line": 13,
+            "col": 7,
+            "tag": "header",
+            "component": "ListingCard",
+            "componentLine": 10
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<header className=\"card-head\">",
+          "method2": {
+            "status": "resolved",
+            "file": "src/components/ListingCard.tsx",
+            "line": 13,
+            "via": "sourcemap"
+          },
+          "method2Verdict": "line-correct",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "ListingCard",
+            "returnChainOwnerName": "ListingCard",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "card-code",
+          "group": "props",
+          "page": "/cards",
+          "sel": "article.card span.code",
+          "ord": 0,
+          "primary": false,
+          "expect": {
+            "file": "src/components/ListingCard.tsx",
+            "line": 14,
+            "tag": "span",
+            "component": "ListingCard"
+          },
+          "observed": {
+            "tag": "span",
+            "anchorOnSelf": "81f0c034df",
+            "anchorOrdinal": 0,
+            "anchorInstanceCount": 3,
+            "ancestorAnchors": [
+              "81f0c034df",
+              "a5d48c1380",
+              "91000588c3",
+              "0500ac6da8",
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": 0,
+            "valueShape": {
+              "chars": 9,
+              "cls": "latin"
+            }
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/components/ListingCard.tsx",
+            "line": 14,
+            "col": 9,
+            "tag": "span",
+            "component": "ListingCard",
+            "componentLine": 10
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<span className=\"code\">{listing.code}</span>",
+          "method2": {
+            "status": "resolved",
+            "file": "src/components/ListingCard.tsx",
+            "line": 14,
+            "via": "sourcemap"
+          },
+          "method2Verdict": "line-correct",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "ListingCard",
+            "returnChainOwnerName": "ListingCard",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "card-body",
+          "group": "props",
+          "page": "/cards",
+          "sel": "div.card-body",
+          "ord": 0,
+          "primary": false,
+          "expect": {
+            "file": "src/components/ListingCard.tsx",
+            "line": 16,
+            "tag": "div",
+            "component": "ListingCard"
+          },
+          "observed": {
+            "tag": "div",
+            "anchorOnSelf": "72cdf7d0b8",
+            "anchorOrdinal": 0,
+            "anchorInstanceCount": 3,
+            "ancestorAnchors": [
+              "72cdf7d0b8",
+              "91000588c3",
+              "0500ac6da8",
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": null,
+            "valueShape": null
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/components/ListingCard.tsx",
+            "line": 16,
+            "col": 7,
+            "tag": "div",
+            "component": "ListingCard",
+            "componentLine": 10
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<div className=\"card-body\">",
+          "method2": {
+            "status": "resolved",
+            "file": "src/components/ListingCard.tsx",
+            "line": 16,
+            "via": "sourcemap"
+          },
+          "method2Verdict": "line-correct",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "ListingCard",
+            "returnChainOwnerName": "ListingCard",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "badge",
+          "group": "nested",
+          "page": "/cards",
+          "sel": "span.badge",
+          "ord": 0,
+          "primary": false,
+          "expect": {
+            "file": "src/components/RegionBadge.tsx",
+            "line": 6,
+            "tag": "span",
+            "component": "RegionBadge"
+          },
+          "observed": {
+            "tag": "span",
+            "anchorOnSelf": "b66777e04e",
+            "anchorOrdinal": 0,
+            "anchorInstanceCount": 3,
+            "ancestorAnchors": [
+              "b66777e04e",
+              "72cdf7d0b8",
+              "91000588c3",
+              "0500ac6da8",
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": null,
+            "valueShape": null
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/components/RegionBadge.tsx",
+            "line": 6,
+            "col": 5,
+            "tag": "span",
+            "component": "RegionBadge",
+            "componentLine": 4
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<span className=\"badge\">",
+          "method2": {
+            "status": "resolved",
+            "file": "src/components/RegionBadge.tsx",
+            "line": 6,
+            "via": "sourcemap"
+          },
+          "method2Verdict": "line-correct",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "RegionBadge",
+            "returnChainOwnerName": "RegionBadge",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "badge-dot",
+          "group": "nested",
+          "page": "/cards",
+          "sel": "span.badge-dot",
+          "ord": 0,
+          "primary": false,
+          "expect": {
+            "file": "src/components/RegionBadge.tsx",
+            "line": 7,
+            "tag": "span",
+            "component": "RegionBadge"
+          },
+          "observed": {
+            "tag": "span",
+            "anchorOnSelf": "cf8474c96b",
+            "anchorOrdinal": 0,
+            "anchorInstanceCount": 3,
+            "ancestorAnchors": [
+              "cf8474c96b",
+              "b66777e04e",
+              "72cdf7d0b8",
+              "91000588c3",
+              "0500ac6da8",
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": null,
+            "valueShape": null
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/components/RegionBadge.tsx",
+            "line": 7,
+            "col": 7,
+            "tag": "span",
+            "component": "RegionBadge",
+            "componentLine": 4
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<span className=\"badge-dot\" aria-hidden=\"true\" />",
+          "method2": {
+            "status": "resolved",
+            "file": "src/components/RegionBadge.tsx",
+            "line": 7,
+            "via": "sourcemap"
+          },
+          "method2Verdict": "line-correct",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "RegionBadge",
+            "returnChainOwnerName": "RegionBadge",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "badge-text",
+          "group": "nested",
+          "page": "/cards",
+          "sel": "span.badge-text",
+          "ord": 0,
+          "primary": true,
+          "expect": {
+            "file": "src/components/RegionBadge.tsx",
+            "line": 8,
+            "tag": "span",
+            "component": "RegionBadge"
+          },
+          "observed": {
+            "tag": "span",
+            "anchorOnSelf": "9d8bc0d72e",
+            "anchorOrdinal": 0,
+            "anchorInstanceCount": 3,
+            "ancestorAnchors": [
+              "9d8bc0d72e",
+              "b66777e04e",
+              "72cdf7d0b8",
+              "91000588c3",
+              "0500ac6da8",
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": 0,
+            "valueShape": {
+              "chars": 5,
+              "cls": "cjk"
+            }
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/components/RegionBadge.tsx",
+            "line": 8,
+            "col": 7,
+            "tag": "span",
+            "component": "RegionBadge",
+            "componentLine": 4
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<span className=\"badge-text\">{region}</span>",
+          "method2": {
+            "status": "resolved",
+            "file": "src/components/RegionBadge.tsx",
+            "line": 8,
+            "via": "sourcemap"
+          },
+          "method2Verdict": "line-correct",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "RegionBadge",
+            "returnChainOwnerName": "RegionBadge",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "badge-text-2",
+          "group": "repeated",
+          "page": "/cards",
+          "sel": "span.badge-text",
+          "ord": 2,
+          "primary": false,
+          "expect": {
+            "file": "src/components/RegionBadge.tsx",
+            "line": 8,
+            "tag": "span",
+            "component": "RegionBadge"
+          },
+          "observed": {
+            "tag": "span",
+            "anchorOnSelf": "9d8bc0d72e",
+            "anchorOrdinal": 2,
+            "anchorInstanceCount": 3,
+            "ancestorAnchors": [
+              "9d8bc0d72e",
+              "b66777e04e",
+              "72cdf7d0b8",
+              "91000588c3",
+              "0500ac6da8",
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": 0,
+            "valueShape": {
+              "chars": 4,
+              "cls": "cjk"
+            }
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/components/RegionBadge.tsx",
+            "line": 8,
+            "col": 7,
+            "tag": "span",
+            "component": "RegionBadge",
+            "componentLine": 4
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<span className=\"badge-text\">{region}</span>",
+          "method2": {
+            "status": "resolved",
+            "file": "src/components/RegionBadge.tsx",
+            "line": 8,
+            "via": "sourcemap"
+          },
+          "method2Verdict": "line-correct",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "RegionBadge",
+            "returnChainOwnerName": "RegionBadge",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "vendor-root",
+          "group": "library",
+          "page": "/cards",
+          "sel": "section.vendor",
+          "ord": 0,
+          "primary": false,
+          "expect": null,
+          "observed": {
+            "tag": "section",
+            "anchorOnSelf": null,
+            "anchorOrdinal": null,
+            "anchorInstanceCount": 0,
+            "ancestorAnchors": [
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": null,
+            "valueShape": null
+          },
+          "method1": {
+            "status": "failure",
+            "reason": "anchor-missing",
+            "nearestAncestorAnchor": "2dbe4989ce"
+          },
+          "method1Verdict": {
+            "verdict": "correct-unidentifiable",
+            "reason": "anchor-missing"
+          },
+          "sourceLine": null,
+          "method2": {
+            "status": "no-user-source",
+            "tried": [
+              "http://localhost:3200/_next/static/chunks/node_modules_next_dist_compiled_1amofcmz--cdp._.js",
+              "http://localhost:3200/_next/static/chunks/_16-xg_8rfa8sz._.js",
+              "http://localhost:3200/_next/static/chunks/1daa_next_dist_compiled_react-dom_cjs_react-dom-client_development_0mp0cp_t-ezj9.js",
+              "http://localhost:3200/_next/static/chunks/1daa_next_dist_compiled_react-dom_cjs_react-dom-client_development_0mp0cp_t-ezj9.js",
+              "http://localhost:3200/_next/static/chunks/1daa_next_dist_compiled_react-dom_cjs_react-dom-client_development_0mp0cp_t-ezj9.js",
+              "http://localhost:3200/_next/static/chunks/1daa_next_dist_compiled_react-dom_cjs_react-dom-client_development_0mp0cp_t-ezj9.js"
+            ]
+          },
+          "method2Verdict": "no-user-source",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "VendorPanel",
+            "returnChainOwnerName": "VendorPanel",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "vendor-title",
+          "group": "library",
+          "page": "/cards",
+          "sel": "h3.vendor-title",
+          "ord": 0,
+          "primary": false,
+          "expect": null,
+          "observed": {
+            "tag": "h3",
+            "anchorOnSelf": null,
+            "anchorOrdinal": null,
+            "anchorInstanceCount": 0,
+            "ancestorAnchors": [
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": 0,
+            "valueShape": {
+              "chars": 9,
+              "cls": "cjk"
+            }
+          },
+          "method1": {
+            "status": "failure",
+            "reason": "anchor-missing",
+            "nearestAncestorAnchor": "2dbe4989ce"
+          },
+          "method1Verdict": {
+            "verdict": "correct-unidentifiable",
+            "reason": "anchor-missing"
+          },
+          "sourceLine": null,
+          "method2": {
+            "status": "no-user-source",
+            "tried": [
+              "http://localhost:3200/_next/static/chunks/node_modules_next_dist_compiled_1amofcmz--cdp._.js",
+              "http://localhost:3200/_next/static/chunks/_16-xg_8rfa8sz._.js",
+              "http://localhost:3200/_next/static/chunks/1daa_next_dist_compiled_react-dom_cjs_react-dom-client_development_0mp0cp_t-ezj9.js",
+              "http://localhost:3200/_next/static/chunks/1daa_next_dist_compiled_react-dom_cjs_react-dom-client_development_0mp0cp_t-ezj9.js",
+              "http://localhost:3200/_next/static/chunks/1daa_next_dist_compiled_react-dom_cjs_react-dom-client_development_0mp0cp_t-ezj9.js",
+              "http://localhost:3200/_next/static/chunks/1daa_next_dist_compiled_react-dom_cjs_react-dom-client_development_0mp0cp_t-ezj9.js"
+            ]
+          },
+          "method2Verdict": "no-user-source",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "VendorPanel",
+            "returnChainOwnerName": "VendorPanel",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "vendor-slot",
+          "group": "library",
+          "page": "/cards",
+          "sel": "div.vendor-slot",
+          "ord": 0,
+          "primary": false,
+          "expect": null,
+          "observed": {
+            "tag": "div",
+            "anchorOnSelf": null,
+            "anchorOrdinal": null,
+            "anchorInstanceCount": 0,
+            "ancestorAnchors": [
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": null,
+            "valueShape": null
+          },
+          "method1": {
+            "status": "failure",
+            "reason": "anchor-missing",
+            "nearestAncestorAnchor": "2dbe4989ce"
+          },
+          "method1Verdict": {
+            "verdict": "correct-unidentifiable",
+            "reason": "anchor-missing"
+          },
+          "sourceLine": null,
+          "method2": {
+            "status": "no-user-source",
+            "tried": [
+              "http://localhost:3200/_next/static/chunks/node_modules_next_dist_compiled_1amofcmz--cdp._.js",
+              "http://localhost:3200/_next/static/chunks/_16-xg_8rfa8sz._.js",
+              "http://localhost:3200/_next/static/chunks/1daa_next_dist_compiled_react-dom_cjs_react-dom-client_development_0mp0cp_t-ezj9.js",
+              "http://localhost:3200/_next/static/chunks/1daa_next_dist_compiled_react-dom_cjs_react-dom-client_development_0mp0cp_t-ezj9.js",
+              "http://localhost:3200/_next/static/chunks/1daa_next_dist_compiled_react-dom_cjs_react-dom-client_development_0mp0cp_t-ezj9.js",
+              "http://localhost:3200/_next/static/chunks/1daa_next_dist_compiled_react-dom_cjs_react-dom-client_development_0mp0cp_t-ezj9.js"
+            ]
+          },
+          "method2Verdict": "no-user-source",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "VendorPanel",
+            "returnChainOwnerName": "VendorPanel",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "dynamic",
+          "group": "no-jsx",
+          "page": "/cards",
+          "sel": "span.injected",
+          "ord": 0,
+          "primary": false,
+          "expect": null,
+          "observed": {
+            "tag": "span",
+            "anchorOnSelf": null,
+            "anchorOrdinal": null,
+            "anchorInstanceCount": 0,
+            "ancestorAnchors": [
+              "5d20141eb7",
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": 0,
+            "valueShape": {
+              "chars": 4,
+              "cls": "cjk"
+            }
+          },
+          "method1": {
+            "status": "failure",
+            "reason": "anchor-missing",
+            "nearestAncestorAnchor": "5d20141eb7"
+          },
+          "method1Verdict": {
+            "verdict": "correct-unidentifiable",
+            "reason": "anchor-missing"
+          },
+          "sourceLine": null,
+          "method2": {
+            "status": "no-debug-stack",
+            "tried": []
+          },
+          "method2Verdict": "no-debug-stack",
+          "react": {
+            "hostKeys": [],
+            "fiber": false
+          }
+        },
+        {
+          "key": "rsc-main",
+          "group": "own-server",
+          "page": "/cards-rsc",
+          "sel": "main.cards-rsc",
+          "ord": 0,
+          "primary": false,
+          "expect": {
+            "file": "src/app/cards-rsc/page.tsx",
+            "line": 17,
+            "tag": "main",
+            "component": "CardsRsc"
+          },
+          "observed": {
+            "tag": "main",
+            "anchorOnSelf": "ad079ad318",
+            "anchorOrdinal": 0,
+            "anchorInstanceCount": 1,
+            "ancestorAnchors": [
+              "ad079ad318"
+            ],
+            "textNodeIndex": null,
+            "valueShape": null
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/app/cards-rsc/page.tsx",
+            "line": 17,
+            "col": 5,
+            "tag": "main",
+            "component": "CardsRsc",
+            "componentLine": 15
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<main className=\"cards-rsc\">",
+          "method2": {
+            "status": "no-user-source",
+            "tried": [
+              "http://localhost:3200/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-67asdr9._.js",
+              "about://React/Server/<local-path>",
+              "http://localhost:3200/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-67asdr9._.js",
+              "http://localhost:3200/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-67asdr9._.js"
+            ]
+          },
+          "method2Verdict": "no-user-source",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": null,
+            "returnChainOwnerName": "SegmentViewNode",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "rsc-h1",
+          "group": "own-server",
+          "page": "/cards-rsc",
+          "sel": "main.cards-rsc > h1",
+          "ord": 0,
+          "primary": false,
+          "expect": {
+            "file": "src/app/cards-rsc/page.tsx",
+            "line": 18,
+            "tag": "h1",
+            "component": "CardsRsc"
+          },
+          "observed": {
+            "tag": "h1",
+            "anchorOnSelf": "69879a922a",
+            "anchorOrdinal": 0,
+            "anchorInstanceCount": 1,
+            "ancestorAnchors": [
+              "69879a922a",
+              "ad079ad318"
+            ],
+            "textNodeIndex": 0,
+            "valueShape": {
+              "chars": 13,
+              "cls": "cjk"
+            }
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/app/cards-rsc/page.tsx",
+            "line": 18,
+            "col": 7,
+            "tag": "h1",
+            "component": "CardsRsc",
+            "componentLine": 15
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<h1>物件カード（サーバー描画）</h1>",
+          "method2": {
+            "status": "no-user-source",
+            "tried": [
+              "http://localhost:3200/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-67asdr9._.js",
+              "about://React/Server/<local-path>",
+              "http://localhost:3200/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-67asdr9._.js",
+              "http://localhost:3200/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-67asdr9._.js"
+            ]
+          },
+          "method2Verdict": "no-user-source",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": null,
+            "returnChainOwnerName": "SegmentViewNode",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "rsc-ul",
+          "group": "own-server",
+          "page": "/cards-rsc",
+          "sel": "main.cards-rsc > ul",
+          "ord": 0,
+          "primary": false,
+          "expect": {
+            "file": "src/app/cards-rsc/page.tsx",
+            "line": 19,
+            "tag": "ul",
+            "component": "CardsRsc"
+          },
+          "observed": {
+            "tag": "ul",
+            "anchorOnSelf": "14f82f0ec2",
+            "anchorOrdinal": 0,
+            "anchorInstanceCount": 1,
+            "ancestorAnchors": [
+              "14f82f0ec2",
+              "ad079ad318"
+            ],
+            "textNodeIndex": null,
+            "valueShape": null
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/app/cards-rsc/page.tsx",
+            "line": 19,
+            "col": 7,
+            "tag": "ul",
+            "component": "CardsRsc",
+            "componentLine": 15
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<ul>",
+          "method2": {
+            "status": "no-user-source",
+            "tried": [
+              "http://localhost:3200/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-67asdr9._.js",
+              "about://React/Server/<local-path>",
+              "http://localhost:3200/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-67asdr9._.js",
+              "http://localhost:3200/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-67asdr9._.js"
+            ]
+          },
+          "method2Verdict": "no-user-source",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": null,
+            "returnChainOwnerName": "SegmentViewNode",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "rsc-li",
+          "group": "own-server",
+          "page": "/cards-rsc",
+          "sel": "main.cards-rsc li",
+          "ord": 1,
+          "primary": false,
+          "expect": {
+            "file": "src/app/cards-rsc/page.tsx",
+            "line": 21,
+            "tag": "li",
+            "component": "CardsRsc"
+          },
+          "observed": {
+            "tag": "li",
+            "anchorOnSelf": "4080787fb3",
+            "anchorOrdinal": 1,
+            "anchorInstanceCount": 2,
+            "ancestorAnchors": [
+              "4080787fb3",
+              "14f82f0ec2",
+              "ad079ad318"
+            ],
+            "textNodeIndex": null,
+            "valueShape": null
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/app/cards-rsc/page.tsx",
+            "line": 21,
+            "col": 11,
+            "tag": "li",
+            "component": "CardsRsc",
+            "componentLine": 15
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<li key={s.id}>",
+          "method2": {
+            "status": "no-user-source",
+            "tried": [
+              "http://localhost:3200/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-67asdr9._.js",
+              "about://React/Server/<local-path>",
+              "<anonymous>",
+              "about://React/Server/<local-path>",
+              "http://localhost:3200/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-67asdr9._.js",
+              "http://localhost:3200/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-67asdr9._.js"
+            ]
+          },
+          "method2Verdict": "no-user-source",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": null,
+            "returnChainOwnerName": "SegmentViewNode",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "rsc-code",
+          "group": "own-server",
+          "page": "/cards-rsc",
+          "sel": "main.cards-rsc span.code",
+          "ord": 0,
+          "primary": false,
+          "expect": {
+            "file": "src/app/cards-rsc/page.tsx",
+            "line": 22,
+            "tag": "span",
+            "component": "CardsRsc"
+          },
+          "observed": {
+            "tag": "span",
+            "anchorOnSelf": "feca95b2ec",
+            "anchorOrdinal": 0,
+            "anchorInstanceCount": 2,
+            "ancestorAnchors": [
+              "feca95b2ec",
+              "4080787fb3",
+              "14f82f0ec2",
+              "ad079ad318"
+            ],
+            "textNodeIndex": 0,
+            "valueShape": {
+              "chars": 9,
+              "cls": "latin"
+            }
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/app/cards-rsc/page.tsx",
+            "line": 22,
+            "col": 13,
+            "tag": "span",
+            "component": "CardsRsc",
+            "componentLine": 15
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<span className=\"code\">{s.code}</span>",
+          "method2": {
+            "status": "no-user-source",
+            "tried": [
+              "http://localhost:3200/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-67asdr9._.js",
+              "about://React/Server/<local-path>",
+              "<anonymous>",
+              "about://React/Server/<local-path>",
+              "http://localhost:3200/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-67asdr9._.js",
+              "http://localhost:3200/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-67asdr9._.js"
+            ]
+          },
+          "method2Verdict": "no-user-source",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": null,
+            "returnChainOwnerName": "SegmentViewNode",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "rsc-badge-text",
+          "group": "own-server",
+          "page": "/cards-rsc",
+          "sel": "span.badge-text",
+          "ord": 1,
+          "primary": false,
+          "expect": {
+            "file": "src/components/RegionBadge.tsx",
+            "line": 8,
+            "tag": "span",
+            "component": "RegionBadge"
+          },
+          "observed": {
+            "tag": "span",
+            "anchorOnSelf": "9d8bc0d72e",
+            "anchorOrdinal": 1,
+            "anchorInstanceCount": 2,
+            "ancestorAnchors": [
+              "9d8bc0d72e",
+              "b66777e04e",
+              "4080787fb3",
+              "14f82f0ec2",
+              "ad079ad318"
+            ],
+            "textNodeIndex": 0,
+            "valueShape": {
+              "chars": 5,
+              "cls": "cjk"
+            }
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/components/RegionBadge.tsx",
+            "line": 8,
+            "col": 7,
+            "tag": "span",
+            "component": "RegionBadge",
+            "componentLine": 4
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<span className=\"badge-text\">{region}</span>",
+          "method2": {
+            "status": "no-user-source",
+            "tried": [
+              "http://localhost:3200/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-67asdr9._.js",
+              "about://React/Server/<local-path>",
+              "http://localhost:3200/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-67asdr9._.js",
+              "http://localhost:3200/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-67asdr9._.js"
+            ]
+          },
+          "method2Verdict": "no-user-source",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": null,
+            "returnChainOwnerName": "SegmentViewNode",
+            "propsHasSource": false
+          }
+        }
+      ]
+    },
+    "webpack": {
+      "facts": {
+        "startupMs": 3143,
+        "pages": {
+          "/cards": {
+            "anchoredElements": 27,
+            "totalElements": 51
+          },
+          "/cards-rsc": {
+            "anchoredElements": 13,
+            "totalElements": 32
+          }
+        },
+        "ownerStack": " |     at main (<anonymous>) |     at Cards (webpack-internal:///(app-pages-browser)/./src/app/cards/page.tsx:53:87) |     at ClientPageRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/client-page.js:37:46)",
+        "clickCount": 21
+      },
+      "manifest": {
+        "files": [
+          {
+            "file": "src/components/ListingCard.tsx",
+            "anchors": 4,
+            "usages": 1,
+            "skipped": []
+          },
+          {
+            "file": "src/app/cards/page.tsx",
+            "anchors": 6,
+            "usages": 2,
+            "skipped": []
+          },
+          {
+            "file": "src/app/cards-rsc/page.tsx",
+            "anchors": 5,
+            "usages": 1,
+            "skipped": []
+          },
+          {
+            "file": "src/app/layout.tsx",
+            "anchors": 0,
+            "usages": 0,
+            "skipped": [
+              {
+                "tag": "html",
+                "file": "src/app/layout.tsx",
+                "line": 5,
+                "why": "framework-owned-element"
+              },
+              {
+                "tag": "body",
+                "file": "src/app/layout.tsx",
+                "line": 6,
+                "why": "framework-owned-element"
+              }
+            ]
+          },
+          {
+            "file": "src/components/RegionBadge.tsx",
+            "anchors": 3,
+            "usages": 0,
+            "skipped": []
+          }
+        ],
+        "anchorCount": 18
+      },
+      "summary": {
+        "targets": 26,
+        "own": {
+          "total": 22,
+          "correct": 22,
+          "wrong": 0,
+          "unidentifiable": 0
+        },
+        "nonOwn": {
+          "total": 4,
+          "correctUnidentifiable": 4,
+          "wrong": 0
+        },
+        "method2": {
+          "lineCorrect": 0,
+          "fileCorrectLineWrong": 22,
+          "fileWrong": 0,
+          "resolvedButShouldNot": 0,
+          "other": 4
+        }
+      },
+      "targets": [
+        {
+          "key": "main",
+          "group": "own-client",
+          "page": "/cards",
+          "sel": "main.cards",
+          "ord": 0,
+          "primary": false,
+          "expect": {
+            "file": "src/app/cards/page.tsx",
+            "line": 42,
+            "tag": "main",
+            "component": "Cards"
+          },
+          "observed": {
+            "tag": "main",
+            "anchorOnSelf": "2dbe4989ce",
+            "anchorOrdinal": 0,
+            "anchorInstanceCount": 1,
+            "ancestorAnchors": [
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": null,
+            "valueShape": null
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/app/cards/page.tsx",
+            "line": 42,
+            "col": 5,
+            "tag": "main",
+            "component": "Cards",
+            "componentLine": 17
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<main className=\"cards\" onClick={probe}>",
+          "method2": {
+            "status": "resolved",
+            "file": "src/app/cards/page.tsx",
+            "line": 53,
+            "via": "frame-url"
+          },
+          "method2Verdict": "file-correct-line-wrong",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "Cards",
+            "returnChainOwnerName": "Cards",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "h1",
+          "group": "own-client",
+          "page": "/cards",
+          "sel": "main.cards > h1",
+          "ord": 0,
+          "primary": false,
+          "expect": {
+            "file": "src/app/cards/page.tsx",
+            "line": 43,
+            "tag": "h1",
+            "component": "Cards"
+          },
+          "observed": {
+            "tag": "h1",
+            "anchorOnSelf": "f57f43c8ae",
+            "anchorOrdinal": 0,
+            "anchorInstanceCount": 1,
+            "ancestorAnchors": [
+              "f57f43c8ae",
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": 0,
+            "valueShape": {
+              "chars": 5,
+              "cls": "cjk"
+            }
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/app/cards/page.tsx",
+            "line": 43,
+            "col": 7,
+            "tag": "h1",
+            "component": "Cards",
+            "componentLine": 17
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<h1>物件カード</h1>",
+          "method2": {
+            "status": "resolved",
+            "file": "src/app/cards/page.tsx",
+            "line": 58,
+            "via": "frame-url"
+          },
+          "method2Verdict": "file-correct-line-wrong",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "Cards",
+            "returnChainOwnerName": "Cards",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "static-p",
+          "group": "own-client",
+          "page": "/cards",
+          "sel": "p.static",
+          "ord": 0,
+          "primary": false,
+          "expect": {
+            "file": "src/app/cards/page.tsx",
+            "line": 44,
+            "tag": "p",
+            "component": "Cards"
+          },
+          "observed": {
+            "tag": "p",
+            "anchorOnSelf": "2ec716e014",
+            "anchorOrdinal": 0,
+            "anchorInstanceCount": 1,
+            "ancestorAnchors": [
+              "2ec716e014",
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": 0,
+            "valueShape": {
+              "chars": 24,
+              "cls": "cjk"
+            }
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/app/cards/page.tsx",
+            "line": 44,
+            "col": 7,
+            "tag": "p",
+            "component": "Cards",
+            "componentLine": 17
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<p className=\"static\">合成データのみ。実在の地名も個人情報も含まない。</p>",
+          "method2": {
+            "status": "resolved",
+            "file": "src/app/cards/page.tsx",
+            "line": 66,
+            "via": "frame-url"
+          },
+          "method2Verdict": "file-correct-line-wrong",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "Cards",
+            "returnChainOwnerName": "Cards",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "grid",
+          "group": "own-client",
+          "page": "/cards",
+          "sel": "div.grid",
+          "ord": 0,
+          "primary": false,
+          "expect": {
+            "file": "src/app/cards/page.tsx",
+            "line": 45,
+            "tag": "div",
+            "component": "Cards"
+          },
+          "observed": {
+            "tag": "div",
+            "anchorOnSelf": "0500ac6da8",
+            "anchorOrdinal": 0,
+            "anchorInstanceCount": 1,
+            "ancestorAnchors": [
+              "0500ac6da8",
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": null,
+            "valueShape": null
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/app/cards/page.tsx",
+            "line": 45,
+            "col": 7,
+            "tag": "div",
+            "component": "Cards",
+            "componentLine": 17
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<div className=\"grid\">",
+          "method2": {
+            "status": "resolved",
+            "file": "src/app/cards/page.tsx",
+            "line": 75,
+            "via": "frame-url"
+          },
+          "method2Verdict": "file-correct-line-wrong",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "Cards",
+            "returnChainOwnerName": "Cards",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "in-slot",
+          "group": "own-client",
+          "page": "/cards",
+          "sel": "span.in-slot",
+          "ord": 0,
+          "primary": false,
+          "expect": {
+            "file": "src/app/cards/page.tsx",
+            "line": 49,
+            "tag": "span",
+            "component": "Cards"
+          },
+          "observed": {
+            "tag": "span",
+            "anchorOnSelf": "48d99ff7db",
+            "anchorOrdinal": 0,
+            "anchorInstanceCount": 1,
+            "ancestorAnchors": [
+              "48d99ff7db",
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": 0,
+            "valueShape": {
+              "chars": 20,
+              "cls": "mixed"
+            }
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/app/cards/page.tsx",
+            "line": 49,
+            "col": 9,
+            "tag": "span",
+            "component": "Cards",
+            "componentLine": 17
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<span className=\"in-slot\">枠の中身はこのファイルの JSX である</span>",
+          "method2": {
+            "status": "resolved",
+            "file": "src/app/cards/page.tsx",
+            "line": 92,
+            "via": "frame-url"
+          },
+          "method2Verdict": "file-correct-line-wrong",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "Cards",
+            "returnChainOwnerName": "VendorPanel",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "slot",
+          "group": "own-client",
+          "page": "/cards",
+          "sel": "div.slot",
+          "ord": 0,
+          "primary": false,
+          "expect": {
+            "file": "src/app/cards/page.tsx",
+            "line": 51,
+            "tag": "div",
+            "component": "Cards"
+          },
+          "observed": {
+            "tag": "div",
+            "anchorOnSelf": "5d20141eb7",
+            "anchorOrdinal": 0,
+            "anchorInstanceCount": 1,
+            "ancestorAnchors": [
+              "5d20141eb7",
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": null,
+            "valueShape": null
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/app/cards/page.tsx",
+            "line": 51,
+            "col": 7,
+            "tag": "div",
+            "component": "Cards",
+            "componentLine": 17
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<div className=\"slot\" ref={slot} />",
+          "method2": {
+            "status": "resolved",
+            "file": "src/app/cards/page.tsx",
+            "line": 106,
+            "via": "frame-url"
+          },
+          "method2Verdict": "file-correct-line-wrong",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "Cards",
+            "returnChainOwnerName": "Cards",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "card-0",
+          "group": "repeated",
+          "page": "/cards",
+          "sel": "article.card",
+          "ord": 0,
+          "primary": false,
+          "expect": {
+            "file": "src/components/ListingCard.tsx",
+            "line": 12,
+            "tag": "article",
+            "component": "ListingCard"
+          },
+          "observed": {
+            "tag": "article",
+            "anchorOnSelf": "91000588c3",
+            "anchorOrdinal": 0,
+            "anchorInstanceCount": 3,
+            "ancestorAnchors": [
+              "91000588c3",
+              "0500ac6da8",
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": null,
+            "valueShape": null
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/components/ListingCard.tsx",
+            "line": 12,
+            "col": 5,
+            "tag": "article",
+            "component": "ListingCard",
+            "componentLine": 10
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<article className=\"card\" data-poc-kind=\"listing-card\">",
+          "method2": {
+            "status": "resolved",
+            "file": "src/components/ListingCard.tsx",
+            "line": 14,
+            "via": "frame-url"
+          },
+          "method2Verdict": "file-correct-line-wrong",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "ListingCard",
+            "returnChainOwnerName": "ListingCard",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "card-1",
+          "group": "repeated",
+          "page": "/cards",
+          "sel": "article.card",
+          "ord": 1,
+          "primary": false,
+          "expect": {
+            "file": "src/components/ListingCard.tsx",
+            "line": 12,
+            "tag": "article",
+            "component": "ListingCard"
+          },
+          "observed": {
+            "tag": "article",
+            "anchorOnSelf": "91000588c3",
+            "anchorOrdinal": 1,
+            "anchorInstanceCount": 3,
+            "ancestorAnchors": [
+              "91000588c3",
+              "0500ac6da8",
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": null,
+            "valueShape": null
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/components/ListingCard.tsx",
+            "line": 12,
+            "col": 5,
+            "tag": "article",
+            "component": "ListingCard",
+            "componentLine": 10
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<article className=\"card\" data-poc-kind=\"listing-card\">",
+          "method2": {
+            "status": "resolved",
+            "file": "src/components/ListingCard.tsx",
+            "line": 14,
+            "via": "frame-url"
+          },
+          "method2Verdict": "file-correct-line-wrong",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "ListingCard",
+            "returnChainOwnerName": "ListingCard",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "card-2",
+          "group": "repeated",
+          "page": "/cards",
+          "sel": "article.card",
+          "ord": 2,
+          "primary": false,
+          "expect": {
+            "file": "src/components/ListingCard.tsx",
+            "line": 12,
+            "tag": "article",
+            "component": "ListingCard"
+          },
+          "observed": {
+            "tag": "article",
+            "anchorOnSelf": "91000588c3",
+            "anchorOrdinal": 2,
+            "anchorInstanceCount": 3,
+            "ancestorAnchors": [
+              "91000588c3",
+              "0500ac6da8",
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": null,
+            "valueShape": null
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/components/ListingCard.tsx",
+            "line": 12,
+            "col": 5,
+            "tag": "article",
+            "component": "ListingCard",
+            "componentLine": 10
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<article className=\"card\" data-poc-kind=\"listing-card\">",
+          "method2": {
+            "status": "resolved",
+            "file": "src/components/ListingCard.tsx",
+            "line": 14,
+            "via": "frame-url"
+          },
+          "method2Verdict": "file-correct-line-wrong",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "ListingCard",
+            "returnChainOwnerName": "ListingCard",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "card-head",
+          "group": "props",
+          "page": "/cards",
+          "sel": "header.card-head",
+          "ord": 0,
+          "primary": false,
+          "expect": {
+            "file": "src/components/ListingCard.tsx",
+            "line": 13,
+            "tag": "header",
+            "component": "ListingCard"
+          },
+          "observed": {
+            "tag": "header",
+            "anchorOnSelf": "a5d48c1380",
+            "anchorOrdinal": 0,
+            "anchorInstanceCount": 3,
+            "ancestorAnchors": [
+              "a5d48c1380",
+              "91000588c3",
+              "0500ac6da8",
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": null,
+            "valueShape": null
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/components/ListingCard.tsx",
+            "line": 13,
+            "col": 7,
+            "tag": "header",
+            "component": "ListingCard",
+            "componentLine": 10
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<header className=\"card-head\">",
+          "method2": {
+            "status": "resolved",
+            "file": "src/components/ListingCard.tsx",
+            "line": 19,
+            "via": "frame-url"
+          },
+          "method2Verdict": "file-correct-line-wrong",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "ListingCard",
+            "returnChainOwnerName": "ListingCard",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "card-code",
+          "group": "props",
+          "page": "/cards",
+          "sel": "article.card span.code",
+          "ord": 0,
+          "primary": false,
+          "expect": {
+            "file": "src/components/ListingCard.tsx",
+            "line": 14,
+            "tag": "span",
+            "component": "ListingCard"
+          },
+          "observed": {
+            "tag": "span",
+            "anchorOnSelf": "81f0c034df",
+            "anchorOrdinal": 0,
+            "anchorInstanceCount": 3,
+            "ancestorAnchors": [
+              "81f0c034df",
+              "a5d48c1380",
+              "91000588c3",
+              "0500ac6da8",
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": 0,
+            "valueShape": {
+              "chars": 9,
+              "cls": "latin"
+            }
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/components/ListingCard.tsx",
+            "line": 14,
+            "col": 9,
+            "tag": "span",
+            "component": "ListingCard",
+            "componentLine": 10
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<span className=\"code\">{listing.code}</span>",
+          "method2": {
+            "status": "resolved",
+            "file": "src/components/ListingCard.tsx",
+            "line": 22,
+            "via": "frame-url"
+          },
+          "method2Verdict": "file-correct-line-wrong",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "ListingCard",
+            "returnChainOwnerName": "ListingCard",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "card-body",
+          "group": "props",
+          "page": "/cards",
+          "sel": "div.card-body",
+          "ord": 0,
+          "primary": false,
+          "expect": {
+            "file": "src/components/ListingCard.tsx",
+            "line": 16,
+            "tag": "div",
+            "component": "ListingCard"
+          },
+          "observed": {
+            "tag": "div",
+            "anchorOnSelf": "72cdf7d0b8",
+            "anchorOrdinal": 0,
+            "anchorInstanceCount": 3,
+            "ancestorAnchors": [
+              "72cdf7d0b8",
+              "91000588c3",
+              "0500ac6da8",
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": null,
+            "valueShape": null
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/components/ListingCard.tsx",
+            "line": 16,
+            "col": 7,
+            "tag": "div",
+            "component": "ListingCard",
+            "componentLine": 10
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<div className=\"card-body\">",
+          "method2": {
+            "status": "resolved",
+            "file": "src/components/ListingCard.tsx",
+            "line": 36,
+            "via": "frame-url"
+          },
+          "method2Verdict": "file-correct-line-wrong",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "ListingCard",
+            "returnChainOwnerName": "ListingCard",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "badge",
+          "group": "nested",
+          "page": "/cards",
+          "sel": "span.badge",
+          "ord": 0,
+          "primary": false,
+          "expect": {
+            "file": "src/components/RegionBadge.tsx",
+            "line": 6,
+            "tag": "span",
+            "component": "RegionBadge"
+          },
+          "observed": {
+            "tag": "span",
+            "anchorOnSelf": "b66777e04e",
+            "anchorOrdinal": 0,
+            "anchorInstanceCount": 3,
+            "ancestorAnchors": [
+              "b66777e04e",
+              "72cdf7d0b8",
+              "91000588c3",
+              "0500ac6da8",
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": null,
+            "valueShape": null
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/components/RegionBadge.tsx",
+            "line": 6,
+            "col": 5,
+            "tag": "span",
+            "component": "RegionBadge",
+            "componentLine": 4
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<span className=\"badge\">",
+          "method2": {
+            "status": "resolved",
+            "file": "src/components/RegionBadge.tsx",
+            "line": 10,
+            "via": "frame-url"
+          },
+          "method2Verdict": "file-correct-line-wrong",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "RegionBadge",
+            "returnChainOwnerName": "RegionBadge",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "badge-dot",
+          "group": "nested",
+          "page": "/cards",
+          "sel": "span.badge-dot",
+          "ord": 0,
+          "primary": false,
+          "expect": {
+            "file": "src/components/RegionBadge.tsx",
+            "line": 7,
+            "tag": "span",
+            "component": "RegionBadge"
+          },
+          "observed": {
+            "tag": "span",
+            "anchorOnSelf": "cf8474c96b",
+            "anchorOrdinal": 0,
+            "anchorInstanceCount": 3,
+            "ancestorAnchors": [
+              "cf8474c96b",
+              "b66777e04e",
+              "72cdf7d0b8",
+              "91000588c3",
+              "0500ac6da8",
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": null,
+            "valueShape": null
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/components/RegionBadge.tsx",
+            "line": 7,
+            "col": 7,
+            "tag": "span",
+            "component": "RegionBadge",
+            "componentLine": 4
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<span className=\"badge-dot\" aria-hidden=\"true\" />",
+          "method2": {
+            "status": "resolved",
+            "file": "src/components/RegionBadge.tsx",
+            "line": 14,
+            "via": "frame-url"
+          },
+          "method2Verdict": "file-correct-line-wrong",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "RegionBadge",
+            "returnChainOwnerName": "RegionBadge",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "badge-text",
+          "group": "nested",
+          "page": "/cards",
+          "sel": "span.badge-text",
+          "ord": 0,
+          "primary": true,
+          "expect": {
+            "file": "src/components/RegionBadge.tsx",
+            "line": 8,
+            "tag": "span",
+            "component": "RegionBadge"
+          },
+          "observed": {
+            "tag": "span",
+            "anchorOnSelf": "9d8bc0d72e",
+            "anchorOrdinal": 0,
+            "anchorInstanceCount": 3,
+            "ancestorAnchors": [
+              "9d8bc0d72e",
+              "b66777e04e",
+              "72cdf7d0b8",
+              "91000588c3",
+              "0500ac6da8",
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": 0,
+            "valueShape": {
+              "chars": 5,
+              "cls": "cjk"
+            }
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/components/RegionBadge.tsx",
+            "line": 8,
+            "col": 7,
+            "tag": "span",
+            "component": "RegionBadge",
+            "componentLine": 4
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<span className=\"badge-text\">{region}</span>",
+          "method2": {
+            "status": "resolved",
+            "file": "src/components/RegionBadge.tsx",
+            "line": 23,
+            "via": "frame-url"
+          },
+          "method2Verdict": "file-correct-line-wrong",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "RegionBadge",
+            "returnChainOwnerName": "RegionBadge",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "badge-text-2",
+          "group": "repeated",
+          "page": "/cards",
+          "sel": "span.badge-text",
+          "ord": 2,
+          "primary": false,
+          "expect": {
+            "file": "src/components/RegionBadge.tsx",
+            "line": 8,
+            "tag": "span",
+            "component": "RegionBadge"
+          },
+          "observed": {
+            "tag": "span",
+            "anchorOnSelf": "9d8bc0d72e",
+            "anchorOrdinal": 2,
+            "anchorInstanceCount": 3,
+            "ancestorAnchors": [
+              "9d8bc0d72e",
+              "b66777e04e",
+              "72cdf7d0b8",
+              "91000588c3",
+              "0500ac6da8",
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": 0,
+            "valueShape": {
+              "chars": 4,
+              "cls": "cjk"
+            }
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/components/RegionBadge.tsx",
+            "line": 8,
+            "col": 7,
+            "tag": "span",
+            "component": "RegionBadge",
+            "componentLine": 4
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<span className=\"badge-text\">{region}</span>",
+          "method2": {
+            "status": "resolved",
+            "file": "src/components/RegionBadge.tsx",
+            "line": 23,
+            "via": "frame-url"
+          },
+          "method2Verdict": "file-correct-line-wrong",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "RegionBadge",
+            "returnChainOwnerName": "RegionBadge",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "vendor-root",
+          "group": "library",
+          "page": "/cards",
+          "sel": "section.vendor",
+          "ord": 0,
+          "primary": false,
+          "expect": null,
+          "observed": {
+            "tag": "section",
+            "anchorOnSelf": null,
+            "anchorOrdinal": null,
+            "anchorInstanceCount": 0,
+            "ancestorAnchors": [
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": null,
+            "valueShape": null
+          },
+          "method1": {
+            "status": "failure",
+            "reason": "anchor-missing",
+            "nearestAncestorAnchor": "2dbe4989ce"
+          },
+          "method1Verdict": {
+            "verdict": "correct-unidentifiable",
+            "reason": "anchor-missing"
+          },
+          "sourceLine": null,
+          "method2": {
+            "status": "no-user-source",
+            "tried": [
+              "app-pages-browser)/./node_modules/next/dist/compiled/react/cjs/react-jsx-runtime.development.js",
+              "app-pages-browser)/./vendor-ui/index.js",
+              "app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js",
+              "app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js",
+              "app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js",
+              "app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js"
+            ]
+          },
+          "method2Verdict": "no-user-source",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "VendorPanel",
+            "returnChainOwnerName": "VendorPanel",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "vendor-title",
+          "group": "library",
+          "page": "/cards",
+          "sel": "h3.vendor-title",
+          "ord": 0,
+          "primary": false,
+          "expect": null,
+          "observed": {
+            "tag": "h3",
+            "anchorOnSelf": null,
+            "anchorOrdinal": null,
+            "anchorInstanceCount": 0,
+            "ancestorAnchors": [
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": 0,
+            "valueShape": {
+              "chars": 9,
+              "cls": "cjk"
+            }
+          },
+          "method1": {
+            "status": "failure",
+            "reason": "anchor-missing",
+            "nearestAncestorAnchor": "2dbe4989ce"
+          },
+          "method1Verdict": {
+            "verdict": "correct-unidentifiable",
+            "reason": "anchor-missing"
+          },
+          "sourceLine": null,
+          "method2": {
+            "status": "no-user-source",
+            "tried": [
+              "app-pages-browser)/./node_modules/next/dist/compiled/react/cjs/react-jsx-runtime.development.js",
+              "app-pages-browser)/./vendor-ui/index.js",
+              "app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js",
+              "app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js",
+              "app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js",
+              "app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js"
+            ]
+          },
+          "method2Verdict": "no-user-source",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "VendorPanel",
+            "returnChainOwnerName": "VendorPanel",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "vendor-slot",
+          "group": "library",
+          "page": "/cards",
+          "sel": "div.vendor-slot",
+          "ord": 0,
+          "primary": false,
+          "expect": null,
+          "observed": {
+            "tag": "div",
+            "anchorOnSelf": null,
+            "anchorOrdinal": null,
+            "anchorInstanceCount": 0,
+            "ancestorAnchors": [
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": null,
+            "valueShape": null
+          },
+          "method1": {
+            "status": "failure",
+            "reason": "anchor-missing",
+            "nearestAncestorAnchor": "2dbe4989ce"
+          },
+          "method1Verdict": {
+            "verdict": "correct-unidentifiable",
+            "reason": "anchor-missing"
+          },
+          "sourceLine": null,
+          "method2": {
+            "status": "no-user-source",
+            "tried": [
+              "app-pages-browser)/./node_modules/next/dist/compiled/react/cjs/react-jsx-runtime.development.js",
+              "app-pages-browser)/./vendor-ui/index.js",
+              "app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js",
+              "app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js",
+              "app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js",
+              "app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js"
+            ]
+          },
+          "method2Verdict": "no-user-source",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": "VendorPanel",
+            "returnChainOwnerName": "VendorPanel",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "dynamic",
+          "group": "no-jsx",
+          "page": "/cards",
+          "sel": "span.injected",
+          "ord": 0,
+          "primary": false,
+          "expect": null,
+          "observed": {
+            "tag": "span",
+            "anchorOnSelf": null,
+            "anchorOrdinal": null,
+            "anchorInstanceCount": 0,
+            "ancestorAnchors": [
+              "5d20141eb7",
+              "2dbe4989ce"
+            ],
+            "textNodeIndex": 0,
+            "valueShape": {
+              "chars": 4,
+              "cls": "cjk"
+            }
+          },
+          "method1": {
+            "status": "failure",
+            "reason": "anchor-missing",
+            "nearestAncestorAnchor": "5d20141eb7"
+          },
+          "method1Verdict": {
+            "verdict": "correct-unidentifiable",
+            "reason": "anchor-missing"
+          },
+          "sourceLine": null,
+          "method2": {
+            "status": "no-debug-stack",
+            "tried": []
+          },
+          "method2Verdict": "no-debug-stack",
+          "react": {
+            "hostKeys": [],
+            "fiber": false
+          }
+        },
+        {
+          "key": "rsc-main",
+          "group": "own-server",
+          "page": "/cards-rsc",
+          "sel": "main.cards-rsc",
+          "ord": 0,
+          "primary": false,
+          "expect": {
+            "file": "src/app/cards-rsc/page.tsx",
+            "line": 17,
+            "tag": "main",
+            "component": "CardsRsc"
+          },
+          "observed": {
+            "tag": "main",
+            "anchorOnSelf": "ad079ad318",
+            "anchorOrdinal": 0,
+            "anchorInstanceCount": 1,
+            "ancestorAnchors": [
+              "ad079ad318"
+            ],
+            "textNodeIndex": null,
+            "valueShape": null
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/app/cards-rsc/page.tsx",
+            "line": 17,
+            "col": 5,
+            "tag": "main",
+            "component": "CardsRsc",
+            "componentLine": 15
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<main className=\"cards-rsc\">",
+          "method2": {
+            "status": "resolved",
+            "file": "src/app/cards-rsc/page.tsx",
+            "line": 29,
+            "via": "frame-url"
+          },
+          "method2Verdict": "file-correct-line-wrong",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": null,
+            "returnChainOwnerName": "SegmentViewNode",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "rsc-h1",
+          "group": "own-server",
+          "page": "/cards-rsc",
+          "sel": "main.cards-rsc > h1",
+          "ord": 0,
+          "primary": false,
+          "expect": {
+            "file": "src/app/cards-rsc/page.tsx",
+            "line": 18,
+            "tag": "h1",
+            "component": "CardsRsc"
+          },
+          "observed": {
+            "tag": "h1",
+            "anchorOnSelf": "69879a922a",
+            "anchorOrdinal": 0,
+            "anchorInstanceCount": 1,
+            "ancestorAnchors": [
+              "69879a922a",
+              "ad079ad318"
+            ],
+            "textNodeIndex": 0,
+            "valueShape": {
+              "chars": 13,
+              "cls": "cjk"
+            }
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/app/cards-rsc/page.tsx",
+            "line": 18,
+            "col": 7,
+            "tag": "h1",
+            "component": "CardsRsc",
+            "componentLine": 15
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<h1>物件カード（サーバー描画）</h1>",
+          "method2": {
+            "status": "resolved",
+            "file": "src/app/cards-rsc/page.tsx",
+            "line": 33,
+            "via": "frame-url"
+          },
+          "method2Verdict": "file-correct-line-wrong",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": null,
+            "returnChainOwnerName": "SegmentViewNode",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "rsc-ul",
+          "group": "own-server",
+          "page": "/cards-rsc",
+          "sel": "main.cards-rsc > ul",
+          "ord": 0,
+          "primary": false,
+          "expect": {
+            "file": "src/app/cards-rsc/page.tsx",
+            "line": 19,
+            "tag": "ul",
+            "component": "CardsRsc"
+          },
+          "observed": {
+            "tag": "ul",
+            "anchorOnSelf": "14f82f0ec2",
+            "anchorOrdinal": 0,
+            "anchorInstanceCount": 1,
+            "ancestorAnchors": [
+              "14f82f0ec2",
+              "ad079ad318"
+            ],
+            "textNodeIndex": null,
+            "valueShape": null
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/app/cards-rsc/page.tsx",
+            "line": 19,
+            "col": 7,
+            "tag": "ul",
+            "component": "CardsRsc",
+            "componentLine": 15
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<ul>",
+          "method2": {
+            "status": "resolved",
+            "file": "src/app/cards-rsc/page.tsx",
+            "line": 41,
+            "via": "frame-url"
+          },
+          "method2Verdict": "file-correct-line-wrong",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": null,
+            "returnChainOwnerName": "SegmentViewNode",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "rsc-li",
+          "group": "own-server",
+          "page": "/cards-rsc",
+          "sel": "main.cards-rsc li",
+          "ord": 1,
+          "primary": false,
+          "expect": {
+            "file": "src/app/cards-rsc/page.tsx",
+            "line": 21,
+            "tag": "li",
+            "component": "CardsRsc"
+          },
+          "observed": {
+            "tag": "li",
+            "anchorOnSelf": "4080787fb3",
+            "anchorOrdinal": 1,
+            "anchorInstanceCount": 2,
+            "ancestorAnchors": [
+              "4080787fb3",
+              "14f82f0ec2",
+              "ad079ad318"
+            ],
+            "textNodeIndex": null,
+            "valueShape": null
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/app/cards-rsc/page.tsx",
+            "line": 21,
+            "col": 11,
+            "tag": "li",
+            "component": "CardsRsc",
+            "componentLine": 15
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<li key={s.id}>",
+          "method2": {
+            "status": "resolved",
+            "file": "src/app/cards-rsc/page.tsx",
+            "line": 43,
+            "via": "frame-url"
+          },
+          "method2Verdict": "file-correct-line-wrong",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": null,
+            "returnChainOwnerName": "SegmentViewNode",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "rsc-code",
+          "group": "own-server",
+          "page": "/cards-rsc",
+          "sel": "main.cards-rsc span.code",
+          "ord": 0,
+          "primary": false,
+          "expect": {
+            "file": "src/app/cards-rsc/page.tsx",
+            "line": 22,
+            "tag": "span",
+            "component": "CardsRsc"
+          },
+          "observed": {
+            "tag": "span",
+            "anchorOnSelf": "feca95b2ec",
+            "anchorOrdinal": 0,
+            "anchorInstanceCount": 2,
+            "ancestorAnchors": [
+              "feca95b2ec",
+              "4080787fb3",
+              "14f82f0ec2",
+              "ad079ad318"
+            ],
+            "textNodeIndex": 0,
+            "valueShape": {
+              "chars": 9,
+              "cls": "latin"
+            }
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/app/cards-rsc/page.tsx",
+            "line": 22,
+            "col": 13,
+            "tag": "span",
+            "component": "CardsRsc",
+            "componentLine": 15
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<span className=\"code\">{s.code}</span>",
+          "method2": {
+            "status": "resolved",
+            "file": "src/app/cards-rsc/page.tsx",
+            "line": 46,
+            "via": "frame-url"
+          },
+          "method2Verdict": "file-correct-line-wrong",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": null,
+            "returnChainOwnerName": "SegmentViewNode",
+            "propsHasSource": false
+          }
+        },
+        {
+          "key": "rsc-badge-text",
+          "group": "own-server",
+          "page": "/cards-rsc",
+          "sel": "span.badge-text",
+          "ord": 1,
+          "primary": false,
+          "expect": {
+            "file": "src/components/RegionBadge.tsx",
+            "line": 8,
+            "tag": "span",
+            "component": "RegionBadge"
+          },
+          "observed": {
+            "tag": "span",
+            "anchorOnSelf": "9d8bc0d72e",
+            "anchorOrdinal": 1,
+            "anchorInstanceCount": 2,
+            "ancestorAnchors": [
+              "9d8bc0d72e",
+              "b66777e04e",
+              "4080787fb3",
+              "14f82f0ec2",
+              "ad079ad318"
+            ],
+            "textNodeIndex": 0,
+            "valueShape": {
+              "chars": 5,
+              "cls": "cjk"
+            }
+          },
+          "method1": {
+            "status": "resolved",
+            "file": "src/components/RegionBadge.tsx",
+            "line": 8,
+            "col": 7,
+            "tag": "span",
+            "component": "RegionBadge",
+            "componentLine": 4
+          },
+          "method1Verdict": {
+            "verdict": "correct"
+          },
+          "sourceLine": "<span className=\"badge-text\">{region}</span>",
+          "method2": {
+            "status": "resolved",
+            "file": "src/components/RegionBadge.tsx",
+            "line": 24,
+            "via": "frame-url"
+          },
+          "method2Verdict": "file-correct-line-wrong",
+          "react": {
+            "hostKeys": [
+              "__reactFiber$<random>",
+              "__reactProps$<random>"
+            ],
+            "fiber": true,
+            "hasDebugSource": false,
+            "hasDebugStack": true,
+            "hasDebugOwner": true,
+            "debugOwnerName": null,
+            "returnChainOwnerName": "SegmentViewNode",
+            "propsHasSource": false
+          }
+        }
+      ]
+    }
+  }
+}

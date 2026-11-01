@@ -1,0 +1,393 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8">
+<title>A-3 余白と情報密度の最適化 — 初期状態（Phase 4B 観測キャンバス）</title>
+<style>
+:root{
+  --bg:#06070a;           /* アプリ最背面（黒に近い） */
+  --shell:#0a0c11;        /* シェル */
+  --panel:#0f1218;        /* パネル面 */
+  --panel-2:#131722;      /* パネル内の面 */
+  --sunken:#0b0e14;       /* 沈んだ面 */
+  --line:#1c2130;         /* 境界 */
+  --line-soft:#161a25;
+  --tx:#e4e8f0;           /* 主文字 */
+  --tx2:#98a1b4;          /* 副文字 */
+  --tx3:#646d80;          /* 第三文字 */
+  --tx4:#454d5d;          /* 最弱 */
+  --lav:#9d93e0;          /* ラベンダー＝選択 */
+  --lav-dim:#6a62a8;
+  --lav-bg:rgba(157,147,224,.10);
+  --blue:#7fa0cc;         /* ブルー＝実測 */
+  --blue-dim:#52657f;
+  --green:#78b79a;        /* グリーン＝正常 */
+  --amber:#c2a06e;        /* 注意（控えめ） */
+  --est:#9a8fc4;          /* 推定の線 */
+  --r:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);}
+body{
+  width:1600px;height:1000px;overflow:hidden;
+  font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP",system-ui,sans-serif;
+  font-feature-settings:"palt" 1;
+  color:var(--tx);-webkit-font-smoothing:antialiased;
+}
+.app{width:1600px;height:1000px;display:flex;flex-direction:column;background:var(--shell);}
+
+/* ---------- N0 グローバルバー ---------- */
+.n0{height:48px;flex:0 0 48px;display:flex;align-items:center;gap:14px;
+    padding:0 16px;border-bottom:1px solid var(--line);background:var(--panel);}
+.proj{display:flex;align-items:center;gap:9px;height:30px;padding:0 11px;border:1px solid var(--line);
+      border-radius:8px;background:var(--panel-2);font-size:12.5px;font-weight:600;letter-spacing:.02em}
+.proj .mark{width:14px;height:14px;border-radius:4px;background:linear-gradient(135deg,#8f85d8,#6f9fd8)}
+.proj .car{color:var(--tx3);font-size:9px}
+.sup{display:flex;align-items:center;gap:7px;height:28px;padding:0 10px;border-radius:7px;
+     border:1px solid rgba(194,160,110,.30);background:rgba(194,160,110,.07);
+     font-size:11.5px;color:#d3b887;cursor:default}
+.sup b{font-weight:600}
+.n0 .spacer{flex:1}
+.env{display:flex;align-items:center;gap:7px;height:28px;padding:0 10px;border:1px solid var(--line);
+     border-radius:7px;background:var(--sunken);font-size:11.5px;color:var(--tx2)}
+.env .lock{color:var(--tx4);font-size:10px}
+.run{display:flex;align-items:center;gap:9px;height:30px;padding:0 10px 0 8px;border:1px solid var(--line);
+     border-radius:8px;background:var(--panel-2);font-size:11.5px;color:var(--tx2)}
+.run .stop{width:18px;height:18px;border-radius:5px;border:1px solid rgba(120,183,154,.4);
+     display:flex;align-items:center;justify-content:center}
+.run .stop i{width:7px;height:7px;background:var(--green);border-radius:1.5px;display:block}
+.run code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;color:var(--tx)}
+.run .port{color:var(--tx3)}
+.ins{display:flex;align-items:center;gap:7px;height:28px;padding:0 10px;border-radius:7px;
+     border:1px solid rgba(120,183,154,.26);background:rgba(120,183,154,.07);font-size:11.5px;color:#8fc4a9}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);display:block}
+
+/* ---------- N1 モードタブ ---------- */
+.n1{height:42px;flex:0 0 42px;display:flex;align-items:flex-end;gap:2px;padding:0 14px;
+    border-bottom:1px solid var(--line);background:var(--shell)}
+.tab{height:33px;padding:0 17px;display:flex;align-items:center;font-size:12.5px;color:var(--tx3);
+     border-radius:8px 8px 0 0;border:1px solid transparent;border-bottom:none;letter-spacing:.03em}
+.tab.on{color:var(--tx);background:var(--panel);border-color:var(--line);position:relative}
+.tab.on::after{content:"";position:absolute;left:12px;right:12px;top:0;height:2px;border-radius:2px;background:var(--lav)}
+.tab.soon{color:var(--tx4)}
+.tab.soon s{text-decoration:none;font-size:10.5px;color:var(--tx4);
+     border:1px dashed var(--line);border-radius:4px;padding:1px 4px;margin-left:6px}
+
+/* ---------- 本体 ---------- */
+.body{flex:1;display:flex;gap:10px;padding:10px;min-height:0}
+.pane{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+      display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.ph{height:34px;flex:0 0 34px;display:flex;align-items:center;gap:8px;padding:0 12px;
+    border-bottom:1px solid var(--line-soft);font-size:11px;color:var(--tx3);letter-spacing:.06em}
+.ph .r{margin-left:auto;display:flex;gap:12px;color:var(--tx4);font-size:10.5px;letter-spacing:.02em}
+
+/* ---------- F-1 ページ一覧 ---------- */
+.pages{padding:7px 7px 10px}
+.pg{height:38px;display:flex;flex-direction:column;justify-content:center;padding:0 10px;border-radius:8px;gap:1px}
+.pg b{font-size:12px;font-weight:500;color:var(--tx2)}
+.pg s{text-decoration:none;font-size:10px;color:var(--tx4);font-family:ui-monospace,Menlo,monospace}
+.pg.on{background:var(--lav-bg);box-shadow:inset 0 0 0 1px rgba(157,147,224,.22)}
+.pg.on b{color:var(--tx);font-weight:600}
+.pg.on s{color:#9088c0}
+.pgsec{font-size:9.5px;color:var(--tx4);letter-spacing:.1em;padding:12px 10px 6px}
+
+/* ---------- F-2 プレビュー ---------- */
+.pv{flex:1;display:flex;flex-direction:column;background:var(--sunken);min-height:0;position:relative;padding-left:24px}
+.urlbar{height:30px;flex:0 0 30px;display:flex;align-items:center;gap:8px;padding:0 10px;
+        border-bottom:1px solid var(--line-soft);background:var(--panel-2)}
+.urlbar .nav{display:flex;gap:6px;color:var(--tx4);font-size:10px}
+.urlbar .u{flex:1;height:19px;border-radius:5px;background:var(--sunken);border:1px solid var(--line-soft);
+        display:flex;align-items:center;padding:0 8px;font-size:10px;color:var(--tx3);
+        font-family:ui-monospace,Menlo,monospace}
+.site{flex:1;background:#fbfcfd;overflow:hidden;position:relative;color:#1b2430}
+.s-nav{height:38px;display:flex;align-items:center;gap:18px;padding:0 16px;background:#fff;
+       border-bottom:1px solid #e9edf2}
+.s-logo{font-weight:800;font-size:13px;letter-spacing:.06em;color:#20303f}
+.s-nav a{font-size:10.5px;color:#55606d;text-decoration:none}
+.s-ava{margin-left:auto;width:19px;height:19px;border-radius:50%;background:#e4e9ef}
+.hero{height:126px;position:relative;overflow:hidden;
+  background:linear-gradient(170deg,#9fc2d8 0%,#7fa8c4 38%,#6f8f72 70%,#4e6b52 100%)}
+.hero::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(90deg,rgba(10,20,28,.55),rgba(10,20,28,.10))}
+.hero .t{position:absolute;left:16px;top:16px;z-index:2;color:#fff}
+.hero .t b{display:block;font-size:17px;line-height:1.35;font-weight:800;letter-spacing:.01em;
+  text-shadow:0 1px 10px rgba(0,0,0,.4)}
+.hero .t i{display:block;font-style:normal;font-size:10px;opacity:.9;margin-top:6px}
+.search{position:absolute;left:16px;right:16px;bottom:9px;height:28px;background:rgba(255,255,255,.95);
+  border-radius:7px;display:flex;align-items:center;padding:0 10px;font-size:10px;color:#8b95a1;z-index:2}
+.filters{display:flex;gap:6px;padding:9px 14px;background:#fff;border-bottom:1px solid #eef1f5}
+.fl{height:23px;border:1px solid #dfe5ec;border-radius:6px;display:flex;align-items:center;
+    padding:0 7px;font-size:9.5px;color:#5c6775;gap:7px;white-space:nowrap}
+.cards{display:flex;gap:9px;padding:11px 14px 0}
+.cards:last-of-type{padding-bottom:12px}
+.card{flex:1;border:1px solid #e4e9ef;border-radius:9px;overflow:hidden;background:#fff;display:flex}
+.card .thumb{width:58px;flex:0 0 58px;background:linear-gradient(160deg,#9db9c9,#6c8f6e)}
+.card.b .thumb{background:linear-gradient(160deg,#aebfcb,#8898a3)}
+.card .cb{flex:1;padding:7px 9px;min-width:0}
+.card .no{font-size:10.5px;white-space:nowrap;font-weight:700;color:#22303d;margin-bottom:5px}
+.row{display:flex;align-items:center;gap:4px;font-size:9.5px;white-space:nowrap;color:#4d5967;margin:3px 0;line-height:1.3}
+.row em{font-style:normal;color:#9aa5b1;font-size:8.5px}
+.sel-el{position:relative;display:inline-block;padding:1px 4px;margin:-1px -4px;border-radius:3px;
+  box-shadow:0 0 0 1.5px #7b6fd0, 0 0 0 4px rgba(123,111,208,.16);background:rgba(123,111,208,.07);color:#1b2430}
+.pv-badge{position:absolute;width:19px;height:19px;border-radius:50%;background:#6f6aa8;color:#efeaff;
+  font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center;z-index:5;
+  box-shadow:0 0 0 3px var(--sunken)}
+.pv-tick{position:absolute;height:1px;display:none;background:rgba(157,147,224,.5);z-index:4}
+.pv-foot{flex:0 0 26px;height:26px;display:flex;align-items:center;gap:8px;padding:0 11px;
+  border-top:1px solid var(--line-soft);background:var(--panel-2);font-size:10px;color:var(--tx3)}
+.pv-foot b{color:var(--tx2);font-weight:500}
+
+/* ---------- 詳細パネル ---------- */
+.dp{overflow:hidden}
+.sum{padding:10px 14px 11px;border-bottom:1px solid var(--line-soft)}
+.sum .k{font-size:10px;color:var(--tx3);letter-spacing:.09em;margin-bottom:9px}
+.claim{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.claim .src{font-family:ui-monospace,Menlo,monospace;font-size:16.5px;font-weight:600;color:var(--tx);letter-spacing:.01em}
+.chip-est{font-size:10.5px;padding:2px 8px;border-radius:5px;color:#c3b9ee;
+  border:1px dashed rgba(157,147,224,.5);background:rgba(157,147,224,.07);letter-spacing:.04em}
+.chip-obs{font-size:10.5px;padding:2px 8px;border-radius:5px;color:#9fb6d4;
+  border:1px solid rgba(127,160,204,.35);background:rgba(127,160,204,.07);letter-spacing:.04em}
+.sum p{font-size:11.5px;line-height:1.66;color:var(--tx2);margin-top:9px}
+.hint{font-size:10px;line-height:1.6;color:var(--tx4);margin-top:7px;padding-top:7px;
+  border-top:1px dashed var(--line)}
+.weak{margin:9px 14px 0;border:1px solid rgba(157,147,224,.26);border-radius:10px;
+  background:linear-gradient(180deg,rgba(157,147,224,.09),rgba(157,147,224,.03));padding:10px 12px}
+.weak .wt{display:flex;align-items:center;gap:7px;font-size:11.5px;color:#c7bef0;font-weight:600;letter-spacing:.03em}
+.weak .wh{font-size:12.5px;color:var(--tx);margin-top:8px;font-weight:600;line-height:1.5}
+.weak .wh u{text-decoration:none;color:var(--lav);font-family:ui-monospace,Menlo,monospace;margin-right:6px}
+.weak p{font-size:11px;line-height:1.66;color:var(--tx2);margin-top:6px}
+.weak .ev{font-size:10.5px;line-height:1.68;color:var(--tx3);margin-top:8px;padding-top:8px;
+  border-top:1px solid rgba(157,147,224,.16)}
+.weak .ev b{color:var(--tx2);font-weight:500}
+.btn{margin-top:8px;height:25px;display:inline-flex;align-items:center;padding:0 12px;border-radius:7px;
+  border:1px solid rgba(157,147,224,.4);background:rgba(157,147,224,.10);color:#cfc6f5;font-size:11px}
+.btn.q{border-color:var(--line);background:var(--sunken);color:var(--tx2)}
+.steps{flex:1;overflow:hidden;padding:9px 14px 0}
+.steps .k{font-size:10px;color:var(--tx3);letter-spacing:.09em;margin-bottom:8px}
+.st{display:flex;gap:9px;padding:4px 0;position:relative}
+.st .bd{width:18px;height:18px;flex:0 0 18px;border-radius:50%;background:#20253a;color:#a79fe0;
+  font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.st.cur .bd{background:#6f6aa8;color:#efeaff}
+.st .tx{min-width:0;flex:1}
+.st .tt{font-size:11px;color:var(--tx);line-height:1.4;display:block}
+.st .ts{font-size:9.5px;color:var(--tx3);margin-top:1px;display:block;font-family:ui-monospace,Menlo,monospace;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st .tg{margin-left:auto;font-size:9.5px;color:var(--tx4);padding-top:2px;white-space:nowrap}
+.st.est .tg{color:#9a90cb}
+.st .conn{position:absolute;left:8.5px;top:24px;bottom:-5px;width:1px;background:var(--line)}
+.st.estc .conn{background:repeating-linear-gradient(180deg,#453f68 0 3px,transparent 3px 6px)}
+.st.cur{background:rgba(157,147,224,.06);border-radius:8px;margin:0 -8px;padding:7px 8px}
+.st.cur .conn{left:16.5px}
+.tabs{display:flex;gap:4px;margin:10px 0 0}
+.tabs span{font-size:10.5px;padding:4px 10px;border-radius:6px;color:var(--tx3);border:1px solid transparent}
+.tabs span.on{color:var(--tx);background:var(--panel-2);border-color:var(--line)}
+.ovw{margin-top:7px;border:1px solid var(--line);border-radius:8px;background:var(--sunken);padding:8px 10px}
+.ovw dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:10.5px}
+.ovw dt{color:var(--tx4)}
+.ovw dd{color:var(--tx2);font-family:ui-monospace,Menlo,monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ---------- N5 ドロワー ---------- */
+.n5{height:36px;flex:0 0 36px;display:flex;align-items:center;gap:8px;padding:0 14px;
+    border-top:1px solid var(--line);background:var(--panel)}
+.n5 .h{display:flex;align-items:center;gap:7px;height:24px;padding:0 10px;border-radius:7px;
+    border:1px solid var(--line);background:var(--panel-2);font-size:11px;color:var(--tx2)}
+.n5 .h i{font-style:normal;color:var(--tx4);font-size:9px}
+.n5 .h.soon{color:var(--tx4);border-style:dashed;background:transparent}
+.n5 .note{margin-left:auto;font-size:9.5px;color:#5a4f36;border:1px dashed #443c28;
+     border-radius:5px;padding:3px 8px;letter-spacing:.03em}
+
+/* 詳細パネル：ステップ間の関係説明（Phase 4B で追加。キャンバスから移した文） */
+.st .conn{bottom:0}
+.rel{position:relative;padding:0 0 1px 28px}
+.rel .rconn{position:absolute;left:8.5px;top:-6px;bottom:-6px;width:1px;background:var(--line)}
+.rel.est .rconn{background:repeating-linear-gradient(180deg,#453f68 0 3px,transparent 3px 6px)}
+.rel .rt{font-size:9.5px;color:#717a8d;line-height:1.5;display:block}
+.rel.est .rt{color:#8f86bd}
+.rel .rt i{font-style:normal;color:var(--tx4)}
+.ret{margin:4px 0 0 0;display:flex;align-items:center;gap:7px;padding:4px 9px;border-radius:7px;
+     border:1px dashed rgba(157,147,224,.30);background:rgba(157,147,224,.05)}
+.ret b{font-size:10.5px;color:#cfc6f5;font-weight:400}
+.ret span{font-size:10px;color:#9a90cb;line-height:1.5}
+.ret u{text-decoration:none;font-family:ui-monospace,Menlo,monospace}
+/* プレビュー：ペイン幅が狭い案でもサイトのナビが折り返さないようにする（モックの見え方の統一） */
+.s-nav{gap:12px}
+.s-nav a{white-space:nowrap}
+/* Phase 4B：説明を1行ずつ足したぶん、既存ブロックの余白を詰めて同じ高さに収める */
+.sum{padding:9px 14px 10px}
+.sum p{margin-top:7px;line-height:1.6}
+.hint{margin-top:6px;padding-top:6px}
+.weak{margin-top:8px;padding:9px 11px}
+.weak .wh{margin-top:6px}
+.weak p{margin-top:5px;line-height:1.6}
+.weak .ev{margin-top:6px;padding-top:6px;line-height:1.55}
+.btn{margin-top:7px}
+.steps{padding:7px 14px 0}
+.steps .k{margin-bottom:6px}
+.st{padding:1px 0}
+.st.cur{padding:6px 8px}
+.tabs{margin-top:8px}
+.ovw{margin-top:6px;padding:6px 9px}
+.ovw dl{gap:3px 12px}
+
+.app{width:1600px;height:1000px;display:flex;flex-direction:column;background:var(--bg);}
+/* N0 は最上部にドック（02b 2.3節で構成が確定しているため、位置だけ据え置く） */
+.n0{border-bottom:1px solid #141922;background:#0b0d13}
+.stage{flex:1;display:flex;min-height:0}
+
+/* ---------- 観測キャンバス本体 ---------- */
+.canvas{position:relative;flex:1;min-width:0;overflow:hidden;
+  background:
+    radial-gradient(1200px 900px at 34% 26%, #0c0f16 0%, #08090e 62%, #06070a 100%),
+    #06070a;}
+/* キャンバスであることの手がかり：ごく薄い点のグリッド（面でも線でもない） */
+.canvas::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(rgba(255,255,255,.042) 1px, transparent 1px);
+  background-size:30px 30px;background-position:10px 10px}
+.canvas > svg{position:absolute;inset:0;z-index:1}
+
+/* ---------- 浮かぶパネル ---------- */
+.fpnl{position:absolute;z-index:3;border-radius:12px;
+  background:rgba(14,17,23,.90);
+  border:1px solid #252d3e;
+  box-shadow:0 20px 44px rgba(0,0,0,.62), 0 2px 10px rgba(0,0,0,.4),
+             inset 0 1px 0 rgba(255,255,255,.035);
+  overflow:hidden}
+.flh{height:28px;display:flex;align-items:center;gap:8px;padding:0 10px;
+  border-bottom:1px solid rgba(255,255,255,.045);font-size:10.5px;color:var(--tx3);letter-spacing:.06em}
+.flh i{font-style:normal;color:var(--tx4);font-size:9.5px;letter-spacing:0}
+.flh .x{margin-left:auto;color:var(--tx4);font-size:11px;line-height:1}
+
+/* モードタブ（浮かぶピル） */
+.fpnl.tabs{display:flex;align-items:center;gap:3px;padding:4px;border-radius:11px}
+.fpnl.tabs b{font-weight:400;font-size:12.5px;color:var(--tx3);padding:0 15px;height:27px;
+  display:flex;align-items:center;border-radius:8px;letter-spacing:.03em}
+.fpnl.tabs b.on{color:var(--tx);background:rgba(157,147,224,.13);
+  box-shadow:inset 0 0 0 1px rgba(157,147,224,.26)}
+.fpnl.tabs b.soon{color:var(--tx4)}
+.fpnl.tabs b.soon s{text-decoration:none;font-size:9.5px;margin-left:6px;
+  border:1px dashed #2b3246;border-radius:4px;padding:1px 4px}
+
+/* ページパネル */
+.fpnl .pglist{padding:6px}
+.fpnl .pg{height:32px;display:flex;flex-direction:column;justify-content:center;padding:0 9px;border-radius:7px;gap:0}
+.fpnl .pg b{font-size:11.5px;font-weight:500;color:var(--tx2);line-height:1.25}
+.fpnl .pg s{text-decoration:none;font-size:9.5px;color:var(--tx4);font-family:ui-monospace,Menlo,monospace}
+.fpnl .pg.on{background:rgba(157,147,224,.11);box-shadow:inset 0 0 0 1px rgba(157,147,224,.22)}
+.fpnl .pg.on b{color:var(--tx);font-weight:600}
+.fpnl .pg.on s{color:#9088c0}
+
+/* 畳んだときのチップ */
+.fpnl.chip{display:flex;align-items:center;gap:8px;height:34px;padding:0 11px;border-radius:9px;
+  font-size:11.5px;color:var(--tx2)}
+.fpnl.chip s{text-decoration:none;font-size:9.5px;color:var(--tx4);font-family:ui-monospace,Menlo,monospace}
+.fpnl.chip em{font-style:normal;color:var(--tx);font-weight:600;font-size:11.5px}
+.fpnl.chip .x{margin-left:auto;color:var(--tx4);font-size:11px}
+
+/* 状態表示（浮かぶ） */
+.fpnl.stat{display:flex;align-items:center;gap:0;height:34px;padding:0 4px;border-radius:9px}
+.fpnl.stat span{font-size:11px;color:var(--tx3);padding:0 11px;letter-spacing:.02em}
+.fpnl.stat span.p{color:#9fb0c6;font-family:ui-monospace,Menlo,monospace;font-size:11px}
+.fpnl.stat span + span{box-shadow:inset 1px 0 0 rgba(255,255,255,.055)}
+
+/* 凡例 */
+.lgb{padding:9px 11px 10px;display:grid;grid-template-columns:30px 1fr;gap:7px 9px;align-items:center}
+.lgb u{text-decoration:none;display:flex;align-items:center;justify-content:center;height:12px}
+.lgb t{display:block;font-size:10.5px;color:var(--tx2)}
+.lgb t i{font-style:normal;color:var(--tx4)}
+
+/* 縮小プレビュー（現物のまま切り出す） */
+.pvm{position:relative;background:var(--sunken);padding:12px 12px 8px 26px}
+.pvm .card{box-shadow:0 2px 10px rgba(0,0,0,.35)}
+.pvm .pv-badge{position:absolute;left:3px;top:46px}
+.fpnl .pv-foot{border-top:1px solid rgba(255,255,255,.045);background:transparent}
+
+/* 下部チップ群 */
+.fpnl.n5c{display:flex;align-items:center;gap:7px;height:30px;padding:0 10px;border-radius:9px;
+  font-size:11px;color:var(--tx2)}
+.fpnl.n5c i{font-style:normal;color:var(--tx4);font-size:9.5px}
+.fpnl.n5c u{text-decoration:none;color:var(--tx4);border-left:1px solid #232b3c;padding-left:10px;margin-left:3px}
+.synth{position:absolute;z-index:3;font-size:9.5px;color:#5a4f36;border:1px dashed #40382680;
+  border-radius:6px;padding:4px 9px;letter-spacing:.02em;background:rgba(10,9,6,.5)}
+
+/* ---------- 右の詳細パネル：ここだけ固定（ドック） ---------- */
+.dock{flex:0 0 auto;background:var(--panel);border-left:1px solid #1f2634;
+  display:flex;flex-direction:column;min-height:0;overflow:hidden;z-index:4;
+  box-shadow:-18px 0 40px rgba(0,0,0,.5)}
+.dock .ph{height:34px;flex:0 0 34px;display:flex;align-items:center;gap:8px;padding:0 12px;
+  border-bottom:1px solid var(--line-soft);font-size:11px;color:var(--tx3);letter-spacing:.06em}
+.dock .ph .r{margin-left:auto;display:flex;gap:10px;color:var(--tx4);font-size:10px}
+.dock .ph .pin{color:#6a7489;font-size:9.5px;border:1px solid #232b3c;border-radius:5px;padding:2px 6px;letter-spacing:.04em}
+</style></head><body><div class="app"><div class="n0">
+  <div class="proj"><span class="mark"></span>GRiDDATA<span class="car">▾</span></div>
+  <div class="sup">◬ 対応範囲 <b>部分対応・1件</b></div>
+  <div class="spacer"></div>
+  <div class="env">環境 <b style="color:#b9c2d2;font-weight:600">Local</b> <span class="lock">固定</span></div>
+  <div class="run"><span class="stop"><i></i></span><code>npm run dev</code>
+     <span class="dot"></span>実行中<span class="port">:3000</span></div>
+  <div class="spacer"></div>
+  <div class="ins"><span class="dot"></span>計装 有効</div>
+</div>
+<div class="stage">
+  <div class="canvas"><svg width="1224" height="952" viewBox="0 0 1224 952"><defs>
+<marker id="ara3r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+  <path d="M0,1 L9,5 L0,9" fill="none" stroke="#8aa4cc" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+<marker id="area3r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+  <path d="M0,1 L9,5 L0,9" fill="none" stroke="#9a8fc4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+<marker id="arda3r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+  <path d="M0,1 L9,5 L0,9" fill="none" stroke="#39405266" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+<filter id="gla3r" x="-60%" y="-60%" width="220%" height="220%">
+  <feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs><rect x="420" y="92" width="265" height="852" rx="16" fill="rgba(255,255,255,.021)"/><rect x="695" y="92" width="265" height="852" rx="16" fill="rgba(255,255,255,.021)"/><rect x="969" y="92" width="227" height="852" rx="16" fill="rgba(255,255,255,.021)"/><text x="556" y="80" text-anchor="middle" font-size="10.5" fill="#6d7689" letter-spacing="2.6">ブラウザ</text><text x="823" y="80" text-anchor="middle" font-size="10.5" fill="#6d7689" letter-spacing="2.6">サーバー</text><text x="1073" y="80" text-anchor="middle" font-size="10.5" fill="#6d7689" letter-spacing="2.6">データベース</text><path d="M555.964,158.5 L555.964,263.605" fill="none" stroke="#8aa4cc" stroke-width="1.4" stroke-linecap="round" marker-end="url(#ara3r)"/><path d="M555.964,324.605 L555.964,429.71" fill="none" stroke="#9a8fc4" stroke-width="1.4" stroke-dasharray="5 4.5" stroke-linecap="round" marker-end="url(#area3r)"/><rect x="536.9639999999999" y="368.1575" width="38" height="18" rx="5" fill="#11131d" stroke="#6f66a8" stroke-dasharray="4 3"/><text x="555.9639999999999" y="380.6575" text-anchor="middle" font-size="10" fill="#bcb2ec">推定</text><path d="M586.464,460.21 L792.612,460.21" fill="none" stroke="#8aa4cc" stroke-width="1.4" stroke-linecap="round" marker-end="url(#ara3r)"/><path d="M823.112,490.71 L823.112,599.997" fill="none" stroke="#8aa4cc" stroke-width="1.4" stroke-linecap="round" marker-end="url(#ara3r)"/><path d="M854,630 H918" fill="none" stroke="#8aa4cc" stroke-width="1.4" stroke-linecap="round"/><path d="M917.905,630.497 L917.9,541.3 Q917.905,528.325 930.9,528.3 L1042.71,528.325" fill="none" stroke="#8aa4cc" stroke-width="1.4" stroke-linecap="round" marker-end="url(#ara3r)"/><path d="M917.905,630.497 L917.9,712.5 Q917.905,725.5 930.9,725.5 L1042.71,725.5" fill="none" stroke="#8aa4cc" stroke-width="1.4" stroke-linecap="round" marker-end="url(#ara3r)"/><circle cx="917.9046400000001" cy="630.4975" r="3.4" fill="#0b0e14" stroke="#8aa4cc" stroke-width="1.4"/><path d="M1073.21,756 L1073.2,802.0 Q1073.21,818 1057.2,818.0 L479.0,818.0 Q462.964,818 463.0,802.0 L463.0,476.2 Q462.964,460.21 479.0,460.2 L525.464,460.21" fill="none" stroke="#9a8fc4" stroke-width="1.4" stroke-dasharray="5 4.5" stroke-linecap="round" marker-end="url(#area3r)"/><rect x="738.086" y="808.0" width="60" height="20" rx="6" fill="#0e1019" stroke="#6f66a8" stroke-dasharray="4 3"/><text x="748.086" y="822.5" font-size="11" fill="#cfc6f5">★</text><text x="775.086" y="822.0" text-anchor="middle" font-size="10" fill="#bcb2ec">推定</text><text x="768.086" y="798.0" text-anchor="middle" font-size="10.5" fill="#9a90cb" stroke="#0a0d13" stroke-width="3.2" paint-order="stroke" stroke-linejoin="round">カラムと応答項目の対応づけ</text><path d="M823.1120000000001,429.71000000000004 V351.71000000000004" fill="none" stroke="#6d5f44" stroke-width="1.4" stroke-dasharray="4 4"/><g transform="translate(823.1120000000001,347.71000000000004) rotate(-90)"><path d="M0,-9 L0,9" stroke="#c2a06e" stroke-width="1.6" stroke-linecap="round"/><path d="M7,-6 L17,4 M17,-6 L7,4" stroke="#c2a06e" stroke-width="1.5" stroke-linecap="round"/></g><text x="823.1120000000001" y="303.71000000000004" text-anchor="middle" font-size="10.5" fill="#bfa073">追跡できません</text><text x="823.1120000000001" y="317.71000000000004" text-anchor="middle" font-size="10" fill="#7d6a4c">未対応の構成です</text><text x="400" y="856" font-size="10" fill="#3f4759">選択していない経路（このページの他の通信）</text><path d="M572,888 L807,888" fill="none" stroke="#242a3a" stroke-width="1.1" marker-end="url(#arda3r)"/><rect x="540.9639999999999" y="873.0" width="30" height="30" rx="7.8" fill="#0d1017" stroke="#1b2030"/><g transform="translate(545.9639999999999,878.0)" fill="none" stroke="#39415a" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7.2"/><path d="M3 10h14M10 3a13 13 0 0 1 0 14a13 13 0 0 1 0-14"/></g><text x="555.9639999999999" y="919.0" text-anchor="middle" font-size="11.5" fill="#4b5468" stroke="#0a0d13" stroke-width="3.2" paint-order="stroke" stroke-linejoin="round"></text><text x="556" y="910" text-anchor="middle" font-size="9.5" fill="#434b5d" font-family="ui-monospace,Menlo,monospace">GET /api/favorites</text><rect x="808.1120000000001" y="873.0" width="30" height="30" rx="7.8" fill="#0d1017" stroke="#1b2030"/><g transform="translate(813.1120000000001,878.0)" fill="none" stroke="#39415a" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.8" y="3.4" width="14.4" height="13.2" rx="2"/><path d="M6 7.4h8M6 10.4h8M6 13.4h4.5"/></g><text x="823.1120000000001" y="919.0" text-anchor="middle" font-size="11.5" fill="#4b5468" stroke="#0a0d13" stroke-width="3.2" paint-order="stroke" stroke-linejoin="round"></text><text x="823" y="910" text-anchor="middle" font-size="9.5" fill="#434b5d">SQL</text><rect x="525.4639999999999" y="97.5" width="61" height="61" rx="15.9" fill="#151b29" stroke="#39356a" stroke-width="1.1"/><rect x="527.4639999999999" y="99.5" width="57" height="57" rx="13.4" fill="none" stroke="rgba(157,147,224,.10)"/><g transform="translate(545.1,117.1) scale(1.089)" fill="none" stroke="#b3abe8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="15" height="12" rx="2.5"/><path d="M6 8.5h8M6 11.5h4.5"/></g><circle cx="524.4639999999999" cy="96.5" r="10.0" fill="#6f6aa8" stroke="#0f1218" stroke-width="2"/><text x="524.4639999999999" y="100.1" text-anchor="middle" font-size="11" font-weight="700" fill="#f0ecff">1</text><text x="555.9639999999999" y="174.5" text-anchor="middle" font-size="12.5" fill="#e4e8f0" stroke="#0a0d13" stroke-width="3.2" paint-order="stroke" stroke-linejoin="round">表示された値</text><text x="555.9639999999999" y="189.5" text-anchor="middle" font-size="10" fill="#8d97ab" font-family="ui-monospace,Menlo,monospace" stroke="#0a0d13" stroke-width="3.2" paint-order="stroke" stroke-linejoin="round">「千葉県」</text><rect x="525.4639999999999" y="263.605" width="61" height="61" rx="15.9" fill="#151b29" stroke="#39356a" stroke-width="1.1"/><rect x="527.4639999999999" y="265.605" width="57" height="57" rx="13.4" fill="none" stroke="rgba(157,147,224,.10)"/><g transform="translate(545.1,283.2) scale(1.089)" fill="none" stroke="#b3abe8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.6 17 6.6v7.8L10 18.4 3 14.4V6.6z"/><circle cx="10" cy="10.5" r="2.4"/></g><circle cx="524.4639999999999" cy="262.605" r="10.0" fill="#6f6aa8" stroke="#0f1218" stroke-width="2"/><text x="524.4639999999999" y="266.20500000000004" text-anchor="middle" font-size="11" font-weight="700" fill="#f0ecff">2</text><text x="555.9639999999999" y="340.605" text-anchor="middle" font-size="12.5" fill="#e4e8f0" stroke="#0a0d13" stroke-width="3.2" paint-order="stroke" stroke-linejoin="round">コンポーネント</text><rect x="525.4639999999999" y="429.71000000000004" width="61" height="61" rx="15.9" fill="#151b29" stroke="#39356a" stroke-width="1.1"/><rect x="527.4639999999999" y="431.71000000000004" width="57" height="57" rx="13.4" fill="none" stroke="rgba(157,147,224,.10)"/><g transform="translate(545.1,449.3) scale(1.089)" fill="none" stroke="#b3abe8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7.2"/><path d="M3 10h14M10 3a13 13 0 0 1 0 14a13 13 0 0 1 0-14"/></g><circle cx="524.4639999999999" cy="428.71000000000004" r="10.0" fill="#6f6aa8" stroke="#0f1218" stroke-width="2"/><text x="524.4639999999999" y="432.31000000000006" text-anchor="middle" font-size="11" font-weight="700" fill="#f0ecff">3</text><text x="555.9639999999999" y="506.71000000000004" text-anchor="middle" font-size="12.5" fill="#e4e8f0" stroke="#0a0d13" stroke-width="3.2" paint-order="stroke" stroke-linejoin="round">通信</text><rect x="792.6120000000001" y="429.71000000000004" width="61" height="61" rx="15.9" fill="#151b29" stroke="#39356a" stroke-width="1.1"/><rect x="794.6120000000001" y="431.71000000000004" width="57" height="57" rx="13.4" fill="none" stroke="rgba(157,147,224,.10)"/><g transform="translate(812.2,449.3) scale(1.089)" fill="none" stroke="#b3abe8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><rect x="2.8" y="4" width="14.4" height="5" rx="1.6"/><rect x="2.8" y="11" width="14.4" height="5" rx="1.6"/><path d="M5.6 6.5h.01M5.6 13.5h.01"/></g><circle cx="791.6120000000001" cy="428.71000000000004" r="10.0" fill="#6f6aa8" stroke="#0f1218" stroke-width="2"/><text x="791.6120000000001" y="432.31000000000006" text-anchor="middle" font-size="11" font-weight="700" fill="#f0ecff">4</text><text x="823.1120000000001" y="506.71000000000004" text-anchor="middle" font-size="12.5" fill="#e4e8f0" stroke="#0a0d13" stroke-width="3.2" paint-order="stroke" stroke-linejoin="round">サーバー処理</text><rect x="792.6120000000001" y="599.9975" width="61" height="61" rx="15.9" fill="#151b29" stroke="#39356a" stroke-width="1.1"/><rect x="794.6120000000001" y="601.9975" width="57" height="57" rx="13.4" fill="none" stroke="rgba(157,147,224,.10)"/><g transform="translate(812.2,619.6) scale(1.089)" fill="none" stroke="#b3abe8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><rect x="2.8" y="3.4" width="14.4" height="13.2" rx="2"/><path d="M6 7.4h8M6 10.4h8M6 13.4h4.5"/></g><circle cx="791.6120000000001" cy="598.9975" r="10.0" fill="#6f6aa8" stroke="#0f1218" stroke-width="2"/><text x="791.6120000000001" y="602.5975" text-anchor="middle" font-size="11" font-weight="700" fill="#f0ecff">5</text><text x="823.1120000000001" y="676.9975" text-anchor="middle" font-size="12.5" fill="#e4e8f0" stroke="#0a0d13" stroke-width="3.2" paint-order="stroke" stroke-linejoin="round">実行SQL</text><rect x="1042.708" y="497.82500000000005" width="61" height="61" rx="15.9" fill="#151b29" stroke="#39356a" stroke-width="1.1"/><rect x="1044.708" y="499.82500000000005" width="57" height="57" rx="13.4" fill="none" stroke="rgba(157,147,224,.10)"/><g transform="translate(1062.3,517.4) scale(1.089)" fill="none" stroke="#b3abe8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="10" cy="5.4" rx="6.6" ry="2.6"/><path d="M3.4 5.4v9.2c0 1.44 2.95 2.6 6.6 2.6s6.6-1.16 6.6-2.6V5.4"/><path d="M3.4 10c0 1.44 2.95 2.6 6.6 2.6s6.6-1.16 6.6-2.6"/></g><circle cx="1041.708" cy="496.82500000000005" r="10.0" fill="#6f6aa8" stroke="#0f1218" stroke-width="2"/><text x="1041.708" y="500.42500000000007" text-anchor="middle" font-size="11" font-weight="700" fill="#f0ecff">6</text><text x="1073.208" y="574.825" text-anchor="middle" font-size="12.5" fill="#e4e8f0" stroke="#0a0d13" stroke-width="3.2" paint-order="stroke" stroke-linejoin="round">テーブル</text><rect x="1042.708" y="695.0" width="61" height="61" rx="15.9" fill="#151b29" stroke="#39356a" stroke-width="1.1"/><rect x="1044.708" y="697.0" width="57" height="57" rx="13.4" fill="none" stroke="rgba(157,147,224,.10)"/><g transform="translate(1062.3,714.6) scale(1.089)" fill="none" stroke="#b3abe8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><rect x="2.8" y="3.6" width="14.4" height="12.8" rx="2"/><path d="M7.6 3.6v12.8M12.4 3.6v12.8"/><rect x="7.6" y="3.6" width="4.8" height="12.8" fill="rgba(157,147,224,.22)" stroke="none"/></g><circle cx="1041.708" cy="694.0" r="10.0" fill="#6f6aa8" stroke="#0f1218" stroke-width="2"/><text x="1041.708" y="697.6" text-anchor="middle" font-size="11" font-weight="700" fill="#f0ecff">7</text><text x="1116.708" y="723.5" font-size="12.5" fill="#e4e8f0" stroke="#0a0d13" stroke-width="3.2" paint-order="stroke" stroke-linejoin="round">カラム</text><text x="1116.708" y="738.5" font-size="10" fill="#8d97ab" font-family="ui-monospace,Menlo,monospace" stroke="#0a0d13" stroke-width="3.2" paint-order="stroke" stroke-linejoin="round">area</text></svg><div class="fpnl tabs" style="left:16px;top:14px">
+  <b class="on">探索</b><b>データ</b><b>実行</b><b class="soon">編集<s>準備中</s></b></div><div class="fpnl" style="left:16px;top:62px;width:206px"><div class="flh">ページ<span class="x">⌃</span></div><div class="pglist"><div class="pg"><b>ホーム</b><s>/</s></div><div class="pg on"><b>物件一覧</b><s>/properties</s></div><div class="pg"><b>物件詳細</b><s>/properties/[id]</s></div><div class="pg"><b>お知らせ</b><s>/news</s></div><div class="pg"><b>お問い合わせ</b><s>/contact</s></div></div></div><div class="fpnl" style="left:16px;top:274px;width:356px;height:414px"><div class="flh">プレビュー<i>現物</i><span class="x">⌃</span></div><div style="flex:1;min-height:0;display:flex;flex-direction:column;height:386px"><div class="pv">
+  <div class="urlbar"><span class="nav">←　→　⟳</span>
+    <div class="u">http://localhost:3000/properties</div></div>
+  <div class="site">
+    <div class="s-nav"><span class="s-logo">GRiDDATA</span><a>物件一覧</a><a>サービス</a><a>お知らせ</a><span class="s-ava"></span></div>
+    <div class="hero"><div class="t"><b>再生可能エネルギーの<br>未来をつくる</b><i>全国の蓄電池用地を、最適なパートナーへ</i></div>
+      <div class="search">エリア・電力会社・条件で検索</div></div>
+    <div class="filters"><div class="fl">エリア <span>▾</span></div><div class="fl">電力会社 <span>▾</span></div>
+      <div class="fl">電圧区分 <span>▾</span></div><div class="fl">承諾状況 <span>▾</span></div></div>
+    <div class="cards">
+      <div class="card"><div class="thumb"></div><div class="cb"><div class="no">No.900001</div><div class="row"><em>◎</em><span class="sel-el">千葉県</span></div><div class="row"><em>⚡</em>東京電力</div><div class="row"><em>▣</em>特別高圧</div><div class="row"><em>▤</em>2027年4月</div></div></div>
+      <div class="card"><div class="thumb"></div><div class="cb"><div class="no">No.900002</div><div class="row"><em>◎</em>茨城県</div><div class="row"><em>⚡</em>東京電力</div><div class="row"><em>▣</em>高圧</div><div class="row"><em>▤</em>2026年10月</div></div></div>
+    </div>
+    <div class="cards">
+      <div class="card"><div class="thumb"></div><div class="cb"><div class="no">No.900003</div><div class="row"><em>◎</em>群馬県</div><div class="row"><em>⚡</em>東京電力</div><div class="row"><em>▣</em>高圧</div><div class="row"><em>▤</em>2027年1月</div></div></div>
+      <div class="card"><div class="thumb"></div><div class="cb"><div class="no">No.900004</div><div class="row"><em>◎</em>栃木県</div><div class="row"><em>⚡</em>東京電力</div><div class="row"><em>▣</em>低圧</div><div class="row"><em>▤</em>2026年12月</div></div></div>
+    </div>
+    <div class="cards">
+      <div class="card"><div class="thumb"></div><div class="cb"><div class="no">No.900005</div><div class="row"><em>◎</em>埼玉県</div><div class="row"><em>⚡</em>東京電力</div><div class="row"><em>▣</em>特別高圧</div><div class="row"><em>▤</em>2027年7月</div></div></div>
+      <div class="card"><div class="thumb"></div><div class="cb"><div class="no">No.900006</div><div class="row"><em>◎</em>神奈川県</div><div class="row"><em>⚡</em>東京電力</div><div class="row"><em>▣</em>高圧</div><div class="row"><em>▤</em>2027年3月</div></div></div>
+    </div>
+    <div class="cards">
+      <div class="card"><div class="thumb"></div><div class="cb"><div class="no">No.900007</div><div class="row"><em>◎</em>静岡県</div><div class="row"><em>⚡</em>東京電力</div><div class="row"><em>▣</em>高圧</div><div class="row"><em>▤</em>2026年11月</div></div></div>
+      <div class="card"><div class="thumb"></div><div class="cb"><div class="no">No.900008</div><div class="row"><em>◎</em>長野県</div><div class="row"><em>⚡</em>東京電力</div><div class="row"><em>▣</em>低圧</div><div class="row"><em>▤</em>2027年2月</div></div></div>
+    </div>
+    <div class="cards">
+      <div class="card"><div class="thumb"></div><div class="cb"><div class="no">No.900009</div><div class="row"><em>◎</em>新潟県</div><div class="row"><em>⚡</em>東京電力</div><div class="row"><em>▣</em>高圧</div><div class="row"><em>▤</em>2027年5月</div></div></div>
+      <div class="card"><div class="thumb"></div><div class="cb"><div class="no">No.900010</div><div class="row"><em>◎</em>山梨県</div><div class="row"><em>⚡</em>東京電力</div><div class="row"><em>▣</em>高圧</div><div class="row"><em>▤</em>2026年9月</div></div></div>
+    </div>
+  </div>
+  <div class="pv-badge" style="left:1px;top:271px">1</div>
+  <div class="pv-tick" style="left:21px;width:52px;top:280px"></div>
+  <div class="pv-foot">選択中 <b>「千葉県」</b> <span style="color:var(--tx4)">— プレビューには枠のみを描きます</span></div>
+</div></div></div><div class="fpnl" style="left:30px;top:704px;width:262px"><div class="flh">凡例<span class="x">⌃</span></div><div class="lgb"><u><svg width="30" height="12"><path d="M1,6 H23" stroke="#8aa4cc" stroke-width="1.6" stroke-linecap="round"/><path d="M22,2.5 L28,6 L22,9.5" fill="none" stroke="#8aa4cc" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></u><t>実測</t><u><svg width="30" height="12"><path d="M1,6 H23" stroke="#9a8fc4" stroke-width="1.6" stroke-dasharray="5 4.5" stroke-linecap="round"/><path d="M22,2.5 L28,6 L22,9.5" fill="none" stroke="#9a8fc4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></u><t>推定</t><u><svg width="30" height="14" viewBox="0 0 30 14"><rect x="2" y="1" width="26" height="12" rx="4" fill="#11131d" stroke="#6f66a8" stroke-dasharray="4 3"/><text x="15" y="10" text-anchor="middle" font-size="9" fill="#cfc6f5">★</text></svg></u><t>いちばん弱いところ</t><u><svg width="30" height="14" viewBox="0 0 30 14"><path d="M8,2 V12" stroke="#c2a06e" stroke-width="1.6" stroke-linecap="round"/><path d="M14,3 L22,11 M22,3 L14,11" stroke="#c2a06e" stroke-width="1.5" stroke-linecap="round"/></svg></u><t>追跡できません</t><u><svg width="30" height="14" viewBox="0 0 30 14"><rect x="5" y="1" width="12" height="12" rx="3.5" fill="#0d1017" stroke="#1b2030"/><path d="M19,7 H28" stroke="#242a3a" stroke-width="1.1"/></svg></u><t>選択していない経路 <i>（減光・削除しない）</i></t></div></div><div class="fpnl n5c" style="left:16px;bottom:20px">▲ ネットワーク <i>3 件</i><u>タイムライン <i>準備中</i></u></div><div class="fpnl stat" style="right:16px;top:14px"><span>データフロー</span><span class="p">/properties</span><span>通信 3 ／ SQL 2</span><span>142 ms</span></div><div class="synth" style="right:14px;bottom:12px">Phase 4B UI検討用モック／シナリオは合成データ（実測ではありません）</div></div>
+  <div class="dock dp" style="width:376px">
+    <div class="ph">詳細<span class="r"><span>経路</span><span class="pin">固定</span></span></div>
+    <div class="sum">
+  <div class="k">この値の出所</div>
+  <div class="claim"><span class="src">properties . area</span><span class="chip-est">推定</span></div>
+  <p>14 か所のうち 2 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。</p>
+  <div class="hint">実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。</div>
+</div><div class="weak">
+  <div class="wt">★ いちばん弱いところ</div>
+  <div class="wh"><u>⑦→③</u>カラムと応答項目の対応づけ</div>
+  <p>ORMの内部変換は観測できません。別名や加工があると成立しません。</p>
+  <div class="ev">根拠 2 件：<b>実行されたSQLの解析</b> ／ <b>値の一致</b><br>（値の一致だけでは1つに絞れません）</div>
+  <span class="btn">ここを見る</span>
+</div><div class="steps"><div class="k">経路のステップ（7）</div><div class="st cur"><span class="conn"></span><span class="bd">1</span><span class="tx"><span class="tt">表示された値</span><span class="ts">「千葉県」</span></span><span class="tg">実測</span></div><div style="margin:2px 0 6px 28px">
+  <div class="tabs"><span class="on">概要</span><span>根拠</span></div>
+  <div class="ovw"><dl>
+    <dt>取得手段</dt><dd>ブラウザのDOM読み取り</dd>
+    <dt>要素</dt><dd>&lt;span&gt; / PropertyCard 内</dd>
+    <dt>次の一歩</dt><dd style="font-family:inherit;color:#9a90cb">⑦ のカラムから実際の値を開く</dd>
+  </dl></div></div><div class="rel"><span class="rconn"></span><span class="rt">この値を描いたコンポーネント</span></div><div class="st"><span class="conn"></span><span class="bd">2</span><span class="tx"><span class="tt">コンポーネント</span><span class="ts">src/components/PropertyCard.tsx:42</span></span><span class="tg">実測</span></div><div class="rel est"><span class="rconn"></span><span class="rt">応答のどの項目が、この値になったか <i>（推定）</i></span></div><div class="st"><span class="conn"></span><span class="bd">3</span><span class="tx"><span class="tt">通信</span><span class="ts">GET /api/properties — 200 — 124ms</span></span><span class="tg">実測</span></div><div class="rel"><span class="rconn"></span><span class="rt">この通信を受けたサーバーの処理</span></div><div class="st"><span class="conn"></span><span class="bd">4</span><span class="tx"><span class="tt">サーバー処理</span><span class="ts">Next.js API Route — 98ms</span></span><span class="tg">実測</span></div><div class="rel"><span class="rconn"></span><span class="rt">その処理が実行したSQL</span></div><div class="st"><span class="conn"></span><span class="bd">5</span><span class="tx"><span class="tt">実行SQL</span><span class="ts">SELECT id, title, area … — 42ms — 12行</span></span><span class="tg">実測</span></div><div class="rel"><span class="rconn"></span><span class="rt">⑤ から分岐 — そのSQLが読んだテーブル</span></div><div class="st"><span class="conn"></span><span class="bd">6</span><span class="tx"><span class="tt">テーブル</span><span class="ts">public.properties</span></span><span class="tg">実測</span></div><div class="rel"><span class="rconn"></span><span class="rt">⑤ から分岐 — そのSQLが取り出した列</span></div><div class="st"><span class="bd">7</span><span class="tx"><span class="tt">カラム</span><span class="ts">area (text)</span></span><span class="tg">実測</span></div><div class="ret"><b>★</b><span><u>⑦ → ③</u> ここから ③ の応答へ戻ります（いちばん弱いところ）</span></div></div>
+  </div>
+</div></div></body></html>

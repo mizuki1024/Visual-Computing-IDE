@@ -1,0 +1,38 @@
+{
+  "name": "poc01-fixture-app",
+  "version": "0.0.0",
+  "private": true,
+  "description": "PoC-01 の検証用の架空アプリ。IDE 本体のビルドには含めない。",
+  "scripts": {
+    "dev:turbopack": "next dev -p 3200",
+    "dev:webpack": "next dev -p 3200 --webpack",
+    "build": "next build"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.2.1",
+    "next": "^16.4.3",
+    "pg": "^8.13.1",
+    "react": "19.1.1",
+    "react-dom": "19.1.1"
+  },
+  "devDependencies": {
+    "@opentelemetry/api": "^1.9.0",
+    "@opentelemetry/core": "^2.1.0",
+    "@opentelemetry/instrumentation": "^0.207.0",
+    "@opentelemetry/instrumentation-http": "^0.207.0",
+    "@opentelemetry/instrumentation-pg": "^0.60.0",
+    "@opentelemetry/instrumentation-undici": "^0.18.0",
+    "@opentelemetry/resources": "^2.1.0",
+    "@opentelemetry/sdk-trace-base": "^2.1.0",
+    "@opentelemetry/sdk-trace-node": "^2.1.0",
+    "@opentelemetry/semantic-conventions": "^1.30.0",
+    "@prisma/instrumentation": "^6.2.1",
+    "@types/node": "22.10.2",
+    "@types/pg": "^8.11.10",
+    "@types/react": "19.1.8",
+    "@types/react-dom": "19.1.6",
+    "node-sql-parser": "^5.3.4",
+    "prisma": "^6.2.1",
+    "typescript": "5.7.3"
+  }
+}

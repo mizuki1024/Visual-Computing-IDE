@@ -1,0 +1,71 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8">
+<title>S-04 探索画面 — UI案 3案比較（Phase 4A）</title>
+<style>
+:root{--bg:#06070a;--panel:#0f1218;--line:#1c2130;--tx:#e4e8f0;--tx2:#98a1b4;--tx3:#646d80;--lav:#9d93e0;--amber:#c2a06e}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:"Hiragino Sans","Noto Sans JP",system-ui,sans-serif;
+     padding:40px 48px 80px;font-feature-settings:"palt" 1}
+h1{font-size:22px;font-weight:700;letter-spacing:.02em}
+.lead{font-size:13px;color:var(--tx2);margin-top:10px;line-height:1.85;max-width:1100px}
+.warn{margin:18px 0 0;display:inline-block;font-size:12px;color:#d3b887;border:1px solid rgba(194,160,110,.3);
+      background:rgba(194,160,110,.07);border-radius:8px;padding:9px 13px;line-height:1.7}
+.fix{margin-top:26px;border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:16px 18px;max-width:1320px}
+.fix h2{font-size:12px;color:var(--tx3);letter-spacing:.1em;font-weight:600;margin-bottom:10px}
+.fix table{border-collapse:collapse;font-size:12px;width:100%}
+.fix td{padding:5px 14px 5px 0;color:var(--tx2);vertical-align:top;line-height:1.7}
+.fix td:first-child{color:var(--tx3);white-space:nowrap;width:150px}
+.case{margin-top:46px}
+.case h2{font-size:17px;font-weight:700;display:flex;align-items:baseline;gap:12px}
+.case h2 em{font-style:normal;font-size:12px;color:var(--lav);border:1px solid rgba(157,147,224,.35);
+            background:rgba(157,147,224,.08);border-radius:6px;padding:3px 9px}
+.case p{font-size:12.5px;color:var(--tx2);margin-top:9px;line-height:1.85;max-width:1200px}
+.shot{margin-top:16px;border:1px solid var(--line);border-radius:12px;overflow:hidden;width:1320px;background:#000}
+.shot img{display:block;width:100%}
+.meta{font-size:11.5px;color:var(--tx3);margin-top:8px}
+.meta a{color:var(--lav);text-decoration:none;margin-left:14px}
+</style></head><body>
+<h1>S-04「探索」画面 — UIデザイン案 3案</h1>
+<p class="lead">Phase 1〜3 の設計書（IA・UX・観測性情報モデル）に基づく、S-04 探索画面の視覚デザイン探索です。
+3案とも <b>同一のデータ・同一の操作状態</b>（物件一覧ページのカード内「千葉県」を選択した段階2）を描いています。
+左アイコンレールは設けず、モード切替は上部タブに一本化しています（<code>02b</code> 決定1）。</p>
+<div class="warn">本シナリオは <b>UI検討のための合成データ</b>です。実測された経路・SQL・所要時間ではありません。</div>
+
+<div class="fix">
+<h2>3案で固定している条件</h2>
+<table>
+<tr><td>選択状態</td><td>プレビュー内「千葉県」（PropertyCard）を選択。段階2（クリック）。開示段階3・実データ開示なし</td></tr>
+<tr><td>経路</td><td>7ノード：① 表示された値 → ② PropertyCard → ③ GET /api/properties → ④ サーバー処理 → ⑤ 実行SQL → <b>⑤ から分岐して</b> ⑥ properties（reads）と ⑦ area（projects）。<br>7ホップ：うち <b>②→③（応答項目との対応）</b> と <b>⑦→③（カラムと応答項目の対応づけ）</b> が推定。最弱環は ⑦→③（下流優先）。<br><b>⑥→⑦ の線は `02a` のモデルに存在しないため描いていない</b>（OBS-05）</td></tr>
+<tr><td>異常状態</td><td>1件：④ サーバー処理からの外部呼び出しが <b>未対応の構成</b>のため追跡できない（切断マーカー）。N0 の対応範囲インジケータが「部分対応・1件」</td></tr>
+<tr><td>経路外</td><td>2ノード（GET /api/favorites・SQL）を減光して保持（UI-33）。削除しない</td></tr>
+<tr><td>件数</td><td>14 か所（ノード7 + ホップ7）のうち実測 12 ／ 推定 2。<b>件数は経路から算出する導出値</b>であり定数ではない（`02d` 2.3節）</td></tr>
+<tr><td>観測性の符号</td><td>実線＝実測／破線＋「推定」語＝推定／★＝最弱環／✕バー＝切断。<b>色は一次符号にしていない</b>（NFR-30）</td></tr>
+<tr><td>出さないもの</td><td>確度ラベル（高/中/低）、L0〜L3 の記号、ノード上の属性値、ファイアウォール等の実在しないノード、下部への同一フロー図の重複</td></tr>
+</table>
+</div>
+
+<div class="case">
+<h2>A案 <em>Data Flow First</em></h2>
+<p>データフローキャンバスを最大面積に置き、ブラウザ／サーバー／データベースの3帯を左→右に配置します（UI-30）。
+プレビューは選択の起点として 1:1.5 に寄せ、線の説明は小さく常時表示。経路の立体的な形（折り返す ⑦→③ を含む）が一目で読めることを優先した構成です。</p>
+<div class="shot"><img src="a-data-flow-first.png" alt="A案 Data Flow First"></div>
+<div class="meta">1600 × 1000<a href="a-data-flow-first.html">HTML を開く</a><a href="a-data-flow-first.png">PNG</a></div>
+</div>
+
+<div class="case">
+<h2>B案 <em>Preview First</em></h2>
+<p>実際のWebページのプレビューを主役に据え、経路は右の細い縦ストリップに索引として畳みます。
+線の説明は詳細パネルの番号付きリスト側へ移し、キャンバスには推定の符号（破線・「推定」・★）だけを残しました。
+視線はプレビュー → ストリップ → 詳細パネルの一方向に流れます。</p>
+<div class="shot"><img src="b-preview-first.png" alt="B案 Preview First"></div>
+<div class="meta">1600 × 1000<a href="b-preview-first.html">HTML を開く</a><a href="b-preview-first.png">PNG</a></div>
+</div>
+
+<div class="case">
+<h2>C案 <em>Comprehension First</em></h2>
+<p>「ブラウザで起きたこと／サーバーで起きたこと／データベースで分かったこと」の3ゾーンを上→下に積み、
+すべてのホップに平易な日本語の説明を常時表示します。ノードを大きく、余白を広く取り、詳細パネルも最も広く確保しました。
+専門用語を知らなくても上から順に読めば経路が理解できることを優先した構成です。</p>
+<div class="shot"><img src="c-comprehension-first.png" alt="C案 Comprehension First"></div>
+<div class="meta">1600 × 1000<a href="c-comprehension-first.html">HTML を開く</a><a href="c-comprehension-first.png">PNG</a></div>
+</div>
+</body></html>

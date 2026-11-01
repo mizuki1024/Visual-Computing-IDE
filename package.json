@@ -1,0 +1,39 @@
+{
+  "name": "visual-computing-ide",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3100 -H 127.0.0.1",
+    "build": "next build",
+    "start": "next start -p 3100 -H 127.0.0.1",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run build:lib && node tests/poc01.spec.mjs && node tests/explore.spec.mjs && node tests/measured.spec.mjs && node tests/poc03.spec.mjs && node tests/elements.spec.mjs && node tests/poc05.spec.mjs && node tests/flows.spec.mjs && node tests/poc02.spec.mjs && node tests/rsc.spec.mjs && node tests/poc04.spec.mjs && node tests/lineage.spec.mjs && node tests/sqlparse.spec.mjs && node tests/sqlimpact.spec.mjs && node tests/model.spec.mjs && node tests/project-inspect.spec.mjs && node tests/devserver.spec.mjs",
+    "build:lib": "tsc -p tsconfig.lib.json",
+    "poc:matrix": "node poc/runner/matrix.mjs",
+    "poc:observe": "node poc/runner/build-observation.mjs",
+    "poc:proxy": "node poc/runner/dbproxy.mjs",
+    "poc:elements": "node poc/runner/build-element-observation.mjs",
+    "poc:anchor": "node poc/runner/poc03.mjs",
+    "poc:flows": "node poc/runner/poc05.mjs",
+    "poc:flowdata": "node poc/runner/build-poc05-observation.mjs",
+    "poc:anchorcost": "node poc/runner/anchorcost.mjs",
+    "poc:rsc": "node poc/runner/poc02.mjs",
+    "poc:rscdata": "node poc/runner/build-poc02-observation.mjs",
+    "poc:lineage": "node poc/runner/poc04.mjs",
+    "poc:lineagedata": "node poc/runner/build-poc04-observation.mjs",
+    "poc:sqlimpact": "node poc/runner/sqlimpact.mjs",
+    "runtime:reap": "node scripts/reap-dev-server.mjs"
+  },
+  "dependencies": {
+    "next": "^16.4.3",
+    "react": "19.1.1",
+    "react-dom": "19.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.2",
+    "@types/react": "19.1.8",
+    "@types/react-dom": "19.1.6",
+    "playwright-core": "^1.64.1",
+    "typescript": "5.7.3"
+  }
+}

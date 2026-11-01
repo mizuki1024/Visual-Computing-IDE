@@ -1,0 +1,2313 @@
+{
+  "collectedAt": "2026-10-31T16:15:49Z",
+  "byBundler": {
+    "turbopack": {
+      "document": {
+        "hasIdentity": true,
+        "matched": true,
+        "isDocument": true,
+        "initiatorType": "other",
+        "initiatorComponent": null,
+        "initiatorReason": "no-script-stack",
+        "expectedReason": "no-script-stack"
+      },
+      "notes": [],
+      "rscResult": {
+        "documentMatched": true,
+        "documentTraceId": "ffb6c1c645528132087f7565205736da",
+        "spansInDocumentTrace": 25,
+        "serverInternalFetchObserved": true,
+        "serverInternalFetchSpan": "fetch GET http://localhost:3200/api/listings",
+        "innerHandlerInSameTrace": false,
+        "innerHandlerTraces": 12,
+        "sqlInDocumentTrace": 0,
+        "browserRequests": [
+          {
+            "path": "/flows-rsc",
+            "isDocument": true,
+            "hasQuery": false,
+            "hasIdentity": true,
+            "initiatorComponent": null,
+            "initiatorReason": "no-script-stack"
+          }
+        ]
+      },
+      "exposureResult": {
+        "resourceEntries": 19,
+        "serverTimingVisibleToPageScript": 1,
+        "sameOriginEntries": 18,
+        "dedicatedHeaderVisibleToPageScript": false,
+        "crossOrigin": {
+          "origin": "http://127.0.0.1:3200",
+          "requestSucceeded": true,
+          "serverTimingReadable": false,
+          "dedicatedReadable": false,
+          "resourceTimingEntries": 1,
+          "resourceTimingServerTiming": 0,
+          "readableViaCdp": true,
+          "viaCdp": "dedicated-header",
+          "error": null
+        }
+      },
+      "summary": {
+        "browserRequests": 28,
+        "withIdentity": 27,
+        "apiRequests": 17,
+        "matched": 27,
+        "serverEntrySpans": 30,
+        "distinctTracesOnEntrySpans": 30,
+        "duplicateSpanClaims": 0,
+        "identityNeverAmbiguous": true,
+        "timeWindowAmbiguous": 3,
+        "timeWindowDisagreed": 0,
+        "timeWindowClaimsWithoutIdentity": 1,
+        "corroborationOnlyAmbiguous": 23,
+        "headerKeysRead": [
+          "server-timing",
+          "x-vcide-trace"
+        ],
+        "headersAgreeAlways": true,
+        "spans": 697
+      },
+      "initiatorSummary": {
+        "total": 15,
+        "resolved": 15,
+        "verified": 15,
+        "unresolved": 0,
+        "reasons": {}
+      },
+      "caseResults": [
+        {
+          "key": "single",
+          "label": "1回の操作で1リクエスト",
+          "required": "1回の操作で1リクエスト",
+          "note": null,
+          "requestCount": 1,
+          "otherRequestCount": 1,
+          "a": [
+            {
+              "path": "/api/listings",
+              "status": 200,
+              "hops": 1,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "headersAgree": true,
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "failure": null,
+              "matched": true,
+              "reason": null,
+              "spanId": "419c7a5314aa4d3f",
+              "traceId": "9a9e299f2ee5f541dd3ba0d2c78b3a68",
+              "serverStatus": 200,
+              "redirects": []
+            }
+          ],
+          "b": [
+            {
+              "path": "/api/listings",
+              "type": "script",
+              "file": "src/app/flows/page.tsx",
+              "line": 30,
+              "functionName": "one",
+              "verified": true,
+              "component": "Flows",
+              "reason": null
+            }
+          ],
+          "expectations": [
+            {
+              "expect": {
+                "method": "GET",
+                "path": "/api/listings",
+                "status": 200,
+                "initiator": {
+                  "file": "src/app/flows/page.tsx",
+                  "line": 30,
+                  "component": "Flows"
+                }
+              },
+              "found": true,
+              "statusOk": true,
+              "identityOk": true,
+              "correlatedOk": true,
+              "hopsOk": true,
+              "initiatorOk": true
+            }
+          ],
+          "rules": [
+            {
+              "browserRequestId": "10973.41",
+              "method": "GET",
+              "path": "/api/listings",
+              "status": 200,
+              "identity": 1,
+              "identityReason": null,
+              "identitySpanId": "419c7a5314aa4d3f",
+              "corroborationOnly": 12,
+              "timeWindow": 1,
+              "timeWindowAgrees": true
+            }
+          ],
+          "duplicateSpanClaims": [],
+          "pass": true,
+          "unexpected": []
+        },
+        {
+          "key": "parallel-distinct",
+          "label": "複数リクエストの同時実行（別URL3件）",
+          "required": "複数リクエストの同時実行",
+          "note": null,
+          "requestCount": 3,
+          "otherRequestCount": 1,
+          "a": [
+            {
+              "path": "/api/listings",
+              "status": 200,
+              "hops": 1,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "headersAgree": true,
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "failure": null,
+              "matched": true,
+              "reason": null,
+              "spanId": "7da87fe17452e8c3",
+              "traceId": "55d2c8b8452ecec9b594f54abd2e249b",
+              "serverStatus": 200,
+              "redirects": []
+            },
+            {
+              "path": "/api/stats",
+              "status": 200,
+              "hops": 1,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "headersAgree": true,
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "failure": null,
+              "matched": true,
+              "reason": null,
+              "spanId": "f5d065fa691cf643",
+              "traceId": "21e6d17a8b879586e716829a84a16fd0",
+              "serverStatus": 200,
+              "redirects": []
+            },
+            {
+              "path": "/api/listings/2",
+              "status": 200,
+              "hops": 1,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "headersAgree": true,
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "failure": null,
+              "matched": true,
+              "reason": null,
+              "spanId": "2b264091aa65c00b",
+              "traceId": "eb9ad8d58372858597a99dfe1fd96416",
+              "serverStatus": 200,
+              "redirects": []
+            }
+          ],
+          "b": [
+            {
+              "path": "/api/listings",
+              "type": "script",
+              "file": "src/app/flows/page.tsx",
+              "line": 39,
+              "functionName": "parallel",
+              "verified": true,
+              "component": "Flows",
+              "reason": null
+            },
+            {
+              "path": "/api/stats",
+              "type": "script",
+              "file": "src/app/flows/page.tsx",
+              "line": 40,
+              "functionName": "parallel",
+              "verified": true,
+              "component": "Flows",
+              "reason": null
+            },
+            {
+              "path": "/api/listings/2",
+              "type": "script",
+              "file": "src/app/flows/page.tsx",
+              "line": 41,
+              "functionName": "parallel",
+              "verified": true,
+              "component": "Flows",
+              "reason": null
+            }
+          ],
+          "expectations": [
+            {
+              "expect": {
+                "method": "GET",
+                "path": "/api/listings",
+                "status": 200,
+                "initiator": {
+                  "file": "src/app/flows/page.tsx",
+                  "line": 39,
+                  "component": "Flows"
+                }
+              },
+              "found": true,
+              "statusOk": true,
+              "identityOk": true,
+              "correlatedOk": true,
+              "hopsOk": true,
+              "initiatorOk": true
+            },
+            {
+              "expect": {
+                "method": "GET",
+                "path": "/api/stats",
+                "status": 200,
+                "initiator": {
+                  "file": "src/app/flows/page.tsx",
+                  "line": 40,
+                  "component": "Flows"
+                }
+              },
+              "found": true,
+              "statusOk": true,
+              "identityOk": true,
+              "correlatedOk": true,
+              "hopsOk": true,
+              "initiatorOk": true
+            },
+            {
+              "expect": {
+                "method": "GET",
+                "path": "/api/listings/2",
+                "status": 200,
+                "initiator": {
+                  "file": "src/app/flows/page.tsx",
+                  "line": 41,
+                  "component": "Flows"
+                }
+              },
+              "found": true,
+              "statusOk": true,
+              "identityOk": true,
+              "correlatedOk": true,
+              "hopsOk": true,
+              "initiatorOk": true
+            }
+          ],
+          "rules": [
+            {
+              "browserRequestId": "10990.41",
+              "method": "GET",
+              "path": "/api/listings",
+              "status": 200,
+              "identity": 1,
+              "identityReason": null,
+              "identitySpanId": "7da87fe17452e8c3",
+              "corroborationOnly": 12,
+              "timeWindow": 1,
+              "timeWindowAgrees": true
+            },
+            {
+              "browserRequestId": "10990.42",
+              "method": "GET",
+              "path": "/api/stats",
+              "status": 200,
+              "identity": 1,
+              "identityReason": null,
+              "identitySpanId": "f5d065fa691cf643",
+              "corroborationOnly": 2,
+              "timeWindow": 1,
+              "timeWindowAgrees": true
+            },
+            {
+              "browserRequestId": "10990.43",
+              "method": "GET",
+              "path": "/api/listings/2",
+              "status": 200,
+              "identity": 1,
+              "identityReason": null,
+              "identitySpanId": "2b264091aa65c00b",
+              "corroborationOnly": 1,
+              "timeWindow": 1,
+              "timeWindowAgrees": true
+            }
+          ],
+          "duplicateSpanClaims": [],
+          "pass": true,
+          "unexpected": []
+        },
+        {
+          "key": "parallel-same-url",
+          "label": "同じURLへの同時実行（3件）",
+          "required": "複数リクエストの同時実行 ＋ 同じURLへのリクエスト",
+          "note": "時刻の近さでは1件も区別できない。識別子でしか分けられないケース",
+          "requestCount": 3,
+          "otherRequestCount": 1,
+          "a": [
+            {
+              "path": "/api/listings",
+              "status": 200,
+              "hops": 1,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "headersAgree": true,
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "failure": null,
+              "matched": true,
+              "reason": null,
+              "spanId": "4f07c7e35f0a787f",
+              "traceId": "84d3c329b90b76c57a435a8f68914b57",
+              "serverStatus": 200,
+              "redirects": []
+            },
+            {
+              "path": "/api/listings",
+              "status": 200,
+              "hops": 1,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "headersAgree": true,
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "failure": null,
+              "matched": true,
+              "reason": null,
+              "spanId": "04952c2c04bc98d1",
+              "traceId": "6f5f20deeaa84d021b65b53d5b00db55",
+              "serverStatus": 200,
+              "redirects": []
+            },
+            {
+              "path": "/api/listings",
+              "status": 200,
+              "hops": 1,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "headersAgree": true,
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "failure": null,
+              "matched": true,
+              "reason": null,
+              "spanId": "a28451baf6dc61fb",
+              "traceId": "1eeb1095e98bf803a5b01ca5e1fcd75b",
+              "serverStatus": 200,
+              "redirects": []
+            }
+          ],
+          "b": [
+            {
+              "path": "/api/listings",
+              "type": "script",
+              "file": "src/app/flows/page.tsx",
+              "line": 49,
+              "functionName": "sameParallel",
+              "verified": true,
+              "component": "Flows",
+              "reason": null
+            },
+            {
+              "path": "/api/listings",
+              "type": "script",
+              "file": "src/app/flows/page.tsx",
+              "line": 50,
+              "functionName": "sameParallel",
+              "verified": true,
+              "component": "Flows",
+              "reason": null
+            },
+            {
+              "path": "/api/listings",
+              "type": "script",
+              "file": "src/app/flows/page.tsx",
+              "line": 51,
+              "functionName": "sameParallel",
+              "verified": true,
+              "component": "Flows",
+              "reason": null
+            }
+          ],
+          "expectations": [
+            {
+              "expect": {
+                "method": "GET",
+                "path": "/api/listings",
+                "status": 200,
+                "initiator": {
+                  "file": "src/app/flows/page.tsx",
+                  "line": 49,
+                  "component": "Flows"
+                }
+              },
+              "found": true,
+              "statusOk": true,
+              "identityOk": true,
+              "correlatedOk": true,
+              "hopsOk": true,
+              "initiatorOk": true
+            },
+            {
+              "expect": {
+                "method": "GET",
+                "path": "/api/listings",
+                "status": 200,
+                "initiator": {
+                  "file": "src/app/flows/page.tsx",
+                  "line": 50,
+                  "component": "Flows"
+                }
+              },
+              "found": true,
+              "statusOk": true,
+              "identityOk": true,
+              "correlatedOk": true,
+              "hopsOk": true,
+              "initiatorOk": true
+            },
+            {
+              "expect": {
+                "method": "GET",
+                "path": "/api/listings",
+                "status": 200,
+                "initiator": {
+                  "file": "src/app/flows/page.tsx",
+                  "line": 51,
+                  "component": "Flows"
+                }
+              },
+              "found": true,
+              "statusOk": true,
+              "identityOk": true,
+              "correlatedOk": true,
+              "hopsOk": true,
+              "initiatorOk": true
+            }
+          ],
+          "rules": [
+            {
+              "browserRequestId": "11004.41",
+              "method": "GET",
+              "path": "/api/listings",
+              "status": 200,
+              "identity": 1,
+              "identityReason": null,
+              "identitySpanId": "4f07c7e35f0a787f",
+              "corroborationOnly": 12,
+              "timeWindow": 3,
+              "timeWindowAgrees": null
+            },
+            {
+              "browserRequestId": "11004.42",
+              "method": "GET",
+              "path": "/api/listings",
+              "status": 200,
+              "identity": 1,
+              "identityReason": null,
+              "identitySpanId": "04952c2c04bc98d1",
+              "corroborationOnly": 12,
+              "timeWindow": 3,
+              "timeWindowAgrees": null
+            },
+            {
+              "browserRequestId": "11004.43",
+              "method": "GET",
+              "path": "/api/listings",
+              "status": 200,
+              "identity": 1,
+              "identityReason": null,
+              "identitySpanId": "a28451baf6dc61fb",
+              "corroborationOnly": 12,
+              "timeWindow": 3,
+              "timeWindowAgrees": null
+            }
+          ],
+          "duplicateSpanClaims": [],
+          "pass": true,
+          "unexpected": []
+        },
+        {
+          "key": "serial-same-url",
+          "label": "同じURLへの連続リクエスト（3件）",
+          "required": "同じURLへの連続リクエスト",
+          "note": null,
+          "requestCount": 3,
+          "otherRequestCount": 1,
+          "a": [
+            {
+              "path": "/api/listings",
+              "status": 200,
+              "hops": 1,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "headersAgree": true,
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "failure": null,
+              "matched": true,
+              "reason": null,
+              "spanId": "c9f3e4904a5f3739",
+              "traceId": "96032c2b9a1b7c8cc459ed904de9f227",
+              "serverStatus": 200,
+              "redirects": []
+            },
+            {
+              "path": "/api/listings",
+              "status": 200,
+              "hops": 1,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "headersAgree": true,
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "failure": null,
+              "matched": true,
+              "reason": null,
+              "spanId": "6a584f25f2149e3a",
+              "traceId": "2c784f68f47510548e51ecacb3a4ff93",
+              "serverStatus": 200,
+              "redirects": []
+            },
+            {
+              "path": "/api/listings",
+              "status": 200,
+              "hops": 1,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "headersAgree": true,
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "failure": null,
+              "matched": true,
+              "reason": null,
+              "spanId": "205d6cb41e2ae469",
+              "traceId": "02729478fb0449cead59d0a8344dd6c4",
+              "serverStatus": 200,
+              "redirects": []
+            }
+          ],
+          "b": [
+            {
+              "path": "/api/listings",
+              "type": "script",
+              "file": "src/app/flows/page.tsx",
+              "line": 58,
+              "functionName": "sameSerial",
+              "verified": true,
+              "component": "Flows",
+              "reason": null
+            },
+            {
+              "path": "/api/listings",
+              "type": "script",
+              "file": "src/app/flows/page.tsx",
+              "line": 58,
+              "functionName": "sameSerial",
+              "verified": true,
+              "component": "Flows",
+              "reason": null
+            },
+            {
+              "path": "/api/listings",
+              "type": "script",
+              "file": "src/app/flows/page.tsx",
+              "line": 58,
+              "functionName": "sameSerial",
+              "verified": true,
+              "component": "Flows",
+              "reason": null
+            }
+          ],
+          "expectations": [
+            {
+              "expect": {
+                "method": "GET",
+                "path": "/api/listings",
+                "status": 200,
+                "initiator": {
+                  "file": "src/app/flows/page.tsx",
+                  "line": 58,
+                  "component": "Flows"
+                }
+              },
+              "found": true,
+              "statusOk": true,
+              "identityOk": true,
+              "correlatedOk": true,
+              "hopsOk": true,
+              "initiatorOk": true
+            },
+            {
+              "expect": {
+                "method": "GET",
+                "path": "/api/listings",
+                "status": 200,
+                "initiator": {
+                  "file": "src/app/flows/page.tsx",
+                  "line": 58,
+                  "component": "Flows"
+                }
+              },
+              "found": true,
+              "statusOk": true,
+              "identityOk": true,
+              "correlatedOk": true,
+              "hopsOk": true,
+              "initiatorOk": true
+            },
+            {
+              "expect": {
+                "method": "GET",
+                "path": "/api/listings",
+                "status": 200,
+                "initiator": {
+                  "file": "src/app/flows/page.tsx",
+                  "line": 58,
+                  "component": "Flows"
+                }
+              },
+              "found": true,
+              "statusOk": true,
+              "identityOk": true,
+              "correlatedOk": true,
+              "hopsOk": true,
+              "initiatorOk": true
+            }
+          ],
+          "rules": [
+            {
+              "browserRequestId": "11022.41",
+              "method": "GET",
+              "path": "/api/listings",
+              "status": 200,
+              "identity": 1,
+              "identityReason": null,
+              "identitySpanId": "c9f3e4904a5f3739",
+              "corroborationOnly": 12,
+              "timeWindow": 1,
+              "timeWindowAgrees": true
+            },
+            {
+              "browserRequestId": "11022.42",
+              "method": "GET",
+              "path": "/api/listings",
+              "status": 200,
+              "identity": 1,
+              "identityReason": null,
+              "identitySpanId": "6a584f25f2149e3a",
+              "corroborationOnly": 12,
+              "timeWindow": 1,
+              "timeWindowAgrees": true
+            },
+            {
+              "browserRequestId": "11022.43",
+              "method": "GET",
+              "path": "/api/listings",
+              "status": 200,
+              "identity": 1,
+              "identityReason": null,
+              "identitySpanId": "205d6cb41e2ae469",
+              "corroborationOnly": 12,
+              "timeWindow": 1,
+              "timeWindowAgrees": true
+            }
+          ],
+          "duplicateSpanClaims": [],
+          "pass": true,
+          "unexpected": []
+        },
+        {
+          "key": "failed-500",
+          "label": "失敗したリクエスト（サーバー側の例外 → 500）",
+          "required": "失敗したリクエスト",
+          "note": null,
+          "requestCount": 1,
+          "otherRequestCount": 1,
+          "a": [
+            {
+              "path": "/api/boom",
+              "status": 500,
+              "hops": 1,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "headersAgree": true,
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "failure": {
+                "kind": "canceled-after-response",
+                "detail": "net::ERR_ABORTED"
+              },
+              "matched": true,
+              "reason": null,
+              "spanId": "a0acb2ff9c65d6e0",
+              "traceId": "8863252a3f1b3c9503be8b692f1ac427",
+              "serverStatus": 500,
+              "redirects": []
+            }
+          ],
+          "b": [
+            {
+              "path": "/api/boom",
+              "type": "script",
+              "file": "src/app/flows/page.tsx",
+              "line": 64,
+              "functionName": "fail",
+              "verified": true,
+              "component": "Flows",
+              "reason": null
+            }
+          ],
+          "expectations": [
+            {
+              "expect": {
+                "method": "GET",
+                "path": "/api/boom",
+                "status": 500,
+                "initiator": {
+                  "file": "src/app/flows/page.tsx",
+                  "line": 64,
+                  "component": "Flows"
+                }
+              },
+              "found": true,
+              "statusOk": true,
+              "identityOk": true,
+              "correlatedOk": true,
+              "hopsOk": true,
+              "initiatorOk": true
+            }
+          ],
+          "rules": [
+            {
+              "browserRequestId": "11035.41",
+              "method": "GET",
+              "path": "/api/boom",
+              "status": 500,
+              "identity": 1,
+              "identityReason": null,
+              "identitySpanId": "a0acb2ff9c65d6e0",
+              "corroborationOnly": 1,
+              "timeWindow": 1,
+              "timeWindowAgrees": true
+            }
+          ],
+          "duplicateSpanClaims": [],
+          "pass": true,
+          "unexpected": []
+        },
+        {
+          "key": "failed-404",
+          "label": "失敗したリクエスト（ハンドラが「無い」と答える → 404）",
+          "required": "失敗したリクエスト",
+          "note": null,
+          "requestCount": 1,
+          "otherRequestCount": 1,
+          "a": [
+            {
+              "path": "/api/listings/999999",
+              "status": 404,
+              "hops": 1,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "headersAgree": true,
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "failure": null,
+              "matched": true,
+              "reason": null,
+              "spanId": "81fc57a7b146f148",
+              "traceId": "c0eeafe0fffa191c29b5962d2f8611f3",
+              "serverStatus": 404,
+              "redirects": []
+            }
+          ],
+          "b": [
+            {
+              "path": "/api/listings/999999",
+              "type": "script",
+              "file": "src/app/flows/page.tsx",
+              "line": 70,
+              "functionName": "missing",
+              "verified": true,
+              "component": "Flows",
+              "reason": null
+            }
+          ],
+          "expectations": [
+            {
+              "expect": {
+                "method": "GET",
+                "path": "/api/listings/999999",
+                "status": 404,
+                "initiator": {
+                  "file": "src/app/flows/page.tsx",
+                  "line": 70,
+                  "component": "Flows"
+                }
+              },
+              "found": true,
+              "statusOk": true,
+              "identityOk": true,
+              "correlatedOk": true,
+              "hopsOk": true,
+              "initiatorOk": true
+            }
+          ],
+          "rules": [
+            {
+              "browserRequestId": "11050.41",
+              "method": "GET",
+              "path": "/api/listings/999999",
+              "status": 404,
+              "identity": 1,
+              "identityReason": null,
+              "identitySpanId": "81fc57a7b146f148",
+              "corroborationOnly": 1,
+              "timeWindow": 1,
+              "timeWindowAgrees": true
+            }
+          ],
+          "duplicateSpanClaims": [],
+          "pass": true,
+          "unexpected": []
+        },
+        {
+          "key": "no-response",
+          "label": "応答が返らない失敗（中断）",
+          "required": "失敗したリクエスト（観測不能な状態）",
+          "note": "応答が無いので識別情報が存在しない。対応付けを作ってはならない",
+          "requestCount": 1,
+          "otherRequestCount": 1,
+          "a": [
+            {
+              "path": "/api/listings",
+              "status": null,
+              "hops": 1,
+              "hasIdentity": false,
+              "via": null,
+              "headersAgree": null,
+              "readHeaderKeys": [],
+              "failure": {
+                "kind": "no-response",
+                "detail": "net::ERR_ABORTED"
+              },
+              "matched": false,
+              "reason": "no-identity-in-response",
+              "spanId": null,
+              "traceId": null,
+              "serverStatus": null,
+              "redirects": []
+            }
+          ],
+          "b": [
+            {
+              "path": "/api/listings",
+              "type": "script",
+              "file": "src/app/flows/page.tsx",
+              "line": 77,
+              "functionName": "abort",
+              "verified": true,
+              "component": "Flows",
+              "reason": null
+            }
+          ],
+          "expectations": [
+            {
+              "expect": {
+                "method": "GET",
+                "path": "/api/listings",
+                "status": null,
+                "identity": false,
+                "initiator": {
+                  "file": "src/app/flows/page.tsx",
+                  "line": 77,
+                  "component": "Flows"
+                }
+              },
+              "found": true,
+              "statusOk": true,
+              "identityOk": true,
+              "correlatedOk": true,
+              "hopsOk": true,
+              "initiatorOk": true
+            }
+          ],
+          "rules": [
+            {
+              "browserRequestId": "11067.41",
+              "method": "GET",
+              "path": "/api/listings",
+              "status": null,
+              "identity": 0,
+              "identityReason": "no-identity-in-response",
+              "identitySpanId": null,
+              "corroborationOnly": 12,
+              "timeWindow": 1,
+              "timeWindowAgrees": null
+            }
+          ],
+          "duplicateSpanClaims": [],
+          "pass": true,
+          "unexpected": []
+        },
+        {
+          "key": "redirect",
+          "label": "リダイレクト（307 → 200）",
+          "required": "リダイレクト",
+          "note": "1回の通信に応答が2つ返る。段ごとに別のサーバー処理である",
+          "requestCount": 1,
+          "otherRequestCount": 1,
+          "a": [
+            {
+              "path": "/api/listings",
+              "status": 200,
+              "hops": 2,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "headersAgree": true,
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "failure": null,
+              "matched": true,
+              "reason": null,
+              "spanId": "fcdca6e71950243e",
+              "traceId": "e6a0360697f7d0d0c3830965f0651748",
+              "serverStatus": 200,
+              "redirects": [
+                {
+                  "path": "/api/redirect",
+                  "status": 307,
+                  "matched": true,
+                  "reason": null,
+                  "spanId": "64f4b91552dd4fb7",
+                  "traceId": "1497f4455a3f9638d3752f3b9aa15827"
+                }
+              ]
+            }
+          ],
+          "b": [
+            {
+              "path": "/api/listings",
+              "type": "script",
+              "file": "src/app/flows/page.tsx",
+              "line": 84,
+              "functionName": "redirect",
+              "verified": true,
+              "component": "Flows",
+              "reason": null
+            }
+          ],
+          "expectations": [
+            {
+              "expect": {
+                "method": "GET",
+                "path": "/api/listings",
+                "status": 200,
+                "hops": 2,
+                "redirect": [
+                  {
+                    "path": "/api/redirect",
+                    "status": 307
+                  }
+                ],
+                "initiator": {
+                  "file": "src/app/flows/page.tsx",
+                  "line": 84,
+                  "component": "Flows"
+                }
+              },
+              "found": true,
+              "statusOk": true,
+              "identityOk": true,
+              "correlatedOk": true,
+              "hopsOk": true,
+              "initiatorOk": true
+            }
+          ],
+          "rules": [
+            {
+              "browserRequestId": "11080.41",
+              "method": "GET",
+              "path": "/api/listings",
+              "status": 200,
+              "identity": 1,
+              "identityReason": null,
+              "identitySpanId": "fcdca6e71950243e",
+              "corroborationOnly": 12,
+              "timeWindow": 1,
+              "timeWindowAgrees": true
+            }
+          ],
+          "duplicateSpanClaims": [],
+          "pass": true,
+          "unexpected": []
+        },
+        {
+          "key": "child-component",
+          "label": "ページとは別のコンポーネントからの通信",
+          "required": "Client Component からの fetch",
+          "note": "ページのコンポーネント（Flows）ではなく FetchButton を指さねばならない",
+          "requestCount": 1,
+          "otherRequestCount": 1,
+          "a": [
+            {
+              "path": "/api/stats",
+              "status": 200,
+              "hops": 1,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "headersAgree": true,
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "failure": null,
+              "matched": true,
+              "reason": null,
+              "spanId": "e1851e19e1fa3c10",
+              "traceId": "f4e4fde9784ce0da3306ed7fd4b7ab3f",
+              "serverStatus": 200,
+              "redirects": []
+            }
+          ],
+          "b": [
+            {
+              "path": "/api/stats",
+              "type": "script",
+              "file": "src/components/FetchButton.tsx",
+              "line": 10,
+              "functionName": "run",
+              "verified": true,
+              "component": "FetchButton",
+              "reason": null
+            }
+          ],
+          "expectations": [
+            {
+              "expect": {
+                "method": "GET",
+                "path": "/api/stats",
+                "status": 200,
+                "initiator": {
+                  "file": "src/components/FetchButton.tsx",
+                  "line": 10,
+                  "component": "FetchButton"
+                }
+              },
+              "found": true,
+              "statusOk": true,
+              "identityOk": true,
+              "correlatedOk": true,
+              "hopsOk": true,
+              "initiatorOk": true
+            }
+          ],
+          "rules": [
+            {
+              "browserRequestId": "11093.41",
+              "method": "GET",
+              "path": "/api/stats",
+              "status": 200,
+              "identity": 1,
+              "identityReason": null,
+              "identitySpanId": "e1851e19e1fa3c10",
+              "corroborationOnly": 2,
+              "timeWindow": 1,
+              "timeWindowAgrees": true
+            }
+          ],
+          "duplicateSpanClaims": [],
+          "pass": true,
+          "unexpected": []
+        }
+      ]
+    },
+    "webpack": {
+      "document": {
+        "hasIdentity": true,
+        "matched": true,
+        "isDocument": true,
+        "initiatorType": "other",
+        "initiatorComponent": null,
+        "initiatorReason": "no-script-stack",
+        "expectedReason": "no-script-stack"
+      },
+      "notes": [],
+      "rscResult": {
+        "documentMatched": true,
+        "documentTraceId": "7af626c9b0a084085b8a25234d86c94d",
+        "spansInDocumentTrace": 25,
+        "serverInternalFetchObserved": true,
+        "serverInternalFetchSpan": "fetch GET http://localhost:3200/api/listings",
+        "innerHandlerInSameTrace": false,
+        "innerHandlerTraces": 12,
+        "sqlInDocumentTrace": 0,
+        "browserRequests": [
+          {
+            "path": "/flows-rsc",
+            "isDocument": true,
+            "hasQuery": false,
+            "hasIdentity": true,
+            "initiatorComponent": null,
+            "initiatorReason": "no-script-stack"
+          }
+        ]
+      },
+      "exposureResult": {
+        "resourceEntries": 9,
+        "serverTimingVisibleToPageScript": 1,
+        "sameOriginEntries": 8,
+        "dedicatedHeaderVisibleToPageScript": false,
+        "crossOrigin": {
+          "origin": "http://127.0.0.1:3200",
+          "requestSucceeded": true,
+          "serverTimingReadable": false,
+          "dedicatedReadable": false,
+          "resourceTimingEntries": 1,
+          "resourceTimingServerTiming": 0,
+          "readableViaCdp": true,
+          "viaCdp": "dedicated-header",
+          "error": null
+        }
+      },
+      "summary": {
+        "browserRequests": 28,
+        "withIdentity": 27,
+        "apiRequests": 17,
+        "matched": 27,
+        "serverEntrySpans": 30,
+        "distinctTracesOnEntrySpans": 30,
+        "duplicateSpanClaims": 0,
+        "identityNeverAmbiguous": true,
+        "timeWindowAmbiguous": 3,
+        "timeWindowDisagreed": 0,
+        "timeWindowClaimsWithoutIdentity": 1,
+        "corroborationOnlyAmbiguous": 23,
+        "headerKeysRead": [
+          "server-timing",
+          "x-vcide-trace"
+        ],
+        "headersAgreeAlways": true,
+        "spans": 703
+      },
+      "initiatorSummary": {
+        "total": 15,
+        "resolved": 15,
+        "verified": 15,
+        "unresolved": 0,
+        "reasons": {}
+      },
+      "caseResults": [
+        {
+          "key": "single",
+          "label": "1回の操作で1リクエスト",
+          "required": "1回の操作で1リクエスト",
+          "note": null,
+          "requestCount": 1,
+          "otherRequestCount": 1,
+          "a": [
+            {
+              "path": "/api/listings",
+              "status": 200,
+              "hops": 1,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "headersAgree": true,
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "failure": null,
+              "matched": true,
+              "reason": null,
+              "spanId": "84d9a48a69eb8bed",
+              "traceId": "582ed36a30e1fc022e12128d87b7a932",
+              "serverStatus": 200,
+              "redirects": []
+            }
+          ],
+          "b": [
+            {
+              "path": "/api/listings",
+              "type": "script",
+              "file": "src/app/flows/page.tsx",
+              "line": 30,
+              "functionName": "one",
+              "verified": true,
+              "component": "Flows",
+              "reason": null
+            }
+          ],
+          "expectations": [
+            {
+              "expect": {
+                "method": "GET",
+                "path": "/api/listings",
+                "status": 200,
+                "initiator": {
+                  "file": "src/app/flows/page.tsx",
+                  "line": 30,
+                  "component": "Flows"
+                }
+              },
+              "found": true,
+              "statusOk": true,
+              "identityOk": true,
+              "correlatedOk": true,
+              "hopsOk": true,
+              "initiatorOk": true
+            }
+          ],
+          "rules": [
+            {
+              "browserRequestId": "11194.18",
+              "method": "GET",
+              "path": "/api/listings",
+              "status": 200,
+              "identity": 1,
+              "identityReason": null,
+              "identitySpanId": "84d9a48a69eb8bed",
+              "corroborationOnly": 12,
+              "timeWindow": 1,
+              "timeWindowAgrees": true
+            }
+          ],
+          "duplicateSpanClaims": [],
+          "pass": true,
+          "unexpected": []
+        },
+        {
+          "key": "parallel-distinct",
+          "label": "複数リクエストの同時実行（別URL3件）",
+          "required": "複数リクエストの同時実行",
+          "note": null,
+          "requestCount": 3,
+          "otherRequestCount": 1,
+          "a": [
+            {
+              "path": "/api/listings",
+              "status": 200,
+              "hops": 1,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "headersAgree": true,
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "failure": null,
+              "matched": true,
+              "reason": null,
+              "spanId": "37ebb6870c64f070",
+              "traceId": "9293e552f68a38d0f625bbc3fd5a7cdd",
+              "serverStatus": 200,
+              "redirects": []
+            },
+            {
+              "path": "/api/stats",
+              "status": 200,
+              "hops": 1,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "headersAgree": true,
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "failure": null,
+              "matched": true,
+              "reason": null,
+              "spanId": "d2f2d5b311b5ec7c",
+              "traceId": "c36f3a0092d6e08081860da0af396f78",
+              "serverStatus": 200,
+              "redirects": []
+            },
+            {
+              "path": "/api/listings/2",
+              "status": 200,
+              "hops": 1,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "headersAgree": true,
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "failure": null,
+              "matched": true,
+              "reason": null,
+              "spanId": "903c877d7df9f685",
+              "traceId": "5cdb4b62b3bf51253bc301a9475f0b9e",
+              "serverStatus": 200,
+              "redirects": []
+            }
+          ],
+          "b": [
+            {
+              "path": "/api/listings",
+              "type": "script",
+              "file": "src/app/flows/page.tsx",
+              "line": 39,
+              "functionName": "parallel",
+              "verified": true,
+              "component": "Flows",
+              "reason": null
+            },
+            {
+              "path": "/api/stats",
+              "type": "script",
+              "file": "src/app/flows/page.tsx",
+              "line": 40,
+              "functionName": "parallel",
+              "verified": true,
+              "component": "Flows",
+              "reason": null
+            },
+            {
+              "path": "/api/listings/2",
+              "type": "script",
+              "file": "src/app/flows/page.tsx",
+              "line": 41,
+              "functionName": "parallel",
+              "verified": true,
+              "component": "Flows",
+              "reason": null
+            }
+          ],
+          "expectations": [
+            {
+              "expect": {
+                "method": "GET",
+                "path": "/api/listings",
+                "status": 200,
+                "initiator": {
+                  "file": "src/app/flows/page.tsx",
+                  "line": 39,
+                  "component": "Flows"
+                }
+              },
+              "found": true,
+              "statusOk": true,
+              "identityOk": true,
+              "correlatedOk": true,
+              "hopsOk": true,
+              "initiatorOk": true
+            },
+            {
+              "expect": {
+                "method": "GET",
+                "path": "/api/stats",
+                "status": 200,
+                "initiator": {
+                  "file": "src/app/flows/page.tsx",
+                  "line": 40,
+                  "component": "Flows"
+                }
+              },
+              "found": true,
+              "statusOk": true,
+              "identityOk": true,
+              "correlatedOk": true,
+              "hopsOk": true,
+              "initiatorOk": true
+            },
+            {
+              "expect": {
+                "method": "GET",
+                "path": "/api/listings/2",
+                "status": 200,
+                "initiator": {
+                  "file": "src/app/flows/page.tsx",
+                  "line": 41,
+                  "component": "Flows"
+                }
+              },
+              "found": true,
+              "statusOk": true,
+              "identityOk": true,
+              "correlatedOk": true,
+              "hopsOk": true,
+              "initiatorOk": true
+            }
+          ],
+          "rules": [
+            {
+              "browserRequestId": "11207.18",
+              "method": "GET",
+              "path": "/api/listings",
+              "status": 200,
+              "identity": 1,
+              "identityReason": null,
+              "identitySpanId": "37ebb6870c64f070",
+              "corroborationOnly": 12,
+              "timeWindow": 1,
+              "timeWindowAgrees": true
+            },
+            {
+              "browserRequestId": "11207.19",
+              "method": "GET",
+              "path": "/api/stats",
+              "status": 200,
+              "identity": 1,
+              "identityReason": null,
+              "identitySpanId": "d2f2d5b311b5ec7c",
+              "corroborationOnly": 2,
+              "timeWindow": 1,
+              "timeWindowAgrees": true
+            },
+            {
+              "browserRequestId": "11207.20",
+              "method": "GET",
+              "path": "/api/listings/2",
+              "status": 200,
+              "identity": 1,
+              "identityReason": null,
+              "identitySpanId": "903c877d7df9f685",
+              "corroborationOnly": 1,
+              "timeWindow": 1,
+              "timeWindowAgrees": true
+            }
+          ],
+          "duplicateSpanClaims": [],
+          "pass": true,
+          "unexpected": []
+        },
+        {
+          "key": "parallel-same-url",
+          "label": "同じURLへの同時実行（3件）",
+          "required": "複数リクエストの同時実行 ＋ 同じURLへのリクエスト",
+          "note": "時刻の近さでは1件も区別できない。識別子でしか分けられないケース",
+          "requestCount": 3,
+          "otherRequestCount": 1,
+          "a": [
+            {
+              "path": "/api/listings",
+              "status": 200,
+              "hops": 1,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "headersAgree": true,
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "failure": null,
+              "matched": true,
+              "reason": null,
+              "spanId": "a37f3b90a344e840",
+              "traceId": "a7c3914f0f2b14177360d5b73344a89e",
+              "serverStatus": 200,
+              "redirects": []
+            },
+            {
+              "path": "/api/listings",
+              "status": 200,
+              "hops": 1,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "headersAgree": true,
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "failure": null,
+              "matched": true,
+              "reason": null,
+              "spanId": "63aa1647807c65a1",
+              "traceId": "380dfdb73bd6bf07710e44e55c7f0e2d",
+              "serverStatus": 200,
+              "redirects": []
+            },
+            {
+              "path": "/api/listings",
+              "status": 200,
+              "hops": 1,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "headersAgree": true,
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "failure": null,
+              "matched": true,
+              "reason": null,
+              "spanId": "9244337e5ca53925",
+              "traceId": "70e2c97cd10be1fabf10f63d2b4d4e8a",
+              "serverStatus": 200,
+              "redirects": []
+            }
+          ],
+          "b": [
+            {
+              "path": "/api/listings",
+              "type": "script",
+              "file": "src/app/flows/page.tsx",
+              "line": 49,
+              "functionName": "sameParallel",
+              "verified": true,
+              "component": "Flows",
+              "reason": null
+            },
+            {
+              "path": "/api/listings",
+              "type": "script",
+              "file": "src/app/flows/page.tsx",
+              "line": 50,
+              "functionName": "sameParallel",
+              "verified": true,
+              "component": "Flows",
+              "reason": null
+            },
+            {
+              "path": "/api/listings",
+              "type": "script",
+              "file": "src/app/flows/page.tsx",
+              "line": 51,
+              "functionName": "sameParallel",
+              "verified": true,
+              "component": "Flows",
+              "reason": null
+            }
+          ],
+          "expectations": [
+            {
+              "expect": {
+                "method": "GET",
+                "path": "/api/listings",
+                "status": 200,
+                "initiator": {
+                  "file": "src/app/flows/page.tsx",
+                  "line": 49,
+                  "component": "Flows"
+                }
+              },
+              "found": true,
+              "statusOk": true,
+              "identityOk": true,
+              "correlatedOk": true,
+              "hopsOk": true,
+              "initiatorOk": true
+            },
+            {
+              "expect": {
+                "method": "GET",
+                "path": "/api/listings",
+                "status": 200,
+                "initiator": {
+                  "file": "src/app/flows/page.tsx",
+                  "line": 50,
+                  "component": "Flows"
+                }
+              },
+              "found": true,
+              "statusOk": true,
+              "identityOk": true,
+              "correlatedOk": true,
+              "hopsOk": true,
+              "initiatorOk": true
+            },
+            {
+              "expect": {
+                "method": "GET",
+                "path": "/api/listings",
+                "status": 200,
+                "initiator": {
+                  "file": "src/app/flows/page.tsx",
+                  "line": 51,
+                  "component": "Flows"
+                }
+              },
+              "found": true,
+              "statusOk": true,
+              "identityOk": true,
+              "correlatedOk": true,
+              "hopsOk": true,
+              "initiatorOk": true
+            }
+          ],
+          "rules": [
+            {
+              "browserRequestId": "11224.18",
+              "method": "GET",
+              "path": "/api/listings",
+              "status": 200,
+              "identity": 1,
+              "identityReason": null,
+              "identitySpanId": "a37f3b90a344e840",
+              "corroborationOnly": 12,
+              "timeWindow": 3,
+              "timeWindowAgrees": null
+            },
+            {
+              "browserRequestId": "11224.19",
+              "method": "GET",
+              "path": "/api/listings",
+              "status": 200,
+              "identity": 1,
+              "identityReason": null,
+              "identitySpanId": "63aa1647807c65a1",
+              "corroborationOnly": 12,
+              "timeWindow": 3,
+              "timeWindowAgrees": null
+            },
+            {
+              "browserRequestId": "11224.20",
+              "method": "GET",
+              "path": "/api/listings",
+              "status": 200,
+              "identity": 1,
+              "identityReason": null,
+              "identitySpanId": "9244337e5ca53925",
+              "corroborationOnly": 12,
+              "timeWindow": 3,
+              "timeWindowAgrees": null
+            }
+          ],
+          "duplicateSpanClaims": [],
+          "pass": true,
+          "unexpected": []
+        },
+        {
+          "key": "serial-same-url",
+          "label": "同じURLへの連続リクエスト（3件）",
+          "required": "同じURLへの連続リクエスト",
+          "note": null,
+          "requestCount": 3,
+          "otherRequestCount": 1,
+          "a": [
+            {
+              "path": "/api/listings",
+              "status": 200,
+              "hops": 1,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "headersAgree": true,
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "failure": null,
+              "matched": true,
+              "reason": null,
+              "spanId": "e94510a7be576dbd",
+              "traceId": "d0b3ff0fc6e66750cc46e5b4561a0eb9",
+              "serverStatus": 200,
+              "redirects": []
+            },
+            {
+              "path": "/api/listings",
+              "status": 200,
+              "hops": 1,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "headersAgree": true,
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "failure": null,
+              "matched": true,
+              "reason": null,
+              "spanId": "d62ea29be7db69b6",
+              "traceId": "5a09e8d7ecb1b0a2753c658723f7a374",
+              "serverStatus": 200,
+              "redirects": []
+            },
+            {
+              "path": "/api/listings",
+              "status": 200,
+              "hops": 1,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "headersAgree": true,
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "failure": null,
+              "matched": true,
+              "reason": null,
+              "spanId": "a538fe167be0c4ef",
+              "traceId": "398d57cea46177ccf44830d3f5577f4a",
+              "serverStatus": 200,
+              "redirects": []
+            }
+          ],
+          "b": [
+            {
+              "path": "/api/listings",
+              "type": "script",
+              "file": "src/app/flows/page.tsx",
+              "line": 58,
+              "functionName": "sameSerial",
+              "verified": true,
+              "component": "Flows",
+              "reason": null
+            },
+            {
+              "path": "/api/listings",
+              "type": "script",
+              "file": "src/app/flows/page.tsx",
+              "line": 58,
+              "functionName": "sameSerial",
+              "verified": true,
+              "component": "Flows",
+              "reason": null
+            },
+            {
+              "path": "/api/listings",
+              "type": "script",
+              "file": "src/app/flows/page.tsx",
+              "line": 58,
+              "functionName": "sameSerial",
+              "verified": true,
+              "component": "Flows",
+              "reason": null
+            }
+          ],
+          "expectations": [
+            {
+              "expect": {
+                "method": "GET",
+                "path": "/api/listings",
+                "status": 200,
+                "initiator": {
+                  "file": "src/app/flows/page.tsx",
+                  "line": 58,
+                  "component": "Flows"
+                }
+              },
+              "found": true,
+              "statusOk": true,
+              "identityOk": true,
+              "correlatedOk": true,
+              "hopsOk": true,
+              "initiatorOk": true
+            },
+            {
+              "expect": {
+                "method": "GET",
+                "path": "/api/listings",
+                "status": 200,
+                "initiator": {
+                  "file": "src/app/flows/page.tsx",
+                  "line": 58,
+                  "component": "Flows"
+                }
+              },
+              "found": true,
+              "statusOk": true,
+              "identityOk": true,
+              "correlatedOk": true,
+              "hopsOk": true,
+              "initiatorOk": true
+            },
+            {
+              "expect": {
+                "method": "GET",
+                "path": "/api/listings",
+                "status": 200,
+                "initiator": {
+                  "file": "src/app/flows/page.tsx",
+                  "line": 58,
+                  "component": "Flows"
+                }
+              },
+              "found": true,
+              "statusOk": true,
+              "identityOk": true,
+              "correlatedOk": true,
+              "hopsOk": true,
+              "initiatorOk": true
+            }
+          ],
+          "rules": [
+            {
+              "browserRequestId": "11237.18",
+              "method": "GET",
+              "path": "/api/listings",
+              "status": 200,
+              "identity": 1,
+              "identityReason": null,
+              "identitySpanId": "e94510a7be576dbd",
+              "corroborationOnly": 12,
+              "timeWindow": 1,
+              "timeWindowAgrees": true
+            },
+            {
+              "browserRequestId": "11237.19",
+              "method": "GET",
+              "path": "/api/listings",
+              "status": 200,
+              "identity": 1,
+              "identityReason": null,
+              "identitySpanId": "d62ea29be7db69b6",
+              "corroborationOnly": 12,
+              "timeWindow": 1,
+              "timeWindowAgrees": true
+            },
+            {
+              "browserRequestId": "11237.20",
+              "method": "GET",
+              "path": "/api/listings",
+              "status": 200,
+              "identity": 1,
+              "identityReason": null,
+              "identitySpanId": "a538fe167be0c4ef",
+              "corroborationOnly": 12,
+              "timeWindow": 1,
+              "timeWindowAgrees": true
+            }
+          ],
+          "duplicateSpanClaims": [],
+          "pass": true,
+          "unexpected": []
+        },
+        {
+          "key": "failed-500",
+          "label": "失敗したリクエスト（サーバー側の例外 → 500）",
+          "required": "失敗したリクエスト",
+          "note": null,
+          "requestCount": 1,
+          "otherRequestCount": 1,
+          "a": [
+            {
+              "path": "/api/boom",
+              "status": 500,
+              "hops": 1,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "headersAgree": true,
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "failure": {
+                "kind": "canceled-after-response",
+                "detail": "net::ERR_ABORTED"
+              },
+              "matched": true,
+              "reason": null,
+              "spanId": "e7f4c2b18e24bcd4",
+              "traceId": "33abb4b4d7b594d4fe5fca34dfcc23ec",
+              "serverStatus": 500,
+              "redirects": []
+            }
+          ],
+          "b": [
+            {
+              "path": "/api/boom",
+              "type": "script",
+              "file": "src/app/flows/page.tsx",
+              "line": 64,
+              "functionName": "fail",
+              "verified": true,
+              "component": "Flows",
+              "reason": null
+            }
+          ],
+          "expectations": [
+            {
+              "expect": {
+                "method": "GET",
+                "path": "/api/boom",
+                "status": 500,
+                "initiator": {
+                  "file": "src/app/flows/page.tsx",
+                  "line": 64,
+                  "component": "Flows"
+                }
+              },
+              "found": true,
+              "statusOk": true,
+              "identityOk": true,
+              "correlatedOk": true,
+              "hopsOk": true,
+              "initiatorOk": true
+            }
+          ],
+          "rules": [
+            {
+              "browserRequestId": "11253.18",
+              "method": "GET",
+              "path": "/api/boom",
+              "status": 500,
+              "identity": 1,
+              "identityReason": null,
+              "identitySpanId": "e7f4c2b18e24bcd4",
+              "corroborationOnly": 1,
+              "timeWindow": 1,
+              "timeWindowAgrees": true
+            }
+          ],
+          "duplicateSpanClaims": [],
+          "pass": true,
+          "unexpected": []
+        },
+        {
+          "key": "failed-404",
+          "label": "失敗したリクエスト（ハンドラが「無い」と答える → 404）",
+          "required": "失敗したリクエスト",
+          "note": null,
+          "requestCount": 1,
+          "otherRequestCount": 1,
+          "a": [
+            {
+              "path": "/api/listings/999999",
+              "status": 404,
+              "hops": 1,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "headersAgree": true,
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "failure": null,
+              "matched": true,
+              "reason": null,
+              "spanId": "2eabebb6ac4e5374",
+              "traceId": "01223907c21370de99e056b511611e95",
+              "serverStatus": 404,
+              "redirects": []
+            }
+          ],
+          "b": [
+            {
+              "path": "/api/listings/999999",
+              "type": "script",
+              "file": "src/app/flows/page.tsx",
+              "line": 70,
+              "functionName": "missing",
+              "verified": true,
+              "component": "Flows",
+              "reason": null
+            }
+          ],
+          "expectations": [
+            {
+              "expect": {
+                "method": "GET",
+                "path": "/api/listings/999999",
+                "status": 404,
+                "initiator": {
+                  "file": "src/app/flows/page.tsx",
+                  "line": 70,
+                  "component": "Flows"
+                }
+              },
+              "found": true,
+              "statusOk": true,
+              "identityOk": true,
+              "correlatedOk": true,
+              "hopsOk": true,
+              "initiatorOk": true
+            }
+          ],
+          "rules": [
+            {
+              "browserRequestId": "11268.18",
+              "method": "GET",
+              "path": "/api/listings/999999",
+              "status": 404,
+              "identity": 1,
+              "identityReason": null,
+              "identitySpanId": "2eabebb6ac4e5374",
+              "corroborationOnly": 1,
+              "timeWindow": 1,
+              "timeWindowAgrees": true
+            }
+          ],
+          "duplicateSpanClaims": [],
+          "pass": true,
+          "unexpected": []
+        },
+        {
+          "key": "no-response",
+          "label": "応答が返らない失敗（中断）",
+          "required": "失敗したリクエスト（観測不能な状態）",
+          "note": "応答が無いので識別情報が存在しない。対応付けを作ってはならない",
+          "requestCount": 1,
+          "otherRequestCount": 1,
+          "a": [
+            {
+              "path": "/api/listings",
+              "status": null,
+              "hops": 1,
+              "hasIdentity": false,
+              "via": null,
+              "headersAgree": null,
+              "readHeaderKeys": [],
+              "failure": {
+                "kind": "no-response",
+                "detail": "net::ERR_ABORTED"
+              },
+              "matched": false,
+              "reason": "no-identity-in-response",
+              "spanId": null,
+              "traceId": null,
+              "serverStatus": null,
+              "redirects": []
+            }
+          ],
+          "b": [
+            {
+              "path": "/api/listings",
+              "type": "script",
+              "file": "src/app/flows/page.tsx",
+              "line": 77,
+              "functionName": "abort",
+              "verified": true,
+              "component": "Flows",
+              "reason": null
+            }
+          ],
+          "expectations": [
+            {
+              "expect": {
+                "method": "GET",
+                "path": "/api/listings",
+                "status": null,
+                "identity": false,
+                "initiator": {
+                  "file": "src/app/flows/page.tsx",
+                  "line": 77,
+                  "component": "Flows"
+                }
+              },
+              "found": true,
+              "statusOk": true,
+              "identityOk": true,
+              "correlatedOk": true,
+              "hopsOk": true,
+              "initiatorOk": true
+            }
+          ],
+          "rules": [
+            {
+              "browserRequestId": "11284.18",
+              "method": "GET",
+              "path": "/api/listings",
+              "status": null,
+              "identity": 0,
+              "identityReason": "no-identity-in-response",
+              "identitySpanId": null,
+              "corroborationOnly": 12,
+              "timeWindow": 1,
+              "timeWindowAgrees": null
+            }
+          ],
+          "duplicateSpanClaims": [],
+          "pass": true,
+          "unexpected": []
+        },
+        {
+          "key": "redirect",
+          "label": "リダイレクト（307 → 200）",
+          "required": "リダイレクト",
+          "note": "1回の通信に応答が2つ返る。段ごとに別のサーバー処理である",
+          "requestCount": 1,
+          "otherRequestCount": 1,
+          "a": [
+            {
+              "path": "/api/listings",
+              "status": 200,
+              "hops": 2,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "headersAgree": true,
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "failure": null,
+              "matched": true,
+              "reason": null,
+              "spanId": "9b3404ef2e119c57",
+              "traceId": "a3579a2c6cc49dc33e67f9e3df76a91b",
+              "serverStatus": 200,
+              "redirects": [
+                {
+                  "path": "/api/redirect",
+                  "status": 307,
+                  "matched": true,
+                  "reason": null,
+                  "spanId": "bafe7ae1f4ec118f",
+                  "traceId": "aabbe3c9ffb0e743ee74ab76e00f95e3"
+                }
+              ]
+            }
+          ],
+          "b": [
+            {
+              "path": "/api/listings",
+              "type": "script",
+              "file": "src/app/flows/page.tsx",
+              "line": 84,
+              "functionName": "redirect",
+              "verified": true,
+              "component": "Flows",
+              "reason": null
+            }
+          ],
+          "expectations": [
+            {
+              "expect": {
+                "method": "GET",
+                "path": "/api/listings",
+                "status": 200,
+                "hops": 2,
+                "redirect": [
+                  {
+                    "path": "/api/redirect",
+                    "status": 307
+                  }
+                ],
+                "initiator": {
+                  "file": "src/app/flows/page.tsx",
+                  "line": 84,
+                  "component": "Flows"
+                }
+              },
+              "found": true,
+              "statusOk": true,
+              "identityOk": true,
+              "correlatedOk": true,
+              "hopsOk": true,
+              "initiatorOk": true
+            }
+          ],
+          "rules": [
+            {
+              "browserRequestId": "11300.18",
+              "method": "GET",
+              "path": "/api/listings",
+              "status": 200,
+              "identity": 1,
+              "identityReason": null,
+              "identitySpanId": "9b3404ef2e119c57",
+              "corroborationOnly": 12,
+              "timeWindow": 1,
+              "timeWindowAgrees": true
+            }
+          ],
+          "duplicateSpanClaims": [],
+          "pass": true,
+          "unexpected": []
+        },
+        {
+          "key": "child-component",
+          "label": "ページとは別のコンポーネントからの通信",
+          "required": "Client Component からの fetch",
+          "note": "ページのコンポーネント（Flows）ではなく FetchButton を指さねばならない",
+          "requestCount": 1,
+          "otherRequestCount": 1,
+          "a": [
+            {
+              "path": "/api/stats",
+              "status": 200,
+              "hops": 1,
+              "hasIdentity": true,
+              "via": "dedicated-header",
+              "headersAgree": true,
+              "readHeaderKeys": [
+                "server-timing",
+                "x-vcide-trace"
+              ],
+              "failure": null,
+              "matched": true,
+              "reason": null,
+              "spanId": "b33315856b9a385e",
+              "traceId": "23df35f608369680a8db0f06b5d3182a",
+              "serverStatus": 200,
+              "redirects": []
+            }
+          ],
+          "b": [
+            {
+              "path": "/api/stats",
+              "type": "script",
+              "file": "src/components/FetchButton.tsx",
+              "line": 10,
+              "functionName": "run",
+              "verified": true,
+              "component": "FetchButton",
+              "reason": null
+            }
+          ],
+          "expectations": [
+            {
+              "expect": {
+                "method": "GET",
+                "path": "/api/stats",
+                "status": 200,
+                "initiator": {
+                  "file": "src/components/FetchButton.tsx",
+                  "line": 10,
+                  "component": "FetchButton"
+                }
+              },
+              "found": true,
+              "statusOk": true,
+              "identityOk": true,
+              "correlatedOk": true,
+              "hopsOk": true,
+              "initiatorOk": true
+            }
+          ],
+          "rules": [
+            {
+              "browserRequestId": "11313.18",
+              "method": "GET",
+              "path": "/api/stats",
+              "status": 200,
+              "identity": 1,
+              "identityReason": null,
+              "identitySpanId": "b33315856b9a385e",
+              "corroborationOnly": 2,
+              "timeWindow": 1,
+              "timeWindowAgrees": true
+            }
+          ],
+          "duplicateSpanClaims": [],
+          "pass": true,
+          "unexpected": []
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "_comment": "純粋な層（モデル・変換・レイアウト・導出）だけを素の Node で動く形に出す。テスト用。",
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "declaration": false,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "outDir": ".libjs",
+    "incremental": false,
+    "jsx": "react-jsx",
+    "plugins": []
+  },
+  "include": ["src/lib/**/*.ts", "src/data/**/*.ts", "src/server/**/*.ts"]
+}

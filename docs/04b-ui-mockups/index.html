@@ -1,0 +1,173 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8">
+<title>S-04 探索画面 — A案の改善 3案比較（Phase 4B）</title>
+<style>
+:root{--bg:#06070a;--panel:#0f1218;--panel2:#131722;--line:#1c2130;--tx:#e4e8f0;--tx2:#98a1b4;--tx3:#646d80;--tx4:#454d5d;--lav:#9d93e0;--amber:#c2a06e}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:"Hiragino Sans","Noto Sans JP",system-ui,sans-serif;
+     padding:40px 48px 90px;font-feature-settings:"palt" 1}
+h1{font-size:22px;font-weight:700;letter-spacing:.02em}
+.lead{font-size:13px;color:var(--tx2);margin-top:10px;line-height:1.85;max-width:1150px}
+.lead b{color:var(--tx)}
+.warn{margin:18px 0 0;display:inline-block;font-size:12px;color:#d3b887;border:1px solid rgba(194,160,110,.3);
+      background:rgba(194,160,110,.07);border-radius:8px;padding:9px 13px;line-height:1.7}
+.box{margin-top:26px;border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:16px 18px;max-width:1340px}
+.box h2{font-size:12px;color:var(--tx3);letter-spacing:.1em;font-weight:600;margin-bottom:10px}
+.box table{border-collapse:collapse;font-size:12px;width:100%}
+.box td{padding:5px 14px 5px 0;color:var(--tx2);vertical-align:top;line-height:1.75}
+.box td:first-child{color:var(--tx3);white-space:nowrap;width:168px}
+.box code{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#9fb0c6}
+.m{margin-top:22px;border:1px solid var(--line);border-radius:12px;background:var(--panel);overflow:hidden;max-width:1340px}
+.m table{border-collapse:collapse;width:100%;font-size:12px}
+.m th{text-align:left;font-size:10.5px;color:var(--tx3);letter-spacing:.07em;font-weight:600;
+      padding:11px 14px;background:var(--panel2);border-bottom:1px solid var(--line)}
+.m td{padding:9px 14px;color:var(--tx2);border-bottom:1px solid #141822;line-height:1.6}
+.m td:first-child{color:var(--tx);white-space:nowrap}
+.m td.n{font-family:ui-monospace,Menlo,monospace;color:#b9c2d2}
+.m tr:last-child td{border-bottom:none}
+.case{margin-top:48px}
+.case h2{font-size:18px;font-weight:700;display:flex;align-items:baseline;gap:12px}
+.case h2 em{font-style:normal;font-size:12px;color:var(--lav);border:1px solid rgba(157,147,224,.35);
+            background:rgba(157,147,224,.08);border-radius:6px;padding:3px 9px}
+.case p{font-size:12.5px;color:var(--tx2);margin-top:9px;line-height:1.85;max-width:1240px}
+.case p b{color:var(--tx)}
+.kv{display:flex;gap:28px;margin-top:12px;flex-wrap:wrap}
+.kv div{font-size:11.5px;color:var(--tx3)}
+.kv div s{text-decoration:none;display:block;color:#b9c2d2;font-family:ui-monospace,Menlo,monospace;
+          font-size:13px;margin-top:3px}
+.shot{margin-top:16px;border:1px solid var(--line);border-radius:12px;overflow:hidden;width:1340px;background:#000}
+.shot img{display:block;width:100%}
+.meta{font-size:11.5px;color:var(--tx3);margin-top:8px}
+.meta a{color:var(--lav);text-decoration:none;margin-left:14px}
+.supp{margin-top:52px}
+.supp h2{font-size:15px;font-weight:700}
+.supp p{font-size:12.5px;color:var(--tx2);margin-top:8px;line-height:1.8;max-width:1240px}
+.supp .shot{width:1340px;margin-top:14px}
+.foot{margin-top:56px;font-size:11.5px;color:var(--tx4);line-height:1.9;max-width:1150px;
+      border-top:1px solid var(--line);padding-top:18px}
+</style></head><body>
+
+<h1>S-04「探索」画面 — A案「Data Flow First」の改善 3案</h1>
+<p class="lead">Phase 4A で採用が決まった <b>A案</b> を出発点に、レイアウトだけを3通りに振った比較です。
+A案の基本コンセプト（データフローを中心に置く／ブラウザ・サーバー・データベースの関係を空間で示す／
+線画ノード／ダークテーマと控えめな配色／実測と推定の区別／段階的開示）は<b>変更していません</b>。
+3案とも <b>同一のデータ・同一の観測性・同一の選択状態（段階2）・1600×1000</b> で描いています。</p>
+<div class="warn">本シナリオは <b>UI検討のための合成データ</b>です。実測された経路・SQL・所要時間ではありません。
+また <b>大量ノード時の性能・可読性は実測していません</b>（下部の補助図を参照）。</div>
+
+<div class="box">
+<h2>3案で固定している条件（Phase 4A から変更なし）</h2>
+<table>
+<tr><td>経路</td><td>7ノード：① 表示された値 → ② PropertyCard → ③ GET /api/properties → ④ サーバー処理 → ⑤ 実行SQL →
+<b>⑤ から分岐して</b> ⑥ properties（reads）と ⑦ area（projects）。7ホップ。<br>
+推定は <b>②→③</b> と <b>⑦→③</b> の2本。最弱環は <b>⑦→③</b>（下流優先）。<code>⑥→⑦ の線はモデルに存在しないため描かない</code>（OBS-05）</td></tr>
+<tr><td>折り返しを消さない</td><td><b>⑦→③ の逆行は3案とも線を消さずに最後まで描く</b>（推定のため破線）。 番号を振り直して見かけ上一直線にしない（<code>03a</code> UX-02）</td></tr>
+<tr><td>異常状態</td><td>1件：④ からの外部呼び出しが <b>未対応の構成</b>のため追跡できない（切断マーカー）。N0 は「部分対応・1件」</td></tr>
+<tr><td>経路外</td><td>2ノード（GET /api/favorites・SQL）を減光して保持。削除しない（UI-33）</td></tr>
+<tr><td>件数</td><td>14 か所（ノード7 + ホップ7）のうち実測 12 ／ 推定 2。<b>経路から算出する導出値</b>であり定数ではない</td></tr>
+<tr><td>観測性の符号</td><td>実線＝実測／破線＋「推定」語＝推定／★＝最弱環／✕バー＝切断。<b>色は一次符号にしない</b>（NFR-30）</td></tr>
+<tr><td>詳細パネルの順序</td><td>経路サマリ → ★いちばん弱いところ → 番号付きリスト。<b>移動しない</b>（<code>03</code> 10.3節）</td></tr>
+</table>
+</div>
+
+<div class="box" style="margin-top:14px">
+<h2>3案に共通して入れた改善（Phase 4B）</h2>
+<table>
+<tr><td>経路の折り返し</td><td>⑦→③ を<b>キャンバス外周をぐるりと回る線から、下辺の専用レーン＋ブラウザ帯内側の立ち上がりへ</b>変更。
+右辺と上辺を通らなくなり、減光ノード群との近接も解消した</td></tr>
+<tr><td>往路の逆行をなくす</td><td>原案の ③→④ は「右へ出てから<b>上へ戻る</b>」折れ線だった。3案とも<b>③ と ④ を同じ高さに置き</b>、往路から上向きの区間を消した</td></tr>
+<tr><td>分岐の明示</td><td>⑤→⑥（reads）と ⑤→⑦（projects）を、<b>共通の枝 → 分岐点（○）→ 2本</b>として描き直した。独立した2本の曲線をやめた</td></tr>
+<tr><td>合流の明示</td><td>③ は <b>上辺で ②</b> を、<b>左辺で ⑦</b> を受ける。入り口の辺を分けて、どちらから来たかを位置で示す</td></tr>
+<tr><td>切断の向き</td><td>④ からの外部呼び出しを<b>サーバー帯の内側を上へ抜ける</b>形に変更（原案はデータベース帯へ向かっていた）</td></tr>
+<tr><td>常時表示の文を削る</td><td>キャンバス上の<b>実測5ホップの説明文を全廃</b>。語を残すのは「観測できていないこと」＝推定2ホップと切断1件のみ</td></tr>
+<tr><td>説明の移し先</td><td>外した説明は<b>詳細パネルのステップ間に1行ずつ</b>置いた（本モックで確認可）。ホバー（段階1）にも配分する</td></tr>
+<tr><td>線の描き方</td><td>折れ線を<b>直交＋角丸</b>に統一し、折れの位置を読み取りやすくした</td></tr>
+</table>
+</div>
+
+<div class="m">
+<table>
+<tr><th>指標（いずれも図から機械的に数えた値。性能・可読性の実測ではない）</th><th>原案 A</th><th>A-1</th><th>A-2</th><th>A-3</th></tr>
+<tr><td>⑦→③ の線の長さ（キャンバス座標 px）</td><td class="n">1044</td><td class="n">913</td><td class="n">868</td><td class="n">940</td></tr>
+<tr><td>⑦→③ が使うキャンバスの辺</td><td class="n">右・下・左</td><td class="n">下のみ</td><td class="n">下のみ</td><td class="n">下のみ</td></tr>
+<tr><td>往路（①→⑦）に含まれる逆行区間</td><td class="n">1 本（172px 上向き）</td><td class="n">0</td><td class="n">0</td><td class="n">0</td></tr>
+<tr><td>線どうしの交差</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td></tr>
+<tr><td>キャンバス上の文字ブロック数（ステップバッジを除く）</td><td class="n">36</td><td class="n">24</td><td class="n">24</td><td class="n">21</td></tr>
+<tr><td>ノードの一辺</td><td class="n">52px</td><td class="n">52px</td><td class="n">52px</td><td class="n">58px</td></tr>
+<tr><td>つながるノードの箱どうしの最小間隔（UI-05 は 90px 以上）</td><td class="n">120px</td><td class="n">92px</td><td class="n">92px</td><td class="n">92px</td></tr>
+<tr><td>キャンバス幅 ／ 詳細パネル幅</td><td class="n">622 / 360</td><td class="n">620 / 360</td><td class="n">680 / 360</td><td class="n">700 / 374</td></tr>
+<tr><td>ノード上の識別子</td><td class="n">5 個</td><td class="n">5 個</td><td class="n">5 個</td><td class="n">2 個（① と ⑦ のみ）</td></tr>
+</table>
+</div>
+
+<div class="case">
+<h2>A-1 <em>現在の構造を維持する最小改善</em></h2>
+<p>原案の骨格（ブラウザ／サーバー／データベースの縦3帯、ブラウザ帯を縦に下る ①②③）を<b>そのまま残します</b>。
+変えたのは4点だけ — ③ と ④ を同じ高さに揃えて往路の上向き区間をなくし、⑦→③ を下辺の専用レーンに移し、
+⑤ の分岐を明示し、常時表示の説明文を外しました。<b>原案からの差分が最も小さく、合意の取りやすい案</b>です。
+代わりに、戻りレーンが囲む<b>左下の空白が3案で最も広く</b>残ります。</p>
+<div class="kv">
+  <div>分割<s>160 / 410 / 620 / 360</s></div>
+  <div>⑦→③ の線<s>913 px</s></div>
+  <div>文字ブロック<s>24</s></div>
+  <div>原案からの変更<s>最小</s></div>
+</div>
+<div class="shot"><img src="a1-minimal-fix.png" alt="A-1 最小改善"></div>
+<div class="meta">1600 × 1000<a href="a1-minimal-fix.html">HTML を開く</a><a href="a1-minimal-fix.png">PNG</a></div>
+</div>
+
+<div class="case">
+<h2>A-2 <em>経路の読みやすさを優先した再配置</em></h2>
+<p>③→④→⑤ を<b>1本の水平線にそろえ</b>、⑤ で上下に分岐、⑦ から下辺を通って ③ へ戻します。
+往路は<b>左から右へ一直線</b>、復路は<b>右から左へ一直線</b>という、向きの揃った2本のレーンになります。
+帯の幅は中身に合わせて可変にし（ブラウザ 218 ／ サーバー 292 ／ データベース 170）、④ と ⑤ を横に並べました。
+<b>⑦→③ の線が3案で最も短く（868px）</b>、「行って、戻る」という経路の形が最も素直に読めます。
+ただし帯の幅配分が3案で最も不均等になります。</p>
+<div class="kv">
+  <div>分割<s>140 / 370 / 680 / 360</s></div>
+  <div>⑦→③ の線<s>868 px</s></div>
+  <div>文字ブロック<s>24</s></div>
+  <div>原案からの変更<s>大</s></div>
+</div>
+<div class="shot"><img src="a2-path-clarity.png" alt="A-2 経路の読みやすさ優先"></div>
+<div class="meta">1600 × 1000<a href="a2-path-clarity.html">HTML を開く</a><a href="a2-path-clarity.png">PNG</a></div>
+</div>
+
+<div class="case">
+<h2>A-3 <em>余白と情報密度を最適化した構成</em></h2>
+<p>帯の境界線をやめて<b>淡い面</b>で層を示し、罫線を2本減らしました。そのぶんノードを 58px に大きくし、
+キャンバスを最も広く（700px）取っています。さらに<b>ノード上の識別子を起点 ① と終点 ⑦ だけに限り</b>、
+中間の `PropertyCard` / `GET /api/properties` / `properties` を詳細パネル側へ移しました。
+キャンバス上の文字ブロックは3案で最少（21）です。
+<b>「ノードに何を書くか」を最も強く絞った案</b>であり、中間の識別子をキャンバスから外してよいかが判断の分かれ目になります。</p>
+<div class="kv">
+  <div>分割<s>128 / 348 / 700 / 374</s></div>
+  <div>⑦→③ の線<s>940 px</s></div>
+  <div>文字ブロック<s>21</s></div>
+  <div>原案からの変更<s>中</s></div>
+</div>
+<div class="shot"><img src="a3-density-balance.png" alt="A-3 余白と情報密度の最適化"></div>
+<div class="meta">1600 × 1000<a href="a3-density-balance.html">HTML を開く</a><a href="a3-density-balance.png">PNG</a></div>
+</div>
+
+<div class="supp">
+<h2>補助図1 — 説明をどの段階に置くか（3案に共通）</h2>
+<p>キャンバスから外した説明文は<b>消していません</b>。ホバー（段階1）と詳細パネル（段階2・3）へ移しただけです。
+ノード上に置く情報の限定と、状態の記号もここで定めています。</p>
+<div class="shot"><img src="supp-disclosure.png" alt="説明の配分"></div>
+<div class="meta"><a href="supp-disclosure.html">HTML を開く</a><a href="supp-disclosure.png">PNG</a></div>
+</div>
+
+<div class="supp">
+<h2>補助図2 — ノードが数十に増えたときの骨格（検討用スケッチ）</h2>
+<p>S-04 を開いた直後の既定スコープは <b>T2（主トレース・選択前）</b>であり、ページによっては数十ノードが並びます。
+3案の<b>幾何がどの方向に伸びるか</b>だけを描いた骨格です。
+<b>描画性能も可読性も実測していません。</b>集約の段の発動条件は UR-07 の検証待ちです。</p>
+<div class="shot"><img src="supp-scale.png" alt="ノード増加時の骨格"></div>
+<div class="meta"><a href="supp-scale.html">HTML を開く</a><a href="supp-scale.png">PNG</a></div>
+</div>
+
+<p class="foot">本ページは Phase 4B（採用案のブラッシュアップ）の成果物です。
+<b>最終案の選定は行っていません。</b>デザインシステムの確定、他画面への展開、アプリケーション本体の実装も行っていません。
+B案・C案の構成を取り込んではいません（C案の「分かりやすさ」は、文章を常時表示する形ではなく、
+ホバーと詳細パネルへの配分として取り入れています）。</p>
+</body></html>

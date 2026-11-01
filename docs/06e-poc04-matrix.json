@@ -1,0 +1,5802 @@
+{
+  "collectedAt": "2026-10-31T18:01:40Z",
+  "app": {
+    "framework": "Next.js",
+    "service": "poc01-fixture-app",
+    "port": 3200
+  },
+  "method": {
+    "staticAnalysis": "TypeScript Compiler API（AST + 記号解決によるスコープ解決）",
+    "columnResolution": "実行された SQL 文の構文解析（sql-ast-parse / L1相当）",
+    "attribution": "サーバー側でデータ取得の呼び出し時に記録したスタック（server-call-stack / L1相当）",
+    "level": "L2（static-analysis）。実測の SQL を使っても格上げしない",
+    "notUsed": [
+      "値の一致",
+      "実行時刻の近さ",
+      "SQL 文の一致",
+      "ソース上の SQL リテラル"
+    ]
+  },
+  "byRun": {
+    "turbopack": {
+      "bundler": "turbopack",
+      "pages": {
+        "/lin-a": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/lin-a",
+              "status": 200,
+              "isDocument": true,
+              "hasIdentity": true,
+              "server": {
+                "traceId": "4e19c62dcdb08cc006adf50aedd0fe4d",
+                "spanId": "bb501b5de3f56fc4"
+              }
+            }
+          ],
+          "excludedAssets": 16
+        },
+        "/lin-b": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/lin-b",
+              "status": 200,
+              "isDocument": true,
+              "hasIdentity": true,
+              "server": {
+                "traceId": "6aaa5828e7ae93f1f1ca6ef9cb39edba",
+                "spanId": "0b220a7a75a6b009"
+              }
+            }
+          ],
+          "excludedAssets": 16
+        },
+        "/lin-c": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/lin-c",
+              "status": 200,
+              "isDocument": true,
+              "hasIdentity": true,
+              "server": {
+                "traceId": "f8b2949e3ec0be6a6efd595165e84a6b",
+                "spanId": "44ce97aaf30ede57"
+              }
+            }
+          ],
+          "excludedAssets": 16
+        },
+        "/lin-d": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/lin-d",
+              "status": 200,
+              "isDocument": true,
+              "hasIdentity": true,
+              "server": {
+                "traceId": "41eb4c244121839ea2a9cf4496cd22ea",
+                "spanId": "9c286e6bcfe4a399"
+              }
+            }
+          ],
+          "excludedAssets": 16
+        },
+        "/lin-e": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/lin-e",
+              "status": 200,
+              "isDocument": true,
+              "hasIdentity": true,
+              "server": {
+                "traceId": "7b3bf358409f872a6b6694a165bb689c",
+                "spanId": "79ece7bdaee704a0"
+              }
+            }
+          ],
+          "excludedAssets": 16
+        },
+        "/lin-f": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/lin-f",
+              "status": 200,
+              "isDocument": true,
+              "hasIdentity": true,
+              "server": {
+                "traceId": "a416de7e693338423a95bdef93a25580",
+                "spanId": "775d26b2ec2dad3e"
+              }
+            }
+          ],
+          "excludedAssets": 16
+        },
+        "/lin-g": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/lin-g",
+              "status": 200,
+              "isDocument": true,
+              "hasIdentity": true,
+              "server": {
+                "traceId": "7636ea82520f5b368d3fb5528a140aaa",
+                "spanId": "88177684bf5e49df"
+              }
+            }
+          ],
+          "excludedAssets": 16
+        },
+        "/lin-x": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/lin-x",
+              "status": 200,
+              "isDocument": true,
+              "hasIdentity": true,
+              "server": {
+                "traceId": "e03265ee46cb52cece4604d131dd6f72",
+                "spanId": "d6e3903fc1d4607a"
+              }
+            }
+          ],
+          "excludedAssets": 16
+        },
+        "/listings": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/listings",
+              "status": 200,
+              "isDocument": true,
+              "hasIdentity": true,
+              "server": {
+                "traceId": "7dee7a592222cd49ad26efe5b596ce75",
+                "spanId": "aa25b78dfb63b4a2"
+              }
+            },
+            {
+              "method": "GET",
+              "path": "/api/listings",
+              "status": 200,
+              "isDocument": false,
+              "hasIdentity": true,
+              "server": {
+                "traceId": "b7f68466afb55616b843e740ac052b77",
+                "spanId": "97d48b661351f4f2"
+              }
+            }
+          ],
+          "excludedAssets": 17
+        }
+      },
+      "notes": [],
+      "summary": {
+        "spans": 266,
+        "sqlSpans": 13,
+        "callsites": 35,
+        "attributedSql": 13,
+        "staticQueries": 25,
+        "joinedQueries": 13,
+        "analyzedFiles": 38,
+        "displaySites": 46,
+        "annotatedSites": 35,
+        "main": {
+          "total": 20,
+          "buckets": {
+            "correct-single": 8,
+            "candidates-correct": 7,
+            "refused-correct": 5
+          }
+        },
+        "supplementary": {
+          "total": 3,
+          "buckets": {
+            "correct-single": 1,
+            "table-only-correct": 1,
+            "refused-correct": 1
+          }
+        },
+        "byDifficulty": {
+          "1": {
+            "total": 3,
+            "buckets": {
+              "correct-single": 3
+            }
+          },
+          "2": {
+            "total": 5,
+            "buckets": {
+              "correct-single": 5
+            }
+          },
+          "3": {
+            "total": 7,
+            "buckets": {
+              "candidates-correct": 7
+            }
+          },
+          "4": {
+            "total": 5,
+            "buckets": {
+              "refused-correct": 5
+            }
+          }
+        },
+        "wrong": 0,
+        "wrongRate": 0,
+        "overclaimed": 0,
+        "underclaimed": 0,
+        "casesPass": 8,
+        "casesTotal": 8
+      },
+      "cases": [
+        {
+          "case": "A",
+          "page": "/lin-a",
+          "label": "単純な直接対応",
+          "note": "SQL の region を同じコンポーネントの JSX がそのまま描く",
+          "supplementary": false,
+          "sites": [
+            {
+              "field": "a-region",
+              "difficulty": 1,
+              "truth": [
+                "poc.listings.region"
+              ],
+              "conclusiveExpected": true,
+              "why": "r.rows.map((row) => …) の row.region。加工も受け渡しも無い",
+              "observed": {
+                "file": "src/app/lin-a/page.tsx",
+                "line": 18,
+                "component": "LinA",
+                "expr": "row.region",
+                "transformed": false,
+                "literalPaths": 0,
+                "untracked": [],
+                "outcome": "confirmed",
+                "candidates": [
+                  {
+                    "key": "poc.listings.region",
+                    "via": "field",
+                    "note": null
+                  }
+                ],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "参照の連鎖が1列に決まり、加工も分岐も無い"
+                ],
+                "trail": [
+                  "pool.query(…) の結果（src/app/lin-a/page.tsx:12）",
+                  ".rows を参照",
+                  "r.rows.map の要素（src/app/lin-a/page.tsx:17）",
+                  ".region を参照"
+                ]
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "correct-single",
+              "detail": "poc.listings.region",
+              "overclaimed": false,
+              "underclaimed": false
+            }
+          ],
+          "pass": true
+        },
+        {
+          "case": "B",
+          "page": "/lin-b",
+          "label": "props の受け渡し（別名・多段）と SQL の別名",
+          "note": "page → LinBCard → LinBLabel。code が label、さらに text に改名される。別に SELECT code AS listing_code の別名も置いた",
+          "supplementary": false,
+          "sites": [
+            {
+              "field": "b-sqlalias",
+              "difficulty": 2,
+              "truth": [
+                "poc.listings.code"
+              ],
+              "conclusiveExpected": true,
+              "why": "SQL の別名。行の鍵は listing_code だが、由来の列は code である（01b Q-04.2 C-2）",
+              "observed": {
+                "file": "src/app/lin-b/page.tsx",
+                "line": 27,
+                "component": "LinB",
+                "expr": "al.rows[0].listing_code",
+                "transformed": false,
+                "literalPaths": 0,
+                "untracked": [],
+                "outcome": "confirmed",
+                "candidates": [
+                  {
+                    "key": "poc.listings.code",
+                    "via": "field",
+                    "note": "SQL の別名 listing_code → 列 code"
+                  }
+                ],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "参照の連鎖が1列に決まり、加工も分岐も無い"
+                ],
+                "trail": [
+                  "pool.query(…) の結果（src/app/lin-b/page.tsx:20）",
+                  ".rows を参照",
+                  "[0] を参照",
+                  ".listing_code を参照"
+                ]
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "correct-single",
+              "detail": "poc.listings.code",
+              "overclaimed": false,
+              "underclaimed": false
+            },
+            {
+              "field": "b-label",
+              "difficulty": 2,
+              "truth": [
+                "poc.listings.code"
+              ],
+              "conclusiveExpected": true,
+              "why": "text ← LinBCard の label ← page の row.code。**2段の別名**",
+              "observed": {
+                "file": "src/components/lin/LinBLabel.tsx",
+                "line": 4,
+                "component": "LinBLabel",
+                "expr": "text",
+                "transformed": false,
+                "literalPaths": 0,
+                "untracked": [],
+                "outcome": "confirmed",
+                "candidates": [
+                  {
+                    "key": "poc.listings.code",
+                    "via": "field",
+                    "note": null
+                  }
+                ],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "参照の連鎖が1列に決まり、加工も分岐も無い"
+                ],
+                "trail": [
+                  "LinBLabel の props text ← src/components/lin/LinBCard.tsx:9",
+                  "LinBCard の props label ← src/app/lin-b/page.tsx:25",
+                  "pool.query(…) の結果（src/app/lin-b/page.tsx:19）",
+                  ".rows を参照",
+                  "r.rows.map の要素（src/app/lin-b/page.tsx:24）",
+                  ".code を参照"
+                ]
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "correct-single",
+              "detail": "poc.listings.code",
+              "overclaimed": false,
+              "underclaimed": false
+            },
+            {
+              "field": "b-tier",
+              "difficulty": 2,
+              "truth": [
+                "poc.listings.plan"
+              ],
+              "conclusiveExpected": true,
+              "why": "tier ← page の row.plan。1段の別名",
+              "observed": {
+                "file": "src/components/lin/LinBCard.tsx",
+                "line": 10,
+                "component": "LinBCard",
+                "expr": "tier",
+                "transformed": false,
+                "literalPaths": 0,
+                "untracked": [],
+                "outcome": "confirmed",
+                "candidates": [
+                  {
+                    "key": "poc.listings.plan",
+                    "via": "field",
+                    "note": null
+                  }
+                ],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "参照の連鎖が1列に決まり、加工も分岐も無い"
+                ],
+                "trail": [
+                  "LinBCard の props tier ← src/app/lin-b/page.tsx:25",
+                  "pool.query(…) の結果（src/app/lin-b/page.tsx:19）",
+                  ".rows を参照",
+                  "r.rows.map の要素（src/app/lin-b/page.tsx:24）",
+                  ".plan を参照"
+                ]
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "correct-single",
+              "detail": "poc.listings.plan",
+              "overclaimed": false,
+              "underclaimed": false
+            }
+          ],
+          "pass": true
+        },
+        {
+          "case": "C",
+          "page": "/lin-c",
+          "label": "値の加工",
+          "note": "連結・関数・プロパティ参照。由来は言えても確定にはできない",
+          "supplementary": false,
+          "sites": [
+            {
+              "field": "c-title",
+              "difficulty": 3,
+              "truth": [
+                "poc.listings.region",
+                "poc.listings.code"
+              ],
+              "conclusiveExpected": false,
+              "why": "テンプレートで2列を連結している。**1列に絞ってはいけない**",
+              "observed": {
+                "file": "src/app/lin-c/page.tsx",
+                "line": 20,
+                "component": "LinC",
+                "expr": "title",
+                "transformed": true,
+                "literalPaths": 0,
+                "untracked": [],
+                "outcome": "candidates",
+                "candidates": [
+                  {
+                    "key": "poc.listings.region",
+                    "via": "field",
+                    "note": null
+                  },
+                  {
+                    "key": "poc.listings.code",
+                    "via": "field",
+                    "note": null
+                  }
+                ],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "候補が 2 件ある",
+                  "加工（連結・変換）を通っている"
+                ],
+                "trail": [
+                  "pool.query(…) の結果（src/app/lin-c/page.tsx:13）",
+                  ".rows を参照",
+                  "[0] を参照",
+                  ".region を参照"
+                ]
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "candidates-correct",
+              "detail": "候補 2 件（正解 2 件を含む）",
+              "overclaimed": false,
+              "underclaimed": false
+            },
+            {
+              "field": "c-upper",
+              "difficulty": 3,
+              "truth": [
+                "poc.listings.code"
+              ],
+              "conclusiveExpected": false,
+              "why": "String() と toUpperCase() を通している。由来は code だが値は別物",
+              "observed": {
+                "file": "src/app/lin-c/page.tsx",
+                "line": 21,
+                "component": "LinC",
+                "expr": "upper",
+                "transformed": true,
+                "literalPaths": 0,
+                "untracked": [],
+                "outcome": "candidates",
+                "candidates": [
+                  {
+                    "key": "poc.listings.code",
+                    "via": "field",
+                    "note": null
+                  }
+                ],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "加工（連結・変換）を通っている"
+                ],
+                "trail": [
+                  "pool.query(…) の結果（src/app/lin-c/page.tsx:13）",
+                  ".rows を参照",
+                  "[0] を参照",
+                  ".code を参照",
+                  "String() を通している",
+                  "toUpperCase() を通している"
+                ]
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "candidates-correct",
+              "detail": "候補 1 件（正解 1 件を含む）",
+              "overclaimed": false,
+              "underclaimed": false
+            },
+            {
+              "field": "c-len",
+              "difficulty": 3,
+              "truth": [
+                "poc.listings.code"
+              ],
+              "conclusiveExpected": false,
+              "why": "code の文字数。由来は code だが、表示値は code ではない",
+              "observed": {
+                "file": "src/app/lin-c/page.tsx",
+                "line": 22,
+                "component": "LinC",
+                "expr": "row.code.length",
+                "transformed": true,
+                "literalPaths": 0,
+                "untracked": [],
+                "outcome": "candidates",
+                "candidates": [
+                  {
+                    "key": "poc.listings.code",
+                    "via": "field",
+                    "note": null
+                  }
+                ],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "加工（連結・変換）を通っている"
+                ],
+                "trail": [
+                  "pool.query(…) の結果（src/app/lin-c/page.tsx:13）",
+                  ".rows を参照",
+                  "[0] を参照",
+                  ".code を参照",
+                  ".length を参照（列の値のさらに内側）"
+                ]
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "candidates-correct",
+              "detail": "候補 1 件（正解 1 件を含む）",
+              "overclaimed": false,
+              "underclaimed": false
+            }
+          ],
+          "pass": true
+        },
+        {
+          "case": "D",
+          "page": "/lin-d",
+          "label": "複数候補・同名変数",
+          "note": "動的キーで引く1箇所と、別スコープの同名 row が2箇所",
+          "supplementary": false,
+          "sites": [
+            {
+              "field": "d-dynamic",
+              "difficulty": 3,
+              "truth": [
+                "poc.listings.region",
+                "poc.listings.plan",
+                "poc.listings.scale"
+              ],
+              "conclusiveExpected": false,
+              "why": "FIELDS の各要素をキーに bag[f] を引く。**どの列かはソースから決まらない**",
+              "observed": {
+                "file": "src/app/lin-d/page.tsx",
+                "line": 26,
+                "component": "LinD",
+                "expr": "String(bag[f])",
+                "transformed": true,
+                "literalPaths": 0,
+                "untracked": [],
+                "outcome": "candidates",
+                "candidates": [
+                  {
+                    "key": "poc.listings.code",
+                    "via": "anyfield",
+                    "note": "キーが動的なため、この SQL の全列が候補"
+                  },
+                  {
+                    "key": "poc.listings.region",
+                    "via": "anyfield",
+                    "note": "キーが動的なため、この SQL の全列が候補"
+                  },
+                  {
+                    "key": "poc.listings.plan",
+                    "via": "anyfield",
+                    "note": "キーが動的なため、この SQL の全列が候補"
+                  },
+                  {
+                    "key": "poc.listings.scale",
+                    "via": "anyfield",
+                    "note": "キーが動的なため、この SQL の全列が候補"
+                  }
+                ],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "候補が 4 件ある",
+                  "加工（連結・変換）を通っている",
+                  "参照のキーが動的で、どの列かが決まらない"
+                ],
+                "trail": [
+                  "pool.query(…) の結果（src/app/lin-d/page.tsx:17）",
+                  ".rows を参照",
+                  "[0] を参照",
+                  "[f] を参照（キーが動的）",
+                  "String() を通している"
+                ]
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "candidates-correct",
+              "detail": "候補 4 件（正解 3 件を含む）",
+              "overclaimed": false,
+              "underclaimed": false
+            },
+            {
+              "field": "d-same-name-a",
+              "difficulty": 2,
+              "truth": [
+                "poc.listings.code"
+              ],
+              "conclusiveExpected": true,
+              "why": "`row` という同名の変数が別の map にもある。こちらは poc.listings の SQL",
+              "observed": {
+                "file": "src/app/lin-d/page.tsx",
+                "line": 31,
+                "component": "LinD",
+                "expr": "row.code",
+                "transformed": false,
+                "literalPaths": 0,
+                "untracked": [],
+                "outcome": "confirmed",
+                "candidates": [
+                  {
+                    "key": "poc.listings.code",
+                    "via": "field",
+                    "note": null
+                  }
+                ],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "参照の連鎖が1列に決まり、加工も分岐も無い"
+                ],
+                "trail": [
+                  "pool.query(…) の結果（src/app/lin-d/page.tsx:19）",
+                  ".rows を参照",
+                  "a.rows.map の要素（src/app/lin-d/page.tsx:30）",
+                  ".code を参照"
+                ]
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "correct-single",
+              "detail": "poc.listings.code",
+              "overclaimed": false,
+              "underclaimed": false
+            },
+            {
+              "field": "d-same-name-b",
+              "difficulty": 2,
+              "truth": [
+                "poc.regions.name"
+              ],
+              "conclusiveExpected": true,
+              "why": "同名の `row` だが、こちらは poc.regions の SQL。**取り違えたら誤答**",
+              "observed": {
+                "file": "src/app/lin-d/page.tsx",
+                "line": 36,
+                "component": "LinD",
+                "expr": "row.name",
+                "transformed": false,
+                "literalPaths": 0,
+                "untracked": [],
+                "outcome": "confirmed",
+                "candidates": [
+                  {
+                    "key": "poc.regions.name",
+                    "via": "field",
+                    "note": null
+                  }
+                ],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "参照の連鎖が1列に決まり、加工も分岐も無い"
+                ],
+                "trail": [
+                  "pool.query(…) の結果（src/app/lin-d/page.tsx:20）",
+                  ".rows を参照",
+                  "b.rows.map の要素（src/app/lin-d/page.tsx:35）",
+                  ".name を参照"
+                ]
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "correct-single",
+              "detail": "poc.regions.name",
+              "overclaimed": false,
+              "underclaimed": false
+            }
+          ],
+          "pass": true
+        },
+        {
+          "case": "E",
+          "page": "/lin-e",
+          "label": "条件分岐",
+          "note": "別の列になる分岐／固定値になる分岐／固定値しか描かない分岐",
+          "supplementary": false,
+          "sites": [
+            {
+              "field": "e-either",
+              "difficulty": 3,
+              "truth": [
+                "poc.listings.region",
+                "poc.listings.code"
+              ],
+              "conclusiveExpected": false,
+              "why": "条件で region か code のどちらかになる。**実行時にしか決まらない**",
+              "observed": {
+                "file": "src/app/lin-e/page.tsx",
+                "line": 24,
+                "component": "LinE",
+                "expr": "either",
+                "transformed": false,
+                "literalPaths": 0,
+                "untracked": [],
+                "outcome": "candidates",
+                "candidates": [
+                  {
+                    "key": "poc.listings.region",
+                    "via": "field",
+                    "note": null
+                  },
+                  {
+                    "key": "poc.listings.code",
+                    "via": "field",
+                    "note": null
+                  }
+                ],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "候補が 2 件ある"
+                ],
+                "trail": [
+                  "pool.query(…) の結果（src/app/lin-e/page.tsx:17）",
+                  ".rows を参照",
+                  "[0] を参照",
+                  ".region を参照"
+                ]
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "candidates-correct",
+              "detail": "候補 2 件（正解 2 件を含む）",
+              "overclaimed": false,
+              "underclaimed": false
+            },
+            {
+              "field": "e-orconst",
+              "difficulty": 3,
+              "truth": [
+                "poc.listings.region"
+              ],
+              "conclusiveExpected": false,
+              "why": "region か固定値 \"未設定\"。固定値になる経路があるので確定にできない",
+              "observed": {
+                "file": "src/app/lin-e/page.tsx",
+                "line": 25,
+                "component": "LinE",
+                "expr": "orConst",
+                "transformed": false,
+                "literalPaths": 1,
+                "untracked": [],
+                "outcome": "candidates",
+                "candidates": [
+                  {
+                    "key": "poc.listings.region",
+                    "via": "field",
+                    "note": null
+                  }
+                ],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "固定値になる経路がある"
+                ],
+                "trail": [
+                  "pool.query(…) の結果（src/app/lin-e/page.tsx:17）",
+                  ".rows を参照",
+                  "[0] を参照",
+                  ".region を参照"
+                ]
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "candidates-correct",
+              "detail": "候補 1 件（正解 1 件を含む）",
+              "overclaimed": false,
+              "underclaimed": false
+            },
+            {
+              "field": "e-inline",
+              "difficulty": 4,
+              "truth": [],
+              "conclusiveExpected": false,
+              "why": "**条件の判定に plan を使うが、描くのは固定値だけである。** plan を由来にしたら誤答である",
+              "observed": {
+                "file": "src/app/lin-e/page.tsx",
+                "line": 26,
+                "component": "LinE",
+                "expr": "row.plan === '標準プラン' ? '標準' : '拡張'",
+                "transformed": false,
+                "literalPaths": 2,
+                "untracked": [],
+                "outcome": "none",
+                "candidates": [],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "候補なし"
+                ],
+                "trail": []
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "refused-correct",
+              "detail": "候補を出さなかった",
+              "overclaimed": false,
+              "underclaimed": false
+            }
+          ],
+          "pass": true
+        },
+        {
+          "case": "F",
+          "page": "/lin-f",
+          "label": "RSC 直接取得（同一／子コンポーネント）",
+          "note": "1ページに2本の SQL。親は poc.listings、子は poc.regions",
+          "supplementary": false,
+          "sites": [
+            {
+              "field": "f-own",
+              "difficulty": 1,
+              "truth": [
+                "poc.listings.code"
+              ],
+              "conclusiveExpected": true,
+              "why": "同じ Server Component が取得して描く",
+              "observed": {
+                "file": "src/app/lin-f/page.tsx",
+                "line": 20,
+                "component": "LinF",
+                "expr": "row.code",
+                "transformed": false,
+                "literalPaths": 0,
+                "untracked": [],
+                "outcome": "confirmed",
+                "candidates": [
+                  {
+                    "key": "poc.listings.code",
+                    "via": "field",
+                    "note": null
+                  }
+                ],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "参照の連鎖が1列に決まり、加工も分岐も無い"
+                ],
+                "trail": [
+                  "pool.query(…) の結果（src/app/lin-f/page.tsx:15）",
+                  ".rows を参照",
+                  "[0] を参照",
+                  ".code を参照"
+                ]
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "correct-single",
+              "detail": "poc.listings.code",
+              "overclaimed": false,
+              "underclaimed": false
+            },
+            {
+              "field": "f-child",
+              "difficulty": 1,
+              "truth": [
+                "poc.regions.name"
+              ],
+              "conclusiveExpected": true,
+              "why": "子の Server Component が自分で取得して、加工せずに描く。**親の SQL（poc.listings）と混同したら誤答**",
+              "observed": {
+                "file": "src/components/lin/LinFChild.tsx",
+                "line": 13,
+                "component": "LinFChild",
+                "expr": "row.name",
+                "transformed": false,
+                "literalPaths": 0,
+                "untracked": [],
+                "outcome": "confirmed",
+                "candidates": [
+                  {
+                    "key": "poc.regions.name",
+                    "via": "field",
+                    "note": null
+                  }
+                ],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "参照の連鎖が1列に決まり、加工も分岐も無い"
+                ],
+                "trail": [
+                  "pool.query(…) の結果（src/components/lin/LinFChild.tsx:9）",
+                  ".rows を参照",
+                  "[0] を参照",
+                  ".name を参照"
+                ]
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "correct-single",
+              "detail": "poc.regions.name",
+              "overclaimed": false,
+              "underclaimed": false
+            },
+            {
+              "field": "f-child-cast",
+              "difficulty": 3,
+              "truth": [
+                "poc.regions.name"
+              ],
+              "conclusiveExpected": false,
+              "why": "同じ列を String() で型変換して描く。由来は1列に決まるが、**型変換も加工として扱うので確定にしない**（安全側の取りこぼし）",
+              "observed": {
+                "file": "src/components/lin/LinFChild.tsx",
+                "line": 14,
+                "component": "LinFChild",
+                "expr": "String(row.name)",
+                "transformed": true,
+                "literalPaths": 0,
+                "untracked": [],
+                "outcome": "candidates",
+                "candidates": [
+                  {
+                    "key": "poc.regions.name",
+                    "via": "field",
+                    "note": null
+                  }
+                ],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "加工（連結・変換）を通っている"
+                ],
+                "trail": [
+                  "pool.query(…) の結果（src/components/lin/LinFChild.tsx:9）",
+                  ".rows を参照",
+                  "[0] を参照",
+                  ".name を参照",
+                  "String() を通している"
+                ]
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "candidates-correct",
+              "detail": "候補 1 件（正解 1 件を含む）",
+              "overclaimed": false,
+              "underclaimed": false
+            }
+          ],
+          "pass": true
+        },
+        {
+          "case": "G",
+          "page": "/lin-g",
+          "label": "否定例（同一コンポーネント内の無関係なSQL）",
+          "note": "SQL は実行するが、結果はどの表示値にも使っていない",
+          "supplementary": false,
+          "sites": [
+            {
+              "field": "g-env",
+              "difficulty": 4,
+              "truth": [],
+              "conclusiveExpected": false,
+              "why": "環境変数由来。同じコンポーネントに SQL があるが無関係である",
+              "observed": {
+                "file": "src/app/lin-g/page.tsx",
+                "line": 25,
+                "component": "LinG",
+                "expr": "label",
+                "transformed": false,
+                "literalPaths": 1,
+                "untracked": [
+                  "no-initializer",
+                  "no-initializer"
+                ],
+                "outcome": "none",
+                "candidates": [],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "候補なし"
+                ],
+                "trail": [
+                  "process に初期化子が無い",
+                  ".env を参照",
+                  ".POC04_LABEL を参照"
+                ]
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "refused-correct",
+              "detail": "候補を出さなかった",
+              "overclaimed": false,
+              "underclaimed": false
+            },
+            {
+              "field": "g-literal",
+              "difficulty": 4,
+              "truth": [],
+              "conclusiveExpected": false,
+              "why": "JSX に直書きされた文字列。式が無いので表示箇所として現れない（02a PathKind = static-literal）",
+              "observed": null,
+              "componentOk": null,
+              "fileOk": null,
+              "bucket": "refused-correct",
+              "detail": "JSX に式が無いため表示箇所にならない（static-literal）",
+              "overclaimed": false,
+              "underclaimed": false
+            },
+            {
+              "field": "g-computed",
+              "difficulty": 4,
+              "truth": [],
+              "conclusiveExpected": false,
+              "why": "定数の計算。DB を一切通らない",
+              "observed": {
+                "file": "src/app/lin-g/page.tsx",
+                "line": 27,
+                "component": "LinG",
+                "expr": "String(2026 - 1991)",
+                "transformed": true,
+                "literalPaths": 2,
+                "untracked": [],
+                "outcome": "none",
+                "candidates": [],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "候補なし"
+                ],
+                "trail": []
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "refused-correct",
+              "detail": "候補を出さなかった",
+              "overclaimed": false,
+              "underclaimed": false
+            },
+            {
+              "field": "g-shadow",
+              "difficulty": 4,
+              "truth": [],
+              "conclusiveExpected": false,
+              "why": "**局所変数の名前が SQL の列名 region と同じ。** 名前の一致で対応づけたら誤答になる罠である",
+              "observed": {
+                "file": "src/app/lin-g/page.tsx",
+                "line": 28,
+                "component": "LinG",
+                "expr": "region",
+                "transformed": false,
+                "literalPaths": 1,
+                "untracked": [],
+                "outcome": "none",
+                "candidates": [],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "候補なし"
+                ],
+                "trail": []
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "refused-correct",
+              "detail": "候補を出さなかった",
+              "overclaimed": false,
+              "underclaimed": false
+            }
+          ],
+          "pass": true
+        },
+        {
+          "case": "X",
+          "page": "/lin-x",
+          "label": "補助: 不完全なソース解析",
+          "note": "ソースだけでは列構成が決まらない3つ",
+          "supplementary": true,
+          "sites": [
+            {
+              "field": "x-dynamic",
+              "difficulty": 2,
+              "truth": [
+                "poc.listings.code"
+              ],
+              "conclusiveExpected": true,
+              "why": "SQL をソース上で組み立てている（リテラルが無い）。**実測された SQL 文があれば列は決まる**（01b Q-04.2 C-7）",
+              "observed": {
+                "file": "src/app/lin-x/page.tsx",
+                "line": 25,
+                "component": "LinX",
+                "expr": "dyn.rows[0].code",
+                "transformed": false,
+                "literalPaths": 0,
+                "untracked": [],
+                "outcome": "confirmed",
+                "candidates": [
+                  {
+                    "key": "poc.listings.code",
+                    "via": "field",
+                    "note": null
+                  }
+                ],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "参照の連鎖が1列に決まり、加工も分岐も無い"
+                ],
+                "trail": [
+                  "pool.query(…) の結果（src/app/lin-x/page.tsx:20）",
+                  ".rows を参照",
+                  "[0] を参照",
+                  ".code を参照"
+                ]
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "correct-single",
+              "detail": "poc.listings.code",
+              "overclaimed": false,
+              "underclaimed": false
+            },
+            {
+              "field": "x-star",
+              "difficulty": 3,
+              "truth": [
+                "poc.regions.name"
+              ],
+              "conclusiveExpected": false,
+              "why": "SELECT * のため列を特定できない。**テーブルまでなら決まる**（01b Q-04.5 代替1）",
+              "observed": {
+                "file": "src/app/lin-x/page.tsx",
+                "line": 26,
+                "component": "LinX",
+                "expr": "String(star.rows[0].name)",
+                "transformed": true,
+                "literalPaths": 0,
+                "untracked": [],
+                "outcome": "table-only",
+                "candidates": [],
+                "tableCandidates": [
+                  {
+                    "key": "poc.regions",
+                    "why": "select-star"
+                  }
+                ],
+                "unresolved": [
+                  {
+                    "why": "select-star",
+                    "text": "SELECT * のため、実行された SQL からも列を特定できない"
+                  }
+                ],
+                "reasons": [
+                  "列は決まらないが、参照している取得のテーブルは決まる",
+                  "SELECT * のため、実行された SQL からも列を特定できない"
+                ],
+                "trail": []
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "table-only-correct",
+              "detail": "テーブルまで: poc.regions",
+              "overclaimed": false,
+              "underclaimed": false
+            },
+            {
+              "field": "x-outside",
+              "difficulty": 4,
+              "truth": [],
+              "conclusiveExpected": false,
+              "why": "解析範囲（src/）の外の関数が返す値。候補を出さないのが正解",
+              "observed": {
+                "file": "src/app/lin-x/page.tsx",
+                "line": 27,
+                "component": "LinX",
+                "expr": "outsideLabel()",
+                "transformed": false,
+                "literalPaths": 0,
+                "untracked": [
+                  "call-not-whitelisted:outsideLabel"
+                ],
+                "outcome": "none",
+                "candidates": [],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "候補なし"
+                ],
+                "trail": [
+                  "outsideLabel() の本体を追っていない（引数を捨てる関数がありうるため）"
+                ]
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "refused-correct",
+              "detail": "候補を出さなかった",
+              "overclaimed": false,
+              "underclaimed": false
+            }
+          ],
+          "pass": true
+        }
+      ],
+      "clientFetch": [
+        {
+          "field": "region",
+          "page": "/listings",
+          "truth": [
+            "poc.listings.region"
+          ],
+          "why": "useState / fetch の応答を経由する。**静的解析では応答の中身に型しか無い**",
+          "outcome": "none",
+          "candidates": [],
+          "untracked": [
+            "call-not-whitelisted:useState"
+          ],
+          "bucket": "missed",
+          "detail": "候補を出せなかった",
+          "overclaimed": false,
+          "underclaimed": false
+        }
+      ],
+      "measuredSql": [
+        {
+          "page": "/lin-a",
+          "spanId": "4aa7ebea0340ea0e",
+          "scope": "@opentelemetry/instrumentation-pg",
+          "depthFromRender": 1,
+          "durationMs": 3.64,
+          "parseOk": true,
+          "selectOk": true,
+          "selectStar": false,
+          "selectError": null,
+          "tables": [
+            {
+              "schema": "poc",
+              "name": "listings"
+            }
+          ],
+          "items": [
+            {
+              "key": "id",
+              "kind": "column",
+              "column": "id",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "id"
+              }
+            },
+            {
+              "key": "region",
+              "kind": "column",
+              "column": "region",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "region"
+              }
+            }
+          ],
+          "projectionsFromColumnList": [
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "id",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "region",
+              "inferredQualifier": true
+            }
+          ],
+          "unresolved": [],
+          "attribution": {
+            "file": "src/app/lin-a/page.tsx",
+            "line": 12,
+            "component": "LinA",
+            "verified": true,
+            "sourceLine": "const r = await pool.query('SELECT id, region FROM poc.listings ORDER BY id LIMIT 3');",
+            "reason": null
+          }
+        },
+        {
+          "page": "/lin-b",
+          "spanId": "4a4dc7c637ddeddc",
+          "scope": "@opentelemetry/instrumentation-pg",
+          "depthFromRender": 1,
+          "durationMs": 18.16,
+          "parseOk": true,
+          "selectOk": true,
+          "selectStar": false,
+          "selectError": null,
+          "tables": [
+            {
+              "schema": "poc",
+              "name": "listings"
+            }
+          ],
+          "items": [
+            {
+              "key": "id",
+              "kind": "column",
+              "column": "id",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "id"
+              }
+            },
+            {
+              "key": "code",
+              "kind": "column",
+              "column": "code",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "code"
+              }
+            },
+            {
+              "key": "plan",
+              "kind": "column",
+              "column": "plan",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "plan"
+              }
+            }
+          ],
+          "projectionsFromColumnList": [
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "id",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "code",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "plan",
+              "inferredQualifier": true
+            }
+          ],
+          "unresolved": [],
+          "attribution": {
+            "file": "src/app/lin-b/page.tsx",
+            "line": 19,
+            "component": "LinB",
+            "verified": true,
+            "sourceLine": "const r = await pool.query('SELECT id, code, plan FROM poc.listings ORDER BY id LIMIT 2');",
+            "reason": null
+          }
+        },
+        {
+          "page": "/lin-b",
+          "spanId": "16defaa589c38595",
+          "scope": "@opentelemetry/instrumentation-pg",
+          "depthFromRender": 1,
+          "durationMs": 2.86,
+          "parseOk": true,
+          "selectOk": true,
+          "selectStar": false,
+          "selectError": null,
+          "tables": [
+            {
+              "schema": "poc",
+              "name": "listings"
+            }
+          ],
+          "items": [
+            {
+              "key": "listing_code",
+              "kind": "column",
+              "column": "code",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "code"
+              }
+            }
+          ],
+          "projectionsFromColumnList": [
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "code",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "id",
+              "inferredQualifier": true
+            }
+          ],
+          "unresolved": [],
+          "attribution": {
+            "file": "src/app/lin-b/page.tsx",
+            "line": 20,
+            "component": "LinB",
+            "verified": true,
+            "sourceLine": "const al = await pool.query('SELECT code AS listing_code FROM poc.listings ORDER BY id LIMIT 1');",
+            "reason": null
+          }
+        },
+        {
+          "page": "/lin-c",
+          "spanId": "881042758607e4df",
+          "scope": "@opentelemetry/instrumentation-pg",
+          "depthFromRender": 1,
+          "durationMs": 3.68,
+          "parseOk": true,
+          "selectOk": true,
+          "selectStar": false,
+          "selectError": null,
+          "tables": [
+            {
+              "schema": "poc",
+              "name": "listings"
+            }
+          ],
+          "items": [
+            {
+              "key": "id",
+              "kind": "column",
+              "column": "id",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "id"
+              }
+            },
+            {
+              "key": "code",
+              "kind": "column",
+              "column": "code",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "code"
+              }
+            },
+            {
+              "key": "region",
+              "kind": "column",
+              "column": "region",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "region"
+              }
+            }
+          ],
+          "projectionsFromColumnList": [
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "id",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "code",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "region",
+              "inferredQualifier": true
+            }
+          ],
+          "unresolved": [],
+          "attribution": {
+            "file": "src/app/lin-c/page.tsx",
+            "line": 13,
+            "component": "LinC",
+            "verified": true,
+            "sourceLine": "const r = await pool.query('SELECT id, code, region FROM poc.listings ORDER BY id LIMIT 2');",
+            "reason": null
+          }
+        },
+        {
+          "page": "/lin-d",
+          "spanId": "d376ee88dacb80e0",
+          "scope": "@opentelemetry/instrumentation-pg",
+          "depthFromRender": 1,
+          "durationMs": 5.08,
+          "parseOk": true,
+          "selectOk": true,
+          "selectStar": false,
+          "selectError": null,
+          "tables": [
+            {
+              "schema": "poc",
+              "name": "listings"
+            }
+          ],
+          "items": [
+            {
+              "key": "code",
+              "kind": "column",
+              "column": "code",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "code"
+              }
+            },
+            {
+              "key": "region",
+              "kind": "column",
+              "column": "region",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "region"
+              }
+            },
+            {
+              "key": "plan",
+              "kind": "column",
+              "column": "plan",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "plan"
+              }
+            },
+            {
+              "key": "scale",
+              "kind": "column",
+              "column": "scale",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "scale"
+              }
+            }
+          ],
+          "projectionsFromColumnList": [
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "code",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "region",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "plan",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "scale",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "id",
+              "inferredQualifier": true
+            }
+          ],
+          "unresolved": [],
+          "attribution": {
+            "file": "src/app/lin-d/page.tsx",
+            "line": 17,
+            "component": "LinD",
+            "verified": true,
+            "sourceLine": "const wide = await pool.query('SELECT code, region, plan, scale FROM poc.listings ORDER BY id LIMIT 1');",
+            "reason": null
+          }
+        },
+        {
+          "page": "/lin-d",
+          "spanId": "f04a2ab6e6817df0",
+          "scope": "@opentelemetry/instrumentation-pg",
+          "depthFromRender": 1,
+          "durationMs": 1.16,
+          "parseOk": true,
+          "selectOk": true,
+          "selectStar": false,
+          "selectError": null,
+          "tables": [
+            {
+              "schema": "poc",
+              "name": "listings"
+            }
+          ],
+          "items": [
+            {
+              "key": "code",
+              "kind": "column",
+              "column": "code",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "code"
+              }
+            }
+          ],
+          "projectionsFromColumnList": [
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "code",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "id",
+              "inferredQualifier": true
+            }
+          ],
+          "unresolved": [],
+          "attribution": {
+            "file": "src/app/lin-d/page.tsx",
+            "line": 19,
+            "component": "LinD",
+            "verified": true,
+            "sourceLine": "const a = await pool.query('SELECT code FROM poc.listings ORDER BY id LIMIT 1');",
+            "reason": null
+          }
+        },
+        {
+          "page": "/lin-d",
+          "spanId": "e29f7523ec5d44ea",
+          "scope": "@opentelemetry/instrumentation-pg",
+          "depthFromRender": 1,
+          "durationMs": 1.13,
+          "parseOk": true,
+          "selectOk": true,
+          "selectStar": false,
+          "selectError": null,
+          "tables": [
+            {
+              "schema": "poc",
+              "name": "regions"
+            }
+          ],
+          "items": [
+            {
+              "key": "name",
+              "kind": "column",
+              "column": "name",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "regions",
+                "column": "name"
+              }
+            }
+          ],
+          "projectionsFromColumnList": [
+            {
+              "schema": "poc",
+              "table": "regions",
+              "column": "name",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "regions",
+              "column": "id",
+              "inferredQualifier": true
+            }
+          ],
+          "unresolved": [],
+          "attribution": {
+            "file": "src/app/lin-d/page.tsx",
+            "line": 20,
+            "component": "LinD",
+            "verified": true,
+            "sourceLine": "const b = await pool.query('SELECT name FROM poc.regions ORDER BY id LIMIT 1');",
+            "reason": null
+          }
+        },
+        {
+          "page": "/lin-e",
+          "spanId": "24f6ea7dac9a6a58",
+          "scope": "@opentelemetry/instrumentation-pg",
+          "depthFromRender": 1,
+          "durationMs": 4.87,
+          "parseOk": true,
+          "selectOk": true,
+          "selectStar": false,
+          "selectError": null,
+          "tables": [
+            {
+              "schema": "poc",
+              "name": "listings"
+            }
+          ],
+          "items": [
+            {
+              "key": "id",
+              "kind": "column",
+              "column": "id",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "id"
+              }
+            },
+            {
+              "key": "code",
+              "kind": "column",
+              "column": "code",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "code"
+              }
+            },
+            {
+              "key": "region",
+              "kind": "column",
+              "column": "region",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "region"
+              }
+            },
+            {
+              "key": "plan",
+              "kind": "column",
+              "column": "plan",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "plan"
+              }
+            }
+          ],
+          "projectionsFromColumnList": [
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "id",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "code",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "region",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "plan",
+              "inferredQualifier": true
+            }
+          ],
+          "unresolved": [],
+          "attribution": {
+            "file": "src/app/lin-e/page.tsx",
+            "line": 17,
+            "component": "LinE",
+            "verified": true,
+            "sourceLine": "const r = await pool.query('SELECT id, code, region, plan FROM poc.listings ORDER BY id LIMIT 2');",
+            "reason": null
+          }
+        },
+        {
+          "page": "/lin-f",
+          "spanId": "3cf750cddc627ee6",
+          "scope": "@opentelemetry/instrumentation-pg",
+          "depthFromRender": 1,
+          "durationMs": 5.87,
+          "parseOk": true,
+          "selectOk": true,
+          "selectStar": false,
+          "selectError": null,
+          "tables": [
+            {
+              "schema": "poc",
+              "name": "listings"
+            }
+          ],
+          "items": [
+            {
+              "key": "id",
+              "kind": "column",
+              "column": "id",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "id"
+              }
+            },
+            {
+              "key": "code",
+              "kind": "column",
+              "column": "code",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "code"
+              }
+            }
+          ],
+          "projectionsFromColumnList": [
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "id",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "code",
+              "inferredQualifier": true
+            }
+          ],
+          "unresolved": [],
+          "attribution": {
+            "file": "src/app/lin-f/page.tsx",
+            "line": 15,
+            "component": "LinF",
+            "verified": true,
+            "sourceLine": "const r = await pool.query('SELECT id, code FROM poc.listings ORDER BY id LIMIT 2');",
+            "reason": null
+          }
+        },
+        {
+          "page": "/lin-f",
+          "spanId": "5f65573e20f9ddd6",
+          "scope": "@opentelemetry/instrumentation-pg",
+          "depthFromRender": 1,
+          "durationMs": 1.08,
+          "parseOk": true,
+          "selectOk": true,
+          "selectStar": false,
+          "selectError": null,
+          "tables": [
+            {
+              "schema": "poc",
+              "name": "regions"
+            }
+          ],
+          "items": [
+            {
+              "key": "name",
+              "kind": "column",
+              "column": "name",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "regions",
+                "column": "name"
+              }
+            }
+          ],
+          "projectionsFromColumnList": [
+            {
+              "schema": "poc",
+              "table": "regions",
+              "column": "name",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "regions",
+              "column": "id",
+              "inferredQualifier": true
+            }
+          ],
+          "unresolved": [],
+          "attribution": {
+            "file": "src/components/lin/LinFChild.tsx",
+            "line": 9,
+            "component": "LinFChild",
+            "verified": true,
+            "sourceLine": "const r = await pool.query('SELECT name FROM poc.regions ORDER BY id LIMIT 1');",
+            "reason": null
+          }
+        },
+        {
+          "page": "/lin-g",
+          "spanId": "b4effb13b95a0bfe",
+          "scope": "@opentelemetry/instrumentation-pg",
+          "depthFromRender": 1,
+          "durationMs": 4.56,
+          "parseOk": true,
+          "selectOk": true,
+          "selectStar": false,
+          "selectError": null,
+          "tables": [
+            {
+              "schema": "poc",
+              "name": "listings"
+            }
+          ],
+          "items": [
+            {
+              "key": "code",
+              "kind": "column",
+              "column": "code",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "code"
+              }
+            },
+            {
+              "key": "region",
+              "kind": "column",
+              "column": "region",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "region"
+              }
+            }
+          ],
+          "projectionsFromColumnList": [
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "code",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "region",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "id",
+              "inferredQualifier": true
+            }
+          ],
+          "unresolved": [],
+          "attribution": {
+            "file": "src/app/lin-g/page.tsx",
+            "line": 19,
+            "component": "LinG",
+            "verified": true,
+            "sourceLine": "await pool.query('SELECT code, region FROM poc.listings ORDER BY id LIMIT 1');",
+            "reason": null
+          }
+        },
+        {
+          "page": "/lin-x",
+          "spanId": "3ab861b928b4e168",
+          "scope": "@opentelemetry/instrumentation-pg",
+          "depthFromRender": 1,
+          "durationMs": 4.33,
+          "parseOk": true,
+          "selectOk": true,
+          "selectStar": false,
+          "selectError": null,
+          "tables": [
+            {
+              "schema": "poc",
+              "name": "listings"
+            }
+          ],
+          "items": [
+            {
+              "key": "id",
+              "kind": "column",
+              "column": "id",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "id"
+              }
+            },
+            {
+              "key": "code",
+              "kind": "column",
+              "column": "code",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "code"
+              }
+            }
+          ],
+          "projectionsFromColumnList": [
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "id",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "code",
+              "inferredQualifier": true
+            }
+          ],
+          "unresolved": [],
+          "attribution": {
+            "file": "src/app/lin-x/page.tsx",
+            "line": 20,
+            "component": "LinX",
+            "verified": true,
+            "sourceLine": "const dyn = await pool.query(`SELECT id, code FROM poc.listings ORDER BY id LIMIT ${LIMIT}`);",
+            "reason": null
+          }
+        },
+        {
+          "page": "/lin-x",
+          "spanId": "5b3d3086caeb712b",
+          "scope": "@opentelemetry/instrumentation-pg",
+          "depthFromRender": 1,
+          "durationMs": 1.31,
+          "parseOk": true,
+          "selectOk": true,
+          "selectStar": true,
+          "selectError": null,
+          "tables": [
+            {
+              "schema": "poc",
+              "name": "regions"
+            }
+          ],
+          "items": [],
+          "projectionsFromColumnList": [
+            {
+              "schema": "poc",
+              "table": "regions",
+              "column": "id",
+              "inferredQualifier": true
+            }
+          ],
+          "unresolved": [],
+          "attribution": {
+            "file": "src/app/lin-x/page.tsx",
+            "line": 21,
+            "component": "LinX",
+            "verified": true,
+            "sourceLine": "const star = await pool.query('SELECT * FROM poc.regions ORDER BY id LIMIT 1');",
+            "reason": null
+          }
+        }
+      ],
+      "staticQueries": [
+        {
+          "id": "q1",
+          "file": "src/app/api/listings/[id]/route.ts",
+          "line": 11,
+          "col": 25,
+          "method": "findUnique",
+          "shape": "orm",
+          "sqlInSource": null,
+          "sqlIsDynamic": true,
+          "receiver": "prisma.listing"
+        },
+        {
+          "id": "q2",
+          "file": "src/app/api/listings/[id]/route.ts",
+          "line": 15,
+          "col": 23,
+          "method": "aggregate",
+          "shape": "orm",
+          "sqlInSource": null,
+          "sqlIsDynamic": true,
+          "receiver": "prisma.listingView"
+        },
+        {
+          "id": "q3",
+          "file": "src/app/api/listings/route.ts",
+          "line": 6,
+          "col": 22,
+          "method": "findMany",
+          "shape": "orm",
+          "sqlInSource": null,
+          "sqlIsDynamic": true,
+          "receiver": "prisma.listing"
+        },
+        {
+          "id": "q4",
+          "file": "src/app/api/stats/route.ts",
+          "line": 7,
+          "col": 26,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT region, count(*) AS n FROM poc.listings GROUP BY region ORDER BY region",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q5",
+          "file": "src/app/lin-a/page.tsx",
+          "line": 12,
+          "col": 19,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT id, region FROM poc.listings ORDER BY id LIMIT 3",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q6",
+          "file": "src/app/lin-b/page.tsx",
+          "line": 19,
+          "col": 19,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT id, code, plan FROM poc.listings ORDER BY id LIMIT 2",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q7",
+          "file": "src/app/lin-b/page.tsx",
+          "line": 20,
+          "col": 20,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT code AS listing_code FROM poc.listings ORDER BY id LIMIT 1",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q8",
+          "file": "src/app/lin-c/page.tsx",
+          "line": 13,
+          "col": 19,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT id, code, region FROM poc.listings ORDER BY id LIMIT 2",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q9",
+          "file": "src/app/lin-d/page.tsx",
+          "line": 17,
+          "col": 22,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT code, region, plan, scale FROM poc.listings ORDER BY id LIMIT 1",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q10",
+          "file": "src/app/lin-d/page.tsx",
+          "line": 19,
+          "col": 19,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT code FROM poc.listings ORDER BY id LIMIT 1",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q11",
+          "file": "src/app/lin-d/page.tsx",
+          "line": 20,
+          "col": 19,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT name FROM poc.regions ORDER BY id LIMIT 1",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q12",
+          "file": "src/app/lin-e/page.tsx",
+          "line": 17,
+          "col": 19,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT id, code, region, plan FROM poc.listings ORDER BY id LIMIT 2",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q13",
+          "file": "src/components/lin/LinFChild.tsx",
+          "line": 9,
+          "col": 19,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT name FROM poc.regions ORDER BY id LIMIT 1",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q14",
+          "file": "src/app/lin-f/page.tsx",
+          "line": 15,
+          "col": 19,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT id, code FROM poc.listings ORDER BY id LIMIT 2",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q15",
+          "file": "src/app/lin-g/page.tsx",
+          "line": 19,
+          "col": 9,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT code, region FROM poc.listings ORDER BY id LIMIT 1",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q16",
+          "file": "src/app/lin-x/page.tsx",
+          "line": 20,
+          "col": 21,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": null,
+          "sqlIsDynamic": true,
+          "receiver": "pool"
+        },
+        {
+          "id": "q17",
+          "file": "src/app/lin-x/page.tsx",
+          "line": 21,
+          "col": 22,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT * FROM poc.regions ORDER BY id LIMIT 1",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q18",
+          "file": "src/app/rsc-db/page.tsx",
+          "line": 12,
+          "col": 19,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT id, code, plan FROM poc.listings ORDER BY id LIMIT 6",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q19",
+          "file": "src/components/ListingCount.tsx",
+          "line": 6,
+          "col": 19,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT count(*) AS n FROM poc.listings",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q20",
+          "file": "src/app/rsc-dup/page.tsx",
+          "line": 13,
+          "col": 19,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT count(*) AS n FROM poc.listings",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q21",
+          "file": "src/app/rsc-fail/page.tsx",
+          "line": 17,
+          "col": 11,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT id FROM poc.table_that_does_not_exist",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q22",
+          "file": "src/app/rsc-helper/page.tsx",
+          "line": 13,
+          "col": 19,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT scale, count(*) AS n FROM poc.listings GROUP BY scale",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q23",
+          "file": "src/app/rsc-parallel/page.tsx",
+          "line": 13,
+          "col": 5,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT count(*) AS n FROM poc.listings",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q24",
+          "file": "src/app/rsc-parallel/page.tsx",
+          "line": 14,
+          "col": 5,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT count(*) AS n FROM poc.regions",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q25",
+          "file": "src/app/rsc-parallel/page.tsx",
+          "line": 15,
+          "col": 5,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT count(*) AS n FROM poc.listing_views",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        }
+      ],
+      "join": [
+        {
+          "queryId": "q1",
+          "at": "src/app/api/listings/[id]/route.ts:11",
+          "method": "findUnique",
+          "sqlIsDynamic": true,
+          "measuredCount": 0,
+          "pages": [],
+          "why": "この呼び出しに対応する実行された SQL を観測していない"
+        },
+        {
+          "queryId": "q2",
+          "at": "src/app/api/listings/[id]/route.ts:15",
+          "method": "aggregate",
+          "sqlIsDynamic": true,
+          "measuredCount": 0,
+          "pages": [],
+          "why": "この呼び出しに対応する実行された SQL を観測していない"
+        },
+        {
+          "queryId": "q3",
+          "at": "src/app/api/listings/route.ts:6",
+          "method": "findMany",
+          "sqlIsDynamic": true,
+          "measuredCount": 0,
+          "pages": [],
+          "why": "この呼び出しに対応する実行された SQL を観測していない"
+        },
+        {
+          "queryId": "q4",
+          "at": "src/app/api/stats/route.ts:7",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 0,
+          "pages": [],
+          "why": "この呼び出しに対応する実行された SQL を観測していない"
+        },
+        {
+          "queryId": "q5",
+          "at": "src/app/lin-a/page.tsx:12",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 1,
+          "pages": [
+            "/lin-a"
+          ],
+          "why": null
+        },
+        {
+          "queryId": "q6",
+          "at": "src/app/lin-b/page.tsx:19",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 1,
+          "pages": [
+            "/lin-b"
+          ],
+          "why": null
+        },
+        {
+          "queryId": "q7",
+          "at": "src/app/lin-b/page.tsx:20",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 1,
+          "pages": [
+            "/lin-b"
+          ],
+          "why": null
+        },
+        {
+          "queryId": "q8",
+          "at": "src/app/lin-c/page.tsx:13",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 1,
+          "pages": [
+            "/lin-c"
+          ],
+          "why": null
+        },
+        {
+          "queryId": "q9",
+          "at": "src/app/lin-d/page.tsx:17",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 1,
+          "pages": [
+            "/lin-d"
+          ],
+          "why": null
+        },
+        {
+          "queryId": "q10",
+          "at": "src/app/lin-d/page.tsx:19",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 1,
+          "pages": [
+            "/lin-d"
+          ],
+          "why": null
+        },
+        {
+          "queryId": "q11",
+          "at": "src/app/lin-d/page.tsx:20",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 1,
+          "pages": [
+            "/lin-d"
+          ],
+          "why": null
+        },
+        {
+          "queryId": "q12",
+          "at": "src/app/lin-e/page.tsx:17",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 1,
+          "pages": [
+            "/lin-e"
+          ],
+          "why": null
+        },
+        {
+          "queryId": "q13",
+          "at": "src/components/lin/LinFChild.tsx:9",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 1,
+          "pages": [
+            "/lin-f"
+          ],
+          "why": null
+        },
+        {
+          "queryId": "q14",
+          "at": "src/app/lin-f/page.tsx:15",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 1,
+          "pages": [
+            "/lin-f"
+          ],
+          "why": null
+        },
+        {
+          "queryId": "q15",
+          "at": "src/app/lin-g/page.tsx:19",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 1,
+          "pages": [
+            "/lin-g"
+          ],
+          "why": null
+        },
+        {
+          "queryId": "q16",
+          "at": "src/app/lin-x/page.tsx:20",
+          "method": "query",
+          "sqlIsDynamic": true,
+          "measuredCount": 1,
+          "pages": [
+            "/lin-x"
+          ],
+          "why": null
+        },
+        {
+          "queryId": "q17",
+          "at": "src/app/lin-x/page.tsx:21",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 1,
+          "pages": [
+            "/lin-x"
+          ],
+          "why": null
+        },
+        {
+          "queryId": "q18",
+          "at": "src/app/rsc-db/page.tsx:12",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 0,
+          "pages": [],
+          "why": "この呼び出しに対応する実行された SQL を観測していない"
+        },
+        {
+          "queryId": "q19",
+          "at": "src/components/ListingCount.tsx:6",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 0,
+          "pages": [],
+          "why": "この呼び出しに対応する実行された SQL を観測していない"
+        },
+        {
+          "queryId": "q20",
+          "at": "src/app/rsc-dup/page.tsx:13",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 0,
+          "pages": [],
+          "why": "この呼び出しに対応する実行された SQL を観測していない"
+        },
+        {
+          "queryId": "q21",
+          "at": "src/app/rsc-fail/page.tsx:17",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 0,
+          "pages": [],
+          "why": "この呼び出しに対応する実行された SQL を観測していない"
+        },
+        {
+          "queryId": "q22",
+          "at": "src/app/rsc-helper/page.tsx:13",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 0,
+          "pages": [],
+          "why": "この呼び出しに対応する実行された SQL を観測していない"
+        },
+        {
+          "queryId": "q23",
+          "at": "src/app/rsc-parallel/page.tsx:13",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 0,
+          "pages": [],
+          "why": "この呼び出しに対応する実行された SQL を観測していない"
+        },
+        {
+          "queryId": "q24",
+          "at": "src/app/rsc-parallel/page.tsx:14",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 0,
+          "pages": [],
+          "why": "この呼び出しに対応する実行された SQL を観測していない"
+        },
+        {
+          "queryId": "q25",
+          "at": "src/app/rsc-parallel/page.tsx:15",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 0,
+          "pages": [],
+          "why": "この呼び出しに対応する実行された SQL を観測していない"
+        }
+      ],
+      "unannotatedSites": [
+        {
+          "file": "src/components/RegionBadge.tsx",
+          "line": 8,
+          "component": "RegionBadge",
+          "expr": "region",
+          "outcome": "none"
+        },
+        {
+          "file": "src/components/ListingCard.tsx",
+          "line": 14,
+          "component": "ListingCard",
+          "expr": "listing.code",
+          "outcome": "none"
+        },
+        {
+          "file": "src/app/cards-rsc/page.tsx",
+          "line": 22,
+          "component": "CardsRsc",
+          "expr": "s.code",
+          "outcome": "none"
+        },
+        {
+          "file": "src/components/FetchButton.tsx",
+          "line": 14,
+          "component": "FetchButton",
+          "expr": "label",
+          "outcome": "none"
+        },
+        {
+          "file": "src/app/flows/page.tsx",
+          "line": 106,
+          "component": "Flows",
+          "expr": "done.join(' ')",
+          "outcome": "none"
+        },
+        {
+          "file": "src/app/layout.tsx",
+          "line": 7,
+          "component": "RootLayout",
+          "expr": "children",
+          "outcome": "none"
+        },
+        {
+          "file": "src/app/listings/[id]/page.tsx",
+          "line": 11,
+          "component": "Detail",
+          "expr": "id",
+          "outcome": "none"
+        },
+        {
+          "file": "src/app/listings/[id]/page.tsx",
+          "line": 12,
+          "component": "Detail",
+          "expr": "data ? JSON.stringify(data, null, 2) : '…'",
+          "outcome": "none"
+        },
+        {
+          "file": "src/app/listings/page.tsx",
+          "line": 16,
+          "component": "Listings",
+          "expr": "r.code",
+          "outcome": "none"
+        },
+        {
+          "file": "src/app/page.tsx",
+          "line": 12,
+          "component": "Home",
+          "expr": "r.region",
+          "outcome": "none"
+        },
+        {
+          "file": "src/app/page.tsx",
+          "line": 12,
+          "component": "Home",
+          "expr": "r.n",
+          "outcome": "none"
+        }
+      ],
+      "outOfScopeSites": [
+        {
+          "field": "code",
+          "file": "src/app/rsc-db/page.tsx",
+          "line": 19,
+          "component": "RscDb",
+          "expr": "row.code",
+          "outcome": "none",
+          "candidates": [],
+          "tableCandidates": [],
+          "note": "本PoCの正解表の対象外（他のPoCの題材ページ）。採点していない"
+        },
+        {
+          "field": "child",
+          "file": "src/components/ListingCount.tsx",
+          "line": 7,
+          "component": "ListingCount",
+          "expr": "String(r.rows[0].n)",
+          "outcome": "none",
+          "candidates": [],
+          "tableCandidates": [],
+          "note": "本PoCの正解表の対象外（他のPoCの題材ページ）。採点していない"
+        },
+        {
+          "field": "page",
+          "file": "src/app/rsc-dup/page.tsx",
+          "line": 17,
+          "component": "RscDup",
+          "expr": "String(r.rows[0].n)",
+          "outcome": "none",
+          "candidates": [],
+          "tableCandidates": [],
+          "note": "本PoCの正解表の対象外（他のPoCの題材ページ）。採点していない"
+        },
+        {
+          "field": "sql",
+          "file": "src/app/rsc-fail/page.tsx",
+          "line": 30,
+          "component": "RscFail",
+          "expr": "sqlError ? 'sql-failed' : 'sql-ok'",
+          "outcome": "none",
+          "candidates": [],
+          "tableCandidates": [],
+          "note": "本PoCの正解表の対象外（他のPoCの題材ページ）。採点していない"
+        },
+        {
+          "field": "fetch",
+          "file": "src/app/rsc-fail/page.tsx",
+          "line": 31,
+          "component": "RscFail",
+          "expr": "fetchError ? 'fetch-failed' : 'fetch-ok'",
+          "outcome": "none",
+          "candidates": [],
+          "tableCandidates": [],
+          "note": "本PoCの正解表の対象外（他のPoCの題材ページ）。採点していない"
+        },
+        {
+          "field": "n",
+          "file": "src/app/rsc-helper/page.tsx",
+          "line": 22,
+          "component": "RscHelper",
+          "expr": "String(n)",
+          "outcome": "none",
+          "candidates": [],
+          "tableCandidates": [],
+          "note": "本PoCの正解表の対象外（他のPoCの題材ページ）。採点していない"
+        },
+        {
+          "field": "n1",
+          "file": "src/app/rsc-parallel/page.tsx",
+          "line": 21,
+          "component": "RscParallel",
+          "expr": "String(a.rows[0].n)",
+          "outcome": "none",
+          "candidates": [],
+          "tableCandidates": [],
+          "note": "本PoCの正解表の対象外（他のPoCの題材ページ）。採点していない"
+        },
+        {
+          "field": "n2",
+          "file": "src/app/rsc-parallel/page.tsx",
+          "line": 22,
+          "component": "RscParallel",
+          "expr": "String(b.rows[0].n)",
+          "outcome": "none",
+          "candidates": [],
+          "tableCandidates": [],
+          "note": "本PoCの正解表の対象外（他のPoCの題材ページ）。採点していない"
+        },
+        {
+          "field": "n3",
+          "file": "src/app/rsc-parallel/page.tsx",
+          "line": 23,
+          "component": "RscParallel",
+          "expr": "String(c.rows[0].n)",
+          "outcome": "none",
+          "candidates": [],
+          "tableCandidates": [],
+          "note": "本PoCの正解表の対象外（他のPoCの題材ページ）。採点していない"
+        },
+        {
+          "field": "echo",
+          "file": "src/app/rsc-svc/page.tsx",
+          "line": 23,
+          "component": "RscSvc",
+          "expr": "String(e.ok)",
+          "outcome": "none",
+          "candidates": [],
+          "tableCandidates": [],
+          "note": "本PoCの正解表の対象外（他のPoCの題材ページ）。採点していない"
+        },
+        {
+          "field": "rows",
+          "file": "src/app/rsc-svc/page.tsx",
+          "line": 24,
+          "component": "RscSvc",
+          "expr": "String(r.count)",
+          "outcome": "none",
+          "candidates": [],
+          "tableCandidates": [],
+          "note": "本PoCの正解表の対象外（他のPoCの題材ページ）。採点していない"
+        },
+        {
+          "field": "status",
+          "file": "src/app/rsc-svc-fail/page.tsx",
+          "line": 16,
+          "component": "RscSvcFail",
+          "expr": "String(res.status)",
+          "outcome": "none",
+          "candidates": [],
+          "tableCandidates": [],
+          "note": "本PoCの正解表の対象外（他のPoCの題材ページ）。採点していない"
+        }
+      ],
+      "lineageNotes": [],
+      "srvMapStats": {
+        "evalModules": 0,
+        "diskMaps": 8
+      }
+    },
+    "webpack": {
+      "bundler": "webpack",
+      "pages": {
+        "/lin-a": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/lin-a",
+              "status": 200,
+              "isDocument": true,
+              "hasIdentity": true,
+              "server": {
+                "traceId": "0f5afd625b8c7c282ec814f4fea21317",
+                "spanId": "feac397b409107d9"
+              }
+            }
+          ],
+          "excludedAssets": 4
+        },
+        "/lin-b": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/lin-b",
+              "status": 200,
+              "isDocument": true,
+              "hasIdentity": true,
+              "server": {
+                "traceId": "f0773f9cb325dd1d8a853793a7a8273c",
+                "spanId": "f3d712e5cdc2e057"
+              }
+            }
+          ],
+          "excludedAssets": 4
+        },
+        "/lin-c": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/lin-c",
+              "status": 200,
+              "isDocument": true,
+              "hasIdentity": true,
+              "server": {
+                "traceId": "246ce5c89dbb3bb2e51ceab99fc197ce",
+                "spanId": "a0d71b1a60932b90"
+              }
+            }
+          ],
+          "excludedAssets": 4
+        },
+        "/lin-d": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/lin-d",
+              "status": 200,
+              "isDocument": true,
+              "hasIdentity": true,
+              "server": {
+                "traceId": "3130c0cc187e42d160a4649372163215",
+                "spanId": "16c7c44a41a7610d"
+              }
+            }
+          ],
+          "excludedAssets": 4
+        },
+        "/lin-e": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/lin-e",
+              "status": 200,
+              "isDocument": true,
+              "hasIdentity": true,
+              "server": {
+                "traceId": "aa779571284406ad69a1e5d713ca80a4",
+                "spanId": "c67ff498d4fbc0ab"
+              }
+            }
+          ],
+          "excludedAssets": 4
+        },
+        "/lin-f": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/lin-f",
+              "status": 200,
+              "isDocument": true,
+              "hasIdentity": true,
+              "server": {
+                "traceId": "c95f70f416827c54b3d4da4e6a56cf5a",
+                "spanId": "46893d1df5880efa"
+              }
+            }
+          ],
+          "excludedAssets": 4
+        },
+        "/lin-g": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/lin-g",
+              "status": 200,
+              "isDocument": true,
+              "hasIdentity": true,
+              "server": {
+                "traceId": "6179156a858a7e952ea593944b091bc0",
+                "spanId": "7a2fdf05ae24f008"
+              }
+            }
+          ],
+          "excludedAssets": 4
+        },
+        "/lin-x": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/lin-x",
+              "status": 200,
+              "isDocument": true,
+              "hasIdentity": true,
+              "server": {
+                "traceId": "b99f905bc6b9e0c9589c2a4fc931c2ae",
+                "spanId": "8fa46eb61bf0661e"
+              }
+            }
+          ],
+          "excludedAssets": 4
+        },
+        "/listings": {
+          "requests": [
+            {
+              "method": "GET",
+              "path": "/listings",
+              "status": 200,
+              "isDocument": true,
+              "hasIdentity": true,
+              "server": {
+                "traceId": "bb1b5af5c3146e6f55d8305b3cd90954",
+                "spanId": "8e4aeabe4fa43de4"
+              }
+            },
+            {
+              "method": "GET",
+              "path": "/api/listings",
+              "status": 200,
+              "isDocument": false,
+              "hasIdentity": true,
+              "server": {
+                "traceId": "191aa14e61eadcbc51010a53e40befa9",
+                "spanId": "98ed688b26aa0a3c"
+              }
+            }
+          ],
+          "excludedAssets": 5
+        }
+      },
+      "notes": [],
+      "summary": {
+        "spans": 266,
+        "sqlSpans": 13,
+        "callsites": 34,
+        "attributedSql": 13,
+        "staticQueries": 25,
+        "joinedQueries": 13,
+        "analyzedFiles": 38,
+        "displaySites": 46,
+        "annotatedSites": 35,
+        "main": {
+          "total": 20,
+          "buckets": {
+            "correct-single": 8,
+            "candidates-correct": 7,
+            "refused-correct": 5
+          }
+        },
+        "supplementary": {
+          "total": 3,
+          "buckets": {
+            "correct-single": 1,
+            "table-only-correct": 1,
+            "refused-correct": 1
+          }
+        },
+        "byDifficulty": {
+          "1": {
+            "total": 3,
+            "buckets": {
+              "correct-single": 3
+            }
+          },
+          "2": {
+            "total": 5,
+            "buckets": {
+              "correct-single": 5
+            }
+          },
+          "3": {
+            "total": 7,
+            "buckets": {
+              "candidates-correct": 7
+            }
+          },
+          "4": {
+            "total": 5,
+            "buckets": {
+              "refused-correct": 5
+            }
+          }
+        },
+        "wrong": 0,
+        "wrongRate": 0,
+        "overclaimed": 0,
+        "underclaimed": 0,
+        "casesPass": 8,
+        "casesTotal": 8
+      },
+      "cases": [
+        {
+          "case": "A",
+          "page": "/lin-a",
+          "label": "単純な直接対応",
+          "note": "SQL の region を同じコンポーネントの JSX がそのまま描く",
+          "supplementary": false,
+          "sites": [
+            {
+              "field": "a-region",
+              "difficulty": 1,
+              "truth": [
+                "poc.listings.region"
+              ],
+              "conclusiveExpected": true,
+              "why": "r.rows.map((row) => …) の row.region。加工も受け渡しも無い",
+              "observed": {
+                "file": "src/app/lin-a/page.tsx",
+                "line": 18,
+                "component": "LinA",
+                "expr": "row.region",
+                "transformed": false,
+                "literalPaths": 0,
+                "untracked": [],
+                "outcome": "confirmed",
+                "candidates": [
+                  {
+                    "key": "poc.listings.region",
+                    "via": "field",
+                    "note": null
+                  }
+                ],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "参照の連鎖が1列に決まり、加工も分岐も無い"
+                ],
+                "trail": [
+                  "pool.query(…) の結果（src/app/lin-a/page.tsx:12）",
+                  ".rows を参照",
+                  "r.rows.map の要素（src/app/lin-a/page.tsx:17）",
+                  ".region を参照"
+                ]
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "correct-single",
+              "detail": "poc.listings.region",
+              "overclaimed": false,
+              "underclaimed": false
+            }
+          ],
+          "pass": true
+        },
+        {
+          "case": "B",
+          "page": "/lin-b",
+          "label": "props の受け渡し（別名・多段）と SQL の別名",
+          "note": "page → LinBCard → LinBLabel。code が label、さらに text に改名される。別に SELECT code AS listing_code の別名も置いた",
+          "supplementary": false,
+          "sites": [
+            {
+              "field": "b-sqlalias",
+              "difficulty": 2,
+              "truth": [
+                "poc.listings.code"
+              ],
+              "conclusiveExpected": true,
+              "why": "SQL の別名。行の鍵は listing_code だが、由来の列は code である（01b Q-04.2 C-2）",
+              "observed": {
+                "file": "src/app/lin-b/page.tsx",
+                "line": 27,
+                "component": "LinB",
+                "expr": "al.rows[0].listing_code",
+                "transformed": false,
+                "literalPaths": 0,
+                "untracked": [],
+                "outcome": "confirmed",
+                "candidates": [
+                  {
+                    "key": "poc.listings.code",
+                    "via": "field",
+                    "note": "SQL の別名 listing_code → 列 code"
+                  }
+                ],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "参照の連鎖が1列に決まり、加工も分岐も無い"
+                ],
+                "trail": [
+                  "pool.query(…) の結果（src/app/lin-b/page.tsx:20）",
+                  ".rows を参照",
+                  "[0] を参照",
+                  ".listing_code を参照"
+                ]
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "correct-single",
+              "detail": "poc.listings.code",
+              "overclaimed": false,
+              "underclaimed": false
+            },
+            {
+              "field": "b-label",
+              "difficulty": 2,
+              "truth": [
+                "poc.listings.code"
+              ],
+              "conclusiveExpected": true,
+              "why": "text ← LinBCard の label ← page の row.code。**2段の別名**",
+              "observed": {
+                "file": "src/components/lin/LinBLabel.tsx",
+                "line": 4,
+                "component": "LinBLabel",
+                "expr": "text",
+                "transformed": false,
+                "literalPaths": 0,
+                "untracked": [],
+                "outcome": "confirmed",
+                "candidates": [
+                  {
+                    "key": "poc.listings.code",
+                    "via": "field",
+                    "note": null
+                  }
+                ],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "参照の連鎖が1列に決まり、加工も分岐も無い"
+                ],
+                "trail": [
+                  "LinBLabel の props text ← src/components/lin/LinBCard.tsx:9",
+                  "LinBCard の props label ← src/app/lin-b/page.tsx:25",
+                  "pool.query(…) の結果（src/app/lin-b/page.tsx:19）",
+                  ".rows を参照",
+                  "r.rows.map の要素（src/app/lin-b/page.tsx:24）",
+                  ".code を参照"
+                ]
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "correct-single",
+              "detail": "poc.listings.code",
+              "overclaimed": false,
+              "underclaimed": false
+            },
+            {
+              "field": "b-tier",
+              "difficulty": 2,
+              "truth": [
+                "poc.listings.plan"
+              ],
+              "conclusiveExpected": true,
+              "why": "tier ← page の row.plan。1段の別名",
+              "observed": {
+                "file": "src/components/lin/LinBCard.tsx",
+                "line": 10,
+                "component": "LinBCard",
+                "expr": "tier",
+                "transformed": false,
+                "literalPaths": 0,
+                "untracked": [],
+                "outcome": "confirmed",
+                "candidates": [
+                  {
+                    "key": "poc.listings.plan",
+                    "via": "field",
+                    "note": null
+                  }
+                ],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "参照の連鎖が1列に決まり、加工も分岐も無い"
+                ],
+                "trail": [
+                  "LinBCard の props tier ← src/app/lin-b/page.tsx:25",
+                  "pool.query(…) の結果（src/app/lin-b/page.tsx:19）",
+                  ".rows を参照",
+                  "r.rows.map の要素（src/app/lin-b/page.tsx:24）",
+                  ".plan を参照"
+                ]
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "correct-single",
+              "detail": "poc.listings.plan",
+              "overclaimed": false,
+              "underclaimed": false
+            }
+          ],
+          "pass": true
+        },
+        {
+          "case": "C",
+          "page": "/lin-c",
+          "label": "値の加工",
+          "note": "連結・関数・プロパティ参照。由来は言えても確定にはできない",
+          "supplementary": false,
+          "sites": [
+            {
+              "field": "c-title",
+              "difficulty": 3,
+              "truth": [
+                "poc.listings.region",
+                "poc.listings.code"
+              ],
+              "conclusiveExpected": false,
+              "why": "テンプレートで2列を連結している。**1列に絞ってはいけない**",
+              "observed": {
+                "file": "src/app/lin-c/page.tsx",
+                "line": 20,
+                "component": "LinC",
+                "expr": "title",
+                "transformed": true,
+                "literalPaths": 0,
+                "untracked": [],
+                "outcome": "candidates",
+                "candidates": [
+                  {
+                    "key": "poc.listings.region",
+                    "via": "field",
+                    "note": null
+                  },
+                  {
+                    "key": "poc.listings.code",
+                    "via": "field",
+                    "note": null
+                  }
+                ],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "候補が 2 件ある",
+                  "加工（連結・変換）を通っている"
+                ],
+                "trail": [
+                  "pool.query(…) の結果（src/app/lin-c/page.tsx:13）",
+                  ".rows を参照",
+                  "[0] を参照",
+                  ".region を参照"
+                ]
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "candidates-correct",
+              "detail": "候補 2 件（正解 2 件を含む）",
+              "overclaimed": false,
+              "underclaimed": false
+            },
+            {
+              "field": "c-upper",
+              "difficulty": 3,
+              "truth": [
+                "poc.listings.code"
+              ],
+              "conclusiveExpected": false,
+              "why": "String() と toUpperCase() を通している。由来は code だが値は別物",
+              "observed": {
+                "file": "src/app/lin-c/page.tsx",
+                "line": 21,
+                "component": "LinC",
+                "expr": "upper",
+                "transformed": true,
+                "literalPaths": 0,
+                "untracked": [],
+                "outcome": "candidates",
+                "candidates": [
+                  {
+                    "key": "poc.listings.code",
+                    "via": "field",
+                    "note": null
+                  }
+                ],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "加工（連結・変換）を通っている"
+                ],
+                "trail": [
+                  "pool.query(…) の結果（src/app/lin-c/page.tsx:13）",
+                  ".rows を参照",
+                  "[0] を参照",
+                  ".code を参照",
+                  "String() を通している",
+                  "toUpperCase() を通している"
+                ]
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "candidates-correct",
+              "detail": "候補 1 件（正解 1 件を含む）",
+              "overclaimed": false,
+              "underclaimed": false
+            },
+            {
+              "field": "c-len",
+              "difficulty": 3,
+              "truth": [
+                "poc.listings.code"
+              ],
+              "conclusiveExpected": false,
+              "why": "code の文字数。由来は code だが、表示値は code ではない",
+              "observed": {
+                "file": "src/app/lin-c/page.tsx",
+                "line": 22,
+                "component": "LinC",
+                "expr": "row.code.length",
+                "transformed": true,
+                "literalPaths": 0,
+                "untracked": [],
+                "outcome": "candidates",
+                "candidates": [
+                  {
+                    "key": "poc.listings.code",
+                    "via": "field",
+                    "note": null
+                  }
+                ],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "加工（連結・変換）を通っている"
+                ],
+                "trail": [
+                  "pool.query(…) の結果（src/app/lin-c/page.tsx:13）",
+                  ".rows を参照",
+                  "[0] を参照",
+                  ".code を参照",
+                  ".length を参照（列の値のさらに内側）"
+                ]
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "candidates-correct",
+              "detail": "候補 1 件（正解 1 件を含む）",
+              "overclaimed": false,
+              "underclaimed": false
+            }
+          ],
+          "pass": true
+        },
+        {
+          "case": "D",
+          "page": "/lin-d",
+          "label": "複数候補・同名変数",
+          "note": "動的キーで引く1箇所と、別スコープの同名 row が2箇所",
+          "supplementary": false,
+          "sites": [
+            {
+              "field": "d-dynamic",
+              "difficulty": 3,
+              "truth": [
+                "poc.listings.region",
+                "poc.listings.plan",
+                "poc.listings.scale"
+              ],
+              "conclusiveExpected": false,
+              "why": "FIELDS の各要素をキーに bag[f] を引く。**どの列かはソースから決まらない**",
+              "observed": {
+                "file": "src/app/lin-d/page.tsx",
+                "line": 26,
+                "component": "LinD",
+                "expr": "String(bag[f])",
+                "transformed": true,
+                "literalPaths": 0,
+                "untracked": [],
+                "outcome": "candidates",
+                "candidates": [
+                  {
+                    "key": "poc.listings.code",
+                    "via": "anyfield",
+                    "note": "キーが動的なため、この SQL の全列が候補"
+                  },
+                  {
+                    "key": "poc.listings.region",
+                    "via": "anyfield",
+                    "note": "キーが動的なため、この SQL の全列が候補"
+                  },
+                  {
+                    "key": "poc.listings.plan",
+                    "via": "anyfield",
+                    "note": "キーが動的なため、この SQL の全列が候補"
+                  },
+                  {
+                    "key": "poc.listings.scale",
+                    "via": "anyfield",
+                    "note": "キーが動的なため、この SQL の全列が候補"
+                  }
+                ],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "候補が 4 件ある",
+                  "加工（連結・変換）を通っている",
+                  "参照のキーが動的で、どの列かが決まらない"
+                ],
+                "trail": [
+                  "pool.query(…) の結果（src/app/lin-d/page.tsx:17）",
+                  ".rows を参照",
+                  "[0] を参照",
+                  "[f] を参照（キーが動的）",
+                  "String() を通している"
+                ]
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "candidates-correct",
+              "detail": "候補 4 件（正解 3 件を含む）",
+              "overclaimed": false,
+              "underclaimed": false
+            },
+            {
+              "field": "d-same-name-a",
+              "difficulty": 2,
+              "truth": [
+                "poc.listings.code"
+              ],
+              "conclusiveExpected": true,
+              "why": "`row` という同名の変数が別の map にもある。こちらは poc.listings の SQL",
+              "observed": {
+                "file": "src/app/lin-d/page.tsx",
+                "line": 31,
+                "component": "LinD",
+                "expr": "row.code",
+                "transformed": false,
+                "literalPaths": 0,
+                "untracked": [],
+                "outcome": "confirmed",
+                "candidates": [
+                  {
+                    "key": "poc.listings.code",
+                    "via": "field",
+                    "note": null
+                  }
+                ],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "参照の連鎖が1列に決まり、加工も分岐も無い"
+                ],
+                "trail": [
+                  "pool.query(…) の結果（src/app/lin-d/page.tsx:19）",
+                  ".rows を参照",
+                  "a.rows.map の要素（src/app/lin-d/page.tsx:30）",
+                  ".code を参照"
+                ]
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "correct-single",
+              "detail": "poc.listings.code",
+              "overclaimed": false,
+              "underclaimed": false
+            },
+            {
+              "field": "d-same-name-b",
+              "difficulty": 2,
+              "truth": [
+                "poc.regions.name"
+              ],
+              "conclusiveExpected": true,
+              "why": "同名の `row` だが、こちらは poc.regions の SQL。**取り違えたら誤答**",
+              "observed": {
+                "file": "src/app/lin-d/page.tsx",
+                "line": 36,
+                "component": "LinD",
+                "expr": "row.name",
+                "transformed": false,
+                "literalPaths": 0,
+                "untracked": [],
+                "outcome": "confirmed",
+                "candidates": [
+                  {
+                    "key": "poc.regions.name",
+                    "via": "field",
+                    "note": null
+                  }
+                ],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "参照の連鎖が1列に決まり、加工も分岐も無い"
+                ],
+                "trail": [
+                  "pool.query(…) の結果（src/app/lin-d/page.tsx:20）",
+                  ".rows を参照",
+                  "b.rows.map の要素（src/app/lin-d/page.tsx:35）",
+                  ".name を参照"
+                ]
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "correct-single",
+              "detail": "poc.regions.name",
+              "overclaimed": false,
+              "underclaimed": false
+            }
+          ],
+          "pass": true
+        },
+        {
+          "case": "E",
+          "page": "/lin-e",
+          "label": "条件分岐",
+          "note": "別の列になる分岐／固定値になる分岐／固定値しか描かない分岐",
+          "supplementary": false,
+          "sites": [
+            {
+              "field": "e-either",
+              "difficulty": 3,
+              "truth": [
+                "poc.listings.region",
+                "poc.listings.code"
+              ],
+              "conclusiveExpected": false,
+              "why": "条件で region か code のどちらかになる。**実行時にしか決まらない**",
+              "observed": {
+                "file": "src/app/lin-e/page.tsx",
+                "line": 24,
+                "component": "LinE",
+                "expr": "either",
+                "transformed": false,
+                "literalPaths": 0,
+                "untracked": [],
+                "outcome": "candidates",
+                "candidates": [
+                  {
+                    "key": "poc.listings.region",
+                    "via": "field",
+                    "note": null
+                  },
+                  {
+                    "key": "poc.listings.code",
+                    "via": "field",
+                    "note": null
+                  }
+                ],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "候補が 2 件ある"
+                ],
+                "trail": [
+                  "pool.query(…) の結果（src/app/lin-e/page.tsx:17）",
+                  ".rows を参照",
+                  "[0] を参照",
+                  ".region を参照"
+                ]
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "candidates-correct",
+              "detail": "候補 2 件（正解 2 件を含む）",
+              "overclaimed": false,
+              "underclaimed": false
+            },
+            {
+              "field": "e-orconst",
+              "difficulty": 3,
+              "truth": [
+                "poc.listings.region"
+              ],
+              "conclusiveExpected": false,
+              "why": "region か固定値 \"未設定\"。固定値になる経路があるので確定にできない",
+              "observed": {
+                "file": "src/app/lin-e/page.tsx",
+                "line": 25,
+                "component": "LinE",
+                "expr": "orConst",
+                "transformed": false,
+                "literalPaths": 1,
+                "untracked": [],
+                "outcome": "candidates",
+                "candidates": [
+                  {
+                    "key": "poc.listings.region",
+                    "via": "field",
+                    "note": null
+                  }
+                ],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "固定値になる経路がある"
+                ],
+                "trail": [
+                  "pool.query(…) の結果（src/app/lin-e/page.tsx:17）",
+                  ".rows を参照",
+                  "[0] を参照",
+                  ".region を参照"
+                ]
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "candidates-correct",
+              "detail": "候補 1 件（正解 1 件を含む）",
+              "overclaimed": false,
+              "underclaimed": false
+            },
+            {
+              "field": "e-inline",
+              "difficulty": 4,
+              "truth": [],
+              "conclusiveExpected": false,
+              "why": "**条件の判定に plan を使うが、描くのは固定値だけである。** plan を由来にしたら誤答である",
+              "observed": {
+                "file": "src/app/lin-e/page.tsx",
+                "line": 26,
+                "component": "LinE",
+                "expr": "row.plan === '標準プラン' ? '標準' : '拡張'",
+                "transformed": false,
+                "literalPaths": 2,
+                "untracked": [],
+                "outcome": "none",
+                "candidates": [],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "候補なし"
+                ],
+                "trail": []
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "refused-correct",
+              "detail": "候補を出さなかった",
+              "overclaimed": false,
+              "underclaimed": false
+            }
+          ],
+          "pass": true
+        },
+        {
+          "case": "F",
+          "page": "/lin-f",
+          "label": "RSC 直接取得（同一／子コンポーネント）",
+          "note": "1ページに2本の SQL。親は poc.listings、子は poc.regions",
+          "supplementary": false,
+          "sites": [
+            {
+              "field": "f-own",
+              "difficulty": 1,
+              "truth": [
+                "poc.listings.code"
+              ],
+              "conclusiveExpected": true,
+              "why": "同じ Server Component が取得して描く",
+              "observed": {
+                "file": "src/app/lin-f/page.tsx",
+                "line": 20,
+                "component": "LinF",
+                "expr": "row.code",
+                "transformed": false,
+                "literalPaths": 0,
+                "untracked": [],
+                "outcome": "confirmed",
+                "candidates": [
+                  {
+                    "key": "poc.listings.code",
+                    "via": "field",
+                    "note": null
+                  }
+                ],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "参照の連鎖が1列に決まり、加工も分岐も無い"
+                ],
+                "trail": [
+                  "pool.query(…) の結果（src/app/lin-f/page.tsx:15）",
+                  ".rows を参照",
+                  "[0] を参照",
+                  ".code を参照"
+                ]
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "correct-single",
+              "detail": "poc.listings.code",
+              "overclaimed": false,
+              "underclaimed": false
+            },
+            {
+              "field": "f-child",
+              "difficulty": 1,
+              "truth": [
+                "poc.regions.name"
+              ],
+              "conclusiveExpected": true,
+              "why": "子の Server Component が自分で取得して、加工せずに描く。**親の SQL（poc.listings）と混同したら誤答**",
+              "observed": {
+                "file": "src/components/lin/LinFChild.tsx",
+                "line": 13,
+                "component": "LinFChild",
+                "expr": "row.name",
+                "transformed": false,
+                "literalPaths": 0,
+                "untracked": [],
+                "outcome": "confirmed",
+                "candidates": [
+                  {
+                    "key": "poc.regions.name",
+                    "via": "field",
+                    "note": null
+                  }
+                ],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "参照の連鎖が1列に決まり、加工も分岐も無い"
+                ],
+                "trail": [
+                  "pool.query(…) の結果（src/components/lin/LinFChild.tsx:9）",
+                  ".rows を参照",
+                  "[0] を参照",
+                  ".name を参照"
+                ]
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "correct-single",
+              "detail": "poc.regions.name",
+              "overclaimed": false,
+              "underclaimed": false
+            },
+            {
+              "field": "f-child-cast",
+              "difficulty": 3,
+              "truth": [
+                "poc.regions.name"
+              ],
+              "conclusiveExpected": false,
+              "why": "同じ列を String() で型変換して描く。由来は1列に決まるが、**型変換も加工として扱うので確定にしない**（安全側の取りこぼし）",
+              "observed": {
+                "file": "src/components/lin/LinFChild.tsx",
+                "line": 14,
+                "component": "LinFChild",
+                "expr": "String(row.name)",
+                "transformed": true,
+                "literalPaths": 0,
+                "untracked": [],
+                "outcome": "candidates",
+                "candidates": [
+                  {
+                    "key": "poc.regions.name",
+                    "via": "field",
+                    "note": null
+                  }
+                ],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "加工（連結・変換）を通っている"
+                ],
+                "trail": [
+                  "pool.query(…) の結果（src/components/lin/LinFChild.tsx:9）",
+                  ".rows を参照",
+                  "[0] を参照",
+                  ".name を参照",
+                  "String() を通している"
+                ]
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "candidates-correct",
+              "detail": "候補 1 件（正解 1 件を含む）",
+              "overclaimed": false,
+              "underclaimed": false
+            }
+          ],
+          "pass": true
+        },
+        {
+          "case": "G",
+          "page": "/lin-g",
+          "label": "否定例（同一コンポーネント内の無関係なSQL）",
+          "note": "SQL は実行するが、結果はどの表示値にも使っていない",
+          "supplementary": false,
+          "sites": [
+            {
+              "field": "g-env",
+              "difficulty": 4,
+              "truth": [],
+              "conclusiveExpected": false,
+              "why": "環境変数由来。同じコンポーネントに SQL があるが無関係である",
+              "observed": {
+                "file": "src/app/lin-g/page.tsx",
+                "line": 25,
+                "component": "LinG",
+                "expr": "label",
+                "transformed": false,
+                "literalPaths": 1,
+                "untracked": [
+                  "no-initializer",
+                  "no-initializer"
+                ],
+                "outcome": "none",
+                "candidates": [],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "候補なし"
+                ],
+                "trail": [
+                  "process に初期化子が無い",
+                  ".env を参照",
+                  ".POC04_LABEL を参照"
+                ]
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "refused-correct",
+              "detail": "候補を出さなかった",
+              "overclaimed": false,
+              "underclaimed": false
+            },
+            {
+              "field": "g-literal",
+              "difficulty": 4,
+              "truth": [],
+              "conclusiveExpected": false,
+              "why": "JSX に直書きされた文字列。式が無いので表示箇所として現れない（02a PathKind = static-literal）",
+              "observed": null,
+              "componentOk": null,
+              "fileOk": null,
+              "bucket": "refused-correct",
+              "detail": "JSX に式が無いため表示箇所にならない（static-literal）",
+              "overclaimed": false,
+              "underclaimed": false
+            },
+            {
+              "field": "g-computed",
+              "difficulty": 4,
+              "truth": [],
+              "conclusiveExpected": false,
+              "why": "定数の計算。DB を一切通らない",
+              "observed": {
+                "file": "src/app/lin-g/page.tsx",
+                "line": 27,
+                "component": "LinG",
+                "expr": "String(2026 - 1991)",
+                "transformed": true,
+                "literalPaths": 2,
+                "untracked": [],
+                "outcome": "none",
+                "candidates": [],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "候補なし"
+                ],
+                "trail": []
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "refused-correct",
+              "detail": "候補を出さなかった",
+              "overclaimed": false,
+              "underclaimed": false
+            },
+            {
+              "field": "g-shadow",
+              "difficulty": 4,
+              "truth": [],
+              "conclusiveExpected": false,
+              "why": "**局所変数の名前が SQL の列名 region と同じ。** 名前の一致で対応づけたら誤答になる罠である",
+              "observed": {
+                "file": "src/app/lin-g/page.tsx",
+                "line": 28,
+                "component": "LinG",
+                "expr": "region",
+                "transformed": false,
+                "literalPaths": 1,
+                "untracked": [],
+                "outcome": "none",
+                "candidates": [],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "候補なし"
+                ],
+                "trail": []
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "refused-correct",
+              "detail": "候補を出さなかった",
+              "overclaimed": false,
+              "underclaimed": false
+            }
+          ],
+          "pass": true
+        },
+        {
+          "case": "X",
+          "page": "/lin-x",
+          "label": "補助: 不完全なソース解析",
+          "note": "ソースだけでは列構成が決まらない3つ",
+          "supplementary": true,
+          "sites": [
+            {
+              "field": "x-dynamic",
+              "difficulty": 2,
+              "truth": [
+                "poc.listings.code"
+              ],
+              "conclusiveExpected": true,
+              "why": "SQL をソース上で組み立てている（リテラルが無い）。**実測された SQL 文があれば列は決まる**（01b Q-04.2 C-7）",
+              "observed": {
+                "file": "src/app/lin-x/page.tsx",
+                "line": 25,
+                "component": "LinX",
+                "expr": "dyn.rows[0].code",
+                "transformed": false,
+                "literalPaths": 0,
+                "untracked": [],
+                "outcome": "confirmed",
+                "candidates": [
+                  {
+                    "key": "poc.listings.code",
+                    "via": "field",
+                    "note": null
+                  }
+                ],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "参照の連鎖が1列に決まり、加工も分岐も無い"
+                ],
+                "trail": [
+                  "pool.query(…) の結果（src/app/lin-x/page.tsx:20）",
+                  ".rows を参照",
+                  "[0] を参照",
+                  ".code を参照"
+                ]
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "correct-single",
+              "detail": "poc.listings.code",
+              "overclaimed": false,
+              "underclaimed": false
+            },
+            {
+              "field": "x-star",
+              "difficulty": 3,
+              "truth": [
+                "poc.regions.name"
+              ],
+              "conclusiveExpected": false,
+              "why": "SELECT * のため列を特定できない。**テーブルまでなら決まる**（01b Q-04.5 代替1）",
+              "observed": {
+                "file": "src/app/lin-x/page.tsx",
+                "line": 26,
+                "component": "LinX",
+                "expr": "String(star.rows[0].name)",
+                "transformed": true,
+                "literalPaths": 0,
+                "untracked": [],
+                "outcome": "table-only",
+                "candidates": [],
+                "tableCandidates": [
+                  {
+                    "key": "poc.regions",
+                    "why": "select-star"
+                  }
+                ],
+                "unresolved": [
+                  {
+                    "why": "select-star",
+                    "text": "SELECT * のため、実行された SQL からも列を特定できない"
+                  }
+                ],
+                "reasons": [
+                  "列は決まらないが、参照している取得のテーブルは決まる",
+                  "SELECT * のため、実行された SQL からも列を特定できない"
+                ],
+                "trail": []
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "table-only-correct",
+              "detail": "テーブルまで: poc.regions",
+              "overclaimed": false,
+              "underclaimed": false
+            },
+            {
+              "field": "x-outside",
+              "difficulty": 4,
+              "truth": [],
+              "conclusiveExpected": false,
+              "why": "解析範囲（src/）の外の関数が返す値。候補を出さないのが正解",
+              "observed": {
+                "file": "src/app/lin-x/page.tsx",
+                "line": 27,
+                "component": "LinX",
+                "expr": "outsideLabel()",
+                "transformed": false,
+                "literalPaths": 0,
+                "untracked": [
+                  "call-not-whitelisted:outsideLabel"
+                ],
+                "outcome": "none",
+                "candidates": [],
+                "tableCandidates": [],
+                "unresolved": [],
+                "reasons": [
+                  "候補なし"
+                ],
+                "trail": [
+                  "outsideLabel() の本体を追っていない（引数を捨てる関数がありうるため）"
+                ]
+              },
+              "componentOk": true,
+              "fileOk": true,
+              "bucket": "refused-correct",
+              "detail": "候補を出さなかった",
+              "overclaimed": false,
+              "underclaimed": false
+            }
+          ],
+          "pass": true
+        }
+      ],
+      "clientFetch": [
+        {
+          "field": "region",
+          "page": "/listings",
+          "truth": [
+            "poc.listings.region"
+          ],
+          "why": "useState / fetch の応答を経由する。**静的解析では応答の中身に型しか無い**",
+          "outcome": "none",
+          "candidates": [],
+          "untracked": [
+            "call-not-whitelisted:useState"
+          ],
+          "bucket": "missed",
+          "detail": "候補を出せなかった",
+          "overclaimed": false,
+          "underclaimed": false
+        }
+      ],
+      "measuredSql": [
+        {
+          "page": "/lin-a",
+          "spanId": "4e0650e9c2816ed4",
+          "scope": "@opentelemetry/instrumentation-pg",
+          "depthFromRender": 1,
+          "durationMs": 3.64,
+          "parseOk": true,
+          "selectOk": true,
+          "selectStar": false,
+          "selectError": null,
+          "tables": [
+            {
+              "schema": "poc",
+              "name": "listings"
+            }
+          ],
+          "items": [
+            {
+              "key": "id",
+              "kind": "column",
+              "column": "id",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "id"
+              }
+            },
+            {
+              "key": "region",
+              "kind": "column",
+              "column": "region",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "region"
+              }
+            }
+          ],
+          "projectionsFromColumnList": [
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "id",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "region",
+              "inferredQualifier": true
+            }
+          ],
+          "unresolved": [],
+          "attribution": {
+            "file": "src/app/lin-a/page.tsx",
+            "line": 12,
+            "component": "LinA",
+            "verified": true,
+            "sourceLine": "const r = await pool.query('SELECT id, region FROM poc.listings ORDER BY id LIMIT 3');",
+            "reason": null
+          }
+        },
+        {
+          "page": "/lin-b",
+          "spanId": "0d85759b389cf58a",
+          "scope": "@opentelemetry/instrumentation-pg",
+          "depthFromRender": 1,
+          "durationMs": 3.7,
+          "parseOk": true,
+          "selectOk": true,
+          "selectStar": false,
+          "selectError": null,
+          "tables": [
+            {
+              "schema": "poc",
+              "name": "listings"
+            }
+          ],
+          "items": [
+            {
+              "key": "id",
+              "kind": "column",
+              "column": "id",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "id"
+              }
+            },
+            {
+              "key": "code",
+              "kind": "column",
+              "column": "code",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "code"
+              }
+            },
+            {
+              "key": "plan",
+              "kind": "column",
+              "column": "plan",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "plan"
+              }
+            }
+          ],
+          "projectionsFromColumnList": [
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "id",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "code",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "plan",
+              "inferredQualifier": true
+            }
+          ],
+          "unresolved": [],
+          "attribution": {
+            "file": "src/app/lin-b/page.tsx",
+            "line": 19,
+            "component": "LinB",
+            "verified": true,
+            "sourceLine": "const r = await pool.query('SELECT id, code, plan FROM poc.listings ORDER BY id LIMIT 2');",
+            "reason": null
+          }
+        },
+        {
+          "page": "/lin-b",
+          "spanId": "67559be099ed0088",
+          "scope": "@opentelemetry/instrumentation-pg",
+          "depthFromRender": 1,
+          "durationMs": 1.41,
+          "parseOk": true,
+          "selectOk": true,
+          "selectStar": false,
+          "selectError": null,
+          "tables": [
+            {
+              "schema": "poc",
+              "name": "listings"
+            }
+          ],
+          "items": [
+            {
+              "key": "listing_code",
+              "kind": "column",
+              "column": "code",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "code"
+              }
+            }
+          ],
+          "projectionsFromColumnList": [
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "code",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "id",
+              "inferredQualifier": true
+            }
+          ],
+          "unresolved": [],
+          "attribution": {
+            "file": "src/app/lin-b/page.tsx",
+            "line": 20,
+            "component": "LinB",
+            "verified": true,
+            "sourceLine": "const al = await pool.query('SELECT code AS listing_code FROM poc.listings ORDER BY id LIMIT 1');",
+            "reason": null
+          }
+        },
+        {
+          "page": "/lin-c",
+          "spanId": "5b0bf980d3c49926",
+          "scope": "@opentelemetry/instrumentation-pg",
+          "depthFromRender": 1,
+          "durationMs": 4.55,
+          "parseOk": true,
+          "selectOk": true,
+          "selectStar": false,
+          "selectError": null,
+          "tables": [
+            {
+              "schema": "poc",
+              "name": "listings"
+            }
+          ],
+          "items": [
+            {
+              "key": "id",
+              "kind": "column",
+              "column": "id",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "id"
+              }
+            },
+            {
+              "key": "code",
+              "kind": "column",
+              "column": "code",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "code"
+              }
+            },
+            {
+              "key": "region",
+              "kind": "column",
+              "column": "region",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "region"
+              }
+            }
+          ],
+          "projectionsFromColumnList": [
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "id",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "code",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "region",
+              "inferredQualifier": true
+            }
+          ],
+          "unresolved": [],
+          "attribution": {
+            "file": "src/app/lin-c/page.tsx",
+            "line": 13,
+            "component": "LinC",
+            "verified": true,
+            "sourceLine": "const r = await pool.query('SELECT id, code, region FROM poc.listings ORDER BY id LIMIT 2');",
+            "reason": null
+          }
+        },
+        {
+          "page": "/lin-d",
+          "spanId": "530510acad5b7b91",
+          "scope": "@opentelemetry/instrumentation-pg",
+          "depthFromRender": 1,
+          "durationMs": 4.97,
+          "parseOk": true,
+          "selectOk": true,
+          "selectStar": false,
+          "selectError": null,
+          "tables": [
+            {
+              "schema": "poc",
+              "name": "listings"
+            }
+          ],
+          "items": [
+            {
+              "key": "code",
+              "kind": "column",
+              "column": "code",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "code"
+              }
+            },
+            {
+              "key": "region",
+              "kind": "column",
+              "column": "region",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "region"
+              }
+            },
+            {
+              "key": "plan",
+              "kind": "column",
+              "column": "plan",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "plan"
+              }
+            },
+            {
+              "key": "scale",
+              "kind": "column",
+              "column": "scale",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "scale"
+              }
+            }
+          ],
+          "projectionsFromColumnList": [
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "code",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "region",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "plan",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "scale",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "id",
+              "inferredQualifier": true
+            }
+          ],
+          "unresolved": [],
+          "attribution": {
+            "file": "src/app/lin-d/page.tsx",
+            "line": 17,
+            "component": "LinD",
+            "verified": true,
+            "sourceLine": "const wide = await pool.query('SELECT code, region, plan, scale FROM poc.listings ORDER BY id LIMIT 1');",
+            "reason": null
+          }
+        },
+        {
+          "page": "/lin-d",
+          "spanId": "41027f48120788bd",
+          "scope": "@opentelemetry/instrumentation-pg",
+          "depthFromRender": 1,
+          "durationMs": 1.16,
+          "parseOk": true,
+          "selectOk": true,
+          "selectStar": false,
+          "selectError": null,
+          "tables": [
+            {
+              "schema": "poc",
+              "name": "listings"
+            }
+          ],
+          "items": [
+            {
+              "key": "code",
+              "kind": "column",
+              "column": "code",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "code"
+              }
+            }
+          ],
+          "projectionsFromColumnList": [
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "code",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "id",
+              "inferredQualifier": true
+            }
+          ],
+          "unresolved": [],
+          "attribution": {
+            "file": "src/app/lin-d/page.tsx",
+            "line": 19,
+            "component": "LinD",
+            "verified": true,
+            "sourceLine": "const a = await pool.query('SELECT code FROM poc.listings ORDER BY id LIMIT 1');",
+            "reason": null
+          }
+        },
+        {
+          "page": "/lin-d",
+          "spanId": "21a1f1275bfacb97",
+          "scope": "@opentelemetry/instrumentation-pg",
+          "depthFromRender": 1,
+          "durationMs": 1.05,
+          "parseOk": true,
+          "selectOk": true,
+          "selectStar": false,
+          "selectError": null,
+          "tables": [
+            {
+              "schema": "poc",
+              "name": "regions"
+            }
+          ],
+          "items": [
+            {
+              "key": "name",
+              "kind": "column",
+              "column": "name",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "regions",
+                "column": "name"
+              }
+            }
+          ],
+          "projectionsFromColumnList": [
+            {
+              "schema": "poc",
+              "table": "regions",
+              "column": "name",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "regions",
+              "column": "id",
+              "inferredQualifier": true
+            }
+          ],
+          "unresolved": [],
+          "attribution": {
+            "file": "src/app/lin-d/page.tsx",
+            "line": 20,
+            "component": "LinD",
+            "verified": true,
+            "sourceLine": "const b = await pool.query('SELECT name FROM poc.regions ORDER BY id LIMIT 1');",
+            "reason": null
+          }
+        },
+        {
+          "page": "/lin-e",
+          "spanId": "e08f489976108976",
+          "scope": "@opentelemetry/instrumentation-pg",
+          "depthFromRender": 1,
+          "durationMs": 4.6,
+          "parseOk": true,
+          "selectOk": true,
+          "selectStar": false,
+          "selectError": null,
+          "tables": [
+            {
+              "schema": "poc",
+              "name": "listings"
+            }
+          ],
+          "items": [
+            {
+              "key": "id",
+              "kind": "column",
+              "column": "id",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "id"
+              }
+            },
+            {
+              "key": "code",
+              "kind": "column",
+              "column": "code",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "code"
+              }
+            },
+            {
+              "key": "region",
+              "kind": "column",
+              "column": "region",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "region"
+              }
+            },
+            {
+              "key": "plan",
+              "kind": "column",
+              "column": "plan",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "plan"
+              }
+            }
+          ],
+          "projectionsFromColumnList": [
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "id",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "code",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "region",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "plan",
+              "inferredQualifier": true
+            }
+          ],
+          "unresolved": [],
+          "attribution": {
+            "file": "src/app/lin-e/page.tsx",
+            "line": 17,
+            "component": "LinE",
+            "verified": true,
+            "sourceLine": "const r = await pool.query('SELECT id, code, region, plan FROM poc.listings ORDER BY id LIMIT 2');",
+            "reason": null
+          }
+        },
+        {
+          "page": "/lin-f",
+          "spanId": "6fc9d43ec453e4bc",
+          "scope": "@opentelemetry/instrumentation-pg",
+          "depthFromRender": 1,
+          "durationMs": 4.68,
+          "parseOk": true,
+          "selectOk": true,
+          "selectStar": false,
+          "selectError": null,
+          "tables": [
+            {
+              "schema": "poc",
+              "name": "listings"
+            }
+          ],
+          "items": [
+            {
+              "key": "id",
+              "kind": "column",
+              "column": "id",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "id"
+              }
+            },
+            {
+              "key": "code",
+              "kind": "column",
+              "column": "code",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "code"
+              }
+            }
+          ],
+          "projectionsFromColumnList": [
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "id",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "code",
+              "inferredQualifier": true
+            }
+          ],
+          "unresolved": [],
+          "attribution": {
+            "file": "src/app/lin-f/page.tsx",
+            "line": 15,
+            "component": "LinF",
+            "verified": true,
+            "sourceLine": "const r = await pool.query('SELECT id, code FROM poc.listings ORDER BY id LIMIT 2');",
+            "reason": null
+          }
+        },
+        {
+          "page": "/lin-f",
+          "spanId": "3aae8755f090d021",
+          "scope": "@opentelemetry/instrumentation-pg",
+          "depthFromRender": 1,
+          "durationMs": 2.42,
+          "parseOk": true,
+          "selectOk": true,
+          "selectStar": false,
+          "selectError": null,
+          "tables": [
+            {
+              "schema": "poc",
+              "name": "regions"
+            }
+          ],
+          "items": [
+            {
+              "key": "name",
+              "kind": "column",
+              "column": "name",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "regions",
+                "column": "name"
+              }
+            }
+          ],
+          "projectionsFromColumnList": [
+            {
+              "schema": "poc",
+              "table": "regions",
+              "column": "name",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "regions",
+              "column": "id",
+              "inferredQualifier": true
+            }
+          ],
+          "unresolved": [],
+          "attribution": {
+            "file": "src/components/lin/LinFChild.tsx",
+            "line": 9,
+            "component": "LinFChild",
+            "verified": true,
+            "sourceLine": "const r = await pool.query('SELECT name FROM poc.regions ORDER BY id LIMIT 1');",
+            "reason": null
+          }
+        },
+        {
+          "page": "/lin-g",
+          "spanId": "18452f3ba65b56cd",
+          "scope": "@opentelemetry/instrumentation-pg",
+          "depthFromRender": 1,
+          "durationMs": 4.36,
+          "parseOk": true,
+          "selectOk": true,
+          "selectStar": false,
+          "selectError": null,
+          "tables": [
+            {
+              "schema": "poc",
+              "name": "listings"
+            }
+          ],
+          "items": [
+            {
+              "key": "code",
+              "kind": "column",
+              "column": "code",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "code"
+              }
+            },
+            {
+              "key": "region",
+              "kind": "column",
+              "column": "region",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "region"
+              }
+            }
+          ],
+          "projectionsFromColumnList": [
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "code",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "region",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "id",
+              "inferredQualifier": true
+            }
+          ],
+          "unresolved": [],
+          "attribution": {
+            "file": "src/app/lin-g/page.tsx",
+            "line": 19,
+            "component": "LinG",
+            "verified": true,
+            "sourceLine": "await pool.query('SELECT code, region FROM poc.listings ORDER BY id LIMIT 1');",
+            "reason": null
+          }
+        },
+        {
+          "page": "/lin-x",
+          "spanId": "3040f036b62e5f15",
+          "scope": "@opentelemetry/instrumentation-pg",
+          "depthFromRender": 1,
+          "durationMs": 5.14,
+          "parseOk": true,
+          "selectOk": true,
+          "selectStar": false,
+          "selectError": null,
+          "tables": [
+            {
+              "schema": "poc",
+              "name": "listings"
+            }
+          ],
+          "items": [
+            {
+              "key": "id",
+              "kind": "column",
+              "column": "id",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "id"
+              }
+            },
+            {
+              "key": "code",
+              "kind": "column",
+              "column": "code",
+              "qualifier": null,
+              "resolved": {
+                "schema": "poc",
+                "table": "listings",
+                "column": "code"
+              }
+            }
+          ],
+          "projectionsFromColumnList": [
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "id",
+              "inferredQualifier": true
+            },
+            {
+              "schema": "poc",
+              "table": "listings",
+              "column": "code",
+              "inferredQualifier": true
+            }
+          ],
+          "unresolved": [],
+          "attribution": {
+            "file": "src/app/lin-x/page.tsx",
+            "line": 20,
+            "component": "LinX",
+            "verified": true,
+            "sourceLine": "const dyn = await pool.query(`SELECT id, code FROM poc.listings ORDER BY id LIMIT ${LIMIT}`);",
+            "reason": null
+          }
+        },
+        {
+          "page": "/lin-x",
+          "spanId": "99b18de2c9dd8c0a",
+          "scope": "@opentelemetry/instrumentation-pg",
+          "depthFromRender": 1,
+          "durationMs": 1.18,
+          "parseOk": true,
+          "selectOk": true,
+          "selectStar": true,
+          "selectError": null,
+          "tables": [
+            {
+              "schema": "poc",
+              "name": "regions"
+            }
+          ],
+          "items": [],
+          "projectionsFromColumnList": [
+            {
+              "schema": "poc",
+              "table": "regions",
+              "column": "id",
+              "inferredQualifier": true
+            }
+          ],
+          "unresolved": [],
+          "attribution": {
+            "file": "src/app/lin-x/page.tsx",
+            "line": 21,
+            "component": "LinX",
+            "verified": true,
+            "sourceLine": "const star = await pool.query('SELECT * FROM poc.regions ORDER BY id LIMIT 1');",
+            "reason": null
+          }
+        }
+      ],
+      "staticQueries": [
+        {
+          "id": "q1",
+          "file": "src/app/api/listings/[id]/route.ts",
+          "line": 11,
+          "col": 25,
+          "method": "findUnique",
+          "shape": "orm",
+          "sqlInSource": null,
+          "sqlIsDynamic": true,
+          "receiver": "prisma.listing"
+        },
+        {
+          "id": "q2",
+          "file": "src/app/api/listings/[id]/route.ts",
+          "line": 15,
+          "col": 23,
+          "method": "aggregate",
+          "shape": "orm",
+          "sqlInSource": null,
+          "sqlIsDynamic": true,
+          "receiver": "prisma.listingView"
+        },
+        {
+          "id": "q3",
+          "file": "src/app/api/listings/route.ts",
+          "line": 6,
+          "col": 22,
+          "method": "findMany",
+          "shape": "orm",
+          "sqlInSource": null,
+          "sqlIsDynamic": true,
+          "receiver": "prisma.listing"
+        },
+        {
+          "id": "q4",
+          "file": "src/app/api/stats/route.ts",
+          "line": 7,
+          "col": 26,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT region, count(*) AS n FROM poc.listings GROUP BY region ORDER BY region",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q5",
+          "file": "src/app/lin-a/page.tsx",
+          "line": 12,
+          "col": 19,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT id, region FROM poc.listings ORDER BY id LIMIT 3",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q6",
+          "file": "src/app/lin-b/page.tsx",
+          "line": 19,
+          "col": 19,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT id, code, plan FROM poc.listings ORDER BY id LIMIT 2",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q7",
+          "file": "src/app/lin-b/page.tsx",
+          "line": 20,
+          "col": 20,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT code AS listing_code FROM poc.listings ORDER BY id LIMIT 1",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q8",
+          "file": "src/app/lin-c/page.tsx",
+          "line": 13,
+          "col": 19,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT id, code, region FROM poc.listings ORDER BY id LIMIT 2",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q9",
+          "file": "src/app/lin-d/page.tsx",
+          "line": 17,
+          "col": 22,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT code, region, plan, scale FROM poc.listings ORDER BY id LIMIT 1",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q10",
+          "file": "src/app/lin-d/page.tsx",
+          "line": 19,
+          "col": 19,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT code FROM poc.listings ORDER BY id LIMIT 1",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q11",
+          "file": "src/app/lin-d/page.tsx",
+          "line": 20,
+          "col": 19,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT name FROM poc.regions ORDER BY id LIMIT 1",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q12",
+          "file": "src/app/lin-e/page.tsx",
+          "line": 17,
+          "col": 19,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT id, code, region, plan FROM poc.listings ORDER BY id LIMIT 2",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q13",
+          "file": "src/components/lin/LinFChild.tsx",
+          "line": 9,
+          "col": 19,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT name FROM poc.regions ORDER BY id LIMIT 1",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q14",
+          "file": "src/app/lin-f/page.tsx",
+          "line": 15,
+          "col": 19,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT id, code FROM poc.listings ORDER BY id LIMIT 2",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q15",
+          "file": "src/app/lin-g/page.tsx",
+          "line": 19,
+          "col": 9,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT code, region FROM poc.listings ORDER BY id LIMIT 1",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q16",
+          "file": "src/app/lin-x/page.tsx",
+          "line": 20,
+          "col": 21,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": null,
+          "sqlIsDynamic": true,
+          "receiver": "pool"
+        },
+        {
+          "id": "q17",
+          "file": "src/app/lin-x/page.tsx",
+          "line": 21,
+          "col": 22,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT * FROM poc.regions ORDER BY id LIMIT 1",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q18",
+          "file": "src/app/rsc-db/page.tsx",
+          "line": 12,
+          "col": 19,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT id, code, plan FROM poc.listings ORDER BY id LIMIT 6",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q19",
+          "file": "src/components/ListingCount.tsx",
+          "line": 6,
+          "col": 19,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT count(*) AS n FROM poc.listings",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q20",
+          "file": "src/app/rsc-dup/page.tsx",
+          "line": 13,
+          "col": 19,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT count(*) AS n FROM poc.listings",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q21",
+          "file": "src/app/rsc-fail/page.tsx",
+          "line": 17,
+          "col": 11,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT id FROM poc.table_that_does_not_exist",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q22",
+          "file": "src/app/rsc-helper/page.tsx",
+          "line": 13,
+          "col": 19,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT scale, count(*) AS n FROM poc.listings GROUP BY scale",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q23",
+          "file": "src/app/rsc-parallel/page.tsx",
+          "line": 13,
+          "col": 5,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT count(*) AS n FROM poc.listings",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q24",
+          "file": "src/app/rsc-parallel/page.tsx",
+          "line": 14,
+          "col": 5,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT count(*) AS n FROM poc.regions",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        },
+        {
+          "id": "q25",
+          "file": "src/app/rsc-parallel/page.tsx",
+          "line": 15,
+          "col": 5,
+          "method": "query",
+          "shape": "pg",
+          "sqlInSource": "SELECT count(*) AS n FROM poc.listing_views",
+          "sqlIsDynamic": false,
+          "receiver": "pool"
+        }
+      ],
+      "join": [
+        {
+          "queryId": "q1",
+          "at": "src/app/api/listings/[id]/route.ts:11",
+          "method": "findUnique",
+          "sqlIsDynamic": true,
+          "measuredCount": 0,
+          "pages": [],
+          "why": "この呼び出しに対応する実行された SQL を観測していない"
+        },
+        {
+          "queryId": "q2",
+          "at": "src/app/api/listings/[id]/route.ts:15",
+          "method": "aggregate",
+          "sqlIsDynamic": true,
+          "measuredCount": 0,
+          "pages": [],
+          "why": "この呼び出しに対応する実行された SQL を観測していない"
+        },
+        {
+          "queryId": "q3",
+          "at": "src/app/api/listings/route.ts:6",
+          "method": "findMany",
+          "sqlIsDynamic": true,
+          "measuredCount": 0,
+          "pages": [],
+          "why": "この呼び出しに対応する実行された SQL を観測していない"
+        },
+        {
+          "queryId": "q4",
+          "at": "src/app/api/stats/route.ts:7",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 0,
+          "pages": [],
+          "why": "この呼び出しに対応する実行された SQL を観測していない"
+        },
+        {
+          "queryId": "q5",
+          "at": "src/app/lin-a/page.tsx:12",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 1,
+          "pages": [
+            "/lin-a"
+          ],
+          "why": null
+        },
+        {
+          "queryId": "q6",
+          "at": "src/app/lin-b/page.tsx:19",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 1,
+          "pages": [
+            "/lin-b"
+          ],
+          "why": null
+        },
+        {
+          "queryId": "q7",
+          "at": "src/app/lin-b/page.tsx:20",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 1,
+          "pages": [
+            "/lin-b"
+          ],
+          "why": null
+        },
+        {
+          "queryId": "q8",
+          "at": "src/app/lin-c/page.tsx:13",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 1,
+          "pages": [
+            "/lin-c"
+          ],
+          "why": null
+        },
+        {
+          "queryId": "q9",
+          "at": "src/app/lin-d/page.tsx:17",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 1,
+          "pages": [
+            "/lin-d"
+          ],
+          "why": null
+        },
+        {
+          "queryId": "q10",
+          "at": "src/app/lin-d/page.tsx:19",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 1,
+          "pages": [
+            "/lin-d"
+          ],
+          "why": null
+        },
+        {
+          "queryId": "q11",
+          "at": "src/app/lin-d/page.tsx:20",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 1,
+          "pages": [
+            "/lin-d"
+          ],
+          "why": null
+        },
+        {
+          "queryId": "q12",
+          "at": "src/app/lin-e/page.tsx:17",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 1,
+          "pages": [
+            "/lin-e"
+          ],
+          "why": null
+        },
+        {
+          "queryId": "q13",
+          "at": "src/components/lin/LinFChild.tsx:9",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 1,
+          "pages": [
+            "/lin-f"
+          ],
+          "why": null
+        },
+        {
+          "queryId": "q14",
+          "at": "src/app/lin-f/page.tsx:15",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 1,
+          "pages": [
+            "/lin-f"
+          ],
+          "why": null
+        },
+        {
+          "queryId": "q15",
+          "at": "src/app/lin-g/page.tsx:19",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 1,
+          "pages": [
+            "/lin-g"
+          ],
+          "why": null
+        },
+        {
+          "queryId": "q16",
+          "at": "src/app/lin-x/page.tsx:20",
+          "method": "query",
+          "sqlIsDynamic": true,
+          "measuredCount": 1,
+          "pages": [
+            "/lin-x"
+          ],
+          "why": null
+        },
+        {
+          "queryId": "q17",
+          "at": "src/app/lin-x/page.tsx:21",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 1,
+          "pages": [
+            "/lin-x"
+          ],
+          "why": null
+        },
+        {
+          "queryId": "q18",
+          "at": "src/app/rsc-db/page.tsx:12",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 0,
+          "pages": [],
+          "why": "この呼び出しに対応する実行された SQL を観測していない"
+        },
+        {
+          "queryId": "q19",
+          "at": "src/components/ListingCount.tsx:6",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 0,
+          "pages": [],
+          "why": "この呼び出しに対応する実行された SQL を観測していない"
+        },
+        {
+          "queryId": "q20",
+          "at": "src/app/rsc-dup/page.tsx:13",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 0,
+          "pages": [],
+          "why": "この呼び出しに対応する実行された SQL を観測していない"
+        },
+        {
+          "queryId": "q21",
+          "at": "src/app/rsc-fail/page.tsx:17",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 0,
+          "pages": [],
+          "why": "この呼び出しに対応する実行された SQL を観測していない"
+        },
+        {
+          "queryId": "q22",
+          "at": "src/app/rsc-helper/page.tsx:13",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 0,
+          "pages": [],
+          "why": "この呼び出しに対応する実行された SQL を観測していない"
+        },
+        {
+          "queryId": "q23",
+          "at": "src/app/rsc-parallel/page.tsx:13",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 0,
+          "pages": [],
+          "why": "この呼び出しに対応する実行された SQL を観測していない"
+        },
+        {
+          "queryId": "q24",
+          "at": "src/app/rsc-parallel/page.tsx:14",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 0,
+          "pages": [],
+          "why": "この呼び出しに対応する実行された SQL を観測していない"
+        },
+        {
+          "queryId": "q25",
+          "at": "src/app/rsc-parallel/page.tsx:15",
+          "method": "query",
+          "sqlIsDynamic": false,
+          "measuredCount": 0,
+          "pages": [],
+          "why": "この呼び出しに対応する実行された SQL を観測していない"
+        }
+      ],
+      "unannotatedSites": [
+        {
+          "file": "src/components/RegionBadge.tsx",
+          "line": 8,
+          "component": "RegionBadge",
+          "expr": "region",
+          "outcome": "none"
+        },
+        {
+          "file": "src/components/ListingCard.tsx",
+          "line": 14,
+          "component": "ListingCard",
+          "expr": "listing.code",
+          "outcome": "none"
+        },
+        {
+          "file": "src/app/cards-rsc/page.tsx",
+          "line": 22,
+          "component": "CardsRsc",
+          "expr": "s.code",
+          "outcome": "none"
+        },
+        {
+          "file": "src/components/FetchButton.tsx",
+          "line": 14,
+          "component": "FetchButton",
+          "expr": "label",
+          "outcome": "none"
+        },
+        {
+          "file": "src/app/flows/page.tsx",
+          "line": 106,
+          "component": "Flows",
+          "expr": "done.join(' ')",
+          "outcome": "none"
+        },
+        {
+          "file": "src/app/layout.tsx",
+          "line": 7,
+          "component": "RootLayout",
+          "expr": "children",
+          "outcome": "none"
+        },
+        {
+          "file": "src/app/listings/[id]/page.tsx",
+          "line": 11,
+          "component": "Detail",
+          "expr": "id",
+          "outcome": "none"
+        },
+        {
+          "file": "src/app/listings/[id]/page.tsx",
+          "line": 12,
+          "component": "Detail",
+          "expr": "data ? JSON.stringify(data, null, 2) : '…'",
+          "outcome": "none"
+        },
+        {
+          "file": "src/app/listings/page.tsx",
+          "line": 16,
+          "component": "Listings",
+          "expr": "r.code",
+          "outcome": "none"
+        },
+        {
+          "file": "src/app/page.tsx",
+          "line": 12,
+          "component": "Home",
+          "expr": "r.region",
+          "outcome": "none"
+        },
+        {
+          "file": "src/app/page.tsx",
+          "line": 12,
+          "component": "Home",
+          "expr": "r.n",
+          "outcome": "none"
+        }
+      ],
+      "outOfScopeSites": [
+        {
+          "field": "code",
+          "file": "src/app/rsc-db/page.tsx",
+          "line": 19,
+          "component": "RscDb",
+          "expr": "row.code",
+          "outcome": "none",
+          "candidates": [],
+          "tableCandidates": [],
+          "note": "本PoCの正解表の対象外（他のPoCの題材ページ）。採点していない"
+        },
+        {
+          "field": "child",
+          "file": "src/components/ListingCount.tsx",
+          "line": 7,
+          "component": "ListingCount",
+          "expr": "String(r.rows[0].n)",
+          "outcome": "none",
+          "candidates": [],
+          "tableCandidates": [],
+          "note": "本PoCの正解表の対象外（他のPoCの題材ページ）。採点していない"
+        },
+        {
+          "field": "page",
+          "file": "src/app/rsc-dup/page.tsx",
+          "line": 17,
+          "component": "RscDup",
+          "expr": "String(r.rows[0].n)",
+          "outcome": "none",
+          "candidates": [],
+          "tableCandidates": [],
+          "note": "本PoCの正解表の対象外（他のPoCの題材ページ）。採点していない"
+        },
+        {
+          "field": "sql",
+          "file": "src/app/rsc-fail/page.tsx",
+          "line": 30,
+          "component": "RscFail",
+          "expr": "sqlError ? 'sql-failed' : 'sql-ok'",
+          "outcome": "none",
+          "candidates": [],
+          "tableCandidates": [],
+          "note": "本PoCの正解表の対象外（他のPoCの題材ページ）。採点していない"
+        },
+        {
+          "field": "fetch",
+          "file": "src/app/rsc-fail/page.tsx",
+          "line": 31,
+          "component": "RscFail",
+          "expr": "fetchError ? 'fetch-failed' : 'fetch-ok'",
+          "outcome": "none",
+          "candidates": [],
+          "tableCandidates": [],
+          "note": "本PoCの正解表の対象外（他のPoCの題材ページ）。採点していない"
+        },
+        {
+          "field": "n",
+          "file": "src/app/rsc-helper/page.tsx",
+          "line": 22,
+          "component": "RscHelper",
+          "expr": "String(n)",
+          "outcome": "none",
+          "candidates": [],
+          "tableCandidates": [],
+          "note": "本PoCの正解表の対象外（他のPoCの題材ページ）。採点していない"
+        },
+        {
+          "field": "n1",
+          "file": "src/app/rsc-parallel/page.tsx",
+          "line": 21,
+          "component": "RscParallel",
+          "expr": "String(a.rows[0].n)",
+          "outcome": "none",
+          "candidates": [],
+          "tableCandidates": [],
+          "note": "本PoCの正解表の対象外（他のPoCの題材ページ）。採点していない"
+        },
+        {
+          "field": "n2",
+          "file": "src/app/rsc-parallel/page.tsx",
+          "line": 22,
+          "component": "RscParallel",
+          "expr": "String(b.rows[0].n)",
+          "outcome": "none",
+          "candidates": [],
+          "tableCandidates": [],
+          "note": "本PoCの正解表の対象外（他のPoCの題材ページ）。採点していない"
+        },
+        {
+          "field": "n3",
+          "file": "src/app/rsc-parallel/page.tsx",
+          "line": 23,
+          "component": "RscParallel",
+          "expr": "String(c.rows[0].n)",
+          "outcome": "none",
+          "candidates": [],
+          "tableCandidates": [],
+          "note": "本PoCの正解表の対象外（他のPoCの題材ページ）。採点していない"
+        },
+        {
+          "field": "echo",
+          "file": "src/app/rsc-svc/page.tsx",
+          "line": 23,
+          "component": "RscSvc",
+          "expr": "String(e.ok)",
+          "outcome": "none",
+          "candidates": [],
+          "tableCandidates": [],
+          "note": "本PoCの正解表の対象外（他のPoCの題材ページ）。採点していない"
+        },
+        {
+          "field": "rows",
+          "file": "src/app/rsc-svc/page.tsx",
+          "line": 24,
+          "component": "RscSvc",
+          "expr": "String(r.count)",
+          "outcome": "none",
+          "candidates": [],
+          "tableCandidates": [],
+          "note": "本PoCの正解表の対象外（他のPoCの題材ページ）。採点していない"
+        },
+        {
+          "field": "status",
+          "file": "src/app/rsc-svc-fail/page.tsx",
+          "line": 16,
+          "component": "RscSvcFail",
+          "expr": "String(res.status)",
+          "outcome": "none",
+          "candidates": [],
+          "tableCandidates": [],
+          "note": "本PoCの正解表の対象外（他のPoCの題材ページ）。採点していない"
+        }
+      ],
+      "lineageNotes": [],
+      "srvMapStats": {
+        "evalModules": 498,
+        "diskMaps": 0
+      }
+    }
+  }
+}

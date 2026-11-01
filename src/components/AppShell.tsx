@@ -1,0 +1,51 @@
+'use client';
+/* =============================================================================
+ * 探索画面（S-04）。1600×1000 で基準画像と同じ構図になる。
+ *   N0 48px / 観測キャンバス（上にパネルが浮かぶ）/ 右の詳細ドック 360px（固定）
+ * 左アイコンレールは置かない（02b 決定1）。ページ一覧は固定サイドバーに戻さない。
+ * ========================================================================== */
+import GlobalBar from './GlobalBar';
+import Canvas from './canvas/Canvas';
+import HoverCard from './canvas/HoverCard';
+import PagesPanel from './panels/PagesPanel';
+import PreviewPanel from './panels/PreviewPanel';
+import LegendPanel from './panels/LegendPanel';
+import MinimapPanel from './panels/MinimapPanel';
+import CanvasControls from './panels/CanvasControls';
+import RuntimePanel from './panels/RuntimePanel';
+import DetailDock from './dock/DetailDock';
+import { useExplore } from '@/state/ExploreStore';
+import { RuntimeProvider } from '@/state/RuntimeStore';
+
+export default function AppShell() {
+  const { data } = useExplore();
+  return (
+    <RuntimeProvider>
+      <div className="app">
+        <GlobalBar />
+        <div className="stage">
+          <Canvas>
+            <PagesPanel />
+            <PreviewPanel />
+            <LegendPanel />
+            <MinimapPanel />
+            <CanvasControls />
+            {/* Phase 7A。プロジェクトの指定と開発サーバーの起動・停止 */}
+            <RuntimePanel />
+            {/*
+              データの出所を常時表示する（表示規則11）。
+              合成なら「合成データ」と言い、実測なら計装方式を言う。文言はデータが持つ。
+            */}
+            <div className={`note synth${data.origin === 'measured' ? ' measured' : ''}`}
+              style={{ right: 16, bottom: 14 }}
+              onPointerDown={(e) => e.stopPropagation()}>
+              {data.notice}
+            </div>
+          </Canvas>
+          <DetailDock />
+        </div>
+        <HoverCard />
+      </div>
+    </RuntimeProvider>
+  );
+}
