@@ -17,15 +17,16 @@
 | Phase 6 | PoC-01〜05。計装・要素特定・通信・SQL・由来推定の実測検証 | 完了（`docs/06a`〜`06e`） |
 | Phase 6F | PoC 成果の整合性修正（SQL 射影解析の作り直し） | 完了（`docs/06f`） |
 | M1 | 関係モデルの最小仕様の確定と機械的検査 | 完了（`docs/06g`） |
-| **Phase 7A** | **ローカル Next.js プロジェクトの選択・起動・停止** | **実装済み。実ブラウザでの通し検証が途中** |
+| **Phase 7A** | **ローカル Next.js プロジェクトの選択・起動・停止** | **完了（`docs/07a`）。利用者の実在プロジェクトでの再確認が残る** |
 | Phase 7B | プレビュー・要素選択・観測情報の統合 | 未着手 |
 
-Phase 7A は自動テスト（`tests/project-inspect.spec.mjs` 91 件 /
-`tests/devserver.spec.mjs` 105 件）で起動・停止・二重起動の防止・ポート競合・
-所有の引き継ぎまで検証済み。**実ブラウザでの通し検証（`tests/runtime-e2e.spec.mjs`）
-は途中であり、既知の残件が3件ある** — `docs/07a-implementation-report.md`（未作成）に
-まとめる予定。残件は `tests/runtime-e2e.spec.mjs` の冒頭コメントと
-リポジトリの最新コミットメッセージを参照。
+Phase 7A は、実ブラウザで「IDE を開く → プロジェクトを指定する → 起動する →
+起動状態を確認する → 停止する」を端から端まで通した（`tests/runtime-e2e.spec.mjs`）。
+**実測で起動まで確認した Next.js は 16.4.3（`poc/fixture-app`）と 15.5.5**
+（15.5.5 は同じ構成で新しく組んだ最小の題材。利用者の実在プロジェクトではない）。
+起動できない構成（上の階層の lockfile など）は理由を起動前に出し、`next dev` 自身が
+対象の `tsconfig.json` / `next-env.d.ts` を書き換えることは主体を明示して伝える。
+詳細と未対応事項は `docs/07a-implementation-report.md`。
 
 ---
 
@@ -58,12 +59,15 @@ npm run dev          # http://127.0.0.1:3100
 ```bash
 npm run typecheck
 npm run build
-npm test             # 1,316 件（ブラウザを使う節は dev サーバーが :3100 に必要）
+npm test             # 1,464 件（ブラウザを使う節は dev サーバーが :3100 に必要）
 npm run runtime:reap # 孤立した開発サーバーの掃除
 ```
 
 `npm test` のうちブラウザを使う節は `BASE`（既定 `http://localhost:3100`）に
-対して実行する。`poc/` の PoC ランナーは Docker の Postgres を使うため、
+対して実行する。最後の `tests/runtime-e2e.spec.mjs` は実際に開発サーバーを起動・停止する
+（題材は既定で `poc/fixture-app`、`VCIDE_E2E_PROJECT` で変えられる）。「開いた直後」の
+3項目は**新しく起動した IDE でしか確かめられない**ため、同じ IDE で続けて回すと skip になる。
+ブラウザは既定で Chrome（`PW_CHANNEL=none` で同梱の chromium）。`poc/` の PoC ランナーは Docker の Postgres を使うため、
 既定のテストには含まれない（記録済みの観測結果を読む）。
 
 ---
@@ -77,7 +81,7 @@ src/lib/          model（関係モデルの契約）/ adapter / layout / derive
 src/data/         記録済みの観測結果（PoC-01〜05 の実測。書き換えない）
 src/server/       Node 側。プロジェクト検出・開発サーバーの起動停止・入口の防御
 src/state/        画面の状態（探索 / 実行）
-tests/            1,316 件。純粋な層は素の Node、画面は実ブラウザで見る
+tests/            1,464 件。純粋な層は素の Node、画面は実ブラウザで見る
 poc/              PoC-01〜05 の検証用アプリとランナー（IDE 本体には含めない）
 docs/             要件から実施報告まで。**実装の根拠はすべてここにある**
 ```

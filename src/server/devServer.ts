@@ -10,6 +10,7 @@
  *   4. **任意のコマンドを実行しない。** 起動するのは対象の node_modules の next だけ
  * ========================================================================== */
 import { spawn, type ChildProcess } from 'node:child_process';
+import { createHash, randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { runtimeDir, spanDirPath, stateFilePath } from './ide';
@@ -17,7 +18,7 @@ import {
   httpResponds, isPortFree, pidAlive, pidCommand, sleep, waitPortFree,
 } from './net';
 import {
-  inspectProject, isStartable, type Finding, type ProjectInspection,
+  inspectProject, isStartable, START_WAIT_SEC, type Finding, type ProjectInspection,
 } from './projectInspect';
 import { redactAll } from './redact';
 
@@ -35,6 +36,21 @@ export interface DevServerSnapshot {
   state: RunState;
   /** 状態が変わるたびに増える。画面の取り違えを防ぐため */
   seq: number;
+  /**
+   * この管理実体の識別子。IDE のプロセスが入れ替わると seq は 0 から数え直すため、
+   * **seq の大小は同じ instance の間でしか比べられない。**
+   */
+  instance: string;
+  /**
+   * 起動中に Next.js が出した、進み具合を表す最後の行（`Compiling` / `Ready` など）。
+   * 状態ではない。IDE が解釈せず、出力をそのまま見せるためにある。
+   */
+  progress: { line: string; at: string } | null;
+  /**
+   * 開発サーバーの実行中に、対象プロジェクトの中で変化を観測したファイル。
+   * IDE は書き込まないため、書き込んだのは IDE の外（主に next dev）である。
+   */
+  targetChanges: Finding | null;
   project: { root: string; name: string } | null;
   pid: number | null;
   port: number | null;
@@ -82,7 +98,47 @@ interface OwnershipRecord {
 }
 
 const LOG_CAP = 400;
-const START_TIMEOUT_MS = 180_000;
+/**
+ * 起動の待ち時間。`VCIDE_START_TIMEOUT_MS` は **テストだけ** が使う（IDE 自身の環境変数であり、
+ * 画面や API からは変えられない）。待ちが切れる経路を180秒待たずに確かめるためにある。
+ */
+const START_TIMEOUT_MS = (() => {
+  const v = Number(process.env.VCIDE_START_TIMEOUT_MS);
+  return Number.isInteger(v) && v >= 1000 ? v : START_WAIT_SEC * 1000;
+})();
+/** 起動中の進み具合として画面に出す行。Next.js の出力の語をそのまま使う */
+const PROGRESS_RE = /(Compiling|Compiled|Ready in|Starting|Local:|Network:|Creating an optimized|Installing|reconfigured your)/i;
+/** Next.js がワークスペースのルートを推定したことを示す出力 */
+const ROOT_INFERENCE_RE = /(inferred your workspace root|multiple lockfiles|Detected additional lockfiles)/i;
+/** next dev が書き換えうる対象のファイル（R4）。内容の指紋を起動前後で比べる */
+const WATCHED_TARGET_FILES = ['tsconfig.json', 'next-env.d.ts', 'package.json'];
+
+/**
+ * 子に渡さない環境変数。**IDE 自身の実行時の状態**であって、対象プロジェクトのものではない。
+ *
+ * IDE は Next の上で動くため、IDE のプロセスには Next が自分のために設定した変数が入っている
+ * （`next start` で実測: NODE_ENV=production / PORT=<IDE のポート> / __NEXT_PRIVATE_ORIGIN=<IDE の URL> /
+ * NEXT_RUNTIME / TURBOPACK / NEXT_PRIVATE_START_TIME / NEXT_DEPLOYMENT_ID）。
+ * これをそのまま渡すと、対象の `next dev` が本番モードの NODE_ENV と IDE の URL を自分のものとして読む。
+ * `npm run dev` で起動した IDE では、IDE の package.json の内容（npm_package_*）も入る。
+ * 利用者の設定（npm_config_* のプロキシ設定・NODE_OPTIONS・PATH など）は渡す。
+ */
+const IDE_OWN_ENV = /^(NODE_ENV|PORT|NEXT_RUNTIME|NEXT_DEPLOYMENT_ID|TURBOPACK|__NEXT_.*|NEXT_PRIVATE_.*|npm_package_.*|npm_lifecycle_.*)$/;
+
+/** 子（対象の next dev）に渡す環境。IDE 自身の実行時の変数を落とす */
+export function childEnv(base: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
+  // NODE_ENV を意図して落とすため、Next の型（NODE_ENV 必須）ではなく素の辞書で組む
+  const env: Record<string, string | undefined> = {};
+  for (const [k, v] of Object.entries(base)) if (!IDE_OWN_ENV.test(k)) env[k] = v;
+  env.NEXT_TELEMETRY_DISABLED = '1';
+  return env as NodeJS.ProcessEnv;
+}
+
+type FileFingerprint = string | null;   // 内容の sha1。無ければ null
+
+function fingerprint(file: string): FileFingerprint {
+  try { return createHash('sha1').update(fs.readFileSync(/* turbopackIgnore: true */ file)).digest('hex'); } catch { return null; }
+}
 const PROBE_INTERVAL_MS = 300;
 const STOP_TERM_WAIT_MS = 8_000;
 const STOP_KILL_WAIT_MS = 3_000;
@@ -125,12 +181,17 @@ const E = {
     impact: '実行時の情報は取得できません。',
     action: '出力の内容を直してから、もう一度試してください。',
   }),
-  startTimeout: (port: number, tail: string[]): Finding => ({
+  startTimeout: (port: number, tail: string[], rootInference: string | null): Finding => ({
     code: 'start-timeout', severity: 'blocker',
-    fact: `${Math.round(START_TIMEOUT_MS / 1000)} 秒待っても、ポート ${port} が HTTP に応答しませんでした。`,
-    reason: tail.length ? `最後の出力:\n${tail.join('\n')}` : '出力がありません。理由を特定できません。',
-    impact: 'プロセスは起動していますが、応答を確認できていないため「実行中」とは言えません。停止してから起動し直してください。',
-    action: 'もう一度試してください。',
+    fact: `${Math.round(START_TIMEOUT_MS / 1000)} 秒待っても、ポート ${port} が HTTP に応答しませんでした。`
+      + 'IDE は待つのをやめ、プロセスを停止しました。',
+    reason: (rootInference ? `${rootInference}\n` : '')
+      + (tail.length ? `最後の出力:\n${tail.join('\n')}` : '出力がありません。理由を特定できません。'),
+    impact: '時間内に応答を確認できなかったという事実だけがわかっています。'
+      + 'プロジェクトのコードが壊れているかどうかは、この結果からはわかりません。',
+    action: rootInference
+      ? 'next.config に turbopack.root（このプロジェクトの絶対パス）を設定してから、もう一度試してください。'
+      : '出力を確認してから、もう一度試してください。',
   }),
   crashed: (code: number | null, signal: string | null, tail: string[]): Finding => ({
     code: 'crashed', severity: 'blocker',
@@ -166,6 +227,21 @@ export class DevServerManager {
   #error: Finding | null = null;
   #lastProbe: DevServerSnapshot['lastProbe'] = null;
   #inspection: ProjectInspection | null = null;
+  readonly #instance = randomUUID();
+  #progress: DevServerSnapshot['progress'] = null;
+  /**
+   * このプロジェクトを **この IDE のセッションで最初に起動する直前** の対象ファイルの指紋と、
+   * 書き込みの主体を示す Next.js の出力（起動をまたいで残す）。
+   * 起動のたびに取り直すと、再起動した時点で前の起動中の変化が画面から消えるため、
+   * 別のプロジェクトを起動するまで取り直さない。引き継いだプロセスでは持たない。
+   */
+  #baseline: {
+    root: string;
+    files: Record<string, FileFingerprint>;
+    saidTs: boolean;
+    saidInstall: boolean;
+  } | null = null;
+  #targetChanges: Finding | null = null;
   /** 停止を自分で始めたか。異常終了と区別するために要る */
   #stopping = false;
   #updatedAt = new Date().toISOString();
@@ -182,6 +258,9 @@ export class DevServerManager {
     return {
       state: this.#state,
       seq: this.#seq,
+      instance: this.#instance,
+      progress: this.#progress,
+      targetChanges: this.#targetChanges,
       project: r ? { root: r.projectRoot, name: r.projectName } : null,
       pid: r?.pid ?? null,
       port: r?.port ?? null,
@@ -219,6 +298,7 @@ export class DevServerManager {
    * 引き継いだプロセスには終了イベントが無いため、ここで生存を確かめる。
    */
   async refresh(): Promise<void> {
+    this.#observeTargetChanges();
     if (this.#state !== 'running' || !this.#record) return;
     if (!pidAlive(this.#record.pid)) {
       if (this.#owner === 'ide-previous-session') {
@@ -296,7 +376,7 @@ export class DevServerManager {
     }
 
     /* ---------------------------------------------------------------- 環境 */
-    const env: NodeJS.ProcessEnv = { ...process.env, NEXT_TELEMETRY_DISABLED: '1' };
+    const env = childEnv(process.env);
     if (instrumentation.state === 'enabled' && insAvail.boot && instrumentation.spanFile) {
       fs.mkdirSync(path.dirname(instrumentation.spanFile), { recursive: true });
       // 空白を含むパスがあるため二重引用符で囲む（PoC-01 と同じ）
@@ -316,6 +396,16 @@ export class DevServerManager {
     this.#lastProbe = null;
     this.#readyMs = null;
     this.#stopping = false;
+    this.#progress = null;
+    if (this.#baseline?.root !== ins.root) {
+      this.#targetChanges = null;
+      this.#baseline = {
+        root: ins.root,
+        files: Object.fromEntries(WATCHED_TARGET_FILES.map((f) => [f, fingerprint(path.join(/* turbopackIgnore: true */ ins.root!, f))])),
+        saidTs: false,
+        saidInstall: false,
+      };
+    }
     this.#set('starting');
 
     let child: ChildProcess;
@@ -365,6 +455,9 @@ export class DevServerManager {
         if (!line.trim()) continue;
         this.#log.push(line);
         if (this.#log.length > LOG_CAP) this.#log.shift();
+        if (PROGRESS_RE.test(line)) {
+          this.#progress = { line: redactAll([line.trim()])[0], at: new Date().toISOString() };
+        }
         // Next 16 は同一プロジェクトの二重起動をここで断る。待たずに失敗にする
         if (/Another next dev server is already running/i.test(line)) {
           const m = /PID:\s*(\d+)/.exec(this.#log.join('\n'));
@@ -410,12 +503,14 @@ export class DevServerManager {
         };
         this.#record.readyAt = new Date().toISOString();
         this.#writeRecordFile();
+        this.#observeTargetChanges();
         this.#set('running');
         return this.snapshot();
       }
       if (Date.now() - t0 > START_TIMEOUT_MS) {
         await this.#killOwned();
-        this.#fail(E.startTimeout(port, this.#tail()));
+        this.#observeTargetChanges();
+        this.#fail(E.startTimeout(port, this.#tail(), this.#rootInferenceNote()));
         this.#clearRecordFile();
         return this.snapshot();
       }
@@ -437,6 +532,7 @@ export class DevServerManager {
     this.#set('stopping');
 
     await this.#killOwned();
+    this.#observeTargetChanges();
 
     // ポートが解放されたことを確認してから stopped にする（ST-07）
     const freed = await waitPortFree(port, { timeout: 10_000 });
@@ -465,6 +561,57 @@ export class DevServerManager {
   /* ------------------------------------------------------------------ 内部 */
 
   #tail(n = 8): string[] { return redactAll(this.#log.slice(-n)); }
+
+  /**
+   * 起動の待ちが切れたとき、ルートの推定が関わっている証拠があれば説明を返す。
+   * 証拠は2つだけ — Next.js の出力と、起動前の検出の所見。どちらも無ければ null。
+   */
+  #rootInferenceNote(): string | null {
+    const fromLog = this.#log.some((l) => ROOT_INFERENCE_RE.test(l));
+    const fromInspection = this.#inspection?.findings.some((f) => f.code === 'ancestor-root-marker') ?? false;
+    if (!fromLog && !fromInspection) return null;
+    const markers = this.#inspection?.ancestorRootMarkers ?? [];
+    return [
+      fromLog ? 'Next.js の出力に、ワークスペースのルートを推定したことを示す行があります。' : null,
+      fromInspection && markers.length
+        ? `起動前の検出で、プロジェクトより上の階層に ${markers.join(' / ')} を見つけています。` : null,
+      'ルートが広く推定されると、初回のコンパイルがそのディレクトリ全体を走査して終わらないことがあります。',
+    ].filter(Boolean).join('');
+  }
+
+  /**
+   * 対象プロジェクトのファイルが、起動前から変わったかを見る（R4）。
+   * IDE は対象に書き込まないので、変化があれば書いたのは IDE の外である。
+   * 誰が書いたかは、Next.js の出力に証拠がある場合だけ名指しする。
+   */
+  #observeTargetChanges(): void {
+    const b = this.#baseline;
+    if (!b) return;
+    const changed: string[] = [];
+    for (const [f, before] of Object.entries(b.files)) {
+      const now = fingerprint(path.join(/* turbopackIgnore: true */ b.root, f));
+      if (now === before) continue;
+      changed.push(`${f}（${before === null ? '作成' : now === null ? '削除' : '変更'}）`);
+    }
+    // 出力の証拠は起動をまたいで残す（再起動で出力の保持は入れ替わる）
+    if (this.#logAvailable) {
+      b.saidTs ||= this.#log.some((l) => /reconfigured your .*tsconfig\.json|created a tsconfig\.json/i.test(l));
+      b.saidInstall ||= this.#log.some((l) => /Installing dependencies/i.test(l));
+    }
+    if (!changed.length) { this.#targetChanges = null; return; }
+    const evidence = [
+      b.saidTs ? 'next dev の出力に「We detected TypeScript in your project and reconfigured your tsconfig.json」があります。' : null,
+      b.saidInstall ? 'next dev の出力に「Installing dependencies」があります。' : null,
+    ].filter(Boolean).join('');
+    this.#targetChanges = {
+      code: 'target-files-changed', severity: 'limit',
+      fact: `この IDE がこのプロジェクトの開発サーバーを最初に起動してから、対象プロジェクトの ${changed.join(' / ')} が変わりました。`,
+      reason: (evidence || '書き込んだプロセスを特定する出力はありません。')
+        + 'IDE は対象プロジェクトに書き込みません。変化は IDE の外（開発サーバーとして起動した next dev を含む）で起きたものです。',
+      impact: '変更の中身は IDE では元に戻していません。Next.js の既定の振る舞いによる書き換えは、起動のたびに起こりえます。',
+      action: '差分はプロジェクトのバージョン管理（git diff など）で確認できます。',
+    };
+  }
 
   #set(s: RunState): void { this.#state = s; this.#bump(); }
 

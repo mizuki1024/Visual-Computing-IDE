@@ -145,7 +145,13 @@ if (!fs.existsSync(NEXT_BIN)) {
   skip('実際の起動・停止の検証', `${PROJECT} に next がインストールされていない`);
 } else {
   // 起動の前に、対象プロジェクトの姿を記録しておく（第10節で突き合わせる）
-  const TOP_BEFORE = fs.readdirSync(PROJECT).filter((f) => f !== '.next').sort().join(',');
+  // .next と next-env.d.ts は **next dev 自身が書く**（R4。Next.js の既定の振る舞い）。
+  // IDE が書いたかどうかの突き合わせからは外し、代わりに「IDE がその変化を観測して
+  // 画面に出していること」を第4節で確かめる。tsconfig.json は内容まで突き合わせる。
+  const NEXT_WRITES = ['.next', 'next-env.d.ts'];
+  const NEXT_ENV_BEFORE = fs.existsSync(path.join(PROJECT, 'next-env.d.ts'));
+  const TSCONFIG_BEFORE = fs.readFileSync(path.join(PROJECT, 'tsconfig.json'), 'utf8');
+  const TOP_BEFORE = fs.readdirSync(PROJECT).filter((f) => !NEXT_WRITES.includes(f)).sort().join(',');
   const SRC_BEFORE = fs.readdirSync(path.join(PROJECT, 'src'), { recursive: true }).sort().join(',');
 
   fs.rmSync(STATE_FILE, { force: true });
@@ -209,6 +215,18 @@ if (!fs.existsSync(NEXT_BIN)) {
     { startedAt: started.startedAt, readyAt: started.readyAt });
   eq('異常終了の記録は無い', started.exitCode, null);
   eq('失敗の説明は無い', started.error, null);
+  {
+    const createdEnv = !NEXT_ENV_BEFORE && fs.existsSync(path.join(PROJECT, 'next-env.d.ts'));
+    if (createdEnv) {
+      ok('next dev が作った next-env.d.ts を、観測した変化として画面に出す（R4）',
+        /next-env\.d\.ts（作成）/.test(started.targetChanges?.fact ?? ''), started.targetChanges);
+      ok('その変化の主体を IDE と書いていない',
+        /IDE は対象プロジェクトに書き込みません/.test(started.targetChanges?.reason ?? ''), started.targetChanges?.reason);
+    } else {
+      ok('next-env.d.ts は起動前から在った。変化が無ければ何も出さない（推測で出さない）',
+        !/next-env\.d\.ts/.test(started.targetChanges?.fact ?? ''), started.targetChanges);
+    }
+  }
 
   console.log('\n5. 実際に HTTP で応答する');
   {
@@ -361,10 +379,11 @@ if (!fs.existsSync(NEXT_BIN)) {
   /* ---------------------------------- 10. 対象プロジェクトを書き換えていない */
   console.log('\n10. 対象プロジェクトを書き換えない（指示 2.E）');
   {
-    const top = (d) => fs.readdirSync(d).filter((f) => f !== '.next').sort().join(',');
+    const top = (d) => fs.readdirSync(d).filter((f) => !NEXT_WRITES.includes(f)).sort().join(',');
     const srcList = fs.readdirSync(path.join(PROJECT, 'src'), { recursive: true }).sort().join(',');
     eq('トップ階層に新しいものを作っていない', top(PROJECT), TOP_BEFORE);
     eq('src の中身を変えていない', srcList, SRC_BEFORE);
+    eq('tsconfig.json の内容が変わっていない', fs.readFileSync(path.join(PROJECT, 'tsconfig.json'), 'utf8'), TSCONFIG_BEFORE);
     ok('計装ファイルを対象に置いていない',
       !fs.existsSync(path.join(PROJECT, 'instrumentation.ts.ide'))
       && !fs.readdirSync(PROJECT).some((f) => f.startsWith('.ide-')));

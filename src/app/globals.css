@@ -326,6 +326,8 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .rt-b.go:hover:not(.off){background:rgba(157,147,224,.18)}
 .rt-b.off,.rt-b:disabled{color:var(--tx4);border-color:var(--line-soft);background:#0c0f15;cursor:default}
 .rt-note{font-size:9.5px;line-height:1.55;color:var(--tx4);margin-top:5px}
+.rt-prog{word-break:break-word}
+.rt-prog code{font-family:var(--mono,ui-monospace,monospace);color:var(--tx3)}
 .rt-opt{margin-top:9px}
 .rt-act{margin-top:9px;gap:7px}
 .rt-ck{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:var(--tx3);

@@ -10,7 +10,10 @@
  *
  * 題材は2種類ある。
  *   - 実在するプロジェクト（poc/fixture-app）。依存が無い環境では skip する
- *   - 構成だけを組んだ骨（.ide-runtime/test-fixtures/ に毎回作り直す）
+ *   - 構成だけを組んだ骨（OS の一時ディレクトリに毎回作り直す）
+ *
+ * 骨を IDE のリポジトリの中に置かないのは、リポジトリ直下の package-lock.json が
+ * 「プロジェクトより上の階層の lockfile」（R3）として、すべての骨に効いてしまうためである。
  * ========================================================================== */
 import { createRequire } from 'node:module';
 import fs from 'node:fs';
@@ -31,10 +34,10 @@ const eq = (name, a, b) => ok(name, a === b, a);
 const skip = (name, why) => { skips.push(`${name} — ${why}`); console.log(`  ⊘ ${name} — ${why}（skip）`); };
 
 const REPO = path.resolve(import.meta.dirname, '..');
-const FIX = path.join(REPO, '.ide-runtime', 'test-fixtures');
+const FIX = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'vcide-fix-')));
+process.on('exit', () => { try { fs.rmSync(FIX, { recursive: true, force: true }); } catch { /* 残っても害はない */ } });
 
 /* ------------------------------------------------------------- 骨を組み直す */
-fs.rmSync(FIX, { recursive: true, force: true });
 const mk = (rel, body) => {
   const p = path.join(FIX, rel);
   fs.mkdirSync(path.dirname(p), { recursive: true });
@@ -63,14 +66,46 @@ pkg('both-routers', { name: 'both', dependencies: { next: '^16.0.0' }, scripts: 
 stubNext('both-routers', '16.2.6'); mk('both-routers/app/layout.tsx', 'x\n'); mk('both-routers/pages/old.tsx', 'x\n');
 pkg('unverified', { name: 'unv', dependencies: { next: '^14.0.0' }, scripts: { dev: 'next dev' } });
 stubNext('unverified', '14.2.15'); mk('unverified/src/app/layout.tsx', 'x\n');
+/** TypeScript の依存を「入っていること」にする（R4 の所見を正常系に混ぜないため） */
+const stubTsDeps = (dir) => {
+  for (const d of ['typescript', '@types/react', '@types/node']) {
+    mk(`${dir}/node_modules/${d}/package.json`, JSON.stringify({ name: d, version: '0.0.0' }));
+  }
+};
 pkg('good-stub', { name: 'good-stub', dependencies: { next: '^16.0.0' }, scripts: { dev: 'next dev --turbopack' } });
 stubNext('good-stub', '16.4.3'); mk('good-stub/src/app/layout.tsx', 'x\n');
-mk('good-stub/package-lock.json', '{}');
+mk('good-stub/package-lock.json', '{}'); mk('good-stub/tsconfig.json', '{}\n'); stubTsDeps('good-stub');
+mk('good-stub/next-env.d.ts', '/// <reference types="next" />\n');
+
+/* R3 — プロジェクトより上の階層に lockfile がある（blog-app の構成） */
+mk('outer/package-lock.json', '{}');
+pkg('outer/nested', { name: 'nested', dependencies: { next: '^16.0.0' } }); stubNext('outer/nested', '16.2.6');
+mk('outer/nested/app/page.jsx', 'x\n'); mk('outer/nested/package-lock.json', '{}');
+pkg('outer/configured', { name: 'configured', dependencies: { next: '^16.0.0' } }); stubNext('outer/configured', '16.2.6');
+mk('outer/configured/app/page.jsx', 'x\n');
+mk('outer/configured/next.config.mjs', 'export default {\n  turbopack: {\n    root: import.meta.dirname,\n  },\n};\n');
+/* ワークスペースの宣言を持つ package.json は推定に使われ、持たないものは使われない */
+pkg('ws', { name: 'ws-root', private: true, workspaces: ['apps/*'] });
+pkg('ws/apps/web', { name: 'web', dependencies: { next: '^16.0.0' } }); stubNext('ws/apps/web', '16.4.3');
+mk('ws/apps/web/app/page.jsx', 'x\n');
+pkg('plain', { name: 'plain-root', private: true });
+pkg('plain/web', { name: 'web2', dependencies: { next: '^16.0.0' } }); stubNext('plain/web', '16.4.3');
+mk('plain/web/app/page.jsx', 'x\n');
+
+/* R4 — TypeScript の構成。next dev が対象のファイルを書き換える条件 */
+pkg('ts-missing', { name: 'tsm', dependencies: { next: '^16.0.0' } }); stubNext('ts-missing', '16.4.3');
+mk('ts-missing/app/page.tsx', 'x\n');
+pkg('ts-ok', { name: 'tso', dependencies: { next: '^16.0.0' } }); stubNext('ts-ok', '16.4.3');
+mk('ts-ok/app/page.tsx', 'x\n'); mk('ts-ok/tsconfig.json', '{}\n'); stubTsDeps('ts-ok');
+pkg('js-only', { name: 'jso', dependencies: { next: '^16.0.0' } }); stubNext('js-only', '16.4.3');
+mk('js-only/app/page.jsx', 'x\n');
 mk('a-file.txt', 'not a directory\n');
 
 const INS = PI.checkInstrumentation();
 /** 計装が使えない環境では「部分対応」になる。環境差を期待値に混ぜない */
 const expectedGoodVerdict = INS.available ? 'supported' : 'partial';
+/** 一時ディレクトリより上に lockfile があると、骨にも R3 の所見が付く。その環境では判定の検証を skip する */
+const TMP_ANCESTORS = PI.findAncestorRootMarkers(path.join(FIX, 'probe'));
 
 const codes = (r) => r.findings.map((f) => f.code);
 const has = (r, code) => codes(r).includes(code);
@@ -79,7 +114,8 @@ const has = (r, code) => codes(r).includes(code);
 console.log('\n1. 正常な Next.js（App Router）プロジェクトを読める');
 {
   const r = await PI.inspectProject(path.join(FIX, 'good-stub'));
-  eq('判定が対応（計装が使える環境）', r.verdict, expectedGoodVerdict);
+  if (TMP_ANCESTORS.length) skip('判定が対応', `一時ディレクトリの上に ${TMP_ANCESTORS.join(' / ')} がある`);
+  else eq('判定が対応（計装が使える環境）', r.verdict, expectedGoodVerdict);
   eq('ルートを正規化した絶対パスで持つ', r.root, path.join(FIX, 'good-stub'));
   eq('プロジェクト名は package.json の name', r.name, 'good-stub');
   eq('インストールされている Next のバージョンを読む', r.next.installed, '16.4.3');
@@ -149,9 +185,17 @@ for (const [label, input, code] of [
 }
 {
   // ~ の展開。ホームそのものは Next プロジェクトではないはずなので、
-  // 「展開された結果で判定している」ことだけを見る
+  // 「展開された結果で判定している」ことだけを見る。
+  // 検出結果の root は package.json が無ければ null になる（推測で埋めない）ため、
+  // 展開そのものは normalizeInput で見る。以前は inspectProject の root を見ており、
+  // ホームに package.json がある環境でしか通らなかった。
+  const home = os.homedir().replace(/\/+$/, '');
+  eq('~ はホームに展開される', PI.normalizeInput('~').root, home);
+  eq('~/x はホームの下に展開される', PI.normalizeInput('~/x').root, path.join(home, 'x'));
   const r = await PI.inspectProject('~');
-  eq('~ はホームに展開される', r.root, os.homedir().replace(/\/+$/, ''));
+  ok('検出も展開後のパスで行う（root か所見のどちらかにホームが出る）',
+    r.root === home || r.findings.some((f) => f.fact.includes(home)) || r.findings[0]?.code === 'no-package-json',
+    { root: r.root, codes: codes(r) });
 }
 {
   const n = PI.normalizeInput('/tmp/x/');
@@ -228,6 +272,78 @@ console.log('\n5. 計装の可用性（ST-25 — 「適用不可」と「失敗�
   eq('検出結果にも可用性が入る', r.instrumentation.available, i.available);
   ok('使えない場合は「限定」として出る（失敗ではない）',
     i.available ? !has(r, 'instrumentation-unavailable') : has(r, 'instrumentation-unavailable'), codes(r));
+}
+
+console.log('\n6a. プロジェクトより上の階層の lockfile を、起動の前に言う（R3）');
+{
+  const r = await PI.inspectProject(path.join(FIX, 'outer', 'nested'));
+  const f = r.findings.find((x) => x.code === 'ancestor-root-marker');
+  ok('上の階層の lockfile を所見に出す', !!f, codes(r));
+  eq('重大度は「限定」（起動は試せる）', f?.severity, 'limit');
+  eq('見つけたファイルを近い順に持つ', r.ancestorRootMarkers[0], path.join(FIX, 'outer', 'package-lock.json'));
+  ok('事実に見つけたパスを具体的に書く', f?.fact.includes(path.join(FIX, 'outer', 'package-lock.json')), f?.fact);
+  ok('turbopack.root の設定を次の操作として示す', /turbopack\.root/.test(f?.action ?? ''), f?.action);
+  ok('「プロジェクトが壊れている」と書かない',
+    !/壊れて(い|お)ます|不具合があります/.test(`${f?.fact}${f?.reason}`) && /不具合を意味しません/.test(f?.impact ?? ''), f);
+  ok('IDE が代わりに設定しないことを明記する', /代わりに行いません/.test(f?.action ?? ''), f?.action);
+  eq('起動は試せる', PI.isStartable(r), true);
+  eq('判定は部分対応', r.verdict, 'partial');
+  eq('next.config の記述は無い', r.rootConfigured, false);
+}
+{
+  const r = await PI.inspectProject(path.join(FIX, 'outer', 'configured'));
+  ok('turbopack.root の記述があれば「限定」にしない', !has(r, 'ancestor-root-marker'), codes(r));
+  const f = r.findings.find((x) => x.code === 'ancestor-root-marker-configured');
+  eq('記述があることは記録として残す', f?.severity, 'info');
+  ok('値を評価していないことを書く', /確認していません/.test(f?.impact ?? ''), f?.impact);
+  eq('記述を見つけた', r.rootConfigured, true);
+}
+{
+  const r = await PI.inspectProject(path.join(FIX, 'ws', 'apps', 'web'));
+  ok('workspaces を持つ package.json は推定に使われるファイルとして出す',
+    r.ancestorRootMarkers.includes(path.join(FIX, 'ws', 'package.json')), r.ancestorRootMarkers);
+  const r2 = await PI.inspectProject(path.join(FIX, 'plain', 'web'));
+  ok('workspaces を持たない package.json は出さない（Next.js は推定に使わない）',
+    !r2.ancestorRootMarkers.includes(path.join(FIX, 'plain', 'package.json')), r2.ancestorRootMarkers);
+}
+
+console.log('\n6b. next dev が対象のファイルを書き換えることを、主体を明示して言う（R4）');
+{
+  const r = await PI.inspectProject(path.join(FIX, 'ts-missing'));
+  const f = r.findings.find((x) => x.code === 'next-dev-installs-typescript');
+  ok('TypeScript の依存が無ければ、next dev が入れることを先に言う', !!f, codes(r));
+  eq('重大度は「限定」', f?.severity, 'limit');
+  ok('不足している依存を具体的に書く', /typescript/.test(f?.fact ?? ''), f?.fact);
+  ok('書き換える主体は next dev であり IDE ではないと書く',
+    /next dev/.test(f?.reason ?? '') && /IDE ではなく next dev/.test(f?.impact ?? ''), f);
+  ok('tsconfig.json の書き換えも言う', has(r, 'next-dev-writes-tsconfig'), codes(r));
+  eq('tsconfig.json が無いことを記録する', r.typescript.tsconfig, false);
+}
+{
+  const r = await PI.inspectProject(path.join(FIX, 'ts-ok'));
+  const f = r.findings.find((x) => x.code === 'next-dev-writes-tsconfig');
+  ok('TypeScript の構成なら tsconfig.json / next-env.d.ts の書き換えを言う', !!f, codes(r));
+  eq('重大度は「記録」（起動にも観測範囲にも影響しない）', f?.severity, 'info');
+  ok('主体は next dev', /next dev/.test(f?.reason ?? ''), f?.reason);
+  ok('IDE は書き込まないと明記する', /IDE は対象プロジェクトに書き込みません/.test(f?.impact ?? ''), f?.impact);
+  ok('next-env.d.ts が無ければ「作成します」と書く', /next-env\.d\.ts を作成します/.test(f?.reason ?? ''), f?.reason);
+  ok('書き換えるかを事前に判定していないことを書く', /事前に判定しません/.test(f?.impact ?? ''), f?.impact);
+  ok('依存が揃っていればインストールの所見は出ない', !has(r, 'next-dev-installs-typescript'), codes(r));
+}
+{
+  const r = await PI.inspectProject(path.join(FIX, 'js-only'));
+  ok('JavaScript だけの構成では、どちらの所見も出さない',
+    !has(r, 'next-dev-writes-tsconfig') && !has(r, 'next-dev-installs-typescript'), codes(r));
+  eq('TypeScript は使っていない', r.typescript.used, false);
+}
+{
+  const all = [];
+  for (const d of ['outer/nested', 'outer/configured', 'ts-missing', 'ts-ok']) {
+    all.push(...(await PI.inspectProject(path.join(FIX, d))).findings);
+  }
+  ok('新しい所見も4要素を満たす', all.every((f) => f.fact.trim() && f.reason.trim() && f.impact.trim()));
+  ok('新しい所見も推測の語を使わない',
+    all.every((f) => !/おそらく|と思われます|かもしれません/.test(f.fact + f.reason + f.impact)));
 }
 
 console.log('\n6. 検出が対象プロジェクトを書き換えない');

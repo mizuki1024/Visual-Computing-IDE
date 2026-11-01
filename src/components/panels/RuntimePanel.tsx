@@ -10,7 +10,7 @@
  *   - 失敗は 03d 1.1節の4要素（事実 / 理由 / わからないこと / 次の操作）で書く
  *   - 押せないボタンには、押せない理由を添える（IX-23 / IX-24）
  * ========================================================================== */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import FloatingPanel from './FloatingPanel';
 import Why from '../common/Why';
 import { RUN_STATE_LABEL, useRuntime, type Finding } from '@/state/RuntimeStore';
@@ -38,6 +38,18 @@ function FindingCard({ f }: { f: Finding }) {
   );
 }
 
+/** 起動を始めてからの経過秒。起動中だけ1秒ごとに進める（IDE の待ちが平坦に見えないように） */
+function useElapsedSec(since: string | null, active: boolean): number | null {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!active) return undefined;
+    const id = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(id);
+  }, [active]);
+  if (!active || !since) return null;
+  return Math.max(0, Math.round((now - Date.parse(since)) / 1000));
+}
+
 export default function RuntimePanel() {
   const {
     pathInput, setPathInput, portInput, setPortInput, instrument, setInstrument,
@@ -46,13 +58,17 @@ export default function RuntimePanel() {
   const [showLog, setShowLog] = useState(false);
 
   const state = runtime?.state ?? 'idle';
+  const elapsed = useElapsedSec(runtime?.startedAt ?? null, state === 'starting');
   const busy = pending !== null || state === 'starting' || state === 'stopping' || state === 'validating';
   const startable = !!inspection
     && (inspection.verdict === 'supported' || inspection.verdict === 'partial');
-  const canStart = startable && !busy && state !== 'running';
+  /** 表示している検出結果が、いま入力されているパスのものか。違えば起動させない */
+  const inputMatches = !!inspection && inspection.input.trim() === pathInput.trim();
+  const canStart = startable && inputMatches && !busy && state !== 'running';
   const canStop = !!runtime?.pid && !busy && (state === 'running' || state === 'error');
 
   const startWhy = !inspection ? 'まず［検出］でプロジェクトの構成を確認してください。'
+    : !inputMatches ? '入力したパスはまだ検出していません。［検出］を押してください。'
     : !startable ? 'この構成は対応範囲外です。理由は下の所見に出ています。'
       : state === 'running' ? '既に実行中です。二重には起動しません。'
         : busy ? '処理中です。完了するまで待ってください。' : '';
@@ -79,7 +95,8 @@ export default function RuntimePanel() {
 
         {/* ------------------------------------------------------ 検出した構成 */}
         {inspection && (
-          <div className="rt-ins">
+          <div className="rt-ins" data-input={inspection.input} data-verdict={inspection.verdict}
+            data-checked-at={inspection.checkedAt}>
             <div className="rt-head">
               <span className={`rt-vd ${inspection.verdict}`}>{VERDICT_LABEL[inspection.verdict]}</span>
               <b>{inspection.name ?? '—'}</b>
@@ -148,7 +165,16 @@ export default function RuntimePanel() {
           {runtime?.port && <span className="rt-k">:{runtime.port}</span>}
           {runtime?.readyMs !== null && runtime?.readyMs !== undefined && state === 'running'
             && <span className="rt-k">{runtime.readyMs} ms</span>}
+          {elapsed !== null && <span className="rt-k">{elapsed} 秒</span>}
         </div>
+        {state === 'starting' && (
+          <p className="rt-note rt-prog">
+            {runtime?.progress
+              ? <>Next.js の出力: <code>{runtime.progress.line}</code></>
+              : 'Next.js の出力はまだありません。'}
+            {' '}HTTP の応答を確認するまで「実行中」にはしません。
+          </p>
+        )}
         {runtime && (
           <dl className="rt-dl rt-run">
             <dt>起動元</dt>
@@ -174,6 +200,7 @@ export default function RuntimePanel() {
         )}
 
         {runtime?.error && <FindingCard f={runtime.error} />}
+        {runtime?.targetChanges && <FindingCard f={runtime.targetChanges} />}
         {apiError && (
           <div className="rt-card blocker">
             <b>IDE の API に届きませんでした。</b>

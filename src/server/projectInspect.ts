@@ -76,6 +76,22 @@ export interface ProjectInspection {
   nodeModulesInstalled: boolean;
   nextConfig: string | null;
   existingDevServer: ExistingDevServer | null;
+  /**
+   * プロジェクトより上の階層にある、Next.js がワークスペースのルートの推定に使うファイル
+   * （lockfile / ワークスペースの宣言）。近い順。無ければ空。
+   */
+  ancestorRootMarkers: string[];
+  /** next.config の本文に `turbopack.root` / `outputFileTracingRoot` の記述があるか（値は評価しない） */
+  rootConfigured: boolean;
+  /** TypeScript の構成。`next dev` が対象のファイルを書き換える条件の判定に使う */
+  typescript: {
+    /** tsconfig.json がある、または App Router の入口が .ts/.tsx */
+    used: boolean;
+    tsconfig: boolean;
+    nextEnvDts: boolean;
+    /** node_modules に無い、Next.js が要求する TypeScript の依存 */
+    missingDeps: string[];
+  };
   instrumentation: InstrumentationAvailability;
   findings: Finding[];
   checkedAt: string;
@@ -100,6 +116,20 @@ const INSTRUMENTATION_DEPS = [
 const VERIFIED_NEXT_MAJORS = [15, 16];
 /** App Router が存在しない世代 */
 const MIN_NEXT_MAJOR = 13;
+
+/** devServer.ts の START_TIMEOUT_MS と同じ値（所見の文言に出す） */
+export const START_WAIT_SEC = 180;
+
+/**
+ * Next.js がワークスペースのルートの推定に使うファイル。
+ * Next.js 16.4.3 の `next/dist/lib/find-root.js` の LOCK_FILES / WORKSPACE_MARKERS と同じ。
+ * `workspaces` を持たない package.json は推定に使われない（同ファイル）。
+ */
+const ROOT_LOCK_FILES = ['pnpm-lock.yaml', 'package-lock.json', 'yarn.lock', 'bun.lock', 'bun.lockb'];
+const ROOT_WORKSPACE_MARKERS = ['pnpm-workspace.yaml', 'lerna.json'];
+
+/** Next.js が TypeScript の構成で要求する依存（next/dist/lib/verify-typescript-setup.js） */
+const TYPESCRIPT_DEPS = ['typescript', '@types/react', '@types/node'];
 
 /* これらの参照先は、利用者が入力したプロジェクトのパスである。静的には決まらない。
  * Turbopack は「プロジェクト全体が追跡対象になる」と警告するが、ここで見たいのは
@@ -175,6 +205,46 @@ export function checkInstrumentation(): InstrumentationAvailability {
     };
   }
   return { available: true, boot, missing: [], reason: null };
+}
+
+/**
+ * プロジェクトより上の階層にある、ルートの推定に使われうるファイルを近い順に返す。
+ * **読むだけ。** どれを Next.js が採るかは決めない（バージョンで異なるため）。
+ */
+export function findAncestorRootMarkers(root: string): string[] {
+  const found: string[] = [];
+  let dir = path.dirname(root);
+  for (let i = 0; i < 64; i++) {
+    for (const f of [...ROOT_WORKSPACE_MARKERS, ...ROOT_LOCK_FILES]) {
+      const p = path.join(dir, f);
+      if (exists(p)) found.push(p);
+    }
+    const pj = path.join(dir, 'package.json');
+    if (exists(pj)) {
+      const r = readJson(pj);
+      if (r.ok && r.value.workspaces != null) found.push(pj);
+    }
+    const up = path.dirname(dir);
+    if (up === dir) break;
+    dir = up;
+  }
+  return found;
+}
+
+/** next.config の本文に、ルートを明示する記述があるか。**実行はしない**（文字列として見るだけ） */
+function mentionsRootConfig(root: string, nextConfig: string | null): boolean {
+  if (!nextConfig) return false;
+  let text: string;
+  try { text = fs.readFileSync(/* turbopackIgnore: true */ path.join(root, nextConfig), 'utf8'); } catch { return false; }
+  return /outputFileTracingRoot/.test(text) || /turbopack[\s\S]{0,400}?\broot\s*:/.test(text);
+}
+
+/** App Router の入口が .ts/.tsx か */
+function routerEntryIsTs(dir: string): boolean {
+  for (const b of ENTRY_BASENAMES) {
+    for (const e of ['ts', 'tsx']) if (exists(path.join(/* turbopackIgnore: true */ dir, `${b}.${e}`))) return true;
+  }
+  return false;
 }
 
 /* -------------------------------------------------------------- 所見の文言 */
@@ -313,6 +383,41 @@ const F = {
     impact: 'サーバー内部の処理と実行された SQL は観測できません。起動と停止、HTTP の応答確認は行えます。',
     action: '計装なしで起動できます。観測が必要な場合は IDE 側の計装の依存を用意してください。',
   }),
+  ancestorRootMarker: (markers: string[]): Finding => ({
+    code: 'ancestor-root-marker', severity: 'limit',
+    fact: `プロジェクトより上の階層に、Next.js がワークスペースのルートの推定に使うファイルがあります（${markers.join(' / ')}）。`,
+    reason: 'Next.js は lockfile とワークスペースの宣言を上の階層へ探し、見つけたディレクトリをワークスペースのルートとして扱うことがあります。'
+      + 'どの候補を採るかは Next.js のバージョンで異なり、この検出では決めません。'
+      + 'next.config に turbopack.root / outputFileTracingRoot の記述は見つかりませんでした。',
+    impact: 'ルートが広く推定されると、開発サーバーの初回コンパイルがそのディレクトリ全体を走査し、'
+      + `IDE の待ち時間（${START_WAIT_SEC} 秒）内に HTTP の応答が返らないことがあります。`
+      + 'その場合の「起動できなかった」は、プロジェクトのコードの不具合を意味しません。',
+    action: 'next.config に turbopack.root（このプロジェクトの絶対パス）を設定するか、不要であれば上の階層のファイルを整理してください。'
+      + 'IDE はどちらも代わりに行いません（対象プロジェクトに書き込まないため）。',
+  }),
+  rootConfigured: (markers: string[]): Finding => ({
+    code: 'ancestor-root-marker-configured', severity: 'info',
+    fact: `プロジェクトより上の階層に lockfile またはワークスペースの宣言があります（${markers.join(' / ')}）。`,
+    reason: 'next.config に turbopack.root または outputFileTracingRoot の記述があります。',
+    impact: 'IDE は next.config を実行しないため、設定された値が正しいかは確認していません。',
+    action: null,
+  }),
+  nextInstallsTypeScript: (missing: string[]): Finding => ({
+    code: 'next-dev-installs-typescript', severity: 'limit',
+    fact: `TypeScript を使う構成ですが、node_modules に ${missing.join(' / ')} がありません。`,
+    reason: 'Next.js の開発サーバー（next dev）は、起動時に不足している TypeScript の依存を自分でインストールします（Next.js の既定の振る舞いです）。',
+    impact: '起動すると、IDE ではなく next dev が package.json・lockfile・node_modules を書き換えます。IDE はこれを止めません。',
+    action: '書き換えを避けたい場合は、起動する前にプロジェクトで依存をインストールしてください。',
+  }),
+  nextRewritesTsconfig: (nextEnvExists: boolean): Finding => ({
+    code: 'next-dev-writes-tsconfig', severity: 'info',
+    fact: 'このプロジェクトは TypeScript を使っています。',
+    reason: 'Next.js の開発サーバー（next dev）は、起動時に tsconfig.json の一部の項目を必要な値に書き換え、'
+      + `next-env.d.ts を${nextEnvExists ? '書き直します' : '作成します'}（Next.js の既定の振る舞いです）。`,
+    impact: '書き換えるかどうかは、その時点の tsconfig.json の内容で Next.js が決めます。この検出では事前に判定しません。'
+      + '書き換えるのは next dev であり、IDE は対象プロジェクトに書き込みません。起動後に変化を観測した場合は、その事実を表示します。',
+    action: null,
+  }),
   alreadyRunning: (s: ExistingDevServer): Finding => ({
     code: 'another-dev-server-running', severity: 'limit',
     fact: `このプロジェクトの開発サーバーが既に起動しています（PID ${s.pid}${s.port ? ` / ポート ${s.port}` : ''}）。`,
@@ -342,6 +447,8 @@ function empty(input: string, finding: Finding): ProjectInspection {
     router: { kind: 'none', appDir: null, pagesDir: null },
     packageManager: null, devScript: null, nodeModulesInstalled: false, nextConfig: null,
     existingDevServer: null,
+    ancestorRootMarkers: [], rootConfigured: false,
+    typescript: { used: false, tsconfig: false, nextEnvDts: false, missingDeps: [] },
     instrumentation: { available: false, reason: null, boot: null, missing: [] },
     findings: [finding], checkedAt: new Date().toISOString(),
   };
@@ -398,6 +505,8 @@ export async function inspectProject(input: string): Promise<ProjectInspection> 
     router: { kind: 'none', appDir: null, pagesDir: null },
     packageManager, devScript, nodeModulesInstalled: false, nextConfig,
     existingDevServer: null,
+    ancestorRootMarkers: [], rootConfigured: false,
+    typescript: { used: false, tsconfig: false, nextEnvDts: false, missingDeps: [] },
     instrumentation: { available: false, reason: null, boot: null, missing: [] },
     findings: [], checkedAt: new Date().toISOString(),
   };
@@ -449,6 +558,24 @@ export async function inspectProject(input: string): Promise<ProjectInspection> 
     findings.push(F.nextUnverified(installed ?? '不明'));
   }
   if (pagesCandidate) findings.push(F.pagesAlso(pagesCandidate.rel));
+
+  /* ルートの推定（R3）。起動が終わらない原因になりうるので、起動前に言う */
+  const markers = findAncestorRootMarkers(root);
+  const rootConfigured = mentionsRootConfig(root, nextConfig);
+  base.ancestorRootMarkers = markers;
+  base.rootConfigured = rootConfigured;
+  if (markers.length) findings.push(rootConfigured ? F.rootConfigured(markers) : F.ancestorRootMarker(markers));
+
+  /* next dev が対象のファイルを書き換える条件（R4）。主体は next dev である */
+  const tsconfig = exists(path.join(root, 'tsconfig.json'));
+  const tsUsed = tsconfig || routerEntryIsTs(appCandidates[0].abs);
+  const missingTs = tsUsed
+    ? TYPESCRIPT_DEPS.filter((d) => !exists(path.join(root, 'node_modules', d, 'package.json')))
+    : [];
+  const nextEnvDts = exists(path.join(root, 'next-env.d.ts'));
+  base.typescript = { used: tsUsed, tsconfig, nextEnvDts, missingDeps: missingTs };
+  if (missingTs.length) findings.push(F.nextInstallsTypeScript(missingTs));
+  if (tsUsed) findings.push(F.nextRewritesTsconfig(nextEnvDts));
 
   const ins = checkInstrumentation();
   base.instrumentation = ins;

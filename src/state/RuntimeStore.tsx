@@ -11,6 +11,7 @@ import {
 } from 'react';
 import type { DevServerSnapshot, RunState } from '@/server/devServer';
 import type { Finding, ProjectInspection } from '@/server/projectInspect';
+import { isNewerSnapshot } from '@/lib/snapshotOrder';
 
 export type { DevServerSnapshot, RunState, Finding, ProjectInspection };
 
@@ -33,6 +34,8 @@ const POLL_MS: Record<RunState, number> = {
   idle: 6000, validating: 1000, starting: 900, running: 3000,
   stopping: 700, stopped: 6000, error: 6000,
 };
+/** 操作の応答を待っている間の間隔 */
+const PENDING_POLL_MS = 500;
 
 interface Ctx {
   /** 入力中のパス */
@@ -76,8 +79,11 @@ export function RuntimeProvider({ children }: { children: ReactNode }) {
   const [pending, setPending] = useState<Ctx['pending']>(null);
   const [apiError, setApiError] = useState<string | null>(null);
 
-  const pendingRef = useRef<Ctx['pending']>(null);
-  pendingRef.current = pending;
+  const restoredRef = useRef(false);
+
+  const acceptRuntime = useCallback((incoming: DevServerSnapshot) => {
+    setRuntime((prev) => (isNewerSnapshot(prev, incoming) ? incoming : prev));
+  }, []);
 
   useEffect(() => {
     try {
@@ -90,22 +96,29 @@ export function RuntimeProvider({ children }: { children: ReactNode }) {
     try { window.localStorage.setItem(LAST_PATH_KEY, p); } catch { /* 覚えないだけ */ }
   }, []);
 
-  /** 状態の取得。**操作中は上書きしない**（応答が入れ違うため） */
+  /** 状態の取得。操作中も止めない。新旧は `isNewerSnapshot` が決める */
   const poll = useCallback(async () => {
-    if (pendingRef.current) return;
     try {
       const r = await fetch('/api/runtime/status', { headers: { accept: 'application/json' } });
       const j = await r.json() as { runtime?: DevServerSnapshot; inspection?: ProjectInspection | null; error?: { message: string } };
       if (j.error) { setApiError(j.error.message); return; }
       setApiError(null);
-      if (j.runtime) setRuntime(j.runtime);
-      if (j.inspection !== undefined && j.inspection !== null) {
-        setInspection((prev) => (prev ? prev : j.inspection ?? null));
+      if (j.runtime) acceptRuntime(j.runtime);
+      if (j.inspection) {
+        // 画面を開き直したとき、サーバーが持つ直近の検出結果を戻す。
+        // その結果がどのパスのものかを入力欄にも戻す（入力が空なのに検出結果だけが
+        // 出ている状態を作らない）。利用者が入力を消した後に何度も戻さないよう、一度だけ行う
+        const restored = j.inspection;
+        setInspection((prev) => prev ?? restored);
+        if (!restoredRef.current) {
+          restoredRef.current = true;
+          setPathInput((p) => (p.trim() ? p : restored.input));
+        }
       }
     } catch (e) {
       setApiError(e instanceof Error ? e.message : String(e));
     }
-  }, []);
+  }, [acceptRuntime]);
 
   const refreshLogs = useCallback(async () => {
     try {
@@ -117,24 +130,26 @@ export function RuntimeProvider({ children }: { children: ReactNode }) {
     } catch { /* 出力が取れないことは状態に影響しない */ }
   }, []);
 
-  /* 初回と、状態に応じた間隔での取得 */
+  /* 初回と、状態に応じた間隔での取得。
+   * 操作の応答を待っている間は、状態が変わり始めるのを見逃さないよう短い間隔で見る
+   * （クリック直後の状態は idle のままなので、idle の間隔では最長 6 秒遅れる） */
   const state = runtime?.state ?? 'idle';
+  const interval = pending ? PENDING_POLL_MS : POLL_MS[state];
   useEffect(() => {
     void poll();
-    const id = window.setInterval(() => { void poll(); }, POLL_MS[state]);
+    const id = window.setInterval(() => { void poll(); }, interval);
     return () => window.clearInterval(id);
-  }, [poll, state]);
+  }, [poll, interval]);
 
-  /* 起動中・失敗後は出力を見たい */
+  /* 起動中・失敗後は出力を見たい。起動中は進み具合が変わるたびに取り直す */
   useEffect(() => {
     if (state === 'starting' || state === 'error' || state === 'running') void refreshLogs();
-  }, [state, refreshLogs, runtime?.seq]);
+  }, [state, refreshLogs, runtime?.seq, runtime?.progress?.at]);
 
   const call = useCallback(async (
     kind: NonNullable<Ctx['pending']>, url: string, payload: unknown,
   ) => {
     setPending(kind);
-    pendingRef.current = kind;
     setApiError(null);
     try {
       const r = await fetch(url, {
@@ -144,17 +159,16 @@ export function RuntimeProvider({ children }: { children: ReactNode }) {
         runtime?: DevServerSnapshot; inspection?: ProjectInspection | null;
         error?: { message: string };
       };
-      if (j.runtime) setRuntime(j.runtime);
+      if (j.runtime) acceptRuntime(j.runtime);
       if (j.inspection !== undefined) setInspection(j.inspection ?? null);
       if (j.error) setApiError(j.error.message);
     } catch (e) {
       setApiError(e instanceof Error ? e.message : String(e));
     } finally {
       setPending(null);
-      pendingRef.current = null;
       void refreshLogs();
     }
-  }, [refreshLogs]);
+  }, [acceptRuntime, refreshLogs]);
 
   const inspect = useCallback(async () => {
     remember(pathInput);

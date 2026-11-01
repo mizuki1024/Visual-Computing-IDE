@@ -7,10 +7,19 @@
  *   → 停止する」が、固定デモではなく実際のローカルプロジェクトで動くこと。
  *
  * 画面の操作だけで行う。API を直接叩かない。
+ *
+ * 題材が無い環境の扱い
+ *   - VCIDE_E2E_PROJECT に next が入っていなければ、全件 skip（成功扱いにしない）
+ *   - Pages Router の題材（/Users/mizuki/portfolio-site-1）が無ければ、
+ *     構成だけを組んだ骨を一時ディレクトリに作って代わりに使う（骨であることを表示する）
+ *   - R3（上の階層の lockfile）の画面表示も、一時ディレクトリの骨で確かめる
+ *
+ * ブラウザは既定で channel: chrome。PW_CHANNEL=none で同梱の chromium を使う。
  * ========================================================================== */
 import { chromium } from 'playwright-core';
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 
 const BASE = process.env.BASE ?? 'http://localhost:3100';
@@ -33,7 +42,28 @@ if (!fs.existsSync(path.join(PROJECT, 'node_modules', 'next', 'dist', 'bin', 'ne
   process.exit(0);
 }
 
-const browser = await chromium.launch({ channel: 'chrome' });
+const CHANNEL = process.env.PW_CHANNEL ?? 'chrome';
+const browser = await chromium.launch(CHANNEL === 'none' ? {} : { channel: CHANNEL });
+console.log(`ブラウザ: ${CHANNEL === 'none' ? '同梱の chromium' : `channel ${CHANNEL}`} ${browser.version()} / 題材: ${PROJECT}`);
+
+/* 骨（検出だけに使う。起動はしない）。一時ディレクトリに置き、終了時に消す */
+const BONES = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'vcide-e2e-')));
+process.on('exit', () => { try { fs.rmSync(BONES, { recursive: true, force: true }); } catch { /* 残っても害はない */ } });
+const bone = (rel, body) => {
+  const p = path.join(BONES, rel);
+  fs.mkdirSync(path.dirname(p), { recursive: true });
+  fs.writeFileSync(p, body);
+};
+const boneNext = (dir, version) => {
+  bone(`${dir}/node_modules/next/package.json`, JSON.stringify({ name: 'next', version }));
+  bone(`${dir}/node_modules/next/dist/bin/next`, '#!/usr/bin/env node\n');
+};
+bone('pages-only/package.json', JSON.stringify({ name: 'pages-only', dependencies: { next: '^16.0.0' } }));
+boneNext('pages-only', '16.2.6'); bone('pages-only/src/pages/index.tsx', 'x\n');
+bone('outer/package-lock.json', '{}');
+bone('outer/nested-app/package.json', JSON.stringify({ name: 'nested-app', dependencies: { next: '^16.0.0' } }));
+boneNext('outer/nested-app', '16.2.6'); bone('outer/nested-app/app/page.tsx', 'x\n');
+bone('outer/nested-app/tsconfig.json', '{}\n'); bone('outer/nested-app/package-lock.json', '{}');
 const page = await browser.newPage({ viewport: { width: 1600, height: 1000 }, deviceScaleFactor: 1 });
 const pageErrors = [];
 page.on('pageerror', (e) => pageErrors.push(e.message));
@@ -50,6 +80,9 @@ const groupMembers = (pgid) => execFileSync('ps', ['-ax', '-o', 'pid=,pgid='], {
   .split('\n').map((l) => /^\s*(\d+)\s+(\d+)/.exec(l)).filter(Boolean)
   .filter((m) => +m[2] === pgid).length;
 
+const TSCONFIG = path.join(PROJECT, 'tsconfig.json');
+const TSCONFIG_BEFORE = fs.existsSync(TSCONFIG) ? fs.readFileSync(TSCONFIG, 'utf8') : null;
+
 await page.goto(BASE, { waitUntil: 'networkidle' });
 await page.waitForTimeout(600);
 
@@ -58,20 +91,45 @@ console.log('\n1. IDE を開く');
 eq('Phase 5 の確定 UI が出ている（N0 / キャンバス / 右ドック）',
   await page.locator('.n0').count() + await page.locator('.canvas').count() + await page.locator('.dock').count(), 3);
 eq('「プロジェクトと実行」のパネルが出ている', await panel().count(), 1);
-eq('最初は未起動', await stateText(), '未起動');
-eq('N0 は「記録」であることを明示している（実プロセスの状態と混ぜない）',
-  (await page.locator('.n0 .chipbar').nth(1).innerText()).startsWith('記録'), true);
-eq('起動ボタンは押せない（まだ検出していない）',
-  await panel().locator('.rt-b.go.off').count(), 1);
-eq('停止ボタンも押せない', await panel().locator('.rt-b.off', { hasText: '停止する' }).count(), 1);
+const initial = await stateText();
+if (initial === '未起動') {
+  ok('最初は未起動', true);
+  eq('N0 は「記録」であることを明示している（実プロセスの状態と混ぜない）',
+    (await page.locator('.n0 .chipbar').nth(1).innerText()).startsWith('記録'), true);
+  eq('起動ボタンは押せない（まだ検出していない）',
+    await panel().locator('.rt-b.go.off').count(), 1);
+} else {
+  // 同じ IDE のプロセスで前に起動・停止した記録がある。「開いた直後」の3項目は
+  // 新しく起動した IDE でしか確かめられないので skip とし、代わりに矛盾が無いことを見る
+  const why = `IDE のプロセスに前回の操作の記録がある（状態「${initial}」）。新しく起動した IDE で確かめる項目`;
+  skip('最初は未起動', why);
+  skip('N0 は「記録」であることを明示している', why);
+  skip('起動ボタンは押せない（まだ検出していない）', why);
+  ok('前回の記録があっても「実行中」とは書かない', initial !== '実行中', initial);
+  const shown = await panel().locator('.rt-ins').getAttribute('data-input', { timeout: 2000 }).catch(() => null);
+  if (shown !== null) {
+    eq('戻した検出結果のパスが入力欄にも入っている（空の入力で起動させない）',
+      await panel().locator('#rt-path').inputValue(), shown);
+  }
+}
+eq('停止ボタンは押せない', await panel().locator('.rt-b.off', { hasText: '停止する' }).count(), 1);
 await shot('01-open');
 
 /* ------------------------------------------- 2. 不正なパス / 対応外の構成 */
 console.log('\n2. 指定が不正・対応外なら理由が出る');
+/**
+ * パスを入れて［検出］を押し、**その入力に対する新しい結果**が出るまで待つ（R1）。
+ * 前の結果が表示されたままなので、`.rt-vd` が見えることを待つだけでは古い DOM を読む。
+ * 入力（data-input）と検出時刻（data-checked-at）の両方で、新しい結果であることを確かめる。
+ */
 const typePath = async (p) => {
+  const prev = await panel().locator('.rt-ins').getAttribute('data-checked-at', { timeout: 500 }).catch(() => null);
   await panel().locator('#rt-path').fill(p);
   await panel().locator('.rt-b', { hasText: '検出' }).click();
-  await panel().locator('.rt-vd').first().waitFor({ state: 'visible', timeout: 15000 });
+  await page.waitForFunction(([input, before]) => {
+    const el = document.querySelector('.fpnl[aria-label="プロジェクトと実行"] .rt-ins');
+    return !!el && el.getAttribute('data-input') === input && el.getAttribute('data-checked-at') !== before;
+  }, [p, prev], { timeout: 15000 });
 };
 await typePath('relative/path');
 eq('相対パスは「指定が不正」', await panel().locator('.rt-vd').innerText(), '指定が不正');
@@ -85,15 +143,34 @@ eq('存在しないパスも「指定が不正」', await panel().locator('.rt-v
 ok('わからないことを書いている（③ を省略しない）',
   (await panel().locator('.rt-card p.imp').first().innerText()).length > 0);
 
-if (fs.existsSync('/Users/mizuki/portfolio-site-1/src/pages')) {
-  await typePath('/Users/mizuki/portfolio-site-1');
-  eq('Pages Router だけのプロジェクトは「未対応」', await panel().locator('.rt-vd').innerText(), '未対応');
+{
+  const real = fs.existsSync('/Users/mizuki/portfolio-site-1/src/pages');
+  const target = real ? '/Users/mizuki/portfolio-site-1' : path.join(BONES, 'pages-only');
+  if (!real) console.log(`  （実在の題材が無いため、構成だけの骨 ${target} を使う）`);
+  await typePath(target);
+  eq(`Pages Router だけのプロジェクトは「未対応」${real ? '' : '（骨）'}`, await panel().locator('.rt-vd').innerText(), '未対応');
+  eq('data-verdict も未対応', await panel().locator('.rt-ins').getAttribute('data-verdict'), 'unsupported');
   ok('検出した構成名が具体的に出る',
-    (await panel().locator('.rt-card b').first().innerText()).includes('src/pages'),
+    (await panel().locator('.rt-card b').first().innerText()).includes('pages'),
     await panel().locator('.rt-card b').first().innerText());
+  eq('起動ボタンは押せない', await panel().locator('.rt-b.go.off').count(), 1);
   await shot('03-unsupported');
-} else {
-  skip('Pages Router だけのプロジェクトの表示', 'この環境に題材が無い');
+}
+
+console.log('\n2b. 上の階層の lockfile は、起動する前に理由として出る（R3）');
+{
+  await typePath(path.join(BONES, 'outer', 'nested-app'));
+  eq('判定は部分対応（起動は試せる）', await panel().locator('.rt-vd').innerText(), '部分対応');
+  const cards = await panel().locator('.rt-ins .rt-card').allInnerTexts();
+  const r3 = cards.find((t) => t.includes('ワークスペースのルート'));
+  ok('上の階層の lockfile を所見として画面に出す', !!r3 && r3.includes(path.join(BONES, 'outer', 'package-lock.json')), cards);
+  ok('turbopack.root の設定を次の操作として示す', /turbopack\.root/.test(r3 ?? ''), r3);
+  ok('「壊れている」と書かない', !/壊れて(い|お)ます/.test(r3 ?? ''), r3);
+  const r4 = cards.find((t) => t.includes('tsconfig.json'));
+  ok('next dev が tsconfig.json を書き換えうることを、主体を明示して出す（R4）',
+    !!r4 && /next dev/.test(r4) && /IDE は対象プロジェクトに書き込みません/.test(r4), cards);
+  await panel().locator('.rt-ins').scrollIntoViewIfNeeded();
+  await shot('10-root-inference');
 }
 
 /* ----------------------------------------------- 3. 実在のプロジェクトを指定 */
@@ -107,14 +184,32 @@ ok('Next のバージョンを実体から読んで表示する', /^\d+\.\d+/.te
 ok('App Router のディレクトリを表示する', /app$/.test(dd[2].split(' ')[0]), dd[2]);
 ok('依存がインストール済みであることを表示する', dd[3].startsWith('インストール済み'), dd[3]);
 eq('起動ボタンが押せるようになる', await panel().locator('.rt-b.go:not(.off)').count(), 1);
+{
+  // 検出した後にパスを書き換えたら、検出し直すまで起動させない（表示中の結果と起動対象を食い違わせない）
+  await panel().locator('#rt-path').fill(`${PROJECT}-edited`);
+  eq('検出後にパスを変えると起動ボタンは押せない', await panel().locator('.rt-b.go.off').count(), 1);
+  await panel().locator('#rt-path').fill(PROJECT);
+  eq('元のパスに戻せば押せる', await panel().locator('.rt-b.go:not(.off)').count(), 1);
+}
 await shot('04-detected');
 
 /* ------------------------------------------------------- 4. 起動する */
 console.log('\n4. 起動する');
 await panel().locator('.rt-b.go', { hasText: '起動する' }).click();
-await page.waitForTimeout(400);
+// R2: 応答（最長180秒）を待つ間も、画面は実プロセスの状態を出し続けること
+await page.locator('.rt-st b', { hasText: /^(構成を検証中|起動中|実行中)$/ }).first()
+  .waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
 const during = await stateText();
-ok(`起動中は「${during}」であって「実行中」ではない`, during !== '実行中', during);
+ok(`クリック後 5 秒以内に「構成を検証中」か「起動中」になる（「未起動」のままにしない）— 「${during}」`,
+  ['構成を検証中', '起動中'].includes(during) || during === '実行中', during);
+ok('起動の応答を待っている間は「実行中」と書かない（応答確認前）',
+  during !== '実行中' || (await panel().locator('.rt-run dd').nth(2).innerText()).startsWith('応答あり'), during);
+if (during === '起動中') {
+  await page.waitForTimeout(1500);
+  const prog = await panel().locator('.rt-prog').innerText().catch(() => '');
+  ok('起動中は経過秒と Next.js の出力を出す（平坦な待ちにしない）',
+    /HTTP の応答を確認するまで/.test(prog) && /\d+ 秒/.test(await panel().locator('.rt-st').innerText()), prog);
+}
 await shot('05-starting');
 await waitState('実行中');
 eq('状態は「実行中」', await stateText(), '実行中');
@@ -189,6 +284,18 @@ await waitState('停止しています', 40000);
 eq('もう一度止められる', aliveNow(pid2), false);
 eq('最後にプロセスが残っていない', groupMembers(pid2), 0);
 
+{
+  // R4: tsconfig.json が変わったなら、それを画面が「観測した変化」として出していること。
+  // 変わっていなければ何も言うことはない（IDE は書かない。next dev が書くかは Next.js が決める）
+  const now = fs.existsSync(TSCONFIG) ? fs.readFileSync(TSCONFIG, 'utf8') : null;
+  if (now === TSCONFIG_BEFORE) {
+    ok('対象の tsconfig.json は起動・停止を2回通しても変わっていない', true);
+  } else {
+    const cards = await panel().locator('.rt-card').allInnerTexts();
+    ok('tsconfig.json が変わったことを、主体を IDE とせずに画面が出している',
+      cards.some((t) => /tsconfig\.json（(変更|作成)）/.test(t) && /IDE は対象プロジェクトに書き込みません/.test(t)), cards);
+  }
+}
 eq('JS エラーなし', pageErrors.length, 0);
 if (pageErrors.length) console.log(pageErrors);
 
