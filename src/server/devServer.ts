@@ -21,6 +21,7 @@ import {
   inspectProject, isStartable, START_WAIT_SEC, type Finding, type ProjectInspection,
 } from './projectInspect';
 import { redactAll } from './redact';
+import { childEnvReport } from './childEnv';
 
 /** 指示 2.D の7状態。これ以外の状態を作らない。 */
 export type RunState =
@@ -70,6 +71,11 @@ export interface DevServerSnapshot {
   logLines: number;
   /** 出力を取得できるか。引き継いだプロセスでは取れない */
   logAvailable: boolean;
+  /**
+   * 起動先に渡した環境変数（Phase 7B-1）。**名前だけ**を持ち、値は持たない。
+   * 渡さなかった変数は数だけを持つ。引き継いだプロセスでは不明（null）
+   */
+  env: { passed: string[]; withheld: number; explicit: string[] } | null;
   updatedAt: string;
 }
 
@@ -113,26 +119,8 @@ const ROOT_INFERENCE_RE = /(inferred your workspace root|multiple lockfiles|Dete
 /** next dev が書き換えうる対象のファイル（R4）。内容の指紋を起動前後で比べる */
 const WATCHED_TARGET_FILES = ['tsconfig.json', 'next-env.d.ts', 'package.json'];
 
-/**
- * 子に渡さない環境変数。**IDE 自身の実行時の状態**であって、対象プロジェクトのものではない。
- *
- * IDE は Next の上で動くため、IDE のプロセスには Next が自分のために設定した変数が入っている
- * （`next start` で実測: NODE_ENV=production / PORT=<IDE のポート> / __NEXT_PRIVATE_ORIGIN=<IDE の URL> /
- * NEXT_RUNTIME / TURBOPACK / NEXT_PRIVATE_START_TIME / NEXT_DEPLOYMENT_ID）。
- * これをそのまま渡すと、対象の `next dev` が本番モードの NODE_ENV と IDE の URL を自分のものとして読む。
- * `npm run dev` で起動した IDE では、IDE の package.json の内容（npm_package_*）も入る。
- * 利用者の設定（npm_config_* のプロキシ設定・NODE_OPTIONS・PATH など）は渡す。
- */
-const IDE_OWN_ENV = /^(NODE_ENV|PORT|NEXT_RUNTIME|NEXT_DEPLOYMENT_ID|TURBOPACK|__NEXT_.*|NEXT_PRIVATE_.*|npm_package_.*|npm_lifecycle_.*)$/;
-
-/** 子（対象の next dev）に渡す環境。IDE 自身の実行時の変数を落とす */
-export function childEnv(base: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
-  // NODE_ENV を意図して落とすため、Next の型（NODE_ENV 必須）ではなく素の辞書で組む
-  const env: Record<string, string | undefined> = {};
-  for (const [k, v] of Object.entries(base)) if (!IDE_OWN_ENV.test(k)) env[k] = v;
-  env.NEXT_TELEMETRY_DISABLED = '1';
-  return env as NodeJS.ProcessEnv;
-}
+/** 子に渡す環境は childEnv.ts が決める（Phase 7B-1 で許可リスト方式に変えた） */
+export { childEnv, childEnvReport } from './childEnv';
 
 type FileFingerprint = string | null;   // 内容の sha1。無ければ null
 
@@ -242,6 +230,7 @@ export class DevServerManager {
     saidInstall: boolean;
   } | null = null;
   #targetChanges: Finding | null = null;
+  #env: DevServerSnapshot['env'] = null;
   /** 停止を自分で始めたか。異常終了と区別するために要る */
   #stopping = false;
   #updatedAt = new Date().toISOString();
@@ -277,6 +266,7 @@ export class DevServerManager {
       error: this.#error,
       logLines: this.#log.length,
       logAvailable: this.#logAvailable,
+      env: this.#env,
       updatedAt: this.#updatedAt,
     };
   }
@@ -376,7 +366,8 @@ export class DevServerManager {
     }
 
     /* ---------------------------------------------------------------- 環境 */
-    const env = childEnv(process.env);
+    const envReport = childEnvReport(process.env);
+    const env = envReport.env;
     if (instrumentation.state === 'enabled' && insAvail.boot && instrumentation.spanFile) {
       fs.mkdirSync(path.dirname(instrumentation.spanFile), { recursive: true });
       // 空白を含むパスがあるため二重引用符で囲む（PoC-01 と同じ）
@@ -397,6 +388,7 @@ export class DevServerManager {
     this.#readyMs = null;
     this.#stopping = false;
     this.#progress = null;
+    this.#env = { passed: envReport.passed, withheld: envReport.withheld, explicit: envReport.explicit };
     if (this.#baseline?.root !== ins.root) {
       this.#targetChanges = null;
       this.#baseline = {

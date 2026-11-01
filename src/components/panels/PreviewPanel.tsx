@@ -3,9 +3,14 @@
  * Webプレビュー（現物）。IDE はプレビューの中身を動かさない（03b 8.3節）。
  * 追跡できる値は合成データの経路にある1件だけである。他の文字に押せる見た目を
  * 与えない（IX-23：押せるのに何も起きない導線を作らない）。
+ *
+ * Phase 7B-1: 開発サーバーを扱っている間は LivePreview（実プレビュー）に切り替える。
+ * 合成データ・記録データの表示（以下）は変えていない。
  * ========================================================================== */
 import { useExplore, sameRef } from '@/state/ExploreStore';
+import { useRuntime } from '@/state/RuntimeStore';
 import FloatingPanel from './FloatingPanel';
+import LivePreview, { wantsLivePreview } from './LivePreview';
 
 const FILTERS = ['エリア', '種別', '規模', '状況'];
 
@@ -29,6 +34,12 @@ function Card({ no, region, plan, scale, date, b, children }: {
 
 export default function PreviewPanel() {
   const { data, selection, select } = useExplore();
+  const { runtime, liveSeen } = useRuntime();
+  /*
+   * Phase 7B-1: IDE が開発サーバーを扱っている間は、同じパネルの中身を実プレビューにする。
+   * それ以外（プロジェクト未指定・この画面で起動を観測していない）は、以下の従来の表示のまま。
+   */
+  if (wantsLivePreview(runtime, liveSeen)) return <LivePreview />;
   // 追跡できる値があるのは、経路に「表示された値」のノードがあるときだけである。
   // PoC-01 の実測データには無い（ブラウザDOMの読み取りは PoC-03 の範囲）。
   const valueNode = data.nodes.find((n) => n.kind === 'value');

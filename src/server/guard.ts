@@ -8,30 +8,27 @@
  *      （独自ヘッダは単純要求にならないため、必ず事前検査が走る）
  * を満たす。**任意のコマンドを受け取る口は作らない** — 起動対象は
  * 検出済みプロジェクトの node_modules の next に限られる（devServer.ts）。
+ *
+ * Phase 7B-1: クラウドの転送 URL（Codespaces など）で使えるよう、1 の「ループバック」に
+ * **IDE を起動した人が環境変数で明示したホスト名**を足せるようにした（access.ts）。
+ * 2 と 3 は変えていない。Origin は Host と完全に一致しなければならない。
  * ========================================================================== */
+import { accessConfig, isAllowedIdeHost, type AccessConfig } from './access';
 
 /** 変更操作に必要な独自ヘッダ。値は問わない（存在が事前検査を強制する） */
 export const REQUEST_HEADER = 'x-vcide-request';
 
-const LOOPBACK = new Set(['localhost', '127.0.0.1', '::1', '[::1]', '0.0.0.0']);
-
 export interface GuardFailure { status: number; code: string; message: string }
-
-const hostnameOf = (hostHeader: string): string => {
-  const h = hostHeader.trim();
-  if (h.startsWith('[')) return h.slice(0, h.indexOf(']') + 1);
-  return h.split(':')[0];
-};
 
 /** 通してよければ null。駄目なら理由を返す。 */
 export function guardRequest(
-  req: Request, { mutating }: { mutating: boolean },
+  req: Request, { mutating }: { mutating: boolean }, cfg: AccessConfig = accessConfig(),
 ): GuardFailure | null {
   const host = req.headers.get('host');
-  if (!host || !LOOPBACK.has(hostnameOf(host))) {
+  if (!host || !isAllowedIdeHost(host, cfg)) {
     return {
       status: 403, code: 'non-local-host',
-      message: 'このAPIはローカルからのみ使用できます（Host がループバックではありません）。',
+      message: 'このAPIはローカルからのみ使用できます（Host がループバックでも、IDE の起動時に許可したホスト名でもありません）。',
     };
   }
 
@@ -49,7 +46,7 @@ export function guardRequest(
     try { u = new URL(origin); } catch {
       return { status: 403, code: 'bad-origin', message: 'Origin を解釈できません。' };
     }
-    if (!LOOPBACK.has(u.hostname) || u.host !== host) {
+    if (u.host !== host.trim().toLowerCase() || !isAllowedIdeHost(u.host, cfg)) {
       return {
         status: 403, code: 'cross-origin',
         message: 'このAPIは同一オリジンからのみ使用できます。',

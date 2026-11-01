@@ -53,8 +53,10 @@ function useElapsedSec(since: string | null, active: boolean): number | null {
 export default function RuntimePanel() {
   const {
     pathInput, setPathInput, portInput, setPortInput, instrument, setInstrument,
-    runtime, inspection, logs, pending, apiError, inspect, start, stop,
+    runtime, inspection, logs, pending, apiError, inspect, start, stop, preview,
   } = useRuntime();
+  /** このブラウザが IDE に転送 URL で来ているか（中継の URL がループバックでない） */
+  const viaForwarding = !!preview?.origin && !/^https?:\/\/(127\.0\.0\.1|localhost|\[::1\])(:|\/|$)/.test(preview.origin);
   const [showLog, setShowLog] = useState(false);
 
   const state = runtime?.state ?? 'idle';
@@ -190,10 +192,22 @@ export default function RuntimePanel() {
                 ? `応答あり（${runtime.lastProbe.status}） ${runtime.lastProbe.at.slice(11, 19)}`
                 : `応答なし — ${runtime.lastProbe.detail ?? '理由を特定できません'}`)
               : '未確認'}</dd>
+            {runtime.env && (
+              <>
+                <dt>環境変数</dt>
+                <dd className="rt-env" title={`渡した変数: ${runtime.env.passed.join(', ')}`}>
+                  {runtime.env.passed.length} 個を渡しました
+                  <i> （他の {runtime.env.withheld} 個は渡していません）</i>
+                </dd>
+              </>
+            )}
             {runtime.url && state === 'running' && (
               <>
                 <dt>URL</dt>
-                <dd><a className="rt-a" href={runtime.url} target="_blank" rel="noreferrer">{runtime.url}</a></dd>
+                {/* クラウドの転送 URL で開いているとき、サーバー側の 127.0.0.1 はこのブラウザから届かない。押せる見た目にしない */}
+                {viaForwarding
+                  ? <dd>{runtime.url}<i> （サーバー側。表示はプレビューから）</i></dd>
+                  : <dd><a className="rt-a" href={runtime.url} target="_blank" rel="noreferrer">{runtime.url}</a></dd>}
               </>
             )}
           </dl>

@@ -66,8 +66,23 @@ boneNext('outer/nested-app', '16.2.6'); bone('outer/nested-app/app/page.tsx', 'x
 bone('outer/nested-app/tsconfig.json', '{}\n'); bone('outer/nested-app/package-lock.json', '{}');
 const page = await browser.newPage({ viewport: { width: 1600, height: 1000 }, deviceScaleFactor: 1 });
 const pageErrors = [];
-page.on('pageerror', (e) => pageErrors.push(e.message));
-page.on('console', (m) => { if (m.type() === 'error' && !/favicon|404/.test(m.text())) pageErrors.push(m.text()); });
+/*
+ * Phase 7B-1: 実行中はプレビューパネルの iframe に対象のアプリが入る。そのアプリ自身のエラー
+ * （題材は DB が無いと /api/* が 500 になる）は IDE の不具合ではないので数えない。
+ * pageerror は iframe の中の例外も区別せずに含むため、IDE の最上位の文書にだけ受け口を置く。
+ * console は出所の URL が IDE のものだけを数える。
+ */
+await page.exposeBinding('__vcideE2eError', (_src, msg) => { pageErrors.push(String(msg)); });
+await page.addInitScript(() => {
+  if (window !== window.top) return;
+  addEventListener('error', (e) => window.__vcideE2eError(e.message));
+  addEventListener('unhandledrejection', (e) => window.__vcideE2eError(e.reason?.message ?? String(e.reason)));
+});
+page.on('console', (m) => {
+  if (m.type() !== 'error' || /favicon|404/.test(m.text())) return;
+  if (!(m.location().url ?? '').startsWith(new URL(BASE).origin)) return;
+  pageErrors.push(m.text());
+});
 
 const shot = async (name) => { if (SHOTS) await page.screenshot({ path: path.join(SHOTS, `${name}.png`) }); };
 const panel = () => page.locator('.fpnl[aria-label="プロジェクトと実行"]');

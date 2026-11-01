@@ -1,5 +1,6 @@
 /* =============================================================================
  * Phase 7A — 起動の待ちが切れる経路と、対象ファイルの変化の観測（R2 / R3 / R4）。
+ * Phase 7B-1 — 第3節に、ダミーの秘密情報が起動先へ渡らないことの否定テストを足した。
  *   node tests/devserver-stub.spec.mjs
  *
  * 実際の Next.js では再現に数分かかる、または環境に依存する経路を、
@@ -66,7 +67,10 @@ const fs = require('node:fs');
 const a = process.argv.slice(2);
 const port = Number(a[a.indexOf('-p') + 1]);
 const host = a[a.indexOf('-H') + 1];
-console.log('ENV ' + JSON.stringify(Object.fromEntries(['NODE_ENV', 'PORT', '__NEXT_PRIVATE_ORIGIN', 'TURBOPACK', 'NEXT_RUNTIME', 'npm_package_name', 'npm_config_https_proxy', 'VCIDE_USER_VAR'].map((k) => [k, process.env[k] ?? null]))));
+console.log('ENV ' + JSON.stringify(Object.fromEntries(['NODE_ENV', 'PORT', '__NEXT_PRIVATE_ORIGIN', 'TURBOPACK', 'NEXT_RUNTIME', 'npm_package_name', 'npm_config_https_proxy', 'VCIDE_USER_VAR', 'MY_APP_FLAG', 'OTHER_SHELL_VAR'].map((k) => [k, process.env[k] ?? null]))));
+// Phase 7B-1: ダミーの秘密情報の印がどこかの値に入っていないか。名前だけを出す（値は出さない）
+console.log('ENVLEAK ' + Object.values(process.env).filter((v) => String(v).includes('DUMMY-SECRET-7B1')).length);
+console.log('ENVNAMES ' + Object.keys(process.env).sort().join(','));
 console.log('   ▲ Next.js 16.2.6 (Turbopack)');
 console.log('   - Local:        http://' + host + ':' + port);
 if (${JSON.stringify(mode)} === 'hang') {
@@ -220,8 +224,15 @@ console.log('\n3. IDE 自身の実行時の環境変数を、対象の next dev 
 
   // 実際に起動して、子のプロセスが受け取った環境を見る（IDE が Next の上で動いている状態を再現する）
   const saved = {};
+  // Phase 7B-1: IDE のプロセスにダミーの秘密情報を入れて起動する（クラウドの環境で実際に入っている名前）
+  const DUMMY = 'DUMMY-SECRET-7B1';
   const set = { NODE_ENV: 'production', PORT: '3101', __NEXT_PRIVATE_ORIGIN: 'http://127.0.0.1:3101', TURBOPACK: '1',
-    NEXT_RUNTIME: 'nodejs', npm_package_name: 'visual-computing-ide', VCIDE_USER_VAR: 'kept' };
+    NEXT_RUNTIME: 'nodejs', npm_package_name: 'visual-computing-ide', VCIDE_USER_VAR: 'kept',
+    GITHUB_TOKEN: `ghp_${DUMMY}`, GH_TOKEN: DUMMY, AWS_SECRET_ACCESS_KEY: DUMMY, AWS_ACCESS_KEY_ID: DUMMY,
+    ANTHROPIC_API_KEY: `sk-ant-${DUMMY}`, CLAUDE_CODE_OAUTH_TOKEN: DUMMY, CLOUDSDK_AUTH_ACCESS_TOKEN: DUMMY,
+    DATABASE_URL: `postgres://u:${DUMMY}@db.invalid/x`, ALL_PROXY: `http://u:${DUMMY}@proxy.invalid:8080`,
+    npm_config__authToken: DUMMY,
+    MY_APP_FLAG: 'explicit', OTHER_SHELL_VAR: 'not-listed', VCIDE_CHILD_ENV_PASS: 'MY_APP_FLAG' };
   for (const [k, v] of Object.entries(set)) { saved[k] = process.env[k]; process.env[k] = v; }
   const m = new DS.DevServerManager();
   const s = await m.start({ project: QUIET, port: await freePort(3660), instrument: false });
@@ -234,7 +245,20 @@ console.log('\n3. IDE 自身の実行時の環境変数を、対象の next dev 
   eq('子は IDE の URL（__NEXT_PRIVATE_ORIGIN）を受け取らない', got.__NEXT_PRIVATE_ORIGIN, null);
   eq('子は TURBOPACK を受け取らない', got.TURBOPACK, null);
   eq('子は IDE の package 名を受け取らない', got.npm_package_name, null);
-  eq('利用者の環境変数は届く', got.VCIDE_USER_VAR, 'kept');
+  // Phase 7B-1 で方針を変えた: 名前を許可していない変数は渡さない（以前は「利用者の変数は届く」を検査していた）
+  eq('IDE の設定（VCIDE_*）は渡さない', got.VCIDE_USER_VAR, null);
+  eq('名前を許可していない変数は渡さない', got.OTHER_SHELL_VAR, null);
+  eq('VCIDE_CHILD_ENV_PASS で明示した変数は渡す', got.MY_APP_FLAG, 'explicit');
+  const leak = m.logs(50).lines.find((l) => l.startsWith('ENVLEAK '));
+  eq('子が受け取った環境のどの値にも、ダミーの秘密情報が無い', leak, 'ENVLEAK 0');
+  const names = (m.logs(50).lines.find((l) => l.startsWith('ENVNAMES ')) ?? '').slice(9).split(',');
+  for (const k of ['GITHUB_TOKEN', 'GH_TOKEN', 'AWS_SECRET_ACCESS_KEY', 'AWS_ACCESS_KEY_ID', 'ANTHROPIC_API_KEY',
+    'CLAUDE_CODE_OAUTH_TOKEN', 'CLOUDSDK_AUTH_ACCESS_TOKEN', 'DATABASE_URL', 'ALL_PROXY', 'npm_config__authToken']) {
+    eq(`子は ${k} を受け取らない`, names.includes(k), false);
+  }
+  ok('子は PATH を受け取る', names.includes('PATH'), names);
+  ok('画面に出す記録は名前と数だけ（値を持たない）', !!s.env && s.env.passed.every((n) => !n.includes('=')) && s.env.withheld > 0, s.env);
+  ok('記録の渡した名前に秘密情報の名前が無い', !s.env.passed.some((n) => /TOKEN|SECRET|API_KEY|DATABASE_URL/.test(n)), s.env.passed);
   await m.stop();
 }
 

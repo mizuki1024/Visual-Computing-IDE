@@ -11,9 +11,10 @@ import {
 } from 'react';
 import type { DevServerSnapshot, RunState } from '@/server/devServer';
 import type { Finding, ProjectInspection } from '@/server/projectInspect';
+import type { PreviewInfo } from '@/server/preview';
 import { isNewerSnapshot } from '@/lib/snapshotOrder';
 
-export type { DevServerSnapshot, RunState, Finding, ProjectInspection };
+export type { DevServerSnapshot, RunState, Finding, ProjectInspection, PreviewInfo };
 
 /** 最後に開いたプロジェクト（S-01 の「最近開いたプロジェクト」の最小形） */
 const LAST_PATH_KEY = 'vcide.lastProjectPath';
@@ -54,6 +55,14 @@ interface Ctx {
   pending: null | 'inspect' | 'start' | 'stop';
   /** API 自体が失敗したときの説明。状態とは別に持つ */
   apiError: string | null;
+  /** プレビューの中継（Phase 7B-1）。状態の取得と一緒に届く */
+  preview: PreviewInfo | null;
+  /**
+   * この画面を開いてから、IDE が開発サーバーを起動しようとしたのを観測したか。
+   * プレビューパネルは、観測した後だけ実プレビュー（停止・失敗を含む）を出す。
+   * 観測していない間は、従来どおり描いているデータセットの見本を出す
+   */
+  liveSeen: boolean;
 
   inspect: () => Promise<void>;
   start: () => Promise<void>;
@@ -78,6 +87,8 @@ export function RuntimeProvider({ children }: { children: ReactNode }) {
   const [logs, setLogs] = useState<Ctx['logs']>(null);
   const [pending, setPending] = useState<Ctx['pending']>(null);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [preview, setPreview] = useState<PreviewInfo | null>(null);
+  const [liveSeen, setLiveSeen] = useState(false);
 
   const restoredRef = useRef(false);
 
@@ -100,10 +111,14 @@ export function RuntimeProvider({ children }: { children: ReactNode }) {
   const poll = useCallback(async () => {
     try {
       const r = await fetch('/api/runtime/status', { headers: { accept: 'application/json' } });
-      const j = await r.json() as { runtime?: DevServerSnapshot; inspection?: ProjectInspection | null; error?: { message: string } };
+      const j = await r.json() as {
+        runtime?: DevServerSnapshot; inspection?: ProjectInspection | null;
+        preview?: PreviewInfo; error?: { message: string };
+      };
       if (j.error) { setApiError(j.error.message); return; }
       setApiError(null);
       if (j.runtime) acceptRuntime(j.runtime);
+      if (j.preview) setPreview(j.preview);
       if (j.inspection) {
         // 画面を開き直したとき、サーバーが持つ直近の検出結果を戻す。
         // その結果がどのパスのものかを入力欄にも戻す（入力が空なのに検出結果だけが
@@ -134,6 +149,9 @@ export function RuntimeProvider({ children }: { children: ReactNode }) {
    * 操作の応答を待っている間は、状態が変わり始めるのを見逃さないよう短い間隔で見る
    * （クリック直後の状態は idle のままなので、idle の間隔では最長 6 秒遅れる） */
   const state = runtime?.state ?? 'idle';
+  useEffect(() => {
+    if (state === 'starting' || state === 'running' || state === 'stopping' || pending === 'start') setLiveSeen(true);
+  }, [state, pending]);
   const interval = pending ? PENDING_POLL_MS : POLL_MS[state];
   useEffect(() => {
     void poll();
@@ -191,9 +209,9 @@ export function RuntimeProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<Ctx>(() => ({
     pathInput, setPathInput, portInput, setPortInput, instrument, setInstrument,
-    runtime, inspection, logs, pending, apiError,
+    runtime, inspection, logs, pending, apiError, preview, liveSeen,
     inspect, start, stop, refreshLogs,
-  }), [pathInput, portInput, instrument, runtime, inspection, logs, pending, apiError,
+  }), [pathInput, portInput, instrument, runtime, inspection, logs, pending, apiError, preview, liveSeen,
     inspect, start, stop, refreshLogs]);
 
   return <RuntimeCtx.Provider value={value}>{children}</RuntimeCtx.Provider>;

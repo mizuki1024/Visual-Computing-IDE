@@ -18,7 +18,8 @@
 | Phase 6F | PoC 成果の整合性修正（SQL 射影解析の作り直し） | 完了（`docs/06f`） |
 | M1 | 関係モデルの最小仕様の確定と機械的検査 | 完了（`docs/06g`） |
 | **Phase 7A** | **ローカル Next.js プロジェクトの選択・起動・停止** | **完了（`docs/07a`）。利用者の実在プロジェクトでの再確認が残る** |
-| Phase 7B | プレビュー・要素選択・観測情報の統合 | 未着手 |
+| **Phase 7B-1** | **実プレビューの統合（既存のプレビューパネルに実ページ）** | **完了（`docs/07b1`）。実物の Codespaces では未確認** |
+| Phase 7B-2 以降 | 要素選択・React ソースの特定・観測情報の統合 | 未着手 |
 
 Phase 7A は、実ブラウザで「IDE を開く → プロジェクトを指定する → 起動する →
 起動状態を確認する → 停止する」を端から端まで通した（`tests/runtime-e2e.spec.mjs`）。
@@ -27,6 +28,11 @@ Phase 7A は、実ブラウザで「IDE を開く → プロジェクトを指�
 起動できない構成（上の階層の lockfile など）は理由を起動前に出し、`next dev` 自身が
 対象の `tsconfig.json` / `next-env.d.ts` を書き換えることは主体を明示して伝える。
 詳細と未対応事項は `docs/07a-implementation-report.md`。
+
+Phase 7B-1 は、IDE が起動した開発サーバーのページを**既存のプレビューパネル**に表示する。
+ブラウザとサーバーの localhost が違うクラウドの環境でも届くよう、IDE 側に**宛先を1つに固定した中継**
+（別ポート・別 origin、既定 3150）を置き、iframe はその中継の URL を開く。起動先の `next dev` には
+**許可リストの環境変数だけ**を渡す（IDE の秘密情報を渡さない）。詳細は `docs/07b1-implementation-report.md`。
 
 ---
 
@@ -53,13 +59,27 @@ npm run dev          # http://127.0.0.1:3100
 
 画面右上の「プロジェクトと実行」パネルから、**実在するローカルの Next.js
 プロジェクト**を指定して開発サーバーを起動・停止できる（Phase 7A）。
+起動すると、プレビューパネルにそのページが出る（Phase 7B-1）。
+
+**クラウドの開発環境（Codespaces など）で使うとき。** ブラウザは転送 URL で来るため、IDE は既定では
+API を拒否する（ループバックだけを受け付ける）。IDE を起動するときに、許可するホスト名を明示する。
+ワイルドカードは受け付けない。ポートの公開範囲は Private のままにすること。
+
+```bash
+# Codespaces（IDE のポート 3100 と、中継のポート 3150 の転送ホストを組み立てる）
+VCIDE_ALLOWED_HOSTS=codespaces npm run dev
+# それ以外の転送
+VCIDE_ALLOWED_HOSTS=ide.example.test VCIDE_PREVIEW_ORIGIN=https://preview.example.test npm run dev
+# シェルの環境変数に頼るプロジェクトは、渡す名前を明示する（既定では渡さない）
+VCIDE_CHILD_ENV_PASS=DATABASE_URL npm run dev
+```
 
 ### 検証
 
 ```bash
 npm run typecheck
 npm run build
-npm test             # 1,464 件（ブラウザを使う節は dev サーバーが :3100 に必要）
+npm test             # ブラウザを使う節は dev サーバーが :3100 に必要（新しく起動した IDE に対して回す）
 npm run runtime:reap # 孤立した開発サーバーの掃除
 ```
 
@@ -67,6 +87,9 @@ npm run runtime:reap # 孤立した開発サーバーの掃除
 対して実行する。最後の `tests/runtime-e2e.spec.mjs` は実際に開発サーバーを起動・停止する
 （題材は既定で `poc/fixture-app`、`VCIDE_E2E_PROJECT` で変えられる）。「開いた直後」の
 3項目は**新しく起動した IDE でしか確かめられない**ため、同じ IDE で続けて回すと skip になる。
+`tests/preview-e2e.spec.mjs` は **IDE を自分で起動し**（`.next` のビルドが要る）、クラウドの転送を模した
+ブラウザ（ブラウザの 127.0.0.1 がサーバーに届かない構成）で実プレビューを確かめる。
+同じ IDE のプロセスで一度でも起動・停止すると `tests/explore.spec.mjs` が失敗する（Phase 7A からの既知の問題。`docs/07b1` 5.3節）。
 ブラウザは既定で Chrome（`PW_CHANNEL=none` で同梱の chromium）。`poc/` の PoC ランナーは Docker の Postgres を使うため、
 既定のテストには含まれない（記録済みの観測結果を読む）。
 
