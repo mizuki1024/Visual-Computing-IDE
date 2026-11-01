@@ -36,10 +36,17 @@ export function normalizeSource(source) {
 
 const diskMaps = new Map();
 
-function diskMap(relFile) {
-  if (diskMaps.has(relFile)) return diskMaps.get(relFile);
+/**
+ * 生成物の隣のソースマップ。鍵は絶対パス、生成物とマップの更新時刻・大きさが
+ * 変われば読み直す（Phase 7B-3B-1。開発中は同じ名前の生成物が書き換わる）。
+ */
+function diskMap(relFile, root = APP) {
+  const abs = path.join(root, relFile);
+  const stamp = (f) => { try { const st = fs.statSync(f); return `${st.mtimeMs}:${st.size}`; } catch { return '-'; } };
+  const key = `${stamp(abs)}|${stamp(`${abs}.map`)}`;
+  const hit = diskMaps.get(abs);
+  if (hit && hit.key === key) return hit.map;
   let map = null;
-  const abs = path.join(APP, relFile);
   try {
     if (fs.existsSync(`${abs}.map`)) {
       map = JSON.parse(fs.readFileSync(`${abs}.map`, 'utf8'));
@@ -50,7 +57,7 @@ function diskMap(relFile) {
       if (m) map = JSON.parse(Buffer.from(m[1], 'base64').toString('utf8'));
     }
   } catch { map = null; }
-  diskMaps.set(relFile, map);
+  diskMaps.set(abs, { key, map });
   return map;
 }
 
@@ -65,7 +72,8 @@ function diskMap(relFile) {
  *   //# sourceMappingURL=data:application/json;charset=utf-8;base64,…
  * の両方が入っている（実測）。
  */
-let evalIndex = null;
+/** 対象アプリの場所 → 索引（Phase 7B-3B-1 で対象を引数にした） */
+const evalIndexes = new Map();
 
 function walkJs(dir, out, depth = 0) {
   if (depth > 6) return out;
@@ -81,10 +89,10 @@ function walkJs(dir, out, depth = 0) {
   return out;
 }
 
-function buildEvalIndex() {
+function buildEvalIndex(root = APP) {
   const index = new Map();
   const files = [];
-  for (const d of NEXT_DIRS) walkJs(path.join(APP, d), files);
+  for (const d of NEXT_DIRS) walkJs(path.join(root, d), files);
   const re = /eval\("((?:[^"\\]|\\.)*)"\)/g;
   for (const f of files) {
     let body;
@@ -114,7 +122,13 @@ function buildEvalIndex() {
 /** 索引を作り直す。dev server を再起動したら呼ぶ */
 export function resetSrvMaps() {
   diskMaps.clear();
-  evalIndex = null;
+  evalIndexes.clear();
+}
+
+function evalIndexOf(root) {
+  let idx = evalIndexes.get(root);
+  if (!idx) { idx = buildEvalIndex(root); evalIndexes.set(root, idx); }
+  return idx;
 }
 
 /**
@@ -124,11 +138,11 @@ export function resetSrvMaps() {
  * @returns {{file:string, line:number, col:number}|null}
  *   `null` は「戻せなかった」である。**推測で埋めない。**
  */
-export function resolveServerFrame(frame) {
+export function resolveServerFrame(frame, root = APP) {
   if (!frame || !frame.line) return null;
 
   if (frame.scope === 'build-output') {
-    const map = diskMap(frame.file);
+    const map = diskMap(frame.file, root);
     if (!map) return null;
     const pos = originalPositionFor(map, frame.line, (frame.col ?? 1) - 1);
     const file = normalizeSource(pos?.source);
@@ -136,8 +150,7 @@ export function resolveServerFrame(frame) {
   }
 
   if (frame.scope === 'bundler-virtual') {
-    if (!evalIndex) evalIndex = buildEvalIndex();
-    const map = evalIndex.get(frame.file);
+    const map = evalIndexOf(root).get(frame.file);
     if (!map) return null;
     const pos = originalPositionFor(map, frame.line, (frame.col ?? 1) - 1);
     const file = normalizeSource(pos?.source);
@@ -148,7 +161,6 @@ export function resolveServerFrame(frame) {
 }
 
 /** 索引の件数（報告に出す。解決できなかった理由の切り分けに使う） */
-export function srvMapStats() {
-  if (!evalIndex) evalIndex = buildEvalIndex();
-  return { evalModules: evalIndex.size, diskMaps: diskMaps.size };
+export function srvMapStats(root = APP) {
+  return { evalModules: evalIndexOf(root).size, diskMaps: diskMaps.size };
 }

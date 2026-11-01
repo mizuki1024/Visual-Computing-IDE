@@ -16,6 +16,7 @@
 import { devServer } from '@/server/devServer';
 import { body, handle, json } from '@/server/apiShared';
 import { observations } from '@/server/observations';
+import { anchorOutDir, readManifestComponents } from '@/server/anchors';
 import { pidAlive } from '@/server/net';
 import { parseRunKey } from '@/lib/previewProtocol';
 import { runKeyString } from '@/lib/liveObservation';
@@ -44,10 +45,17 @@ export async function POST(req: Request): Promise<Response> {
         },
       });
     }
+    const ideOwned = s.instrumentation.state === 'enabled' && s.owner === 'ide';
     const observation = await observations().collect({
       run, runString: runKeyString(run), project: s.project.name, port: s.port,
       instrumentation: s.instrumentation,
-      traceHeader: s.instrumentation.state === 'enabled' && s.owner === 'ide',
+      traceHeader: ideOwned,
+      /* 7B-3B-1: SQL を実行した呼び出し位置の照合。対応表（コンポーネント範囲）は要素識別子の注入が有効なときだけ読む */
+      dataAccess: {
+        projectRoot: s.project.root,
+        enabled: ideOwned,
+        manifest: s.anchors?.state === 'enabled' ? readManifestComponents(anchorOutDir(s.project.root)) : null,
+      },
     });
     if (!observation) {
       return json({

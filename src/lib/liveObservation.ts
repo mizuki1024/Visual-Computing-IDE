@@ -21,6 +21,84 @@ export const RELAY_READ_REQUEST_HEADERS = ['sec-fetch-dest', 'rsc'] as const;
 export const RELAY_TRACE_HEADER = 'x-vcide-trace';
 
 /**
+ * Phase 7B-3B-1: 中継が**要求ごとに自分で作って**開発サーバーへの要求に載せる識別子のヘッダ。
+ * 計装はこれを受付スパンの属性（`RELAY_ID_ATTR`）に写す。ブラウザから来た同名のヘッダは
+ * 転送しない（中継が必ず上書きする）。値は 16 進 32 桁の乱数で、何の情報も含まない。
+ *
+ * **なぜ要るか。** 応答の `x-vcide-trace` はアプリのプロセスの中で付くので、同じパスの別の
+ * 要求のトレースに付け替えられても、パスの照合（7B-3A）では見分けられない。中継が作った値は
+ * 中継が知っているので、「その値を受け取った受付スパン」を探せば付け替えを検出できる。
+ */
+export const RELAY_ID_HEADER = 'x-vcide-relay';
+export const RELAY_ID_ATTR = 'vcide.relay.id';
+export const RELAY_ID_RE = /^[0-9a-f]{32}$/;
+
+/**
+ * 通信とサーバー処理を結んだ根拠（7B-3B-1）。
+ *   relay-id     中継が作った識別子を受け取った受付スパンが1本だけあり、応答のトレース識別子とも食い違わない
+ *   trace-header 7B-3A の規則（応答のトレース識別子＋パスの照合）。中継の識別子を持たない記録だけに使う
+ */
+export type HandlesBasis = 'relay-id' | 'trace-header';
+
+/**
+ * サーバー側でデータ取得の呼び出し位置を特定できなかった理由（`server-call-stack`）。
+ * 前の4つは収集ファイルの記録の照合、中の4つは PoC-02 の4段（`rscattr.mjs`）、後ろは 7B-3B-1 の追加。
+ */
+export type DataAccessFailureReason =
+  | 'callsite-disabled' | 'no-callsite-record' | 'multiple-callsite-records' | 'callsite-mismatch'
+  | 'no-entry-callsite' | 'no-app-frame' | 'source-line-mismatch' | 'component-not-agreed'
+  | 'outside-scope' | 'build-changed-after-call' | 'source-changed-after-call' | 'build-freshness-unverified'
+  | 'manifest-unavailable' | 'resolver-unavailable';
+
+export const DATA_ACCESS_FAILURE_LABEL: Record<DataAccessFailureReason, string> = {
+  'callsite-disabled': 'この起動では、呼び出し位置の記録（計装の POC02_CALLSITE）を有効にしていません',
+  'no-callsite-record': 'この SQL のスパンには、呼び出し位置の記録がありません',
+  'multiple-callsite-records': 'この SQL のスパンに呼び出し位置の記録が2件以上あり、1つに決まりません',
+  'callsite-mismatch': '呼び出し位置の記録が、この SQL のスパンと別のトレース・別のプロセス・別の種類を指しています',
+  'no-entry-callsite': '呼び出しの入口でスタックを記録できていません（この計装が入口を包んでいないドライバ — Prisma など）',
+  'no-app-frame': 'スタックに、注入範囲（src/）のソースへ戻せるフレームがありません',
+  'source-line-mismatch': 'ソースマップで戻した位置のソース行に、データ取得の呼び出しがありません',
+  'component-not-agreed': '囲むコンポーネントが、ソースの読み直しとビルド時の対応表で一致しません（コンポーネントではない関数の中など）',
+  'outside-scope': '戻した位置が、対象プロジェクトの注入範囲（src/）の外です',
+  'build-changed-after-call': 'SQL の実行の後に生成物が書き換わったため、ソースマップの戻しを信用できません',
+  'source-changed-after-call': 'SQL の実行の後にソースファイルが書き換わったため、読み直した行が実行したコードとは限りません',
+  'build-freshness-unverified': '生成物がバンドラの仮想モジュールで、実行の後に書き換わっていないかを確かめられません',
+  'manifest-unavailable': 'ビルド時の対応表（要素識別子の注入）が無いため、囲むコンポーネントを2つの情報源で照合できません',
+  'resolver-unavailable': '呼び出し位置の照合器（PoC-02 の rscattr.mjs）を読み込めません',
+};
+
+/**
+ * SQL のスパン1本について、それを実行したデータ取得の呼び出し位置（`DataAccessSite`）を
+ * 特定できたか（取得手段 `server-call-stack`）。
+ *
+ * `site` が入るのは、PoC-02 の4段（入口のスタック → ソースマップで戻す → ソース行の読み直し →
+ * 囲むコンポーネントの2情報源の一致）と、7B-3B-1 の照合（記録が1件・同じトレースと
+ * プロセス・注入範囲の中・実行の後に生成物もソースも書き換わっていない）が**すべて**通ったときだけ。
+ */
+export interface LiveDataAccess {
+  spanId: string;
+  traceId: string;
+  /** 呼び出しの入口（pg-pool.Pool.query など）。記録が無ければ null */
+  at: string | null;
+  site: {
+    file: string; line: number; col: number;
+    functionName: string | null;
+    /** 読み直したソースの1行（全文は持たない） */
+    sourceLine: string;
+    /** 囲むコンポーネント定義。**文脈であって端点ではない**（M1 決定 A） */
+    component: { name: string; file: string; line: number; endLine: number };
+  } | null;
+  /**
+   * ソースマップで戻せた位置。`site` が null でも、戻すところまで通っていれば入る。
+   * **関係を作る根拠にはしない**（理由とともに出すだけ）。
+   */
+  located: { file: string; line: number; col: number } | null;
+  failure: { reason: DataAccessFailureReason; detail: string } | null;
+  /** 通った照合（画面の根拠に出す） */
+  checks: string[];
+}
+
+/**
  * 通信の種類。ブラウザが要求に付けた `sec-fetch-dest` と Next.js の `rsc` ヘッダの
  * 有無から決める（値はこの分類にしか使わず、保存しない）。
  */
@@ -55,6 +133,11 @@ export interface LiveExchange {
   trace: { traceId: string; spanId: string } | null;
   /** 応答が返らなかった場合 */
   failure: { kind: 'upstream-error' | 'aborted'; detail: string | null } | null;
+  /**
+   * 7B-3B-1: 中継がこの要求のために作って開発サーバーへ載せた識別子（`RELAY_ID_HEADER`）。
+   * ブラウザには渡していない。中継を通った記録には必ず入る（入っていない記録は 7B-3A の形）
+   */
+  relayId?: string;
 }
 
 export interface LiveRunObservation {
@@ -72,6 +155,8 @@ export interface LiveRunObservation {
     excludedStatic: number;
     readRequestHeaders: readonly string[];
     readResponseHeaders: readonly string[];
+    /** 7B-3B-1: 中継が開発サーバーへの要求に**書き足す**ヘッダ（値は中継が作った乱数だけ） */
+    writtenRequestHeaders?: readonly string[];
   };
   instrumentation: {
     state: 'enabled' | 'disabled' | 'unavailable';
@@ -93,6 +178,19 @@ export interface LiveRunObservation {
   /** 中継を通らずにサーバーが受けた HTTP 処理の数（IDE 自身の生存確認など）。描かない */
   serverOnlyRequests: number;
   collectedAt: string;
+  /**
+   * 7B-3B-1: 通信のトレースに属する SQL のスパンごとの、データ取得の呼び出し位置の照合結果。
+   * 無い（7B-3A の形の）観測では、どの SQL にも `queries` を作らない
+   */
+  dataAccess?: LiveDataAccess[];
+  /** 7B-3B-1: 呼び出し位置の記録の状態 */
+  callsite?: {
+    /** この起動で呼び出し位置の記録を有効にしたか */
+    enabled: boolean;
+    /** 収集ファイルにあった SQL の呼び出し位置の記録の数（いまの起動の全体） */
+    records: number;
+    resolver: { available: boolean; reason: string | null };
+  };
 }
 
 /* ------------------------------------------------------------- 中継での分類 */

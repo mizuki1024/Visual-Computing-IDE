@@ -302,6 +302,21 @@ function start() {
   /** 開発機の中だけに閉じる。実ホスト名・外部ドメイン宛には付けない */
   const LOOPBACK = /^(localhost|127\.0\.0\.1|\[::1\]|::1)(:\d+)?$/i;
 
+  /* --------------------------------------------------------- Phase 7B-3B-1
+   * **IDE のプレビュー中継が要求ごとに作った識別子**を、受付スパンの属性に写す。
+   *
+   * 応答のトレース識別子（X-Vcide-Trace）はアプリのプロセスの中で付くので、
+   * 同じパスの別の要求のものに付け替えられても中継には見分けがつかない（7B-3A 第9節 #12）。
+   * そこで逆向きの証拠を足す: 中継が**自分で**乱数を作って要求に載せ（x-vcide-relay）、
+   * 計装はそれを受付スパンに記録する。IDE は「自分が作った値を持つ受付スパン」を探すので、
+   * 応答ヘッダが別の要求を指していれば食い違いとして検出できる。
+   *
+   * 値は 16 進 32 桁だけを受ける（mask.cjs でも同じ形を検査する）。既定では無効。
+   * ------------------------------------------------------------------- */
+  const RELAY_ID_ON = process.env.POC07_RELAY_ID === '1';
+  const RELAY_ID_HEADER = 'x-vcide-relay';
+  const RELAY_ID_FORM = /^[0-9a-f]{32}$/;
+
   const spanOfResponse = new WeakMap();
   patchWriteHead();
 
@@ -330,6 +345,14 @@ function start() {
   registerInstrumentations({
     instrumentations: [
       new HttpInstrumentation({
+        /* 受付の要求から読むのは中継の識別子の1つだけ（RELAY_ID_ON のとき）。他のヘッダは読まない */
+        requestHook(span, request) {
+          if (!RELAY_ID_ON) return;
+          try {
+            const h = request && request.headers ? request.headers[RELAY_ID_HEADER] : undefined;
+            if (typeof h === 'string' && RELAY_ID_FORM.test(h)) span.setAttribute('vcide.relay.id', h);
+          } catch { /* 取れなければ取れないままにする */ }
+        },
         // 本文もヘッダも読まない。応答オブジェクトとスパンの対応だけを覚える
         responseHook(span, response) {
           try {

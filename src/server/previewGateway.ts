@@ -23,6 +23,7 @@
  *   - IDE の画面以外から埋め込まれないよう、CSP の frame-ancestors を足す
  *   - 転送元の情報（X-Forwarded-*）や中継の資格情報（Proxy-Authorization）を転送先へ渡さない
  * ========================================================================== */
+import { randomBytes } from 'node:crypto';
 import http from 'node:http';
 import net from 'node:net';
 import { Transform, type TransformCallback } from 'node:stream';
@@ -30,7 +31,7 @@ import {
   ideFrameAncestors, isAllowedPreviewHost, isIdeOrigin, type AccessConfig,
 } from './access';
 import {
-  RELAY_TRACE_HEADER, classifyRelayRequest, parseTraceparent, type LiveExchange,
+  RELAY_ID_HEADER, RELAY_TRACE_HEADER, classifyRelayRequest, parseTraceparent, type LiveExchange,
 } from '../lib/liveObservation';
 
 /** 中継が自分で答えるパス。対象のアプリのパスと重ならない名前にする */
@@ -55,9 +56,13 @@ export interface GatewayTarget {
 }
 
 /** Phase 7B-3A: 中継が転送した通信1件の記録。**パス・状態・時刻・トレース識別子だけ** */
-export type RelayRecord = Omit<LiveExchange, 'seq'>;
+export type RelayRecord = Omit<LiveExchange, 'seq' | 'relayId'>;
 export interface RelayObserver {
-  record(run: string, rec: RelayRecord): void;
+  /**
+   * `meta.relayId`（7B-3B-1）は、中継がこの要求のために作って開発サーバーへ載せた識別子。
+   * 記録そのもの（`rec`）とは別に渡す（記録の形は 7B-3A のまま）
+   */
+  record(run: string, rec: RelayRecord, meta?: { relayId: string }): void;
   /** 静的資材。通信として数えず、件数だけ */
   excludeStatic(run: string): void;
 }
@@ -283,6 +288,8 @@ const DROP_REQ = new Set([
   'te', 'trailer', 'transfer-encoding', 'upgrade',
   'forwarded', 'x-forwarded-for', 'x-forwarded-host', 'x-forwarded-proto', 'x-forwarded-port',
   'x-forwarded-server', 'x-real-ip',
+  /* 7B-3B-1: 中継の識別子はブラウザから受けない（ページのスクリプトが偽れないように、中継だけが付ける） */
+  RELAY_ID_HEADER,
 ]);
 const DROP_RES = new Set([
   'connection', 'keep-alive', 'proxy-connection', 'transfer-encoding', 'trailer', 'upgrade',
@@ -471,6 +478,9 @@ export class PreviewGateway {
     let traced: RelayRecord['trace'] = null;
     let status: number | null = null;
     let recorded = false;
+    /* 7B-3B-1: 記録する通信には、中継が自分で作った識別子を載せる（要求ごとに新しい乱数）。
+     * 計装が受付スパンに写すので、応答のトレース識別子が別の要求を指していても見分けられる */
+    const relayId = observer && run && cls && !cls.static ? randomBytes(16).toString('hex') : null;
     const finish = (failure: RelayRecord['failure']) => {
       if (recorded || !observer || !run || !cls || cls.static) return;
       recorded = true;
@@ -479,14 +489,16 @@ export class PreviewGateway {
         path: cls.path, hasQuery: cls.hasQuery, kind: cls.kind,
         status, startMs: t0, durationMs: failure ? null : Date.now() - t0,
         trace: traced, failure,
-      });
+      }, relayId ? { relayId } : undefined);
     };
     res.once('finish', () => finish(null));
     res.once('close', () => { if (!res.writableFinished) finish({ kind: 'aborted', detail: '応答を送り終える前に接続が閉じられました' }); });
 
+    const fwdHeaders = forwardHeaders(req.headers, target.port);
+    if (relayId) fwdHeaders[RELAY_ID_HEADER] = relayId;
     const upstream = http.request({
       host: '127.0.0.1', port: target.port, method: req.method, path: url,
-      headers: forwardHeaders(req.headers, target.port),
+      headers: fwdHeaders,
     }, (up) => {
       status = up.statusCode ?? null;
       const headers: Record<string, string | string[] | number> = {};

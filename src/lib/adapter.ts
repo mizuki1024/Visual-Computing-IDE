@@ -16,13 +16,16 @@
  * ========================================================================== */
 import {
   ATTRIBUTION_SCOPE_NOTE, hop, node, type Convergence, type Cut, type Dataset, type ModelHop,
-  type ModelHopInput, type ModelNode, type OffPath, type SourceId,
+  type ModelHopInput, type ModelNode, type OffPath, type OverviewRow, type SourceId,
 } from './model';
 import type {
   ObsBrowserRequest, ObsElementAnchor, ObsElements, ObsServerCallsite, ObsSpan,
   ObsSqlAnalysis, ObservationBundle,
 } from './observation';
-import { RELAY_KIND_LABEL, type LiveExchange, type LiveRunObservation } from './liveObservation';
+import {
+  DATA_ACCESS_FAILURE_LABEL, RELAY_ID_ATTR, RELAY_KIND_LABEL,
+  type HandlesBasis, type LiveDataAccess, type LiveExchange, type LiveRunObservation,
+} from './liveObservation';
 
 /* -------------------------------------------------------------------------- */
 /* 記録の種別 → 取得手段。この表が「根拠に従う」の実体である（05c 6章）         */
@@ -1800,6 +1803,8 @@ const LIVE_MAX_SQL = 2;
 const LIVE_MAX_COLUMNS = 5;
 
 export const LIVE_RUN_METHOD = '方式2 NODE_OPTIONS=--require（PoC-01）＋ プレビュー中継の記録';
+/** 7B-3B-1: 呼び出しの入口のスタック（PoC-02 Gate B）を併せて取った起動 */
+export const LIVE_RUN_METHOD_CALLSITE = `${LIVE_RUN_METHOD} ＋ 呼び出しの入口のスタック（PoC-02）`;
 
 /** 一覧の1行。通信を選ぶための見出し */
 export function liveExchangeLabel(e: LiveExchange): string {
@@ -1809,33 +1814,61 @@ export function liveExchangeLabel(e: LiveExchange): string {
 /** 通信ごとに、サーバー処理と SQL がどこまで結べるか（一覧と変換が同じ判定を使う） */
 export function liveExchangeLinks(obs: LiveRunObservation, e: LiveExchange): {
   root: ObsSpan | null; server: ObsSpan | null; sql: ObsSpan[]; reason: string | null;
+  /** 7B-3B-1: 何を根拠に通信と受付スパンを結んだか（結べなければ null） */
+  basis: HandlesBasis | null;
 } {
+  const none = (reason: string) => ({ root: null, server: null, sql: [], reason, basis: null });
   if (obs.instrumentation.state !== 'enabled') {
-    return { root: null, server: null, sql: [], reason: `計装が有効ではありません（${obs.instrumentation.reason ?? obs.instrumentation.state}）` };
+    return none(`計装が有効ではありません（${obs.instrumentation.reason ?? obs.instrumentation.state}）`);
   }
-  if (!e.trace) {
-    return {
-      root: null, server: null, sql: [],
-      reason: e.failure
+  let root: ObsSpan | null;
+  let basis: HandlesBasis;
+  if (e.relayId) {
+    /*
+     * 7B-3B-1: **中継が自分で作った識別子**を受け取った受付スパンを探す（応答のヘッダはアプリの
+     * プロセスの中で付くので、それだけを信じない）。
+     *   0 本 → まだ書かれていない／記録されていない。結ばない
+     *   2 本以上 → 1つに決まらない。結ばない
+     *   応答のトレース識別子があり、その受付スパンと食い違う → 付け替えを疑う。結ばない
+     */
+    const cands = obs.spans.filter((s) => s.attrs[RELAY_ID_ATTR] === e.relayId
+      && s.kind === 1 && s.scope.includes('instrumentation-http'));
+    if (!cands.length) {
+      return none(e.failure
+        ? '開発サーバーから応答が返らなかったため、受付スパンを確かめられません'
+        : '中継がこの要求に付けた識別子を受け取った受付スパンが、まだ収集ファイルに書かれていません');
+    }
+    if (cands.length > 1) {
+      return none(`中継がこの要求に付けた識別子を受け取った受付スパンが ${cands.length} 本あり、1つに決まりません`);
+    }
+    root = cands[0];
+    if (e.trace && (e.trace.traceId !== root.traceId || e.trace.spanId !== root.spanId)) {
+      return none('応答のトレース識別子が、中継の識別子を受け取った受付スパンと食い違います'
+        + '（同じパスの別の要求に付け替えられた可能性があります）。どちらも信じずに結びません');
+    }
+    basis = 'relay-id';
+  } else {
+    /* 7B-3A の規則（中継の識別子を持たない記録） */
+    if (!e.trace) {
+      return none(e.failure
         ? '開発サーバーから応答が返らなかったため、トレース識別子がありません'
-        : '応答にトレース識別子の専用ヘッダがありませんでした',
-    };
+        : '応答にトレース識別子の専用ヘッダがありませんでした');
+    }
+    root = obs.spans.find((s) => s.traceId === e.trace!.traceId && s.spanId === e.trace!.spanId) ?? null;
+    if (!root) return none('応答のトレース識別子が指すスパンが、まだ収集ファイルに書かれていません');
+    basis = 'trace-header';
   }
-  const inTrace = obs.spans.filter((s) => s.traceId === e.trace!.traceId);
+  const inTrace = obs.spans.filter((s) => s.traceId === root!.traceId);
   const byId = new Map(inTrace.map((s) => [s.spanId, s]));
-  const root = byId.get(e.trace.spanId) ?? null;
-  if (!root) {
-    return { root: null, server: null, sql: [], reason: '応答のトレース識別子が指すスパンが、まだ収集ファイルに書かれていません' };
-  }
   /* 照合（断るだけ。結ぶ根拠を足さない）: 識別子はアプリのプロセスの中で付くので、
    * アプリのコードが書き換えうる。指した受付スパンのパスが、中継が転送したパスと違えば結ばない */
   const target = root.attrs['http.target'] ?? root.attrs['url.path'];
   if (typeof target === 'string' && target.split('?')[0] !== e.path) {
-    return { root: null, server: null, sql: [], reason: 'トレース識別子が指す受付スパンのパスが、この通信のパスと一致しません' };
+    return none('トレース識別子が指す受付スパンのパスが、この通信のパスと一致しません');
   }
   const descends = (s: ObsSpan, targetId: string) => s.spanId === targetId || ancestry(byId, s, targetId) !== null;
   const route = inTrace
-    .filter((s) => ROUTE_SPAN_TYPES.includes(String(s.attrs['next.span_type'] ?? '')) && descends(s, root.spanId))
+    .filter((s) => ROUTE_SPAN_TYPES.includes(String(s.attrs['next.span_type'] ?? '')) && descends(s, root!.spanId))
     .sort((a, b) => a.startMs - b.startMs)[0];
   const server = route ?? root;
   const sqlIds = new Set(obs.sqlAnalyses.map((a) => a.spanId));
@@ -1844,10 +1877,61 @@ export function liveExchangeLinks(obs: LiveRunObservation, e: LiveExchange): {
     .filter((s) => s.spanId !== server.spanId && descends(s, server.spanId))
     .filter((s) => sqlIds.has(s.spanId) || !obs.parser.available)
     .sort((a, b) => a.startMs - b.startMs);
-  return { root, server, sql, reason: null };
+  return { root, server, sql, reason: null, basis };
 }
 
-export function fromLiveRun(obs: LiveRunObservation, seq: number): AdapterResult {
+/** キャンバスに置くコンポーネントのノードの上限（layout.ts の帯は2つまで重ならない — 7B-3A 第9節 #8） */
+const LIVE_MAX_COMPONENTS = 2;
+
+/** 7B-3B-1: SQL を実行した呼び出し位置（DataAccessSite）を担うコンポーネントのノード */
+function liveSiteNode(id: number, d: LiveDataAccess, server: ObsSpan, firstSqlId: number): ModelNode {
+  const site = d.site!;
+  const rendering = String(server.attrs['next.span_type'] ?? '') === 'AppRender.getBodyResult';
+  return node({
+    id, kind: 'component', form: 'module',
+    title: 'コンポーネント',
+    identifier: `${site.file}:${site.line}`,
+    chipSub: site.component.name,
+    hover: 'この SQL を実行したデータ取得の呼び出し位置（いまの起動で観測）',
+    overview: [
+      { k: '取得手段', v: 'サーバー側でデータ取得の呼び出し時に記録したスタック' },
+      { k: '呼び出し位置', v: `${site.line} 行 ${site.col} 列 — ${site.file}:${site.line}:${site.col}` },
+      { k: 'ソース', v: site.sourceLine },
+      ...(site.functionName ? [{ k: '関数', v: site.functionName }] : []),
+      { k: 'コンポーネント', v: `${site.component.name}（${site.component.file}:${site.component.line}〜${site.component.endLine}）。囲む定義は文脈であって、関係の端点ではありません` },
+      {
+        k: '実行の種別',
+        v: rendering
+          ? 'サーバーでページを描画している間の実行です（Server Component の直接の取得）。ブラウザからの API 通信ではありません'
+          : `サーバー処理 ${server.name} の間の実行です`,
+      },
+      { k: '帰属の範囲', v: ATTRIBUTION_SCOPE_NOTE.definitionOnly },
+      { k: '照合', v: d.checks.join(' / ') },
+      {
+        k: '主張の範囲',
+        v: 'この SQL を実行したのはこの位置のコードである、までです。この SQL の結果が画面のどの値になったかは確認していません',
+      },
+      { k: '次の一歩', v: 'この実行SQLを見る', go: { type: 'node', id: firstSqlId } },
+    ],
+    source: SOURCE_OF.serverCallStack,
+    evidence: [
+      `呼び出しの入口（${d.at ?? '不明'}）で記録した呼び出しスタック（同じ起動の収集ファイル・同じスパン ID の記録1件）`,
+      'ソースマップで戻した位置のソース行に、データ取得の呼び出しがあることの確認（実行の後に生成物もソースも書き換わっていない）',
+      'ソースの読み直しとビルド時の対応表で、囲むコンポーネントが一致',
+    ],
+  });
+}
+
+/** 7B-3B-1: 選択した要素（7B-2）を同じキャンバスに並べるときの入力 */
+export interface LiveRunOptions {
+  /**
+   * いまプレビューで選択している要素。**関係は作らない。** 同じ画面に並べるだけで、
+   * 選択した値と SQL の間には線を引かず、値の由来は未確認と書く
+   */
+  selection?: LiveSelectionInput;
+}
+
+export function fromLiveRun(obs: LiveRunObservation, seq: number, opts: LiveRunOptions = {}): AdapterResult {
   const ex = obs.exchanges.find((e) => e.seq === seq);
   if (!ex) throw new Error(`exchange #${seq} not observed in this session`);
   const skipped: { what: string; why: string }[] = [];
@@ -1860,6 +1944,33 @@ export function fromLiveRun(obs: LiveRunObservation, seq: number): AdapterResult
   const { root, server } = links;
 
   let nextId = 1;
+  /* ------------------------------------------- 7B-3B-1: 選択した要素（① ②。7B-2 の変換をそのまま使う） */
+  let selComp: ModelNode | undefined;
+  if (opts.selection) {
+    const sd = fromLiveSelection(opts.selection);
+    nodes.push(...sd.dataset.nodes);
+    hops.push(...sd.dataset.hops);
+    skipped.push(...sd.skipped);
+    selComp = sd.dataset.nodes.find((n) => n.kind === 'component');
+    for (const c of sd.dataset.cuts) {
+      /* 7B-2 の切断（props の由来）を、SQL と並べたときの言い方にする。**結ばないことは同じ** */
+      cuts.push(c.from === selComp?.id
+        ? {
+          ...c,
+          head: 'この値の由来は未確認です',
+          sub: 'この値が右の SQL の結果から来たかは確認していません（props の由来）',
+          kind: 'supplies / derives を作らない。同じコンポーネントの中にあることを根拠にしない',
+        }
+        : c);
+    }
+    const value = sd.dataset.nodes.find((n) => n.kind === 'value');
+    value?.overview.push({
+      k: '通信との関係',
+      v: `この要素を描いた文書の取得が、通信 #${ex.seq}（${ex.method} ${ex.path}）かどうかは特定していません。`
+        + '同じパスのページであることだけで並べています',
+    });
+    nextId = Math.max(0, ...nodes.map((n) => n.id)) + 1;
+  }
   const httpId = nextId++;
   const serverId = server ? nextId++ : undefined;
 
@@ -1908,6 +2019,31 @@ export function fromLiveRun(obs: LiveRunObservation, seq: number): AdapterResult
     kind: '証拠が無いため関係を作らない（requests / derives）。選択した要素との関係は 7B-3B で評価',
   });
 
+  /* ------------------------------------------ ⑤ 実行SQL と ②'' 呼び出し位置の割り当て（7B-3B-1）
+   * 番号は経路の順に振る: ②''（実行した位置）→ ⑤（実行されたSQL）。PoC-02 と同じ規約。
+   * `queries` を作るのは、照合（dataAccess.ts）が通った SQL だけ。同じ位置から2本の SQL が出たら、
+   * 位置のノードは1つで線が2本（どの描画インスタンスかは同定しない — 決定 G） */
+  const drawnSql = links.sql.slice(0, LIVE_MAX_SQL);
+  const siteBudget = LIVE_MAX_COMPONENTS - (selComp ? 1 : 0);
+  const siteIdOf = new Map<string, number>();
+  const plan = drawnSql.map((sp) => {
+    const d = obs.dataAccess?.find((x) => x.spanId === sp.spanId) ?? null;
+    /* 同じスパン ID・同じトレースの照合結果だけを使う（別のトレースの記録を当てない） */
+    const usable = d && d.traceId === sp.traceId ? d : null;
+    let siteId: number | undefined;
+    let siteNew = false;
+    let siteCapped = false;
+    if (usable?.site) {
+      const key = `${usable.site.file}:${usable.site.line}:${usable.site.col}`;
+      const have = siteIdOf.get(key);
+      if (have !== undefined) siteId = have;
+      else if (siteIdOf.size < siteBudget) { siteId = nextId++; siteIdOf.set(key, siteId); siteNew = true; } else siteCapped = true;
+    }
+    return { span: sp, d: usable, siteId, siteNew, siteCapped, sqlId: nextId++ };
+  });
+  const siteSqlCount = plan.filter((p) => p.siteId !== undefined).length;
+  const firstSqlNodeId = plan[0]?.sqlId ?? 0;
+
   /* ------------------------------------------------------- ④ サーバー処理 */
   if (!server || serverId === undefined) {
     skipped.push({ what: 'サーバー処理', why: links.reason ?? '観測していない' });
@@ -1936,9 +2072,16 @@ export function fromLiveRun(obs: LiveRunObservation, seq: number): AdapterResult
         ...(links.sql.length > LIVE_MAX_SQL
           ? [{ k: '描いていない SQL', v: `${links.sql.length - LIVE_MAX_SQL} 本。キャンバスの配置の上限のため（観測はしています）` }]
           : []),
-        { k: '主張の範囲', v: 'ルート単位の処理です。どのコンポーネント・どの行が SQL を実行したかは観測していません' },
+        {
+          k: '主張の範囲',
+          v: siteSqlCount
+            ? 'ルート単位の処理です。このスパンだけではどのコードが SQL を実行したかは言えません。'
+              + 'SQL を実行した呼び出し位置は、別の根拠（呼び出しの入口のスタック）で「コンポーネント」のノードに出しています'
+            : 'ルート単位の処理です。どのコンポーネント・どの行が SQL を実行したかは観測していません'
+              + (obs.dataAccess && links.sql.length ? '（各 SQL の「実行した呼び出し位置」に理由を書いています）' : ''),
+        },
         ...(links.sql.length
-          ? [{ k: '次の一歩', v: '実行SQLを見る', go: { type: 'node' as const, id: serverId + 1 } }]
+          ? [{ k: '次の一歩', v: '実行SQLを見る', go: { type: 'node' as const, id: firstSqlNodeId } }]
           : []),
       ],
       source: 'trace-span',
@@ -1949,7 +2092,12 @@ export function fromLiveRun(obs: LiveRunObservation, seq: number): AdapterResult
       label: 'この通信を受けたサーバーの処理',
       source: 'trace-context',
       evidence: [
-        '中継が応答の専用ヘッダから読んだトレース識別子と、サーバー側スパンの識別子の一致',
+        ...(links.basis === 'relay-id'
+          ? [
+            '中継がこの要求のために作って開発サーバーへ載せた識別子を、受付スパンが受け取っていたこと（その受付スパンは1本だけ）',
+            ...(ex.trace ? ['中継が応答の専用ヘッダから読んだトレース識別子も、同じ受付スパンを指していること'] : []),
+          ]
+          : ['中継が応答の専用ヘッダから読んだトレース識別子と、サーバー側スパンの識別子の一致']),
         ...(isRoute ? ['HTTP の受付スパンからこの処理のスパンへの親子の連鎖'] : []),
       ],
     }));
@@ -1965,17 +2113,40 @@ export function fromLiveRun(obs: LiveRunObservation, seq: number): AdapterResult
   }
 
   /* ------------------------------------------------------------ ⑤ 実行SQL */
-  const drawnSql = links.sql.slice(0, LIVE_MAX_SQL);
   for (const s of links.sql.slice(LIVE_MAX_SQL)) {
     skipped.push({ what: `実行SQL ${s.spanId}`, why: 'キャンバスの配置の上限のため描いていない（観測はしている）' });
   }
   const sqlNodes: { id: number; a: ObsSqlAnalysis | null; span: ObsSpan }[] = [];
-  for (const s of drawnSql) {
-    const id = nextId++;
+  for (const p of plan) {
+    const s = p.span;
+    const id = p.sqlId;
+    const d = p.d;
     const a = obs.sqlAnalyses.find((x) => x.spanId === s.spanId) ?? null;
     const text = String(s.attrs['db.statement'] ?? s.attrs['db.query.text']);
     const chain = ancestry(new Map(obs.spans.filter((x) => x.traceId === s.traceId).map((x) => [x.spanId, x])), s, server!.spanId);
     sqlNodes.push({ id, a, span: s });
+    /* ②'' この SQL を実行した呼び出し位置（照合が通ったときだけ。SQL のノードの前に置く） */
+    if (p.siteId !== undefined && p.siteNew && d?.site) nodes.push(liveSiteNode(p.siteId, d, server!, id));
+    if (p.siteCapped) {
+      skipped.push({ what: `実行SQL ${s.spanId} の呼び出し位置のノード`, why: 'キャンバスの配置の上限のため描いていない（位置は SQL の詳細に書いている）' });
+    }
+    if (d && !d.site) {
+      skipped.push({ what: `実行SQL ${s.spanId} の呼び出し位置`, why: `${d.failure?.reason ?? '不明'}: ${d.failure?.detail ?? ''}` });
+    }
+    const accessRow: OverviewRow[] = !obs.dataAccess ? [] : d?.site
+      ? [{
+        k: '実行した呼び出し位置',
+        v: `${d.site.file}:${d.site.line}:${d.site.col}（${d.site.component.name} の中）`
+          + (p.siteCapped ? '。キャンバスの配置の上限のため、ノードと線は描いていません' : ''),
+        ...(p.siteId !== undefined ? { go: { type: 'node' as const, id: p.siteId } } : {}),
+      }]
+      : [{
+        k: '実行した呼び出し位置',
+        v: `特定していません — ${d?.failure ? DATA_ACCESS_FAILURE_LABEL[d.failure.reason] ?? d.failure.reason : 'この SQL の照合結果がありません'}`
+          + (d?.located && (d.failure?.reason === 'component-not-agreed' || d.failure?.reason === 'manifest-unavailable')
+            ? `（参考: ソースマップで戻した位置は ${d.located.file}:${d.located.line}:${d.located.col}。関係は作っていません）`
+            : ''),
+      }];
     nodes.push(node({
       id, kind: 'sql', form: 'module',
       title: '実行SQL', identifier: shortSql(text),
@@ -2000,6 +2171,10 @@ export function fromLiveRun(obs: LiveRunObservation, seq: number): AdapterResult
               : `できませんでした（${a?.parseError ?? '理由不明'}）`,
         },
         { k: '取得件数', v: '計装から取得できていません' },
+        ...accessRow,
+        ...(p.siteId !== undefined
+          ? [{ k: '表示された値との関係', v: 'この SQL の結果が画面のどの値になったかは確認していません（supplies / derives を作っていません）' }]
+          : []),
       ],
       source: 'orm-instrumentation',
       evidence: [
@@ -2007,12 +2182,64 @@ export function fromLiveRun(obs: LiveRunObservation, seq: number): AdapterResult
         chain?.depth === 1 ? 'サーバー処理のスパンの直接の子' : `サーバー処理のスパンからの親子の連鎖（${chain?.depth ?? '?'} 段）`,
       ],
     }));
+    if (p.siteId !== undefined && d?.site) {
+      hops.push(hop({
+        /*
+         * queries | DataAccessSite → SqlStatement | L1相当 | server-call-stack（M1 決定 A）。
+         * `executes`（Span → SqlStatement）とは**始点の型が違う**。同じ SQL への別々の観測であり、
+         * データの合流ではない（shared-object）
+         */
+        id: `queries-${id}`, order: hops.length + 1, from: p.siteId, to: id, relation: 'queries',
+        label: 'この位置のコードが実行したSQL',
+        endpoints: {
+          from: {
+            type: 'DataAccessSite', file: d.site.file, line: d.site.line, col: d.site.col,
+            inComponent: d.site.component.name,
+          },
+        },
+        convergence: 'shared-object',
+        source: SOURCE_OF.serverCallStack,
+        evidence: [
+          `呼び出し位置 ${d.site.file}:${d.site.line}:${d.site.col}`,
+          '呼び出しの入口で記録したスタックの、最も内側のアプリ側フレーム',
+          'その SQL のスパンの OpenTelemetry コンテキストが運んできた記録である（同じスパン ID・同じトレース・同じプロセス）',
+        ],
+      }));
+    }
     hops.push(hop({
       id: `executes-${id}`, order: hops.length + 1, from: serverId!, to: id, relation: 'executes',
       label: 'その処理が実行したSQL',
+      ...(p.siteId !== undefined ? { convergence: 'shared-object' as Convergence } : {}),
       source: 'trace-span',
       evidence: ['スパンの親子関係', `同一トレース ${s.traceId.slice(0, 8)}…`],
     }));
+  }
+
+  /* 呼び出し位置のノードに、結果の行き先が未確認であることの切断を付ける（選択した要素が無いとき） */
+  if (!selComp) {
+    const firstSite = plan.find((p) => p.siteNew)?.siteId;
+    if (firstSite !== undefined) {
+      cuts.push({
+        from: firstSite,
+        head: 'この SQL の結果の行き先は未確認です',
+        sub: '画面のどの値になったか（supplies / derives）',
+        where: 'コンポーネントの中の値の受け渡し',
+        kind: '証拠が無いため関係を作らない。同じコンポーネントの中にあることを根拠にしない',
+      });
+    }
+  }
+  /* 選択した要素のコンポーネントに、SQL の位置との関係を書く（**関係は作らない**） */
+  if (selComp) {
+    const sites = plan.filter((p) => p.d?.site).map((p) => p.d!.site!);
+    const same = sites.find((x) => x.component.file === selComp!.identifier.split(':')[0]
+      && selComp!.chipSub === x.component.name);
+    selComp.overview.push({
+      k: 'SQL との関係',
+      v: same
+        ? `同じコンポーネント定義（${same.component.name}）の中に、SQL の呼び出し位置（${same.file}:${same.line}）があります。`
+          + '**同じ定義の中にあることは根拠にしていません。** この値がその SQL の結果から来たかは未確認です'
+        : 'この選択と SQL の呼び出し位置は結んでいません。この値の由来は未確認です',
+    });
   }
 
   /* --------------------------------------------- ⑥ テーブル ⑦ カラム（構文解析だけ） */
@@ -2123,19 +2350,24 @@ export function fromLiveRun(obs: LiveRunObservation, seq: number): AdapterResult
       caption: { text: '選択していない経路（いまの起動の他の通信）', textUnselected: 'いまの起動の他の通信' },
     },
     pages: [{ icon: '▤', name: ex.path, path: ex.path, current: true }],
-    notice: `いまの起動の実測（${obs.session.startedAt} 以降）／${LIVE_RUN_METHOD}`,
+    notice: `いまの起動の実測（${obs.session.startedAt} 以降）／${obs.dataAccess ? LIVE_RUN_METHOD_CALLSITE : LIVE_RUN_METHOD}`,
     overviewNote:
       `${obs.collectedAt} に取得した、いまの起動の観測です（記録済みデータではありません）。`
       + `静的資材の通信 ${obs.session.excludedStatic} 件は数えていません。`
-      + '表示された値・コンポーネントとは結んでいません。',
+      + (siteSqlCount
+        ? 'SQL を実行した呼び出し位置は呼び出しスタックで特定しました。表示された値とその SQL は結んでいません（値の由来は未確認）。'
+        : '表示された値・コンポーネントとは結んでいません。')
+      + (opts.selection ? `選択した要素は同じパス（${ex.path}）のページのものですが、それを描いた文書取得がこの通信かは特定していません。` : ''),
     provenance: {
-      instrumentation: LIVE_RUN_METHOD,
+      instrumentation: obs.dataAccess ? LIVE_RUN_METHOD_CALLSITE : LIVE_RUN_METHOD,
       bundler: '開発サーバーの既定',
       traceId: ex.trace?.traceId ?? '—',
       collectedAt: obs.collectedAt,
       notObserved: [
-        { what: 'この通信を起こしたコード（requests）', why: '中継の記録は開始元を語らない。7B-3B で証拠を評価する' },
-        { what: '表示された値との対応（derives / maps）', why: '応答本文を読まない。構造的に推定（02a 3.5.1）' },
+        { what: 'この通信を起こしたコード（requests）', why: '中継の記録は開始元を語らない。ブラウザの呼び出しスタック（request-initiator）を IDE は持たない' },
+        { what: '表示された値と SQL の対応（supplies / derives / maps）', why: '取得結果・応答本文・表示値を読まない。同じコンポーネントの中にあることは根拠にしない' },
+        ...(opts.selection ? [{ what: '選択した要素を描いた文書取得の同定', why: '同じパスの通信のどれがこの DOM を描いたかを示す証拠を取っていない' }] : []),
+        ...(obs.dataAccess ? [{ what: 'Prisma など、入口を包んでいないドライバの SQL の呼び出し位置', why: '計装が呼び出しの入口でスタックを取るのは pg の Pool.query / Client.query だけ（PoC-02）' }] : []),
         { what: '中継を通らない通信', why: 'ブラウザのキャッシュで済んだもの・別 origin への通信は中継に現れない' },
         { what: 'カラムの型・テーブルの行数', why: 'DB の情報スキーマに照会していない' },
         { what: 'SQL のパラメータ値・取得件数', why: '方針として収集しない／計装が付けない' },

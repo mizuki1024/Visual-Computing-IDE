@@ -188,6 +188,8 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .pvobsrow .pvobs{flex-basis:100%}
 .pvobs b{color:#cfc6f5;font-weight:600}
 .pvobssel{height:22px;font-size:11px}
+/* 7B-3B-1: 選択した要素と SQL を並べたときの注記（結んでいないこと） */
+.pvobspair{margin:-4px 0 7px}
 .pvfoot em.pvpath{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;font-family:var(--mono)}
 
 /* 表示設定（凡例） */

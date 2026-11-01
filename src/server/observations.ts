@@ -12,16 +12,28 @@
  *   4. 対象プロジェクトに書き込まない。収集ファイルは IDE の `.ide-runtime/spans/` にある
  *   5. SQL の構文解析は Phase 6F の `poc/runner/lib/sqlparse.mjs` を**そのまま呼ぶ**
  *      （解析器を2つ持たない。持つと 6F の不具合が再発する）
+ *
+ * Phase 7B-3B-1 で足したこと
+ *   6. 収集ファイルの **呼び出し位置の記録**（PoC-02 の `type: 'callsite'`）を同じ差分読み取りで読む。
+ *      同じファイル＝同じ起動の記録だけを使う。記録を書いたプロセス（proc.pid）も持つ
+ *   7. 中継が要求ごとに作った識別子（`vcide.relay.id`）を持つ受付スパンを索引する。
+ *      通信のトレースは、応答のヘッダが指すものに加えて、**中継の識別子が指すもの**も返す
+ *      （両者が食い違うときに、変換が「結ばない」と判定できるように）
+ *   8. 通信のトレースに属する SQL のスパンごとに、データ取得の呼び出し位置を照合する
+ *      （`dataAccess.ts`。PoC-02 の照合器をそのまま呼ぶ）
  * ========================================================================== */
 import fs from 'node:fs';
 import path from 'node:path';
 import { ideRoot } from './ide';
 import type { RelayObserver, RelayRecord } from './previewGateway';
 import {
-  RELAY_READ_REQUEST_HEADERS, RELAY_TRACE_HEADER,
-  type LiveExchange, type LiveRunKey, type LiveRunObservation,
+  RELAY_ID_ATTR, RELAY_ID_HEADER, RELAY_ID_RE, RELAY_READ_REQUEST_HEADERS, RELAY_TRACE_HEADER,
+  type LiveDataAccess, type LiveExchange, type LiveRunKey, type LiveRunObservation,
 } from '../lib/liveObservation';
 import type { ObsSpan, ObsSqlAnalysis } from '../lib/observation';
+import {
+  parseCallsiteRecord, resetDataAccess, resolveDataAccess, resolverStatus, type CallsiteRecord,
+} from './dataAccess';
 
 /** 1セッションで持つ通信の上限。超えた分は数だけ残す */
 const MAX_EXCHANGES = 200;
@@ -47,7 +59,19 @@ interface SpanFileState {
   spans: ObsSpan[];
   byTrace: Map<string, ObsSpan[]>;
   truncated: boolean;
+  /** 7B-3B-1: spanId → そのスパンを書いたプロセス */
+  pidOf: Map<string, number>;
+  /** 7B-3B-1: spanId → 呼び出し位置の記録（SQL のものだけ。1件のはずだが、2件以上も隠さず持つ） */
+  callsites: Map<string, CallsiteRecord[]>;
+  callsiteRecords: number;
+  /** 7B-3B-1: 中継の識別子 → その値を受け取った受付スパン */
+  byRelayId: Map<string, ObsSpan[]>;
 }
+
+const newSpanFileState = (file: string): SpanFileState => ({
+  file, offset: 0, rest: '', spans: [], byTrace: new Map(), truncated: false,
+  pidOf: new Map(), callsites: new Map(), callsiteRecords: 0, byRelayId: new Map(),
+});
 
 type RawSpan = ObsSpan & { type?: string; sqlRedacted?: { strings: number; numbers: number } | null };
 
@@ -57,7 +81,10 @@ function readSpanFile(st: SpanFileState): void {
   try { fd = fs.openSync(/* turbopackIgnore: true */ st.file, 'r'); } catch { return; }
   try {
     const size = fs.fstatSync(fd).size;
-    if (size < st.offset) { st.offset = 0; st.rest = ''; st.spans = []; st.byTrace.clear(); }
+    if (size < st.offset) {
+      st.offset = 0; st.rest = ''; st.spans = []; st.byTrace.clear();
+      st.pidOf.clear(); st.callsites.clear(); st.callsiteRecords = 0; st.byRelayId.clear();
+    }
     const len = Math.min(size - st.offset, MAX_READ_BYTES);
     if (len <= 0) return;
     const buf = Buffer.alloc(len);
@@ -70,6 +97,16 @@ function readSpanFile(st: SpanFileState): void {
       if (!line.trim()) continue;
       let o: RawSpan;
       try { o = JSON.parse(line) as RawSpan; } catch { continue; }
+      if (o.type === 'callsite') {
+        /* 7B-3B-1: 呼び出し位置の記録。SQL のものだけ持つ（サーバー内部の fetch は今回の範囲外） */
+        const c = parseCallsiteRecord(o as unknown as Record<string, unknown>);
+        if (!c || c.target !== 'sql') continue;
+        if (st.callsiteRecords >= MAX_SPANS) { st.truncated = true; continue; }
+        st.callsiteRecords += 1;
+        const list = st.callsites.get(c.spanId);
+        if (list) list.push(c); else st.callsites.set(c.spanId, [c]);
+        continue;
+      }
       if (o.type !== 'span' || typeof o.traceId !== 'string' || typeof o.spanId !== 'string') continue;
       if (st.spans.length >= MAX_SPANS) { st.truncated = true; continue; }
       const s: ObsSpan & { sqlRedacted?: RawSpan['sqlRedacted'] } = {
@@ -83,6 +120,13 @@ function readSpanFile(st: SpanFileState): void {
       st.spans.push(s);
       const list = st.byTrace.get(s.traceId);
       if (list) list.push(s); else st.byTrace.set(s.traceId, [s]);
+      const pid = (o as unknown as { proc?: { pid?: unknown } }).proc?.pid;
+      if (typeof pid === 'number') st.pidOf.set(s.spanId, pid);
+      const rid = s.attrs[RELAY_ID_ATTR];
+      if (typeof rid === 'string' && RELAY_ID_RE.test(rid)) {
+        const l = st.byRelayId.get(rid);
+        if (l) l.push(s); else st.byRelayId.set(rid, [s]);
+      }
     }
   } finally {
     fs.closeSync(fd);
@@ -121,17 +165,23 @@ const SQL_TEXT = (a: ObsSpan['attrs']): string | null => {
 export class ObservationStore implements RelayObserver {
   #session: Session | null = null;
   #files = new Map<string, SpanFileState>();
+  /** 7B-3B-1: SQL のスパンごとの照合結果（このセッションの中だけ。起動が変われば捨てる） */
+  #dataAccess = new Map<string, LiveDataAccess>();
 
   /** running になった起動のために、新しいセッションを作る（前のセッションは捨てる） */
   begin(run: string): void {
     if (this.#session?.run === run) return;
     this.#session = { run, startedAt: new Date().toISOString(), exchanges: [], overflow: 0, excludedStatic: 0 };
+    this.#dataAccess.clear();
+    void resetDataAccess();
   }
 
   /** 停止・異常終了。セッションを閉じ、収集ファイルの読み取り状態も捨てる */
   end(): void {
     this.#session = null;
     this.#files.clear();
+    this.#dataAccess.clear();
+    void resetDataAccess();
   }
 
   current(): { run: string; startedAt: string } | null {
@@ -139,11 +189,12 @@ export class ObservationStore implements RelayObserver {
   }
 
   /** **いまのセッションの起動からの記録だけ**を受ける。違う起動の記録は捨てる */
-  record(run: string, rec: RelayRecord): void {
+  record(run: string, rec: RelayRecord, meta?: { relayId: string }): void {
     const s = this.#session;
     if (!s || s.run !== run) return;
     if (s.exchanges.length >= MAX_EXCHANGES) { s.overflow += 1; return; }
-    s.exchanges.push({ ...rec, seq: s.exchanges.length + s.overflow + 1 });
+    const relayId = meta && RELAY_ID_RE.test(meta.relayId) ? meta.relayId : null;
+    s.exchanges.push({ ...rec, seq: s.exchanges.length + s.overflow + 1, ...(relayId ? { relayId } : {}) });
   }
 
   excludeStatic(run: string): void {
@@ -158,6 +209,11 @@ export class ObservationStore implements RelayObserver {
     run: LiveRunKey; runString: string; project: string; port: number;
     instrumentation: { state: 'enabled' | 'disabled' | 'unavailable'; reason: string | null; spanFile: string | null };
     traceHeader: boolean;
+    /**
+     * 7B-3B-1: 呼び出し位置の照合に要るもの。省略すると照合しない（7B-3A の形の観測を返す）。
+     * `projectRoot` は IDE のサーバーの中だけで使い、返す形には入れない
+     */
+    dataAccess?: { projectRoot: string; enabled: boolean; manifest: Map<string, unknown[]> | null };
   }): Promise<LiveRunObservation | null> {
     const s = this.#session;
     if (!s || s.run !== input.runString) return null;
@@ -166,14 +222,20 @@ export class ObservationStore implements RelayObserver {
     let st: SpanFileState | null = null;
     if (input.instrumentation.state === 'enabled' && input.instrumentation.spanFile) {
       const f = input.instrumentation.spanFile;
-      st = this.#files.get(f) ?? { file: f, offset: 0, rest: '', spans: [], byTrace: new Map(), truncated: false };
+      st = this.#files.get(f) ?? newSpanFileState(f);
       this.#files.set(f, st);
       readSpanFile(st);
     }
 
-    /* ---- 通信のトレースに属するスパンだけを取り出す */
+    /* ---- 通信のトレースに属するスパンだけを取り出す。
+     * 応答のヘッダが指すトレースに加え、中継の識別子を受け取った受付スパンのトレースも入れる
+     * （食い違えば変換が結ばない。どちらか片方だけを信じて取り違えないために両方を渡す） */
     const exchanges = s.exchanges.map((e) => ({ ...e }));
     const traceIds = new Set(exchanges.map((e) => e.trace?.traceId).filter((t): t is string => !!t));
+    for (const e of exchanges) {
+      if (!e.relayId) continue;
+      for (const r of st?.byRelayId.get(e.relayId) ?? []) traceIds.add(r.traceId);
+    }
     const spans: (ObsSpan & { sqlRedacted?: unknown })[] = [];
     for (const t of traceIds) spans.push(...(st?.byTrace.get(t) ?? []));
 
@@ -193,6 +255,26 @@ export class ObservationStore implements RelayObserver {
       }
     }
 
+    /* ---- 7B-3B-1: SQL のスパンごとに、データ取得の呼び出し位置を照合する（結果はこのセッションの中で使い回す） */
+    let dataAccess: LiveDataAccess[] | undefined;
+    if (input.dataAccess && st) {
+      const pending = sqlSpans.filter((x) => !this.#dataAccess.has(x.spanId));
+      const fresh = await resolveDataAccess({
+        projectRoot: input.dataAccess.projectRoot,
+        sql: pending.map((x) => ({ span: x, pid: st!.pidOf.get(x.spanId) ?? null })),
+        callsites: st.callsites,
+        manifest: input.dataAccess.manifest,
+        enabled: input.dataAccess.enabled,
+      });
+      if (this.#session !== s) return null;                 // 照合の間に停止・再起動した
+      for (const d of fresh) {
+        // 照合器を読めなかった結果は使い回さない（次の取得でもう一度試す）
+        if (d.failure?.reason !== 'resolver-unavailable') this.#dataAccess.set(d.spanId, d);
+      }
+      const now = new Map(fresh.map((d) => [d.spanId, d]));
+      dataAccess = sqlSpans.map((x) => this.#dataAccess.get(x.spanId) ?? now.get(x.spanId)).filter((d): d is LiveDataAccess => !!d);
+    }
+
     return {
       run: input.run,
       project: input.project,
@@ -204,6 +286,7 @@ export class ObservationStore implements RelayObserver {
         excludedStatic: s.excludedStatic,
         readRequestHeaders: RELAY_READ_REQUEST_HEADERS,
         readResponseHeaders: [RELAY_TRACE_HEADER],
+        ...(input.dataAccess ? { writtenRequestHeaders: [RELAY_ID_HEADER] } : {}),
       },
       instrumentation: {
         state: input.instrumentation.state,
@@ -221,6 +304,14 @@ export class ObservationStore implements RelayObserver {
           : { available: false, reason: `SQL の構文解析器を読み込めませんでした（${parserError ?? '理由不明'}）。解析しないまま出しません。` },
       serverOnlyRequests,
       collectedAt: new Date().toISOString(),
+      ...(input.dataAccess ? {
+        dataAccess: dataAccess ?? [],
+        callsite: {
+          enabled: input.dataAccess.enabled,
+          records: st?.callsiteRecords ?? 0,
+          resolver: resolverStatus(),
+        },
+      } : {}),
     };
   }
 }

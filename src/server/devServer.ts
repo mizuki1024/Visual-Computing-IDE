@@ -392,6 +392,13 @@ export class DevServerManager {
        * どちらもループバック宛の応答にしか付かない（ide-instrumentation/otel.cjs） */
       env.POC05_TRACE_HEADER = '1';
       env.POC05_SERVER_TIMING = '0';
+      /* Phase 7B-3B-1: SQL を実行したデータ取得の呼び出し位置（PoC-02 Gate B）。
+       * 呼び出しの入口（pg の Pool.query / Client.query）でスタックを取り、同じ収集ファイルに書かせる。
+       * 記録するのはファイル・行・列・関数名だけ（引数・変数・行データは読まない — PoC-02 第8.1節）。
+       * サーバー内部の fetch の計装（POC02_UNDICI）は今回の範囲外なので渡さない */
+      env.POC02_CALLSITE = '1';
+      /* 中継が要求ごとに作る識別子（x-vcide-relay）を受付スパンに写させる（previewGateway.ts） */
+      env.POC07_RELAY_ID = '1';
     }
     /* 要素識別子の注入（Phase 7B-2）。対象の next.config がローダを読む設定のときだけ。
      * 対応表は IDE 側に書かせる（対象プロジェクトには書かない） */

@@ -23,7 +23,7 @@ import {
 } from '@/lib/previewProtocol';
 import {
   LIVE_UNRESOLVED_LABEL, fromLiveRun, fromLiveSelection, liveExchangeLabel, liveExchangeLinks,
-  type LiveResolution,
+  type LiveResolution, type LiveSelectionInput,
 } from '@/lib/adapter';
 import type { LiveRunObservation } from '@/lib/liveObservation';
 import { layout } from '@/lib/layout';
@@ -180,8 +180,10 @@ export default function LivePreview() {
   const [obs, setObs] = useState<LiveRunObservation | null>(null);
   const [obsError, setObsError] = useState<string | null>(null);
   const [obsPick, setObsPick] = useState<number | null>(null);
-  const [obsShown, setObsShown] = useState<{ seq: number; sig: string } | null>(null);
+  const [obsShown, setObsShown] = useState<{ seq: number; sig: string; withSel: boolean } | null>(null);
   const [obsNote, setObsNote] = useState<string | null>(null);
+  /** 7B-3B-1: いま選択している要素（7B-2 の解決の入力）。観測と同じキャンバスに**並べるだけ**に使う */
+  const lastSelRef = useRef<LiveSelectionInput | null>(null);
   useEffect(() => {
     setObs(null); setObsError(null); setObsPick(null); setObsShown(null);
     if (!serverKey) return undefined;
@@ -217,28 +219,47 @@ export default function LivePreview() {
     e, links: liveExchangeLinks(obs, e),
   })) : []), [obs]);
   const obsSqlCount = obsRows.reduce((n, r) => n + r.links.sql.length, 0);
-  /** 利用者が選ぶまでは、SQL まで結べた最新の通信（無ければ最新）を既定にする */
-  const obsDefault = (obsRows.find((r) => r.links.sql.length) ?? obsRows[0])?.e.seq ?? null;
+  /** 7B-3B-1: SQL ごとの呼び出し位置の照合（通った本数を一覧に出す） */
+  const sitedOf = useCallback((sql: { spanId: string; traceId: string }[]) => (obs?.dataAccess
+    ? sql.filter((x) => obs.dataAccess!.some((d) => d.spanId === x.spanId && d.traceId === x.traceId && d.site)).length
+    : null), [obs]);
+  const obsSiteCount = obs?.dataAccess ? obsRows.reduce((n, r) => n + (sitedOf(r.links.sql) ?? 0), 0) : null;
+  /** 利用者が選ぶまでは、SQL まで結べた最新の通信（無ければ最新）を既定にする。
+   * 要素を選んでいれば、そのページと同じパスの通信を優先する（**並べるだけ。結ばない**） */
+  const selPath = liveSel && liveSel.status !== 'cleared' ? liveSel.path : null;
+  const obsDefault = ((selPath ? obsRows.find((r) => r.e.path === selPath && r.links.sql.length) : undefined)
+    ?? obsRows.find((r) => r.links.sql.length) ?? obsRows[0])?.e.seq ?? null;
   const obsSel = obsPick !== null && obsRows.some((r) => r.e.seq === obsPick) ? obsPick : obsDefault;
 
+  /** 選択した要素を並べるか。**同じパスのページの選択のときだけ**（別のページの要素と並べない） */
+  const selectionFor = (data: LiveRunObservation, seq: number): LiveSelectionInput | undefined => {
+    const sel = lastSelRef.current;
+    const ex = data.exchanges.find((e) => e.seq === seq);
+    return sel && ex && sel.page.path === ex.path ? sel : undefined;
+  };
+
   const showObs = useCallback((seq: number, data: LiveRunObservation, key: string) => {
-    const { dataset } = fromLiveRun(data, seq);
+    const selection = selectionFor(data, seq);
+    const { dataset } = fromLiveRun(data, seq, { selection });
     const ds = layout(dataset);
     const focus = ds.nodes.find((n) => n.kind === 'server')?.id ?? ds.nodes[0].id;
     selSeqRef.current += 1;             // 待っている要素の解決は捨てる（後から上書きさせない）
-    setLiveSel(null);
+    if (!selection) { setLiveSel(null); lastSelRef.current = null; }
     setObsNote(null);
     showLive(ds, `${key}#obs${seq}`, focus);
-    setObsShown({ seq, sig: `${ds.nodes.length}/${ds.hops.length}` });
+    setObsShown({ seq, sig: `${ds.nodes.length}/${ds.hops.length}`, withSel: !!selection });
     setObsPick(seq);                    // 一覧の選択を、描いている通信に固定する（新しい通信で動かさない）
+  // selectionFor は ref だけを読む
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showLive]);
 
   /* 表示中の通信のスパンが後から書かれたら（応答の後に閉じるスパンがある）、描き直す */
   useEffect(() => {
     if (!obsShown || !obs || !serverKey) return;
     if (!obs.exchanges.some((e) => e.seq === obsShown.seq)) return;
-    const { dataset } = fromLiveRun(obs, obsShown.seq);
+    const { dataset } = fromLiveRun(obs, obsShown.seq, { selection: obsShown.withSel ? selectionFor(obs, obsShown.seq) : undefined });
     if (`${dataset.nodes.length}/${dataset.hops.length}` !== obsShown.sig) showObs(obsShown.seq, obs, serverKey);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [obs, obsShown, serverKey, showObs]);
 
   const clearObs = () => { setObsShown(null); clearLive(); };
@@ -278,11 +299,13 @@ export default function LivePreview() {
     }
     const res = j.resolution;
     setObsShown(null);                    // 観測の表示は、この選択の表示で置き換わる
-    const { dataset } = fromLiveSelection({
+    const input: LiveSelectionInput = {
       project: rt.project?.name ?? '—', port: rt.port ?? 0,
       page: { path: sel.path, title: msg?.title ?? '' },
       selection: sel, resolution: res, selectedAt: new Date().toISOString(),
-    });
+    };
+    lastSelRef.current = input;
+    const { dataset } = fromLiveSelection(input);
     const ds = layout(dataset);
     const focus = ds.nodes.find((n) => n.kind === 'component')?.id ?? ds.nodes[0].id;
     showLive(ds, `${key}#${mySeq}`, focus);
@@ -363,6 +386,7 @@ export default function LivePreview() {
     if (prev === serverKey) return;
     closeAll();
     selSeqRef.current += 1;              // 返事を待っている解決も捨てる
+    lastSelRef.current = null;
     setSelectMode(false);
     if (prev !== null) {
       setObsNote(serverKey ? '開発サーバーが起動し直されたため、前の起動の観測を消しました。' : '開発サーバーが実行中ではなくなったため、観測の表示を消しました（実測中ではありません）。');
@@ -374,7 +398,7 @@ export default function LivePreview() {
   }, [serverKey, closeAll, clearLive]);
   useEffect(() => () => { closeAll(); clearLive(); }, [closeAll, clearLive]);
 
-  const clearSel = () => { selSeqRef.current += 1; clearLive(); setLiveSel(null); };
+  const clearSel = () => { selSeqRef.current += 1; lastSelRef.current = null; clearLive(); setLiveSel(null); setObsShown(null); };
 
   const onFrameLoad = useCallback(() => {
     // 知らせは文書の DOMContentLoaded で来るので、load より先に届いている。
@@ -468,12 +492,13 @@ export default function LivePreview() {
         {view === 'live' && (
           <div className="rt-row pvobsrow" data-obs-state={obs ? (obs.exchanges.length ? 'some' : 'none') : obsError ? 'error' : 'loading'}
             data-obs-count={obs?.exchanges.length ?? ''} data-obs-sql={obs ? obsSqlCount : ''}
-            data-obs-shown={obsShown?.seq ?? ''} data-obs-session={obs?.session.startedAt ?? ''}>
+            data-obs-shown={obsShown?.seq ?? ''} data-obs-session={obs?.session.startedAt ?? ''}
+            data-obs-sites={obsSiteCount ?? ''} data-obs-with-sel={obsShown?.withSel ? 'on' : ''}>
             <p className="rt-note pvobs">
               {!obs && !obsError && <>観測（いまの起動）: 取得しています…</>}
               {!obs && obsError && <>観測（いまの起動）: 取得できません — {obsError}</>}
               {obs && !obs.exchanges.length && <>観測（いまの起動）: まだ通信はありません（未観測）。</>}
-              {obs && obs.exchanges.length > 0 && <>観測（いまの起動）: 通信 <b>{obs.exchanges.length}</b> 件・SQL <b>{obsSqlCount}</b> 本{obs.session.overflow ? `（上限を超えた ${obs.session.overflow} 件は記録していません）` : ''}</>}
+              {obs && obs.exchanges.length > 0 && <>観測（いまの起動）: 通信 <b>{obs.exchanges.length}</b> 件・SQL <b>{obsSqlCount}</b> 本{obsSiteCount !== null && obsSqlCount > 0 ? <>（実行した呼び出し位置を特定 <b>{obsSiteCount}</b> 本）</> : ''}{obs.session.overflow ? `（上限を超えた ${obs.session.overflow} 件は記録していません）` : ''}</>}
               {obs && obs.instrumentation.state !== 'enabled' && <> サーバー処理・SQL は観測していません（{obs.instrumentation.reason ?? '計装なし'}）。</>}
             </p>
             {obs && obs.exchanges.length > 0 && (
@@ -482,7 +507,7 @@ export default function LivePreview() {
                   onChange={(e) => setObsPick(Number(e.target.value))}>
                   {obsRows.map(({ e, links }) => (
                     <option key={e.seq} value={e.seq}>
-                      {liveExchangeLabel(e)}{links.server ? ` / SQL ${links.sql.length}` : ' / 処理と未接続'}
+                      {liveExchangeLabel(e)}{links.server ? ` / SQL ${links.sql.length}` : ' / 処理と未接続'}{links.server && links.sql.length && sitedOf(links.sql) !== null ? ` / 位置 ${sitedOf(links.sql)}` : ''}
                     </option>
                   ))}
                 </select>
@@ -493,6 +518,9 @@ export default function LivePreview() {
               </>
             )}
           </div>
+        )}
+        {view === 'live' && obsShown?.withSel && (
+          <p className="rt-note pvobs pvobspair">選択した要素と、この通信の SQL を並べています。<b>両者は結んでいません</b>（値の由来は未確認。この要素を描いた文書取得がこの通信かも特定していません）。</p>
         )}
         {obsNote && view !== 'live' && <p className="rt-note pvobs pvobsnote">{obsNote}</p>}
         {view === 'live' && origin && (

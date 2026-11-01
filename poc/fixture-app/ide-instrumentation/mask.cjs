@@ -30,7 +30,13 @@ const ALLOW = new Set([
   'method', 'model', 'name',
   // Next.js 計装
   'next.route', 'next.span_type', 'next.rsc', 'next.page', 'next.segment',
+  // Phase 7B-3B-1: IDE のプレビュー中継が要求ごとに作った識別子（16進 32 桁の乱数）。
+  // 値の形は RELAY_ID で検査し、形が違えば捨てる
+  'vcide.relay.id',
 ]);
+
+/** 中継の識別子の形。**これ以外の値は記録しない**（任意の文字列をスパンに運ばせない） */
+const RELAY_ID = /^[0-9a-f]{32}$/;
 
 /** 値に現れたら、その属性を丸ごと捨てる（キー名が許可リストにあっても捨てる）。 */
 const SECRET_VALUE = [
@@ -95,6 +101,9 @@ function maskAttributes(raw) {
       redacted = r.redacted;
     } else if (key === 'http.target' || key === 'url.path') {
       value = stripQuery(value);
+    } else if (key === 'vcide.relay.id' && !(typeof value === 'string' && RELAY_ID.test(value))) {
+      droppedKeys.push(key);
+      continue;
     }
 
     if (typeof value === 'string' && SECRET_VALUE.some((re) => re.test(value))) {
@@ -107,4 +116,4 @@ function maskAttributes(raw) {
   return { attrs, droppedKeys, redacted };
 }
 
-module.exports = { maskAttributes, redactSql, ALLOW, SECRET_KEY, SECRET_VALUE };
+module.exports = { maskAttributes, redactSql, ALLOW, SECRET_KEY, SECRET_VALUE, RELAY_ID };

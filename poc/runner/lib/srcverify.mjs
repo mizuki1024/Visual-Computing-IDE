@@ -69,9 +69,14 @@ export function verifyLocation({ file, line, col, tag, component }) {
   return { ok: true, actual: hit };
 }
 
-/** その行のソーステキスト（報告書に出す1行。全文は持ち出さない） */
-export function lineText(file, line) {
-  const abs = path.join(APP, file);
+/**
+ * その行のソーステキスト（報告書に出す1行。全文は持ち出さない）。
+ * `root` は対象アプリの場所（既定は PoC の題材）。Phase 7B-3B-1 で IDE が
+ * いまの起動の対象プロジェクトに対して同じ照合を使うために足した。
+ * **毎回ソースを読み直す**（キャッシュしない。読み直しが照合の本体である）。
+ */
+export function lineText(file, line, root = APP) {
+  const abs = path.join(root, file);
   if (!fs.existsSync(abs)) return null;
   const l = fs.readFileSync(abs, 'utf8').split('\n')[line - 1];
   return l === undefined ? null : l.trim();
@@ -85,10 +90,15 @@ const compCache = new Map();
  * そのファイルのコンポーネント宣言の行範囲を、**ソースを読み直して**作る。
  * ビルド時のマニフェストとは独立した情報源である（両者の一致を根拠に使う）。
  */
-function componentRanges(relPath) {
-  if (compCache.has(relPath)) return compCache.get(relPath);
-  const abs = path.join(APP, relPath);
-  if (!fs.existsSync(abs)) { compCache.set(relPath, null); return null; }
+function componentRanges(relPath, root = APP) {
+  const abs = path.join(root, relPath);
+  /* 鍵は絶対パス、更新時刻と大きさが変われば作り直す（開発中にソースが書き換わるため。
+   * 古い解析結果で照合すると「読み直し」にならない） */
+  let st;
+  try { st = fs.statSync(abs); } catch { st = null; }
+  const hit = compCache.get(abs);
+  if (hit && st && hit.mtimeMs === st.mtimeMs && hit.size === st.size) return hit.out;
+  if (!st) { compCache.delete(abs); return null; }
   const code = fs.readFileSync(abs, 'utf8');
   const sf = ts.createSourceFile(relPath, code, ts.ScriptTarget.Latest, false, ts.ScriptKind.TSX);
   const isPascal = (s) => /^[A-Z]/.test(s);
@@ -108,7 +118,7 @@ function componentRanges(relPath) {
     ts.forEachChild(n, walk);
   };
   walk(sf);
-  compCache.set(relPath, out);
+  compCache.set(abs, { mtimeMs: st.mtimeMs, size: st.size, out });
   return out;
 }
 
@@ -116,8 +126,8 @@ function componentRanges(relPath) {
  * その行を囲むいちばん内側のコンポーネント宣言。無ければ null。
  * **ソースの読み直しによる独立した判定である。**
  */
-export function enclosingComponent(file, line) {
-  const ranges = componentRanges(file);
+export function enclosingComponent(file, line, root = APP) {
+  const ranges = componentRanges(file, root);
   if (!ranges) return null;
   const hit = ranges
     .filter((r) => r.line <= line && line <= r.endLine)

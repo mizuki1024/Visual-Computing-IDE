@@ -39,12 +39,12 @@ const CALL_PATTERN = {
  * **いちばん内側（呼び出しを書いた場所）を採る。** 外側へ遡って
  * 「結果的に原因となったコンポーネント」を指しにはいかない。
  */
-function firstAppFrame(frames) {
+function firstAppFrame(frames, root) {
   for (const f of frames) {
     if (!f || !f.file) continue;
     if (SELF.test(f.file)) continue;
     if (f.scope !== 'build-output' && f.scope !== 'bundler-virtual') continue;
-    const pos = resolveServerFrame(f);
+    const pos = resolveServerFrame(f, root);
     if (!pos || !pos.file.startsWith(SCOPE)) continue;
     return { frame: f, resolved: pos };
   }
@@ -57,8 +57,13 @@ function firstAppFrame(frames) {
  * @param {{target:'sql'|'server-fetch', entry:{at:string, frames:object[]}|null,
  *          atSpanStart?:object[]}} callsite   計装が書いた callsite 記録
  * @param {Map<string, object[]>} manifestComponents  file → コンポーネント範囲
+ * @param {{root?: string}} [opts]  対象アプリの場所（既定は PoC の題材）。
+ *   Phase 7B-3B-1 で、IDE がいまの起動の対象プロジェクトに**同じ4段**を使うために足した。
+ *   結果には、戻す前の生成物の位置（`generated`）も入れる（呼び出し側が
+ *   「その生成物が呼び出しの後に書き換わっていないか」を確かめるため）
  */
-export function resolveRscAttribution(callsite, manifestComponents) {
+export function resolveRscAttribution(callsite, manifestComponents, opts = {}) {
+  const root = opts.root;
   const target = callsite?.target ?? null;
   const entry = callsite?.entry ?? null;
   const base = {
@@ -78,7 +83,7 @@ export function resolveRscAttribution(callsite, manifestComponents) {
     };
   }
 
-  const hit = firstAppFrame(entry.frames);
+  const hit = firstAppFrame(entry.frames, root);
   if (!hit) {
     return {
       ...base, frame: null, verified: false, sourceLine: null, component: null,
@@ -89,9 +94,10 @@ export function resolveRscAttribution(callsite, manifestComponents) {
     };
   }
   const { file, line, col } = hit.resolved;
+  base.generated = { file: hit.frame.file, scope: hit.frame.scope, line: hit.frame.line, col: hit.frame.col };
 
   /* 3. ソース行の読み直し */
-  const text = lineText(file, line);
+  const text = lineText(file, line, root);
   const pattern = CALL_PATTERN[target] ?? CALL_PATTERN.sql;
   const verified = !!text && pattern.test(text);
   if (!verified) {
@@ -107,7 +113,7 @@ export function resolveRscAttribution(callsite, manifestComponents) {
   }
 
   /* 4. 囲んでいるコンポーネント。独立した2つの情報源の一致を要求する */
-  const bySource = enclosingComponent(file, line);
+  const bySource = enclosingComponent(file, line, root);
   const manifest = (manifestComponents.get(file) ?? [])
     .filter((c) => c.line <= line && line <= c.endLine)
     .sort((a, b) => (a.endLine - a.line) - (b.endLine - b.line))[0] ?? null;

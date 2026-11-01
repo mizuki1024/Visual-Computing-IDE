@@ -123,6 +123,31 @@ export function readManifest(dir: string): Map<string, ManifestAnchor> {
   return out;
 }
 
+/**
+ * 対応表に入っている「コンポーネント定義の行範囲」（ローダが同じ変換で書く。7B-3B-1 で読むようにした）。
+ * PoC-02 の帰属の第4段（囲むコンポーネントを**ソースの読み直し**と**ビルド時の対応表**の2つで決める）の
+ * 片方である。形の合わない記述・注入範囲の外のファイルは捨てる。
+ */
+export function readManifestComponents(dir: string): Map<string, { name: string; file: string; line: number; endLine: number }[]> {
+  const out = new Map<string, { name: string; file: string; line: number; endLine: number }[]>();
+  let names: string[] = [];
+  try { names = fs.readdirSync(dir).filter((n) => /^[0-9a-f]{16}\.json$/.test(n)); } catch { return out; }
+  for (const n of names) {
+    let j: { file?: unknown; components?: unknown[] };
+    try { j = JSON.parse(fs.readFileSync(path.join(dir, n), 'utf8')) as typeof j; } catch { continue; }
+    if (!isStr(j.file) || !j.file.startsWith(`${ANCHOR_SCOPE}/`) || j.file.split('/').includes('..')) continue;
+    const list: { name: string; file: string; line: number; endLine: number }[] = [];
+    for (const c of Array.isArray(j.components) ? j.components : []) {
+      const r = c as Record<string, unknown>;
+      if (!r || !isStr(r.name) || !/^[A-Z][\w$]{0,99}$|^\(default export\)$/.test(r.name)
+        || !isPosInt(r.line) || !isPosInt(r.endLine) || r.endLine < r.line) continue;
+      list.push({ name: r.name, file: j.file, line: r.line, endLine: r.endLine });
+    }
+    if (list.length) out.set(j.file, list);
+  }
+  return out;
+}
+
 /* ---------------------------------------------------- ソースの読み直し */
 
 type TS = typeof import('typescript');
