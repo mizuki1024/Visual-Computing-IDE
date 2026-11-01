@@ -293,6 +293,7 @@ try {
   eq('計装は有効', st1.runtime.instrumentation.state, 'enabled');
   await page.waitForFunction(() => ['none', 'some'].includes(document.querySelector('.pvobsrow')?.getAttribute('data-obs-state') ?? ''), null, { timeout: 30000 });
   ok('既存のプレビューパネルに観測の行が出る', await obsRow().count() === 1);
+  eq('観測の行は 7B-2 の選択の行のクラス（.pvsel / .pvselrow）を使わない（7B-2 の操作と取り違えない）', await pv().locator('.pvsel, .pvselrow').count(), 0);
   const o1 = await obsOf(run1);
   ok('観測セッションはこの起動の後に作られた', o1 && Date.parse(o1.session.startedAt) >= Date.parse(run1.startedAt), o1?.session);
   ok('最初のページの読み込み（/）が、いまの起動の通信として現れる', o1?.exchanges.some((e) => e.path === '/'), o1?.exchanges);

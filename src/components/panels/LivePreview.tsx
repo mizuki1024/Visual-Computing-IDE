@@ -466,10 +466,10 @@ export default function LivePreview() {
         )}
 
         {view === 'live' && (
-          <div className="rt-row pvselrow pvobsrow" data-obs-state={obs ? (obs.exchanges.length ? 'some' : 'none') : obsError ? 'error' : 'loading'}
+          <div className="rt-row pvobsrow" data-obs-state={obs ? (obs.exchanges.length ? 'some' : 'none') : obsError ? 'error' : 'loading'}
             data-obs-count={obs?.exchanges.length ?? ''} data-obs-sql={obs ? obsSqlCount : ''}
             data-obs-shown={obsShown?.seq ?? ''} data-obs-session={obs?.session.startedAt ?? ''}>
-            <p className="rt-note pvsel pvobs">
+            <p className="rt-note pvobs">
               {!obs && !obsError && <>観測（いまの起動）: 取得しています…</>}
               {!obs && obsError && <>観測（いまの起動）: 取得できません — {obsError}</>}
               {obs && !obs.exchanges.length && <>観測（いまの起動）: まだ通信はありません（未観測）。</>}
@@ -494,7 +494,7 @@ export default function LivePreview() {
             )}
           </div>
         )}
-        {obsNote && view !== 'live' && <p className="rt-note pvsel">{obsNote}</p>}
+        {obsNote && view !== 'live' && <p className="rt-note pvobs pvobsnote">{obsNote}</p>}
         {view === 'live' && origin && (
           <div className="site pvsite">
             <iframe key={nav.n} ref={frameRef} className="pvframe" title="開発サーバーのプレビュー"
