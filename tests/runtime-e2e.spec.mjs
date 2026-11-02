@@ -257,6 +257,9 @@ console.log('\n5. 起動状態を確認する');
   await tab.close();
 }
 {
+  // 7C-2: 実行中は「プロジェクトと実行」を状態・PID・停止の1段に畳む。出力・起動ボタンは［詳細］で開いてから見る
+  eq('7C-2: 実行中は「プロジェクトと実行」を畳んでいる', await panel().locator('.rt').getAttribute('data-compact'), 'on');
+  await panel().locator('button.fold').click();
   await panel().locator('.rt-more').click();
   await page.waitForTimeout(400);
   const lines = await panel().locator('.rt-log div').allInnerTexts();

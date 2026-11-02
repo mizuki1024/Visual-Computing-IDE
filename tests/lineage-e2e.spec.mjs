@@ -480,6 +480,33 @@ try {
   }
   await shot('01-lin-a-supplies');
   await shotCanvas('01b-lin-a-supplies-canvas');
+  {
+    /* 7C-2（P0-2）: 選択モードを抜けた「経路を見る」状態では、浮かぶパネルを**隠さずに**測って、
+     * 経路のノードと接続線がパネルに覆われていない（scripts/lib/overlap.mjs と同じ定義）。視点の移動を待つ */
+    await page.waitForTimeout(700);
+    eq('7C-2: 選択モードを抜けると、プレビューのページ表示を畳む', await pv().getAttribute('data-folded'), 'on');
+    const cov = await page.evaluate(() => {
+      const ps = [...document.querySelectorAll('.canvas > .fpnl, .canvas > .ctl')].map((p) => p.getBoundingClientRect());
+      const inter = (a, b) => Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left)) * Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
+      const nodes = [...document.querySelectorAll('g.nd')].filter((g) => {
+        const r = g.getBoundingClientRect();
+        return ps.some((p) => inter(r, p) / (r.width * r.height || 1) > 0.05);
+      }).map((g) => g.getAttribute('aria-label'));
+      const hops = [...document.querySelectorAll('g.hp')].filter((g) => {
+        const path = [...g.querySelectorAll('path')].at(-1);
+        const L = path.getTotalLength(); const m = path.getScreenCTM();
+        for (let i = 0; i <= 12; i++) {
+          const q = path.getPointAtLength((L * i) / 12);
+          const x = m.a * q.x + m.c * q.y + m.e; const y = m.b * q.x + m.d * q.y + m.f;
+          if (ps.some((p) => x >= p.left && x <= p.right && y >= p.top && y <= p.bottom)) return true;
+        }
+        return false;
+      }).map((g) => g.getAttribute('aria-label'));
+      return { nodes, hops };
+    });
+    eq('7C-2: 経路のノードが浮かぶパネルに覆われていない（パネルを隠さずに DOM の矩形で測る）', JSON.stringify(cov.nodes), '[]');
+    eq('7C-2: 接続線（推定の線を含む）が浮かぶパネルに覆われていない', JSON.stringify(cov.hops), '[]');
+  }
 
   /* ============================================ 3. 同じパスの別の文書を取り違えない */
   console.log('\n3. 同じパスの別の文書: 再読み込み・並行する同じパスの取得・前の文書の通信');

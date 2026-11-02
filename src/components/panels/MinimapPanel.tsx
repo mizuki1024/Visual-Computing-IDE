@@ -5,6 +5,12 @@ import { summarizePage } from '@/lib/derive';
 import { useExplore } from '@/state/ExploreStore';
 import FloatingPanel from './FloatingPanel';
 
+/**
+ * 7C-2: キャンバスが設計寸法（高さ 952）より低いときの、左の列の下端からの位置。
+ * 設計寸法での「表示設定」と「全体」の間隔（30px）と「全体」の高さ（124px）を保つ
+ */
+export const LEFT_COLUMN_BOTTOM = { minimap: 16, legend: 16 + 124 + 30 } as const;
+
 const W = 234;
 const H = 92;
 const PAD = 8;
@@ -31,7 +37,7 @@ export default function MinimapPanel() {
   return (
     <FloatingPanel id="minimap" title="全体"
       right={<i>{page.pathShown} / {page.pathTotal} 経路</i>}
-      style={{ left: 16, top: 792, width: 236 }}>
+      style={{ left: 16, width: 236, ...(viewport.h >= 952 ? { top: 792 } : { bottom: LEFT_COLUMN_BOTTOM.minimap }) }}>
       <div className="mmwrap">
         <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label="全体図">
           <defs><clipPath id="mmclip"><rect x="0" y="0" width={W} height={H} /></clipPath></defs>

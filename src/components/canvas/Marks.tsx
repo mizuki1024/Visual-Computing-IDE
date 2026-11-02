@@ -18,7 +18,7 @@ const halo = {
 export function CutMarker({ cut, k }: { cut: Cut; k: number }) {
   const CUT = cut;
   return (
-    <g>
+    <g data-mark="cut">
       <path d={CUT.d} fill="none" stroke="#6d5f44" strokeWidth={1.6 / Math.sqrt(k)}
         strokeDasharray={`${5 / k} ${5 / k}`} />
       <g transform={`translate(${CUT.mark.x},${CUT.mark.y}) rotate(${CUT.mark.angle})`}>
@@ -32,15 +32,15 @@ export function CutMarker({ cut, k }: { cut: Cut; k: number }) {
 }
 
 /** 「推定」チップ。★付きは最弱環。 */
-export function EstimateTag({ x, y, label, star }: {
-  x: number; y: number; label: string; star?: boolean;
+export function EstimateTag({ x, y, label, star, below }: {
+  x: number; y: number; label: string; star?: boolean; below?: boolean;
 }) {
   const w = star ? 58 : 40;
   return (
-    <g style={{ pointerEvents: 'none' }}>
-      {label && (
-        <text x={x} y={y - 18} textAnchor="middle" fontSize="10.5" fill="#9a90cb" {...halo}>{label}</text>
-      )}
+    <g style={{ pointerEvents: 'none' }} data-mark={star ? 'estimate-weakest' : 'estimate'}>
+      {label && (below
+        ? <text x={x - w / 2} y={y + 25} textAnchor="start" fontSize="10.5" fill="#9a90cb" {...halo}>{label}</text>
+        : <text x={x} y={y - 18} textAnchor="middle" fontSize="10.5" fill="#9a90cb" {...halo}>{label}</text>)}
       <rect x={x - w / 2} y={y - 10} width={w} height="20" rx="6" fill="#0d1019"
         stroke="#6f66a8" strokeDasharray="4 3" />
       {star ? (<>
@@ -85,7 +85,7 @@ export function StepChip({ node, selected, badge }: {
   const cy = node.chip.y;
   const tx = badge !== null ? x + 38 : x + 13;
   return (
-    <g style={{ pointerEvents: 'none' }}>
+    <g style={{ pointerEvents: 'none' }} data-mark="chip" data-node={node.id}>
       <rect x={x} y={y} width={w} height={h} rx="9" fill="rgba(11,14,21,.90)"
         stroke={selected ? '#6f66a8' : '#39356a'} strokeWidth={selected ? 1.4 : 1} />
       {badge !== null && (

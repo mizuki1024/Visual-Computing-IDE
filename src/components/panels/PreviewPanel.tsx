@@ -11,8 +11,11 @@ import { useExplore, sameRef } from '@/state/ExploreStore';
 import { useRuntime } from '@/state/RuntimeStore';
 import FloatingPanel from './FloatingPanel';
 import LivePreview, { wantsLivePreview } from './LivePreview';
+import { PREVIEW_LEFT, previewWidth } from './previewLayout';
 
 const FILTERS = ['エリア', '種別', '規模', '状況'];
+
+
 
 function Card({ no, region, plan, scale, date, b, children }: {
   no: string; region: string; plan: string; scale: string; date: string;
@@ -33,13 +36,18 @@ function Card({ no, region, plan, scale, date, b, children }: {
 }
 
 export default function PreviewPanel() {
-  const { data, selection, select } = useExplore();
+  const { data, selection, select, compact, setCompact, viewport } = useExplore();
   const { runtime, liveSeen } = useRuntime();
   /*
    * Phase 7B-1: IDE が開発サーバーを扱っている間は、同じパネルの中身を実プレビューにする。
    * それ以外（プロジェクト未指定・この画面で起動を観測していない）は、以下の従来の表示のまま。
    */
   if (wantsLivePreview(runtime, liveSeen)) return <LivePreview />;
+  /* 7C-2: 全体表示などで畳んだときは、見本の画面を隠して下の1行（何を選べるか・選んだか）だけ残す */
+  const fold = {
+    expanded: !compact.preview, onToggle: () => setCompact('preview', !compact.preview),
+    showLabel: 'ページを表示', hideLabel: '畳む',
+  };
   // 追跡できる値があるのは、経路に「表示された値」のノードがあるときだけである。
   // PoC-01 の実測データには無い（ブラウザDOMの読み取りは PoC-03 の範囲）。
   const valueNode = data.nodes.find((n) => n.kind === 'value');
@@ -57,7 +65,7 @@ export default function PreviewPanel() {
     const page = data.pages.find((x) => x.current)?.path ?? '—';
     return (
       <FloatingPanel id="preview" title="プレビュー" note="現物"
-        style={{ left: 232, top: 16, width: 392 }}>
+        style={{ left: PREVIEW_LEFT, top: 16, width: previewWidth(viewport.w) }} fold={fold}>
         <div className="pvb">
           <div className="site" style={{ padding: 18 }}>
             <div className="s-nav"><span className="s-logo">{data.project}</span></div>
@@ -98,7 +106,7 @@ export default function PreviewPanel() {
   if (!valueNode) {
     return (
       <FloatingPanel id="preview" title="プレビュー" note="現物"
-        style={{ left: 232, top: 16, width: 392 }}>
+        style={{ left: PREVIEW_LEFT, top: 16, width: previewWidth(viewport.w) }} fold={fold}>
         <div className="pvb">
           <div className="site" style={{ padding: 18 }}>
             <div className="s-nav"><span className="s-logo">{data.project}</span></div>
@@ -120,7 +128,7 @@ export default function PreviewPanel() {
 
   return (
     <FloatingPanel id="preview" title="プレビュー" note="現物"
-      style={{ left: 232, top: 16, width: 392 }}>
+      style={{ left: PREVIEW_LEFT, top: 16, width: previewWidth(viewport.w) }} fold={fold}>
       <div className="pvb">
         <div className="site">
           <div className="s-nav">

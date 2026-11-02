@@ -11,6 +11,7 @@
 import { chromium } from 'playwright-core';
 import fs from 'node:fs';
 import path from 'node:path';
+import { overlap as overlapOf, summarizeOverlap } from './lib/overlap.mjs';
 
 const REPO = path.resolve(import.meta.dirname, '..');
 const BASE = process.env.BASE ?? 'http://127.0.0.1:3100';
@@ -58,30 +59,9 @@ const waitPv = (s, timeout = 240000) => page.waitForFunction(
   (x) => document.querySelector('section[aria-label="プレビュー"] .pvlive')?.getAttribute('data-preview-state') === x, s, { timeout },
 );
 
-/** 浮かぶパネルとキャンバスのノードの重なり（画面座標）。パネルを隠さずに測る */
-async function overlap() {
-  return page.evaluate(() => {
-    const panels = [...document.querySelectorAll('.fpnl')].map((p) => ({ name: p.getAttribute('aria-label'), r: p.getBoundingClientRect() }));
-    const dock = document.querySelector('aside.dock')?.getBoundingClientRect() ?? null;
-    const nodes = [...document.querySelectorAll('g.nd')].map((g) => ({ label: g.getAttribute('aria-label'), r: g.getBoundingClientRect() }));
-    const inter = (a, b) => Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left)) * Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
-    const vw = innerWidth, vh = innerHeight;
-    return {
-      panels: panels.map((p) => ({ name: p.name, x: Math.round(p.r.left), y: Math.round(p.r.top), w: Math.round(p.r.width), h: Math.round(p.r.height) })),
-      nodes: nodes.map((n) => {
-        const area = n.r.width * n.r.height || 1;
-        const by = panels.map((p) => ({ name: p.name, frac: inter(n.r, p.r) / area })).filter((x) => x.frac > 0.05);
-        const off = n.r.right < 0 || n.r.left > (dock ? dock.left : vw) || n.r.bottom < 0 || n.r.top > vh;
-        const underDock = dock ? inter(n.r, dock) / area > 0.05 : false;
-        return { label: n.label, coveredBy: by.map((b) => `${b.name}:${Math.round(b.frac * 100)}%`), offscreen: off, underDock };
-      }),
-    };
-  });
-}
-const summarizeOverlap = (o) => {
-  const covered = o.nodes.filter((n) => n.coveredBy.length);
-  return { nodes: o.nodes.length, covered: covered.length, offscreen: o.nodes.filter((n) => n.offscreen).length, coveredList: covered.map((n) => `${n.label} ← ${n.coveredBy.join(',')}`) };
-};
+/* 浮かぶパネルとキャンバスのノードの重なり（画面座標）。パネルを隠さずに測る。
+ * 7C-2 で scripts/lib/overlap.mjs に移した（定義は変えていない。7C-2 の受入でも同じ関数を使う） */
+const overlap = () => overlapOf(page);
 
 /** Markdown の記号が文字として出ていないか（右ドック・キャンバス・パネル） */
 async function markdownLeaks() {

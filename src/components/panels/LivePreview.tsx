@@ -14,6 +14,7 @@
  * ========================================================================== */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import FloatingPanel from './FloatingPanel';
+import { PREVIEW_LEFT, previewWidth } from './previewLayout';
 import Why from '../common/Why';
 import { RUN_STATE_LABEL, useRuntime, type Finding } from '@/state/RuntimeStore';
 import { useExplore } from '@/state/ExploreStore';
@@ -142,7 +143,7 @@ export function wantsLivePreview(
 
 export default function LivePreview() {
   const { runtime, preview } = useRuntime();
-  const { showLive, clearLive } = useExplore();
+  const { showLive, clearLive, compact, setCompact, viewport } = useExplore();
   const state = runtime?.state ?? 'idle';
   const origin = preview?.origin ?? null;
   const running = state === 'running';
@@ -558,6 +559,7 @@ export default function LivePreview() {
     lastSelRef.current = null;
     setLin(null);
     setSelectMode(false);
+    setCompact('preview', false);         // 7C-2: 前の起動の選択が無くなったので、ページの表示に戻す
     if (prev !== null) {
       setObsNote(serverKey ? '開発サーバーが起動し直されたため、前の起動の観測を消しました。' : '開発サーバーが実行中ではなくなったため、観測の表示を消しました（実測中ではありません）。');
       clearLive();
@@ -565,10 +567,30 @@ export default function LivePreview() {
         ? { status: 'cleared', message: serverKey ? '開発サーバーが起動し直されたため、前の選択を解除しました。' : '開発サーバーが実行中ではなくなったため、選択を解除しました。' }
         : cur));
     }
-  }, [serverKey, closeAll, clearLive]);
+  }, [serverKey, closeAll, clearLive, setCompact]);
   useEffect(() => () => { closeAll(); clearLive(); }, [closeAll, clearLive]);
 
-  const clearSel = () => { selSeqRef.current += 1; lastSelRef.current = null; setLin(null); clearLive(); setLiveSel(null); setObsShown(null); };
+  /*
+   * 7C-2: 「画面を見る → 選ぶ → 理解する」。
+   *   選ぶ    … 選択モードに入ると、ページの表示を広げる（選び直せる）
+   *   理解する … 選択モードを抜けた（選んだ要素が残っている）・観測の通信を［表示］したら、
+   *             ページの表示を畳んで経路図を優先する。畳んでも iframe の文書・選択・観測は残る
+   *   戻る    … ヘッダの［ページを表示］・［選択］・移動・再読み込み・解除で、いつでも広げる
+   */
+  const toggleSelect = () => {
+    const next = !selectMode;
+    setSelectMode(next);
+    if (next) setCompact('preview', false);
+    else if (liveSel && (liveSel.status === 'resolved' || liveSel.status === 'unresolved')) setCompact('preview', true);
+  };
+  /* 全体表示などで畳まれたら、選択モードを抜ける（畳んだ表示では要素を選べないため） */
+  const prevCompact = useRef(compact.preview);
+  useEffect(() => {
+    if (compact.preview && !prevCompact.current) setSelectMode(false);
+    prevCompact.current = compact.preview;
+  }, [compact.preview]);
+
+  const clearSel = () => { selSeqRef.current += 1; lastSelRef.current = null; setLin(null); clearLive(); setLiveSel(null); setObsShown(null); setCompact('preview', false); };
 
   const onFrameLoad = useCallback(() => {
     // 知らせは文書の DOMContentLoaded で来るので、load より先に届いている。
@@ -583,6 +605,7 @@ export default function LivePreview() {
   }, []);
 
   const go = (path: string) => {
+    setCompact('preview', false);        // 7C-2: 移動・再読み込みはページを見るための操作
     readyRef.current = false;
     setSilent(false);
     setMsg(null);
@@ -610,11 +633,21 @@ export default function LivePreview() {
 
   const st = statusLabel(msg);
   const canNav = view === 'live';
+  /** 7C-2: ページの表示を畳んでいるか（実ページを表示していて、選択モードでないときだけ畳める） */
+  const folded = compact.preview && view === 'live' && !selectMode;
 
   return (
     <FloatingPanel id="preview" title="プレビュー" note="開発サーバー"
-      style={{ left: 232, top: 16, width: 392 }}>
-      <div className="pvb pvlive" data-preview-state={view}
+      style={{ left: PREVIEW_LEFT, top: 16, width: previewWidth(viewport.w) }}
+      fold={view === 'live' ? {
+        expanded: !folded,
+        onToggle: () => { if (folded) setCompact('preview', false); else { setSelectMode(false); setCompact('preview', true); } },
+        showLabel: 'ページを表示', hideLabel: '畳む',
+        hint: folded
+          ? 'ページの表示を広げます（同じ文書のまま。別の要素を選ぶときは［選択］）'
+          : 'ページの表示を畳み、経路図を広く見ます（選択・観測・表示中の文書は残ります）',
+      } : undefined}>
+      <div className={`pvb pvlive${folded ? ' pvfold' : ''}`} data-preview-state={view} data-folded={folded ? 'on' : 'off'}
         data-http-status={msg?.status ?? ''} data-from={msg?.from ?? ''}
         data-path={msg?.path ?? ''} data-loads={loads}
         data-conn={connN} data-rejected={rejected} data-select-mode={selectMode ? 'on' : 'off'}
@@ -642,8 +675,8 @@ export default function LivePreview() {
             : <Why reason="開発サーバーのページを表示しているときだけ使えます。"><span className="rt-b off" aria-disabled="true">移動</span></Why>}
           {canNav
             ? <button type="button" className={`rt-b${selectMode ? ' go' : ''}`} aria-pressed={selectMode}
-              title={selectMode ? '選択モード中: プレビューの中のクリックは要素の選択になります（ページは操作されません）' : 'プレビューの中の要素をクリックで選び、React のソース位置を調べます'}
-              onClick={() => setSelectMode((v) => !v)}>選択</button>
+              title={selectMode ? '選択モード中: プレビューの中のクリックは要素の選択になります（ページは操作されません）。抜けると、ページの表示を畳んで経路図を広く表示します' : 'プレビューの中の要素をクリックで選び、React のソース位置を調べます'}
+              onClick={toggleSelect}>選択</button>
             : <Why reason="開発サーバーのページを表示しているときだけ使えます。"><span className="rt-b off" aria-disabled="true">選択</span></Why>}
         </div>
         {addrError && <p className="rt-note pvwarn">{addrError}</p>}
@@ -661,7 +694,7 @@ export default function LivePreview() {
           </div>
         )}
         {liveSel?.status === 'resolved' && lin && (
-          <p className={`rt-note pvlin${lin.status === 'cut' ? ' pvwarn' : ''}`}>{lineageLine(lin)}</p>
+          <p className={`rt-note pvlin${lin.status === 'cut' ? ' pvwarn' : ''}`} title={folded ? lineageLine(lin) : undefined}>{lineageLine(lin)}</p>
         )}
         {selectMode && !liveSel && view === 'live' && (
           <p className="rt-note pvsel">選択モード: プレビューの中の要素をクリックしてください（ページは操作されません）。</p>
@@ -693,8 +726,12 @@ export default function LivePreview() {
                 </select>
                 <button type="button" className="rt-b" disabled={obsSel === null}
                   title="選んだ通信と、そのサーバー処理・SQL・テーブル・カラムをキャンバスと右の詳細に出します"
-                  onClick={() => { if (obsSel !== null && obs && serverKey) showObs(obsSel, obs, serverKey); }}>表示</button>
-                {obsShown && <button type="button" className="rt-b" onClick={clearObs}>解除</button>}
+                  onClick={() => {
+                    if (obsSel === null || !obs || !serverKey) return;
+                    showObs(obsSel, obs, serverKey);
+                    if (!selectMode) setCompact('preview', true);   // 7C-2: 経路を見る操作なので、経路図を優先する
+                  }}>表示</button>
+                {obsShown && <button type="button" className="rt-b" onClick={() => { clearObs(); if (!liveSel || liveSel.status === 'cleared') setCompact('preview', false); }}>解除</button>}
               </>
             )}
           </div>
@@ -711,7 +748,7 @@ export default function LivePreview() {
         )}
         {obsNote && view !== 'live' && <p className="rt-note pvobs pvobsnote">{obsNote}</p>}
         {view === 'live' && origin && (
-          <div className="site pvsite">
+          <div className={`site pvsite${folded ? ' pvstash' : ''}`} aria-hidden={folded || undefined}>
             <iframe key={nav.n} ref={frameRef} className="pvframe" title="開発サーバーのプレビュー"
               src={`${origin}${nav.path}`} onLoad={onFrameLoad}
               // 別 origin なので IDE の画面には触れない。上の階層の移動（IDE の画面の差し替え）は許さない

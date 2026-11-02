@@ -134,7 +134,7 @@ export default function FlowScene() {
         {/* 推定の印。語を置くのは推定の2本だけ（表示規則10） */}
         {hops.filter((h) => h.tag).map((h) => (
           <EstimateTag key={h.id} x={h.tag!.x} y={h.tag!.y}
-            label={showLabels ? h.tag!.label : ''} star={h.star === true} />
+            label={showLabels ? h.tag!.label : ''} star={h.star === true} below={h.tag!.below} />
         ))}
 
         {/* ラベル札 */}

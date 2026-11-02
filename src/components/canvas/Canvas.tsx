@@ -9,7 +9,7 @@ import { zoomAt } from '@/lib/view';
 import FlowScene from './FlowScene';
 
 export default function Canvas({ children }: { children?: ReactNode }) {
-  const { view, setView, setViewport, clearSelection } = useExplore();
+  const { view, setViewByUser: setView, setViewport, clearSelection, registerObstacles } = useExplore();
   const ref = useRef<HTMLDivElement>(null);
   const drag = useRef<
     { id: number; sx: number; sy: number; vx: number; vy: number; moved: boolean } | null
@@ -31,6 +31,23 @@ export default function Canvas({ children }: { children?: ReactNode }) {
     setViewport(Math.round(r.width), Math.round(r.height));
     return () => ro.disconnect();
   }, [setViewport]);
+
+  /*
+   * 7C-2: 全体表示と寄せが使う「覆われない領域」のために、いま表示されている浮かぶパネル・
+   * 操作バー・注記の実寸を、キャンバス座標で測って渡す（固定値の見積りにしない）
+   */
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+    registerObstacles(() => {
+      const c = el.getBoundingClientRect();
+      return [...el.querySelectorAll<HTMLElement>(':scope > .fpnl, :scope > .ctl, :scope > .note')]
+        .map((p) => p.getBoundingClientRect())
+        .filter((r) => r.width > 0 && r.height > 0)
+        .map((r) => ({ x: r.left - c.left, y: r.top - c.top, w: r.width, h: r.height }));
+    });
+    return () => registerObstacles(null);
+  }, [registerObstacles]);
 
   /* ズーム。ページのスクロールに奪われないよう passive:false で受ける */
   useEffect(() => {

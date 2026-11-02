@@ -1,0 +1,755 @@
+{
+ "base": "http://127.0.0.1:3100",
+ "viewport": "1440x900",
+ "startedAt": "2026-11-02T09:14:07.752Z",
+ "scenarios": [
+  {
+   "id": "S0",
+   "title": "IDE を開いた直後",
+   "steps": [
+    {
+     "k": "screenshot",
+     "v": "00-open-ide.png"
+    },
+    {
+     "k": "overlap.initial",
+     "v": {
+      "nodes": 7,
+      "covered": 4,
+      "offscreen": 0,
+      "coveredList": [
+       "サーバー処理 Next.js API Route — 98ms ← プロジェクトと実行:100%",
+       "テーブル public.listings ← プロジェクトと実行:11%",
+       "実行SQL SELECT id, title, region … — 42ms — 12行 ← プロジェクトと実行:100%",
+       "カラム region (text) ← プロジェクトと実行:88%"
+      ]
+     }
+    }
+   ],
+   "notes": [],
+   "error": null
+  },
+  {
+   "id": "S1",
+   "title": "プロジェクトを開く（対応状況と制約が分かる）",
+   "steps": [
+    {
+     "k": "verdict",
+     "v": "supported"
+    },
+    {
+     "k": "runtimePanel",
+     "v": "プロジェクトと実行\nPhase 7A\n✕\nプロジェクトのパス（絶対パス）\n検出\n\nブラウザからフォルダ選択ダイアログは開けません。パスを入力する方式です。\n\n対応\npoc01-fixture-app\nルート\n<IDE>/poc/fixture-app\nNext.js\n16.4.3 （宣言 ^16.4.3）\nルーター\nsrc/app\n依存\nインストール済み （npm）\nプロジェクトより上の階層に lockfile またはワークスペースの宣言があります（<IDE>/package-lock.json）。\n\nnext.config に turbopack.root または outputFileTracingRoot の記述があります。\n\nIDE は next.config を実行しないため、設定された値が正しいかは確認していません。\n\nこのプロジェクトは TypeScript を使っています。\n\nNext.js の開発サーバー（next dev）は、起動時に tsconfig.json の一部の項目を必要な値に書き換え、next-env.d.ts を書き直します（Next.js の既定の振る舞いです）。\n\n書き換えるかどうかは、その時点の tsconfig.json の内容で Next.js が決めます。この検出では事前に判定しません。書き換えるのは next dev であり、IDE は対象プロジェクトに書き込みません。起動後に変化を観測した場合は、その事実を表示します。\n\npackage.json に dev スクリプトがありません。\n\n宣言されていません。\n\n起動には影響しません。IDE は node_modules の next を直接起動します。\n\nポート\n計装つき\nPoC-01 方式2（NODE_OPTIONS の前置）で計装します。対象プロジェクトにはファイルを置きません。\n使えない場合は「適用不可」と表示します。計装なしでも起動と停止は行えます。\n起動する\n停止する\n処理中です。\n停止しています\nPID 972\n:3000\n起動元\nIDE\n計装\n有効\nHTTP\n応答なし — ポート 3000 は解放されています。\n環境変数\n23 個を渡しました （他の 177 個は渡していません）\nこの IDE がこのプロジェクトの開発サーバーを最初に起動してから、対象プロジェクトの next-env.d.ts（作成） が変わりました。\n\n書き込んだプロセスを特定する出力はありません。IDE は対象プロジェクトに書き込みません。変化は IDE の外（開発サーバーとして起動した next dev を含む）で起きたものです。\n\n変更の中身は IDE では元に戻していません。Next.js の既定の振る舞いによる書き換えは、起動のたびに起こりえます。\n\n差分はプロジェクトのバージョン管理（git diff など）で確認できます。\n\n▸ 標準出力・エラー出力\n115 行"
+    },
+    {
+     "k": "screenshot",
+     "v": "01-inspect-fixture.png"
+    },
+    {
+     "k": "verdict.invalid",
+     "v": "invalid"
+    },
+    {
+     "k": "runtimePanel.invalid",
+     "v": "プロジェクトと実行\nPhase 7A\n✕\nプロジェクトのパス（絶対パス）\n検出\n\nブラウザからフォルダ選択ダイアログは開けません。パスを入力する方式です。\n\n指定が不正\n—\nルート\n—\nNext.js\n—\nルーター\n—\n依存\n未インストール\n指定されたパスが存在しません（/nonexistent/path/app）。\n\nそのパスにファイルもディレクトリもありません。\n\nプロジェクトの構成は判定できません。\n\nパスを確認して入力し直してください。\n\nポート\n計装つき\nPoC-01 方式2（NODE_OPTIONS の前置）で計装します。対象プロジェクトにはファイルを置きません。\n使えない場合は「適用不可」と表示します。計装なしでも起動と停止は行えます。\n起動する\nこの構成は対応範囲外です。理由は下の所見に出ています。\n停止する\n処理中です。\n停止しています\nPID 972\n:3000\n起動元\nIDE\n計装\n有効\nHTTP\n応答なし — ポート 3000 は解放されています。\n環境変数\n23 個を渡しました （他の 177 個は渡していません）\nこの IDE がこのプロジェクトの開発サーバーを最初に起動してから、対象プロジェクトの next-env.d.ts（作成） が変わりました。\n\n書き込んだプロセスを特定する出力はありません。IDE は対象プロジェクトに書き込みません。変化は IDE の外（開発サーバーとして起動した next dev を含む）で起きたものです。\n\n変更の中身は IDE では元に戻していません。Next.js の既定の振る舞いによる書き換えは、起動のたびに起こりえます。\n\n差分はプロジェクトのバージョン管理（git diff など）で確認できます。\n\n▸ 標準出力・エラー出力\n115 行"
+    },
+    {
+     "k": "screenshot",
+     "v": "01b-inspect-invalid.png"
+    },
+    {
+     "k": "verdict.again",
+     "v": "supported"
+    }
+   ],
+   "notes": [],
+   "error": null
+  },
+  {
+   "id": "S2",
+   "title": "開発サーバーを起動する（状態が正確に表示される）",
+   "steps": [
+    {
+     "k": "start",
+     "v": {
+      "states": [
+       "停止しています",
+       "起動中",
+       "実行中"
+      ],
+      "preview": "live",
+      "ms": 1934
+     }
+    },
+    {
+     "k": "status.runtime",
+     "v": {
+      "state": "running",
+      "pid": 1339,
+      "port": 3000,
+      "readyMs": 1849,
+      "instrumentation": "enabled",
+      "anchors": "enabled",
+      "env": {
+       "passed": [
+        "HOME",
+        "HTTPS_PROXY",
+        "NODE_EXTRA_CA_CERTS",
+        "NODE_OPTIONS",
+        "NO_PROXY",
+        "NPM_CONFIG_USERCONFIG",
+        "PATH",
+        "SHELL",
+        "SSL_CERT_FILE",
+        "TERM",
+        "https_proxy",
+        "no_proxy",
+        "npm_config_cache",
+        "npm_config_global_prefix",
+        "npm_config_globalconfig",
+        "npm_config_https_proxy",
+        "npm_config_init_module",
+        "npm_config_local_prefix",
+        "npm_config_node_gyp",
+        "npm_config_noproxy",
+        "npm_config_npm_version",
+        "npm_config_prefix",
+        "npm_config_user_agent"
+       ],
+       "withheld": 177,
+       "explicit": []
+      }
+     }
+    },
+    {
+     "k": "runtimePanel",
+     "v": "プロジェクトと実行\nPhase 7A\n✕\nプロジェクトのパス（絶対パス）\n検出\n\nブラウザからフォルダ選択ダイアログは開けません。パスを入力する方式です。\n\n対応\npoc01-fixture-app\nルート\n<IDE>/poc/fixture-app\nNext.js\n16.4.3 （宣言 ^16.4.3）\nルーター\nsrc/app\n依存\nインストール済み （npm）\nプロジェクトより上の階層に lockfile またはワークスペースの宣言があります（<IDE>/package-lock.json）。\n\nnext.config に turbopack.root または outputFileTracingRoot の記述があります。\n\nIDE は next.config を実行しないため、設定された値が正しいかは確認していません。\n\nこのプロジェクトは TypeScript を使っています。\n\nNext.js の開発サーバー（next dev）は、起動時に tsconfig.json の一部の項目を必要な値に書き換え、next-env.d.ts を書き直します（Next.js の既定の振る舞いです）。\n\n書き換えるかどうかは、その時点の tsconfig.json の内容で Next.js が決めます。この検出では事前に判定しません。書き換えるのは next dev であり、IDE は対象プロジェクトに書き込みません。起動後に変化を観測した場合は、その事実を表示します。\n\npackage.json に dev スクリプトがありません。\n\n宣言されていません。\n\n起動には影響しません。IDE は node_modules の next を直接起動します。\n\nポート\n計装つき\nPoC-01 方式2（NODE_OPTIONS の前置）で計装します。対象プロジェクトにはファイルを置きません。\n使えない場合は「適用不可」と表示します。計装なしでも起動と停止は行えます。\n起動する\n既に実行中です。二重には起動しません。\n停止する\n実行中\nPID 1339\n:3000\n1849 ms\n起動元\nIDE\n計装\n有効\nHTTP\n応答あり（200） 09:14:11\n環境変数\n23 個を渡しました （他の 177 個は渡していません）\nURL\nhttp://127.0.0.1:3000\nこの IDE がこのプロジェクトの開発サーバーを最初に起動してから、対象プロジェクトの next-env.d.ts（作成） が変わりました。\n\n書き込んだプロセスを特定する出力はありません。IDE は対象プロジェクトに書き込みません。変化は IDE の外（開発サーバーとして起動した next dev を含む）で起きたものです。\n\n変更の中身は IDE では元に戻していません。Next.js の既定の振る舞いによる書き換えは、起動のたびに起こりえます。\n\n差分はプロジェクトのバージョン管理（git diff など）で確認できます。\n\n▸ 標準出力・エラー出力\n17 行"
+    },
+    {
+     "k": "screenshot",
+     "v": "02-running.png"
+    }
+   ],
+   "notes": [],
+   "error": null
+  },
+  {
+   "id": "S3",
+   "title": "実ページをプレビューする（遷移・再読み込み）",
+   "steps": [
+    {
+     "k": "after goto /lin-a",
+     "v": {
+      "path": "/lin-a",
+      "http": "200",
+      "loads": "2"
+     }
+    },
+    {
+     "k": "after reload",
+     "v": {
+      "path": "/lin-a",
+      "http": "200",
+      "loads": "3"
+     }
+    },
+    {
+     "k": "after goto 404",
+     "v": {
+      "path": "/no-such-page",
+      "http": "404",
+      "foot": "HTTP 404 — ページが見つかりません（開発サーバーの応答）\n/no-such-page"
+     }
+    },
+    {
+     "k": "screenshot",
+     "v": "03-preview-lin-a.png"
+    }
+   ],
+   "notes": [],
+   "error": null
+  },
+  {
+   "id": "S4",
+   "title": "要素を選ぶ（対応する React ソースが分かる）",
+   "steps": [
+    {
+     "k": "pick li",
+     "v": {
+      "selection": "resolved",
+      "at": "src/app/lin-a/page.tsx:18:11",
+      "component": "LinA",
+      "reason": "",
+      "binding": "identified",
+      "docSeq": "6",
+      "lineage": "linked",
+      "lineageReason": "",
+      "lineageStage": "",
+      "outcome": "confirmed",
+      "cands": "poc.listings.region",
+      "ms": 753,
+      "before": ""
+     }
+    },
+    {
+     "k": "previewPanel",
+     "v": "↻\n移動\n選択\n\n選択: <li> → LinA src/app/lin-a/page.tsx:18:11 （同じ JSX の要素 3 個のうち 1 番目。どの使用箇所かは区別していません）\n\n解除\n\n文書: 通信 #6 の応答と同定。由来（静的解析による推定）: poc.listings.region\n\n観測（いまの起動）: 通信 6 件・SQL 5 本（実行した呼び出し位置を特定 3 本）\n\n#6 GET /lin-a — 200 / SQL 1 / 位置 1\n#5 GET /no-such-page — 404 / SQL 0\n#4 GET /lin-a — 200 / SQL 1 / 位置 1\n#3 GET /lin-a — 200 / SQL 1 / 位置 1\n#2 GET /api/stats — 応答なし / SQL 2 / 位置 0\n#1 GET / — 200 / SQL 0\n表示\n解除\n\n選択した要素と、それを描いた文書の通信 #6 を並べています。値の由来は静的解析による推定で結んでいます（実行時に値を観測したものではありません）。"
+    },
+    {
+     "k": "dock",
+     "v": "詳細\n経路\n固定\nこの値の出所\npoc.listings . region\n推定\n\n17 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。\n\n実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。\n\n概要\n根拠\n★\nいちばん弱いところ\n②→⑤この表示値の由来（取得結果のどの項目か）\n\n取得結果のどの項目がこの表示値になったかは、ソースの静的解析による推定です。実行時に観測したものではありません（表示された値も、取得した行も読んでいません）。文書・呼び出し位置・SQL は実測ですが、それで推定が実測に変わることはありません。推定の状態: 参照の連鎖が1列に決まり、加工も分岐も無い。参照の連鎖: pool.query(…) の結果（src/app/lin-a/page.tsx:12） ← .rows を参照 ← r.rows.map の要素（src/app/lin-a/page.tsx:17） ← .region を参照。同じ定義が複数回描かれている場合、どの行の値かは同定していません。\n\n根拠 4 件：ソースの静的解析（PoC-04。TypeScript の AST と記号解決）による参照の連鎖 ／ 実行された SQL の SELECT 句で解決した列 1 件（poc.listings.region） ／ 静的解析が見た取得の呼び出し位置と、実測した呼び出し位置（src/app/lin-a/page.tsx:12:24）が列まで一致 ／ 選択した要素を描いた文書は通信 #6（中継が応答ごとに付けた識別子で同定）\nここを見る\n経路のステップ（9）\n1\n表示された値\n<li> のテキスト #0\n実測\nこの値を描いたコンポーネント\n2\nコンポーネント\nsrc/app/lin-a/page.tsx:18\n実測\n取得手段\nビルド時に注入した要素識別子\n定義\nsrc/app/lin-a/page.tsx:18\n位置（行・列）\n18 行 11 列 — src/app/lin-a/page.tsx:18:11\nJSX\n<li key={row.id} data-poc-field=\"a-region\">{row.region}</li>\nコンポーネント\nLinA（src/app/lin-a/page.tsx:11 で定義）\n包含関係\nLinA\nこの JSX が生んだ要素\n3 個（どの使用箇所が何番目を描いたかは観測していません）\n注入範囲\nsrc/ のみ。範囲外の要素は特定不能と返します\nファイルの指定\n'use client' はありません。サーバーで描かれたかブラウザで描かれたかは、このファイルだけでは決まりません（読み込み元による）\n帰属の範囲\nこの位置のコードであることまでです。同じコンポーネントが複数回"
+    },
+    {
+     "k": "screenshot",
+     "v": "04-select-li.png"
+    },
+    {
+     "k": "overlap.afterSelect",
+     "v": {
+      "nodes": 9,
+      "covered": 7,
+      "offscreen": 0,
+      "coveredList": [
+       "表示された値 <li> のテキスト #0 ← プレビュー:86%",
+       "サーバー処理 render route (app) /lin-a — 34ms ← プロジェクトと実行:24%",
+       "通信 GET /lin-a — 200 — 56ms ← プレビュー:100%",
+       "コンポーネント src/app/lin-a/page.tsx:12 ← プレビュー:71%",
+       "実行SQL SELECT id, region FROM poc.listings ORDER BY id LIMIT $0 — 9ms ← プロジェクトと実行:100%",
+       "カラム poc.listings.id ← プロジェクトと実行:100%",
+       "カラム poc.listings.region ← プロジェクトと実行:100%"
+      ]
+     }
+    }
+   ],
+   "notes": [],
+   "error": null
+  },
+  {
+   "id": "S5",
+   "title": "データの由来を追う（限定対象で DB カラムまで）",
+   "steps": [
+    {
+     "k": "showBound",
+     "v": {
+      "shown": "6",
+      "withSel": "on",
+      "count": "6",
+      "sql": "5"
+     }
+    },
+    {
+     "k": "previewPanel",
+     "v": "↻\n移動\n選択\n\n選択: <li> → LinA src/app/lin-a/page.tsx:18:11 （同じ JSX の要素 3 個のうち 1 番目。どの使用箇所かは区別していません）\n\n解除\n\n文書: 通信 #6 の応答と同定。由来（静的解析による推定）: poc.listings.region\n\n観測（いまの起動）: 通信 6 件・SQL 5 本（実行した呼び出し位置を特定 3 本）\n\n#6 GET /lin-a — 200 / SQL 1 / 位置 1\n#5 GET /no-such-page — 404 / SQL 0\n#4 GET /lin-a — 200 / SQL 1 / 位置 1\n#3 GET /lin-a — 200 / SQL 1 / 位置 1\n#2 GET /api/stats — 応答なし / SQL 2 / 位置 0\n#1 GET / — 200 / SQL 0\n表示\n解除\n\n選択した要素と、それを描いた文書の通信 #6 を並べています。値の由来は静的解析による推定で結んでいます（実行時に値を観測したものではありません）。"
+    },
+    {
+     "k": "canvas",
+     "v": "/api/stats\n/lin-a\n/lin-a\n/no-such-page\n選択していない経路（いまの起動の他の通信）\nここより上流は結んでいません\nこの通信を起こしたコード・表示された値\nブラウザ\nlocalhost:3000\n開発サーバー\nlocalhost:3000\nPostgreSQL\n由来は静的解析による推定\n推定\n1\n表示された値\n<li>\n2\nコンポーネント\nLinA\n3\n通信\nGET /lin-a\n4\nサーバー処理\n/lin-a\n5\nコンポーネント\nLinA\n6\n実行SQL\n7\nテーブル\nlistings\n8\nカラム\nid\n9\nカラム\nregion\nページ\n✕\n⌕\n▤\n/lin-a\n/lin-a\n\nページの切替は未実装です（観測しているページの経路だけを描いています）\n\nプレビュー\n開発サーバー\n✕\n↻\n移動\n選択\n\n選択: <li> → LinA src/app/lin-a/page.tsx:18:11 （同じ JSX の要素 3 個のうち 1 番目。どの使用箇所かは区別していません）\n\n解除\n\n文書: 通信 #6 の応答と同定。由来（静的解析による推定）: poc.listings.region\n\n観測（いまの起動）: 通信 6 件・SQL 5 本（実行した呼び出し位置を特定 3 本）\n\n#6 GET /lin-a — 200 / SQL 1 / 位置 1\n#5 GET /no-such-page — 404 / SQL 0\n#4 GET /lin-a — 200 / SQL 1 / 位置 1\n#3 GET /lin-a — 200 / SQL 1 / 位置 1\n#2 GET /api/stats — 応答なし / SQL 2 / 位置 0\n#1 GET / — 200 / SQL 0\n表示\n解除\n\n選択した要素と、それを描いた文書の通信 #6 を並べています。値の由来は静的解析による推定で結んでいます（実行時に値を観測したものではありません）。\n\nHTTP 200\n/lin-a\n表示設定\n✕\n実測された関係\n推定の関係\n★\nいちばん弱いところ\n追跡できません\n詳細が未取得の通信 （減光して残す）\nラベルを表示\n全体\n1 / 5 経路\n✕\nページ\nプレビュー\n表示設定\n全体\n実行\n全体表示\n−\n100%\n＋\nプロジェクトと実行\nPhase 7A\n✕\nプロジェクトのパス（絶対パス）\n検出\n\nブラウザからフォルダ選択ダイアログは開けません。パスを入力する方式です。\n\n対応\npoc01-fixture-app\nルート\n<IDE>/poc/fixture-app\nNext.js\n16.4.3 （宣言 ^16.4.3）\nルーター\nsrc/app\n依存\nインストール済み （npm）\nプロジェクトより上の階層に lockfile またはワークスペースの宣言があります（<IDE>/package-lock.json）。\n\nnext.config に turbopack.root または outputFileTracingRoot の記述があります。\n\nIDE は next.config を実行しないため、設定された値が正しいかは確認していません。\n\nこのプロジェクトは TypeScript を使っています。\n\nNext.js の開発サーバー（next dev）は、起動時に tsconfig.json の一部の項目を必要な値に書き換え、ne"
+    },
+    {
+     "k": "dock",
+     "v": "詳細\n経路\n固定\nこの値の出所\npoc.listings . region\n推定\n\n17 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。\n\n実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。\n\n概要\n根拠\n★\nいちばん弱いところ\n②→⑤この表示値の由来（取得結果のどの項目か）\n\n取得結果のどの項目がこの表示値になったかは、ソースの静的解析による推定です。実行時に観測したものではありません（表示された値も、取得した行も読んでいません）。文書・呼び出し位置・SQL は実測ですが、それで推定が実測に変わることはありません。推定の状態: 参照の連鎖が1列に決まり、加工も分岐も無い。参照の連鎖: pool.query(…) の結果（src/app/lin-a/page.tsx:12） ← .rows を参照 ← r.rows.map の要素（src/app/lin-a/page.tsx:17） ← .region を参照。同じ定義が複数回描かれている場合、どの行の値かは同定していません。\n\n根拠 4 件：ソースの静的解析（PoC-04。TypeScript の AST と記号解決）による参照の連鎖 ／ 実行された SQL の SELECT 句で解決した列 1 件（poc.listings.region） ／ 静的解析が見た取得の呼び出し位置と、実測した呼び出し位置（src/app/lin-a/page.tsx:12:24）が列まで一致 ／ 選択した要素を描いた文書は通信 #6（中継が応答ごとに付けた識別子で同定）\nここを見る\n経路のステップ（9）\n1\n表示された値\n<li> のテキスト #0\n実測\nこの値を描いたコンポーネント\n2\nコンポーネント\nsrc/app/lin-a/page.tsx:18\n実測\n3\n通信\nGET /lin-a — 200 — 56ms\n実測\nこの通信を受けたサーバーの処理\n4\nサーバー処理\nrender route (app) /lin-a — 34ms\n実測\n取得手段\n計装が生成したスパン\n区間\n34ms\nルート\n/lin-a\nスパン\nrender route (app) /lin-a（HTTP の受付スパンから 8 段下の、Next.js のルート単位の処理）\nSQL\n1 本（このスパンの子孫）\n主張の範囲\nルート単位の処理です。このスパンだけではどのコードが SQL を実行したかは言えません。SQL を実行した呼び出し位置は、別の根拠（呼び出しの入口のスタック）で「コンポーネント」のノードに出しています\n次の一歩\n実行SQLを見る\nこの表示値の由来（取得結果のどの項目か）（推定）\n5\nコンポーネント\nsrc/app/lin-a/page.tsx:12\n実測\nこの位置のコードが実行したSQL\nその処理が実行したSQL\n6\n実行SQL\nSELECT id, region FROM poc.listings ORDER BY id LIMIT $0 — 9ms\n実測\nそのSQLが読んだテーブル\n7\nテーブル\npoc.listings\n実測\nそのSQLが取り出した列\n8\nカラム\npoc.listings.id\n実測\nそのSQLが取り出した列\n9\nカラム\npoc.listings.region\n実測"
+    },
+    {
+     "k": "overlap.lineage",
+     "v": {
+      "nodes": 9,
+      "covered": 7,
+      "offscreen": 0,
+      "coveredList": [
+       "表示された値 <li> のテキスト #0 ← プレビュー:86%",
+       "サーバー処理 render route (app) /lin-a — 34ms ← プロジェクトと実行:24%",
+       "通信 GET /lin-a — 200 — 56ms ← プレビュー:100%",
+       "コンポーネント src/app/lin-a/page.tsx:12 ← プレビュー:71%",
+       "実行SQL SELECT id, region FROM poc.listings ORDER BY id LIMIT $0 — 9ms ← プロジェクトと実行:100%",
+       "カラム poc.listings.id ← プロジェクトと実行:100%",
+       "カラム poc.listings.region ← プロジェクトと実行:100%"
+      ]
+     }
+    },
+    {
+     "k": "overlap.raw",
+     "v": {
+      "panels": [
+       {
+        "name": "ページ",
+        "x": 16,
+        "y": 64,
+        "w": 200,
+        "h": 150
+       },
+       {
+        "name": "プレビュー",
+        "x": 232,
+        "y": 64,
+        "w": 392,
+        "h": 563
+       },
+       {
+        "name": "表示設定",
+        "x": 16,
+        "y": 614,
+        "w": 236,
+        "h": 196
+       },
+       {
+        "name": "全体",
+        "x": 16,
+        "y": 840,
+        "w": 236,
+        "h": 124
+       },
+       {
+        "name": "プロジェクトと実行",
+        "x": 734,
+        "y": 110,
+        "w": 330,
+        "h": 762
+       }
+      ],
+      "nodes": [
+       {
+        "label": "表示された値 <li> のテキスト #0",
+        "coveredBy": [
+         "プレビュー:86%"
+        ],
+        "offscreen": false,
+        "underDock": false
+       },
+       {
+        "label": "サーバー処理 render route (app) /lin-a — 34ms",
+        "coveredBy": [
+         "プロジェクトと実行:24%"
+        ],
+        "offscreen": false,
+        "underDock": false
+       },
+       {
+        "label": "テーブル poc.listings",
+        "coveredBy": [],
+        "offscreen": false,
+        "underDock": true
+       },
+       {
+        "label": "コンポーネント src/app/lin-a/page.tsx:18",
+        "coveredBy": [],
+        "offscreen": false,
+        "underDock": false
+       },
+       {
+        "label": "通信 GET /lin-a — 200 — 56ms",
+        "coveredBy": [
+         "プレビュー:100%"
+        ],
+        "offscreen": false,
+        "underDock": false
+       },
+       {
+        "label": "コンポーネント src/app/lin-a/page.tsx:12",
+        "coveredBy": [
+         "プレビュー:71%"
+        ],
+        "offscreen": false,
+        "underDock": false
+       },
+       {
+        "label": "実行SQL SELECT id, region FROM poc.listings ORDER BY id LIMIT $0 — 9ms",
+        "coveredBy": [
+         "プロジェクトと実行:100%"
+        ],
+        "offscreen": false,
+        "underDock": false
+       },
+       {
+        "label": "カラム poc.listings.id",
+        "coveredBy": [
+         "プロジェクトと実行:100%"
+        ],
+        "offscreen": false,
+        "underDock": false
+       },
+       {
+        "label": "カラム poc.listings.region",
+        "coveredBy": [
+         "プロジェクトと実行:100%"
+        ],
+        "offscreen": false,
+        "underDock": false
+       }
+      ]
+     }
+    },
+    {
+     "k": "markdownLeaks",
+     "v": []
+    },
+    {
+     "k": "screenshot",
+     "v": "05-lineage-panels-visible.png"
+    },
+    {
+     "k": "overlap.afterFit",
+     "v": {
+      "nodes": 9,
+      "covered": 8,
+      "offscreen": 0,
+      "coveredList": [
+       "表示された値 <li> のテキスト #0 ← プレビュー:100%",
+       "テーブル poc.listings ← プロジェクトと実行:100%",
+       "コンポーネント src/app/lin-a/page.tsx:18 ← プレビュー:100%",
+       "通信 GET /lin-a — 200 — 56ms ← プレビュー:100%",
+       "コンポーネント src/app/lin-a/page.tsx:12 ← プレビュー:100%",
+       "実行SQL SELECT id, region FROM poc.listings ORDER BY id LIMIT $0 — 9ms ← プロジェクトと実行:100%",
+       "カラム poc.listings.id ← プロジェクトと実行:100%",
+       "カラム poc.listings.region ← プロジェクトと実行:100%"
+      ]
+     }
+    },
+    {
+     "k": "screenshot",
+     "v": "05b-lineage-after-fit.png"
+    },
+    {
+     "k": "overlap.runtimeClosed",
+     "v": {
+      "nodes": 9,
+      "covered": 4,
+      "offscreen": 0,
+      "coveredList": [
+       "表示された値 <li> のテキスト #0 ← プレビュー:100%",
+       "コンポーネント src/app/lin-a/page.tsx:18 ← プレビュー:100%",
+       "通信 GET /lin-a — 200 — 56ms ← プレビュー:100%",
+       "コンポーネント src/app/lin-a/page.tsx:12 ← プレビュー:100%"
+      ]
+     }
+    },
+    {
+     "k": "screenshot",
+     "v": "05c-lineage-runtime-closed.png"
+    }
+   ],
+   "notes": [],
+   "error": null
+  },
+  {
+   "id": "S6",
+   "title": "推定を見る（実測と推定を誤認しない）",
+   "steps": [
+    {
+     "k": "nodeLabels",
+     "v": [
+      "表示された値 <li> のテキスト #0",
+      "サーバー処理 render route (app) /lin-a — 34ms",
+      "テーブル poc.listings",
+      "コンポーネント src/app/lin-a/page.tsx:18",
+      "通信 GET /lin-a — 200 — 56ms",
+      "コンポーネント src/app/lin-a/page.tsx:12",
+      "実行SQL SELECT id, region FROM poc.listings ORDER BY id LIMIT $0 — 9ms",
+      "カラム poc.listings.id",
+      "カラム poc.listings.region"
+     ]
+    },
+    {
+     "k": "edgesObs",
+     "v": []
+    },
+    {
+     "k": "dock.badge1",
+     "v": "詳細\n経路\n固定\nこの値の出所\npoc.listings . region\n推定\n\n17 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。\n\n実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。\n\n概要\n根拠\n★\nいちばん弱いところ\n②→⑤この表示値の由来（取得結果のどの項目か）\n\n取得結果のどの項目がこの表示値になったかは、ソースの静的解析による推定です。実行時に観測したものではありません（表示された値も、取得した行も読んでいません）。文書・呼び出し位置・SQL は実測ですが、それで推定が実測に変わることはありません。推定の状態: 参照の連鎖が1列に決まり、加工も分岐も無い。参照の連鎖: pool.query(…) の結果（src/app/lin-a/page.tsx:12） ← .rows を参照 ← r.rows.map の要素（src/app/lin-a/page.tsx:17） ← .region を参照。同じ定義が複数回描かれている場合、どの行の値かは同定していません。\n\n根拠 4 件：ソースの静的解析（PoC-04。TypeScript の AST と記号解決）による参照の連鎖 ／ 実行された SQL の SELECT 句で解決した列 1 件（poc.listings.region） ／ 静的解析が見た取得の呼び出し位置と、実測した呼び出し位置（src/app/lin-a/page.tsx:12:24）が列まで一致 ／ 選択した要素を描いた文書は通信 #6（中継が応答ごとに付けた識別子で同定）\nここを見る\n経路のステップ（9）\n1\n表示された値\n<li> のテキスト #0\n実測\n取得手段\nブラウザのDOM直接読み取り\nページ\n/lin-a\n要素\n<li> — LinA 内\n値の形\n5 文字・和文\n値の保存\n表示された値そのものは保存していません。対応付けは要素識別子とテキストノードの位置で行っています\n次の一歩\nこの値を描いたコンポーネントを見る\n通信との関係\nこの要素を描いた文書は、通信 "
+    },
+    {
+     "k": "markdownLeaks.badge1",
+     "v": []
+    },
+    {
+     "k": "dock.badge2",
+     "v": "詳細\n経路\n固定\nこの値の出所\npoc.listings . region\n推定\n\n17 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。\n\n実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。\n\n概要\n根拠\n★\nいちばん弱いところ\n②→⑤この表示値の由来（取得結果のどの項目か）\n\n取得結果のどの項目がこの表示値になったかは、ソースの静的解析による推定です。実行時に観測したものではありません（表示された値も、取得した行も読んでいません）。文書・呼び出し位置・SQL は実測ですが、それで推定が実測に変わることはありません。推定の状態: 参照の連鎖が1列に決まり、加工も分岐も無い。参照の連鎖: pool.query(…) の結果（src/app/lin-a/page.tsx:12） ← .rows を参照 ← r.rows.map の要素（src/app/lin-a/page.tsx:17） ← .region を参照。同じ定義が複数回描かれている場合、どの行の値かは同定していません。\n\n根拠 4 件：ソースの静的解析（PoC-04。TypeScript の AST と記号解決）による参照の連鎖 ／ 実行された SQL の SELECT 句で解決した列 1 件（poc.listings.region） ／ 静的解析が見た取得の呼び出し位置と、実測した呼び出し位置（src/app/lin-a/page.tsx:12:24）が列まで一致 ／ 選択した要素を描いた文書は通信 #6（中継が応答ごとに付けた識別子で同定）\nここを見る\n経路のステップ（9）\n1\n表示された値\n<li> のテキスト #0\n実測\nこの値を描いたコンポーネント\n2\nコンポーネント\nsrc/app/lin-a/page.tsx:18\n実測\n取得手段\nビルド時に注入した要素識別子\n定義\nsrc/app/lin-a/page.tsx:18\n位置（行・列）\n18 行 11 列 — src/app/lin-a/page.tsx:18:11\nJSX\n<li"
+    },
+    {
+     "k": "markdownLeaks.badge2",
+     "v": []
+    },
+    {
+     "k": "screenshot",
+     "v": "06-dock-badge2.png"
+    },
+    {
+     "k": "dock.badge3",
+     "v": "詳細\n経路\n固定\nこの値の出所\npoc.listings . region\n推定\n\n17 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。\n\n実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。\n\n概要\n根拠\n★\nいちばん弱いところ\n②→⑤この表示値の由来（取得結果のどの項目か）\n\n取得結果のどの項目がこの表示値になったかは、ソースの静的解析による推定です。実行時に観測したものではありません（表示された値も、取得した行も読んでいません）。文書・呼び出し位置・SQL は実測ですが、それで推定が実測に変わることはありません。推定の状態: 参照の連鎖が1列に決まり、加工も分岐も無い。参照の連鎖: pool.query(…) の結果（src/app/lin-a/page.tsx:12） ← .rows を参照 ← r.rows.map の要素（src/app/lin-a/page.tsx:17） ← .region を参照。同じ定義が複数回描かれている場合、どの行の値かは同定していません。\n\n根拠 4 件：ソースの静的解析（PoC-04。TypeScript の AST と記号解決）による参照の連鎖 ／ 実行された SQL の SELECT 句で解決した列 1 件（poc.listings.region） ／ 静的解析が見た取得の呼び出し位置と、実測した呼び出し位置（src/app/lin-a/page.tsx:12:24）が列まで一致 ／ 選択した要素を描いた文書は通信 #6（中継が応答ごとに付けた識別子で同定）\nここを見る\n経路のステップ（9）\n1\n表示された値\n<li> のテキスト #0\n実測\nこの値を描いたコンポーネント\n2\nコンポーネント\nsrc/app/lin-a/page.tsx:18\n実測\n3\n通信\nGET /lin-a — 200 — 56ms\n実測\n取得手段\nIDE のプレビュー中継が転送した通信の記録（ブラウザ自身の記録ではありません）\n応答\n200 — 56ms\n種類\nページの取得\nクエリ"
+    },
+    {
+     "k": "markdownLeaks.badge3",
+     "v": []
+    },
+    {
+     "k": "dock.badge4",
+     "v": "詳細\n経路\n固定\nこの値の出所\npoc.listings . region\n推定\n\n17 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。\n\n実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。\n\n概要\n根拠\n★\nいちばん弱いところ\n②→⑤この表示値の由来（取得結果のどの項目か）\n\n取得結果のどの項目がこの表示値になったかは、ソースの静的解析による推定です。実行時に観測したものではありません（表示された値も、取得した行も読んでいません）。文書・呼び出し位置・SQL は実測ですが、それで推定が実測に変わることはありません。推定の状態: 参照の連鎖が1列に決まり、加工も分岐も無い。参照の連鎖: pool.query(…) の結果（src/app/lin-a/page.tsx:12） ← .rows を参照 ← r.rows.map の要素（src/app/lin-a/page.tsx:17） ← .region を参照。同じ定義が複数回描かれている場合、どの行の値かは同定していません。\n\n根拠 4 件：ソースの静的解析（PoC-04。TypeScript の AST と記号解決）による参照の連鎖 ／ 実行された SQL の SELECT 句で解決した列 1 件（poc.listings.region） ／ 静的解析が見た取得の呼び出し位置と、実測した呼び出し位置（src/app/lin-a/page.tsx:12:24）が列まで一致 ／ 選択した要素を描いた文書は通信 #6（中継が応答ごとに付けた識別子で同定）\nここを見る\n経路のステップ（9）\n1\n表示された値\n<li> のテキスト #0\n実測\nこの値を描いたコンポーネント\n2\nコンポーネント\nsrc/app/lin-a/page.tsx:18\n実測\n3\n通信\nGET /lin-a — 200 — 56ms\n実測\nこの通信を受けたサーバーの処理\n4\nサーバー処理\nrender route (app) /lin-a — 34ms\n実測\n取得手段\n計装が生成した"
+    },
+    {
+     "k": "markdownLeaks.badge4",
+     "v": []
+    },
+    {
+     "k": "dock.badge5",
+     "v": "詳細\n経路\n固定\nこの値の出所\npoc.listings . region\n推定\n\n17 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。\n\n実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。\n\n概要\n根拠\n★\nいちばん弱いところ\n②→⑤この表示値の由来（取得結果のどの項目か）\n\n取得結果のどの項目がこの表示値になったかは、ソースの静的解析による推定です。実行時に観測したものではありません（表示された値も、取得した行も読んでいません）。文書・呼び出し位置・SQL は実測ですが、それで推定が実測に変わることはありません。推定の状態: 参照の連鎖が1列に決まり、加工も分岐も無い。参照の連鎖: pool.query(…) の結果（src/app/lin-a/page.tsx:12） ← .rows を参照 ← r.rows.map の要素（src/app/lin-a/page.tsx:17） ← .region を参照。同じ定義が複数回描かれている場合、どの行の値かは同定していません。\n\n根拠 4 件：ソースの静的解析（PoC-04。TypeScript の AST と記号解決）による参照の連鎖 ／ 実行された SQL の SELECT 句で解決した列 1 件（poc.listings.region） ／ 静的解析が見た取得の呼び出し位置と、実測した呼び出し位置（src/app/lin-a/page.tsx:12:24）が列まで一致 ／ 選択した要素を描いた文書は通信 #6（中継が応答ごとに付けた識別子で同定）\nここを見る\n経路のステップ（9）\n1\n表示された値\n<li> のテキスト #0\n実測\nこの値を描いたコンポーネント\n2\nコンポーネント\nsrc/app/lin-a/page.tsx:18\n実測\n3\n通信\nGET /lin-a — 200 — 56ms\n実測\nこの通信を受けたサーバーの処理\n4\nサーバー処理\nrender route (app) /lin-a — 34ms\n実測\nこの表示値の由来（取得結"
+    },
+    {
+     "k": "markdownLeaks.badge5",
+     "v": []
+    },
+    {
+     "k": "dock.badge6",
+     "v": "詳細\n経路\n固定\nこの値の出所\npoc.listings . region\n推定\n\n17 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。\n\n実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。\n\n概要\n根拠\n★\nいちばん弱いところ\n②→⑤この表示値の由来（取得結果のどの項目か）\n\n取得結果のどの項目がこの表示値になったかは、ソースの静的解析による推定です。実行時に観測したものではありません（表示された値も、取得した行も読んでいません）。文書・呼び出し位置・SQL は実測ですが、それで推定が実測に変わることはありません。推定の状態: 参照の連鎖が1列に決まり、加工も分岐も無い。参照の連鎖: pool.query(…) の結果（src/app/lin-a/page.tsx:12） ← .rows を参照 ← r.rows.map の要素（src/app/lin-a/page.tsx:17） ← .region を参照。同じ定義が複数回描かれている場合、どの行の値かは同定していません。\n\n根拠 4 件：ソースの静的解析（PoC-04。TypeScript の AST と記号解決）による参照の連鎖 ／ 実行された SQL の SELECT 句で解決した列 1 件（poc.listings.region） ／ 静的解析が見た取得の呼び出し位置と、実測した呼び出し位置（src/app/lin-a/page.tsx:12:24）が列まで一致 ／ 選択した要素を描いた文書は通信 #6（中継が応答ごとに付けた識別子で同定）\nここを見る\n経路のステップ（9）\n1\n表示された値\n<li> のテキスト #0\n実測\nこの値を描いたコンポーネント\n2\nコンポーネント\nsrc/app/lin-a/page.tsx:18\n実測\n3\n通信\nGET /lin-a — 200 — 56ms\n実測\nこの通信を受けたサーバーの処理\n4\nサーバー処理\nrender route (app) /lin-a — 34ms\n実測\nこの表示値の由来（取得結"
+    },
+    {
+     "k": "markdownLeaks.badge6",
+     "v": []
+    },
+    {
+     "k": "markdownLeaks",
+     "v": []
+    }
+   ],
+   "notes": [],
+   "error": null
+  },
+  {
+   "id": "S7",
+   "title": "特定不能な値を選ぶ（理由と限界が理解できる）",
+   "steps": [
+    {
+     "k": "pick g-shadow (lineage cut)",
+     "v": {
+      "selection": "resolved",
+      "at": "src/app/lin-g/page.tsx:28:7",
+      "component": "LinG",
+      "reason": "",
+      "binding": "identified",
+      "docSeq": "7",
+      "lineage": "cut",
+      "lineageReason": "no-reference",
+      "lineageStage": "static",
+      "outcome": "",
+      "cands": "",
+      "ms": 727,
+      "before": "src/app/lin-a/page.tsx:18:11"
+     }
+    },
+    {
+     "k": "previewPanel",
+     "v": "↻\n移動\n選択\n\n選択: <p> → LinG src/app/lin-g/page.tsx:28:7\n\n解除\n\n文書: 通信 #7 の応答と同定。由来は結んでいません — 静的解析: 静的解析で、この値からデータ取得の結果への参照の連鎖を解けません（定数・追えない関数・条件の判定など）（固定値の経路 1 本）\n\n観測（いまの起動）: 通信 7 件・SQL 6 本（実行した呼び出し位置を特定 4 本）\n\n#7 GET /lin-g — 200 / SQL 1 / 位置 1\n#6 GET /lin-a — 200 / SQL 1 / 位置 1\n#5 GET /no-such-page — 404 / SQL 0\n#4 GET /lin-a — 200 / SQL 1 / 位置 1\n#3 GET /lin-a — 200 / SQL 1 / 位置 1\n#2 GET /api/stats — 応答なし / SQL 2 / 位置 0\n#1 GET / — 200 / SQL 0\n表示"
+    },
+    {
+     "k": "dock",
+     "v": "詳細\n経路\n固定\nこの値の出所\nsrc/app/lin-g/page.tsx:28\n実測\n\n3 か所のうち 0 か所が推定です。経路全体は、いちばん弱いところに合わせて「実測」になります。\n\nここから先はたどれていません。つながりを観測できていない箇所は、 キャンバスに「追跡できません」として残しています。\n\n実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。\n\n概要\n根拠\n経路のステップ（2）\n1\n表示された値\n<p> のテキスト #0\n実測\nこの値を描いたコンポーネント\n2\nコンポーネント\nsrc/app/lin-g/page.tsx:28\n実測\n取得手段\nビルド時に注入した要素識別子\n定義\nsrc/app/lin-g/page.tsx:28\n位置（行・列）\n28 行 7 列 — src/app/lin-g/page.tsx:28:7\nJSX\n<p data-poc-field=\"g-shadow\">{region}</p>\nコンポーネント\nLinG（src/app/lin-g/page.tsx:18 で定義）\n包含関係\nLinG\nこの JSX が生んだ要素\n1 個（どの使用箇所が何番目を描いたかは観測していません）\n注入範囲\nsrc/ のみ。範囲外の要素は特定不能と返します\nファイルの指定\n'use client' はありません。サーバーで描かれたかブラウザで描かれたかは、このファイルだけでは決まりません（読み込み元による）\n帰属の範囲\nこの位置のコードであることまでです。同じコンポーネントが複数回描かれる場合、どの描画が対象かは同定していません\n特定方法\n要素自身の識別子 → いまのビルドの対応表 → ソースの読み直しで照合\n照合\nこの要素自身に付いていた要素識別子（祖先の識別子は使っていない） / いま実行中の開発サーバーのビルドが書いた対応表に、その識別子がある / 対応表のファイルが注入範囲（src/）の中にある / 識別子を「ファイル:行:列」から計算し直すと一致する / DOM のタグと対応表のタグが一致する / ソースを読み直し、その位置に同じタグの JSX があり、囲むコンポーネントが一致する\n主張の範囲\nこの要素を描いた JSX の位置とコンポーネントまでです。表示された値がどこから来たかは観測していません"
+    },
+    {
+     "k": "screenshot",
+     "v": "07a-lineage-cut.png"
+    },
+    {
+     "k": "pick vendor/unresolvable",
+     "v": {
+      "selection": "unresolved",
+      "at": "",
+      "component": "",
+      "reason": "anchor-missing",
+      "binding": "",
+      "docSeq": "",
+      "lineage": "",
+      "lineageReason": "",
+      "lineageStage": "",
+      "outcome": "",
+      "cands": "",
+      "ms": 470,
+      "before": "src/app/lin-g/page.tsx:28:7"
+     }
+    },
+    {
+     "k": "previewPanel",
+     "v": "↻\n移動\n選択\n\n選択: <section> — 特定できません（この要素自身に要素識別子がありません）。理由は右の詳細に出しています\n\n解除\n\n観測（いまの起動）: 通信 9 件・SQL 7 本（実行した呼び出し位置を特定 4 本）\n\n#9 GET /api/listings — 200 / SQL 1 / 位置 0\n#8 GET /cards — 200 / SQL 0\n#7 GET /lin-g — 200 / SQL 1 / 位置 1\n#6 GET /lin-a — 200 / SQL 1 / 位置 1\n#5 GET /no-such-page — 404 / SQL 0\n#4 GET /lin-a — 200 / SQL 1 / 位置 1\n#3 GET /lin-a — 200 / SQL 1 / 位置 1\n#2 GET /api/stats — 応答なし / SQL 2 / 位置 0\n#1 GET / — 200 / SQL 0\n表示"
+    },
+    {
+     "k": "dock",
+     "v": "詳細\n経路\n固定\nこの値の出所\n<section>\n実測\n\n1 か所のうち 0 か所が推定です。経路全体は、いちばん弱いところに合わせて「実測」になります。\n\nここから先はたどれていません。つながりを観測できていない箇所は、 キャンバスに「追跡できません」として残しています。\n\n実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。\n\n概要\n根拠\n経路のステップ（1）\n1\n選択した要素\n<section>\n実測\n取得手段\nブラウザのDOM直接読み取り\nページ\n/cards\n要素\n<section>\n特定できなかった理由\nこの要素自身に要素識別子がありません\n詳しく\nこの <section> 自身には要素識別子がありません。ライブラリ由来の要素・JSX を経由せずに作られた要素・注入範囲（src/）の外の要素・フレームワークが所有する要素（html / body）のいずれかですが、DOM からはどれかを区別できません。祖先の <main>（Cards）には識別子がありますが、祖先は文脈であって出所ではないため、そこへは対応付けていません。\n祖先の文脈\n<main>（Cards — src/app/cards/page.tsx:42）の中にあります。祖先は文脈であって、この要素の出所ではありません\n値の形\nこの要素は直下にテキストを持っていません\n値の保存\n表示された値そのものは保存していません"
+    },
+    {
+     "k": "screenshot",
+     "v": "07b-unresolved.png"
+    },
+    {
+     "k": "pick lin-c (candidates)",
+     "v": {
+      "selection": "resolved",
+      "at": "src/app/lin-c/page.tsx:20:7",
+      "component": "LinC",
+      "reason": "",
+      "binding": "identified",
+      "docSeq": "10",
+      "lineage": "linked",
+      "lineageReason": "",
+      "lineageStage": "",
+      "outcome": "candidates",
+      "cands": "poc.listings.region,poc.listings.code",
+      "ms": 471,
+      "before": ""
+     }
+    },
+    {
+     "k": "previewPanel",
+     "v": "↻\n移動\n選択\n\n選択: <p> → LinC src/app/lin-c/page.tsx:20:7\n\n解除\n\n文書: 通信 #10 の応答と同定。由来（静的解析による推定）: 2 候補のいずれか（listings.region / listings.code）。1つに決めていません\n\n観測（いまの起動）: 通信 10 件・SQL 8 本（実行した呼び出し位置を特定 5 本）\n\n#10 GET /lin-c — 200 / SQL 1 / 位置 1\n#9 GET /api/listings — 200 / SQL 1 / 位置 0\n#8 GET /cards — 200 / SQL 0\n#7 GET /lin-g — 200 / SQL 1 / 位置 1\n#6 GET /lin-a — 200 / SQL 1 / 位置 1\n#5 GET /no-such-page — 404 / SQL 0\n#4 GET /lin-a — 200 / SQL 1 / 位置 1\n#3 GET /lin-a — 200 / SQL 1 / 位置 1\n#2 GET /api/stats — 応答なし / SQL 2 / 位置 0\n#1 GET / — 200 / SQL 0\n表示\n解除\n\n選択した要素と、それを描いた文書の通信 #10 を並べています。値の由来は静的解析による推定で結んでいます（実行時に値を観測したものではありません）。"
+    },
+    {
+     "k": "dock",
+     "v": "詳細\n経路\n固定\nこの値の出所\npoc.listings . 2 候補のいずれか\n推定\n\n19 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。\n\n実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。\n\n概要\n根拠\n★\nいちばん弱いところ\n②→⑤この表示値の由来（取得結果のどの項目か）\n\n取得結果のどの項目がこの表示値になったかは、ソースの静的解析による推定です。実行時に観測したものではありません（表示された値も、取得した行も読んでいません）。文書・呼び出し位置・SQL は実測ですが、それで推定が実測に変わることはありません。推定の状態: 候補が 2 件ある／加工（連結・変換）を通っている。参照の連鎖: pool.query(…) の結果（src/app/lin-c/page.tsx:13） ← .rows を参照 ← [0] を参照 ← .region を参照。表示までに加工（連結・型変換など）を通っています。由来の列は推定できても、表示値がその列の値そのままとは限りません。同じ定義が複数回描かれている場合、どの行の値かは同定していません。\n\n根拠 4 件：ソースの静的解析（PoC-04。TypeScript の AST と記号解決）による参照の連鎖 ／ 実行された SQL の SELECT 句で解決した列 2 件（poc.listings.region / poc.listings.code） ／ 静的解析が見た取得の呼び出し位置と、実測した呼び出し位置（src/app/lin-c/page.tsx:13:24）が列まで一致 ／ 選択した要素を描いた文書は通信 #10（中継が応答ごとに付けた識別子で同定）\nここを見る\n経路のステップ（10）\n1\n表示された値\n<p> のテキスト #0\n実測\nこの値を描いたコンポーネント\n2\nコンポーネント\nsrc/app/lin-c/page.tsx:20\n実測\n取得手段\nビルド時に注入した要素識別子\n定義\nsrc/app/lin-c/page.tsx:20\n位置（行・列）\n20 行 7 列 — src/app/lin-c/page.tsx:20:7\nJSX\n<p data-poc-field=\"c-title\">{title}</p>\nコンポーネント\nLinC（src/app/lin-c/page.tsx:12 で定義）\n包含関係\nLinC\nこの JSX が生んだ要素\n1 個（どの使用箇所が何番目を描いたかは観測していません）\n注入範囲\nsrc/ のみ。範囲外の要素は特定不能と返します\nファイルの指定\n'use client' はありません。サーバーで描かれたかブラウザで描かれたかは、このファイルだけでは決まりません（読み込み元による）\n帰属の範囲\nこの位置のコードであることまでです。同じコンポーネントが複数回描かれる場合、どの描画が対象かは同定していません\n特定方法\n要素自身の識別子 → いまのビルドの対応表 → ソースの読み直しで照合\n照合\nこの要素自身に付いていた要素識別子（祖先の識別子は使っていない） / いま実行中の開発サーバーのビルドが書いた対応表に、その識別子がある / 対応表のファイルが注入範囲（src/）の中にある / 識別子を「ファイル:行:列」から計算し直すと一致する / DOM のタグと対応表のタグが一致する / ソースを読み直し、その位置に同じタグの JSX があり、囲むコンポーネントが一致する\n主張の範囲\nこの要素を描いた JSX の位置とコンポーネントまでです。表示された値がどこから来たかは観測していません\nSQL との関係\n静的解析で、この値（title — src/app/lin-c/page.tsx:20:35）は src/app/lin-c/page.tsx:13:24 の取得結果から来ていると推定しました（supplies・L2）\n由来の評価\n通った条件: 選択した要素を描いた文書を、中継の記録の通信 #10（GET /lin-c）に同定（応答ごとの文書の識別子） / 要素識別子が指す <p>（src/app/lin-c/page.tsx:20:7）の直下に、値を描く式がちょうど1つ（title — src/app/lin-c/page.tsx:20:35）。静的解析が見た描画位置と列まで一致 / 解析したソースは、その文書を取得した後に書き換わっていない / 参照の連鎖が1つのデータ取得の呼び出し（src/app/lin-c/page.tsx:13:24）の結果に届く（PoC-04 の保守規則 R1〜R4） / その呼び出し位置で実行された SQL 1 本を、この文書の通信の中で観測し、実行位置を呼び出しスタック（server-call-stack）で列まで特定（R5） / 参照の鍵が、実行された SQL の SELECT 句にある（R6。候補 2 件）\n3\n通信\nGET /lin-c — 200 — 234ms\n実測\nこの通信を受けたサーバーの処理\n4\nサーバー処理\nrender route (app) /lin-c — 31ms\n実測\nこの表示値の由来（取得結果のどの項目か）（推定）\n5\nコンポーネント\nsrc/app/lin-c/page.tsx:13\n実測\nこの位置のコードが実行したSQL\nその処理が実行したSQL\n6\n実行SQL\nSELECT id, code, region FROM poc.listings ORDER BY id LIM… — 11ms\n実測\nそのSQLが読んだテーブル\n7\nテーブル\npoc.listings\n実測\nそのSQLが取り出した列\n8\nカラム\npoc.listings.id\n実測\nそのSQLが取り出した列\n9\nカラム\npoc.listings.code\n実測\nそのSQLが取り出した列\n10\nカラム\npoc.listing"
+    },
+    {
+     "k": "markdownLeaks",
+     "v": []
+    },
+    {
+     "k": "screenshot",
+     "v": "07c-candidates.png"
+    }
+   ],
+   "notes": [],
+   "error": null
+  },
+  {
+   "id": "S8",
+   "title": "停止・再起動する（古い情報が混入しない）",
+   "steps": [
+    {
+     "k": "pick before stop",
+     "v": {
+      "selection": "resolved",
+      "at": "src/app/lin-a/page.tsx:18:11",
+      "component": "LinA",
+      "reason": "",
+      "binding": "identified",
+      "docSeq": "11",
+      "lineage": "linked",
+      "lineageReason": "",
+      "lineageStage": "",
+      "outcome": "confirmed",
+      "cands": "poc.listings.region",
+      "ms": 467,
+      "before": "src/app/lin-c/page.tsx:20:7"
+     }
+    },
+    {
+     "k": "stop",
+     "v": {
+      "ms": 2143,
+      "preview": "stopped",
+      "selection": "cleared"
+     }
+    },
+    {
+     "k": "previewPanel",
+     "v": "↻\n開発サーバーのページを表示しているときだけ使えます。\n移動\n開発サーバーのページを表示しているときだけ使えます。\n選択\n開発サーバーのページを表示しているときだけ使えます。\n\n開発サーバーが実行中ではなくなったため、選択を解除しました。\n\n開発サーバーが実行中ではなくなったため、観測の表示を消しました（実測中ではありません）。\n\n開発サーバーは停止しています。プレビューは表示していません。"
+    },
+    {
+     "k": "canvas",
+     "v": "/api/saved\nSQL\nこのページの他の通信\n追跡できません\n未対応の構成です\nブラウザ\nlocalhost:3000\n開発サーバー\nlocalhost:3000\nPostgreSQL\n応答のどの項目か\n推定\nカラムと応答項目の対応づけ\n★\n推定\n表示された値\n「千葉県」\nコンポーネント\nListingCard\n通信\nGET /api/listings\nサーバー処理\nNext.js API Route\n実行SQL\nテーブル\nlistings\nカラム\nregion\nページ\n✕\n⌕\n⌂\nホーム\n/\n▣\n物件一覧\n/listings\n▢\n物件詳細\n/listings/[id]\n▢\nお知らせ\n/news\n▢\nお問い合わせ\n/contact\n\nページの切替は未実装です（観測しているページの経路だけを描いています）\n\nプレビュー\n開発サーバー\n✕\n↻\n開発サーバーのページを表示しているときだけ使えます。\n移動\n開発サーバーのページを表示しているときだけ使えます。\n選択\n開発サーバーのページを表示しているときだけ使えます。\n\n開発サーバーが実行中ではなくなったため、選択を解除しました。\n\n開発サーバーが実行中ではなくなったため、観測の表示を消しました（実測中ではありません）。\n\n開発サーバーは停止しています。プレビューは表示していません。\n\npoc01-fixture-app — 停止して"
+    },
+    {
+     "k": "dock",
+     "v": "詳細\nページ\n固定\nこのページの読み込み\n/listings\n物件一覧\n通信\n2 件\nSQL\n2 件\n計測できた時間\n124 ms（通信 1 / 2 件ぶん）\n表示中の経路\n1 / 2（他 1 件は詳細が未取得）\n\n推定\n推定を含みます（2 か所）\n\n✕\n追跡できない箇所が 1 件あります\n\nプレビューかフロー図で値を選ぶと、その出所をたどれます。\n\n表示している数値は合成シナリオから算出したものです。実際の計装結果ではありません。"
+    },
+    {
+     "k": "screenshot",
+     "v": "08a-stopped.png"
+    },
+    {
+     "k": "old pid alive after stop",
+     "v": {
+      "pid": 1339,
+      "alive": false
+     }
+    },
+    {
+     "k": "restart",
+     "v": {
+      "states": [
+       "起動中",
+       "実行中"
+      ],
+      "preview": "live",
+      "ms": 2226
+     }
+    },
+    {
+     "k": "restart.runtime",
+     "v": {
+      "pid": 1419,
+      "startedAt": "2026-11-02T09:14:29.339Z",
+      "prevStartedAt": "2026-11-02T09:14:09.799Z"
+     }
+    },
+    {
+     "k": "after restart",
+     "v": {
+      "selection": "cleared",
+      "lineage": "",
+      "obsCount": "3",
+      "obsShown": ""
+     }
+    },
+    {
+     "k": "previewPanel",
+     "v": "↻\n移動\n選択\n\n開発サーバーが実行中ではなくなったため、選択を解除しました。\n\n観測（いまの起動）: 通信 3 件・SQL 3 本（実行した呼び出し位置を特定 1 本）\n\n#3 GET /api/stats — 200 / SQL 2 / 位置 0\n#2 GET / — 200 / SQL 0\n#1 GET /lin-a — 応答なし / SQL 1 / 位置 1\n表示"
+    },
+    {
+     "k": "canvas",
+     "v": "/api/saved\nSQL\nこのページの他の通信\n追跡できません\n未対応の構成です\nブラウザ\nlocalhost:3000\n開発サーバー\nlocalhost:3000\nPostgreSQL\n応答のどの項目か\n推定\nカラムと応答項目の対応づけ\n★\n推定\n表示された値\n「千葉県」\nコンポーネント\nListingCard\n通信\nGET /api/listings\nサーバー処理\nNext.js API Route\n実行SQL\nテーブル\nlistings\nカラム\nregion\nページ\n✕\n⌕\n⌂\nホーム\n/\n▣\n物件一覧\n/listings\n▢\n物件詳細\n/listings/[id]\n▢\nお知らせ\n/news\n▢\nお問い合わせ\n/contact\n\nページの切替は未実装です（観測しているページの経路だけを描いています）\n\nプレビュー\n開発サーバー\n✕\n↻\n移動\n選択\n\n開発サーバーが実行中ではなくなったため、選択を解除しました。\n\n観測（いまの起動）: 通信 3 件・SQL 3 本（実行した呼び出し位置を特定 1 本）\n\n#3 GET /api/stats — 200 / SQL 2 / 位置 0\n#2 GET / — 200 / SQL 0\n#1 GET /lin-a — 応答なし / SQL 1 / 位置 1\n表示\nHTTP 200\n/\n表示設定\n✕\n実測された関係\n推定の関係\n★\nいち"
+    },
+    {
+     "k": "screenshot",
+     "v": "08b-restarted.png"
+    },
+    {
+     "k": "old-run observations",
+     "v": {
+      "status": 200,
+      "observation": null,
+      "stale": "stale-run"
+     }
+    },
+    {
+     "k": "pick after restart",
+     "v": {
+      "selection": "resolved",
+      "at": "src/app/lin-a/page.tsx:18:11",
+      "component": "LinA",
+      "reason": "",
+      "binding": "identified",
+      "docSeq": "4",
+      "lineage": "linked",
+      "lineageReason": "",
+      "lineageStage": "",
+      "outcome": "confirmed",
+      "cands": "poc.listings.region",
+      "ms": 741,
+      "before": ""
+     }
+    },
+    {
+     "k": "detect enabled after restart",
+     "v": true
+    },
+    {
+     "k": "detect enabled after stop",
+     "v": true
+    },
+    {
+     "k": "previewPanel.final",
+     "v": "↻\n開発サーバーのページを表示しているときだけ使えます。\n移動\n開発サーバーのページを表示しているときだけ使えます。\n選択\n開発サーバーのページを表示しているときだけ使えます。\n\n開発サーバーが実行中ではなくなったため、選択を解除しました。\n\n開発サーバーが実行中ではなくなったため、観測の表示を消しました（実測中ではありません）。\n\n開発サーバーは停止しています。プレビューは表示していません。"
+    }
+   ],
+   "notes": [],
+   "error": null
+  }
+ ],
+ "consoleErrors": [],
+ "finishedAt": "2026-11-02T09:14:34.951Z"
+}

@@ -17,9 +17,18 @@ import {
   CANVAS, byIdIn, hopByIdIn, type LaidOutDataset, type SelectionRef,
 } from '@/lib/trace';
 import { nodeIdForBadge } from '@/lib/derive';
-import { centerOn, fitAll, zoomAt, clampK, type View } from '@/lib/view';
+import {
+  centerOn, fitAll, fitBounds, freeRegionAmong, keepInside, zoomAt, clampK, type View,
+} from '@/lib/view';
+import { contentBounds, pathBounds, type Rect } from '@/lib/geometry';
 
 export type PanelId = 'pages' | 'preview' | 'legend' | 'minimap' | 'runtime';
+/**
+ * Phase 7C-2: 畳める浮かぶパネル。畳んでも閉じない（中身・状態・iframe の文書は残る）。
+ *   preview … 経路を見るときは、ページの表示を畳んで1行の文脈（パス・選択した要素）だけ残す
+ *   runtime … 開発サーバーの実行中は、状態・PID・停止の1段だけにする（所見・設定は［詳細］で開く）
+ */
+export type CompactId = 'preview' | 'runtime';
 export type DockTab = 'overview' | 'evidence';
 /** 03c 5.2節 ScopeContext。未選択はページ全体、選択すると経路。 */
 export type Scope = 'page' | 'path';
@@ -67,6 +76,8 @@ interface Ctx {
   hoverNote: HoverNote | null;
   tab: DockTab;
   panels: Record<PanelId, boolean>;
+  /** 7C-2: 畳んでいるか（panels の開閉とは別の軸） */
+  compact: Record<CompactId, boolean>;
   showLabels: boolean;
   pageFilter: string;
   view: View;
@@ -78,6 +89,11 @@ interface Ctx {
   setHoverNote: (n: HoverNote | null) => void;
   setTab: (t: DockTab) => void;
   togglePanel: (p: PanelId) => void;
+  setCompact: (p: CompactId, v: boolean) => void;
+  /** 7C-2: キャンバスが、浮かぶパネルの実寸（キャンバス座標）を測る関数を登録する */
+  registerObstacles: (fn: (() => Rect[]) | null) => void;
+  /** 利用者のパン・ホイールでの拡縮（自動の全体表示をやめる） */
+  setViewByUser: (v: View) => void;
   setShowLabels: (v: boolean) => void;
   setPageFilter: (v: string) => void;
   setView: (v: View) => void;
@@ -108,6 +124,7 @@ export function ExploreProvider(
   const [panels, setPanels] = useState<Record<PanelId, boolean>>({
     pages: true, preview: true, legend: true, minimap: true, runtime: true,
   });
+  const [compact, setCompactState] = useState<Record<CompactId, boolean>>({ preview: false, runtime: true });
   const [showLabels, setShowLabels] = useState(true);
   const [pageFilter, setPageFilter] = useState('');
   const [view, setView] = useState<View>({ k: 1, x: 0, y: 0 });
@@ -119,6 +136,23 @@ export function ExploreProvider(
   const didInitialFit = useRef(false);
 
   const leftPanels = panels.pages || panels.legend || panels.minimap;
+
+  /*
+   * 7C-2: 覆われない領域は、**いま表示されているパネルの実寸**から求める（freeRegionAmong）。
+   * 測れないとき（最初の描画の前）だけ、従来の固定の見積り（freeRegion）に戻る。
+   */
+  const obstaclesRef = useRef<(() => Rect[]) | null>(null);
+  const registerObstacles = useCallback((fn: (() => Rect[]) | null) => { obstaclesRef.current = fn; }, []);
+  const regionNow = useCallback((target: Rect) => {
+    const obs = obstaclesRef.current?.();
+    if (!obs) return null;
+    return freeRegionAmong(viewport.w, viewport.h, obs, target);
+  }, [viewport.w, viewport.h]);
+  /**
+   * いまの視点が「全体表示（自動を含む）の結果」のままか。利用者がパン・拡縮・寄せをしたら false。
+   * true の間は、パネルの開閉・畳み・窓の大きさが変わるたびに収め直す（覆われない領域が変わるため）
+   */
+  const autoFitRef = useRef(false);
 
   const stopTween = () => {
     if (raf.current !== null) { cancelAnimationFrame(raf.current); raf.current = null; }
@@ -149,8 +183,14 @@ export function ExploreProvider(
 
   useEffect(() => stopTween, []);
 
+  /*
+   * 7C-2: 実寸を一度でも測ったか。初期値（設計寸法 1240×952）のまま最初の視点を決めると、
+   * 窓が小さくても「等倍で収まる」と判定してしまっていた（1440×900 で全体表示に合わせていなかった）
+   */
+  const [viewportMeasured, setViewportMeasured] = useState(false);
   const setViewport = useCallback((w: number, h: number) => {
     setViewportState((prev) => (prev.w === w && prev.h === h ? prev : { w, h }));
+    setViewportMeasured(true);
   }, []);
 
   /*
@@ -158,22 +198,84 @@ export function ExploreProvider(
    * 窓がそれより小さいときだけ全体表示に合わせる。以後は視点を勝手に動かさない。
    */
   useEffect(() => {
-    if (didInitialFit.current || viewport.w <= 80) return;
+    if (didInitialFit.current || !viewportMeasured || viewport.w <= 80) return;
     didInitialFit.current = true;
     const fitsAtActualSize = viewport.w >= CANVAS.w - 8 && viewport.h >= CANVAS.h - 8;
     setView(fitsAtActualSize
       ? { k: 1, x: 0, y: 0 }
-      : fitAll(data, viewport.w, viewport.h, leftPanels));
-  }, [data, viewport.w, viewport.h, leftPanels]);
+      : fitAll(data, viewport.w, viewport.h, leftPanels, regionNow(contentBounds(data))));
+  }, [data, viewport.w, viewport.h, leftPanels, regionNow, viewportMeasured]);
 
+  /*
+   * 7C-2: 収める処理は「パネルの表示が DOM に反映された後」に測ってから行う。
+   * 畳む → 再描画 → 実寸を測る → 収める、の順にするため、要求の番号だけを state に持つ。
+   * 収める範囲は2種類。'all' = 全体表示（経路外の通信も含む）、'path' = 実ページの経路を描いた直後
+   * （経路だけ。07c0 第7節 案3「経路の範囲がその領域に入るように視点を合わせる」）。
+   * パネルの開閉で収め直すときは、直前と同じ種類で収める
+   */
+  const [fitReq, setFitReq] = useState<{ n: number; mode: 'all' | 'path' }>({ n: 0, mode: 'all' });
+  const fitModeRef = useRef<'all' | 'path'>('all');
+  const requestFit = useCallback((mode?: 'all' | 'path') => {
+    if (mode) fitModeRef.current = mode;
+    setFitReq((r) => ({ n: r.n + 1, mode: fitModeRef.current }));
+  }, []);
+  useEffect(() => {
+    if (fitReq.n === 0) return;
+    autoFitRef.current = true;
+    if (fitReq.mode === 'path') {
+      const b = pathBounds(data);
+      const region = regionNow(b);
+      animateTo(region ? fitBounds(b, region) : fitAll(data, viewport.w, viewport.h, leftPanels));
+      return;
+    }
+    animateTo(fitAll(data, viewport.w, viewport.h, leftPanels, regionNow(contentBounds(data))));
+  // data は最新を読む。要求の番号だけで動かす
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fitReq]);
+
+  /**
+   * 全体表示（0）。表示領域が足りないときは、ズームだけで解決しない（7C-2）:
+   * 畳めるパネル（プレビュー・実行中の「プロジェクトと実行」）を畳んでから、残った領域へ収める。
+   * 畳んだパネルは閉じない。ヘッダの［ページを表示］［詳細］で、ワンクリックで戻せる
+   */
   const fit = useCallback(() => {
-    animateTo(fitAll(data, viewport.w, viewport.h, leftPanels));
-  }, [animateTo, data, viewport.w, viewport.h, leftPanels]);
+    setCompactState((c) => (c.preview && c.runtime ? c : { preview: true, runtime: true }));
+    requestFit('all');
+  }, [requestFit]);
 
   const focusOn = useCallback((ref: SelectionRef) => {
     const c = centerOfRef(data, ref);
-    animateTo(centerOn(viewRef.current, c.x, c.y, viewport.w, viewport.h, leftPanels));
-  }, [animateTo, data, viewport.w, viewport.h, leftPanels]);
+    autoFitRef.current = false;
+    // 7C-2: 寄せても、経路が覆われない領域に収まる大きさなら、経路がはみ出さない位置に留める
+    const b = pathBounds(data);
+    const region = regionNow(b);
+    const v = centerOn(viewRef.current, c.x, c.y, viewport.w, viewport.h, leftPanels, region);
+    animateTo(region ? keepInside(v, b, region) : v);
+  }, [animateTo, data, viewport.w, viewport.h, leftPanels, regionNow]);
+
+  /*
+   * 7C-2: 実ページの選択・観測の経路を描いたら、経路の範囲を覆われない領域へ収める。
+   * 経路が変わらない描き直し（由来の取り直しで同じ図になった等）では動かさない
+   */
+  const liveSig = liveData
+    ? (() => { const b = pathBounds(liveData.ds); return `${liveData.ds.nodes.length}/${liveData.ds.hops.length}/${Math.round(b.x)},${Math.round(b.y)},${Math.round(b.w)},${Math.round(b.h)}`; })()
+    : null;
+  const lastLiveSig = useRef<string | null>(null);
+  useEffect(() => {
+    if (liveSig === lastLiveSig.current) return;
+    lastLiveSig.current = liveSig;
+    if (liveSig) requestFit('path');
+    else fitModeRef.current = 'all';
+  }, [liveSig, requestFit]);
+
+  /* 全体表示のままなら、覆われない領域が変わったときに収め直す */
+  const layoutSig = `${Object.values(panels).map(Number).join('')}${Number(compact.preview)}${Number(compact.runtime)}:${viewport.w}x${viewport.h}`;
+  const lastLayoutSig = useRef(layoutSig);
+  useEffect(() => {
+    if (layoutSig === lastLayoutSig.current) return;
+    lastLayoutSig.current = layoutSig;
+    if (autoFitRef.current) requestFit();
+  }, [layoutSig, requestFit]);
 
   const select = useCallback((ref: SelectionRef, opts?: { focus?: boolean }) => {
     setSelection(ref);
@@ -193,6 +295,8 @@ export function ExploreProvider(
 
   /* Phase 7B-2: 実ページの選択を、同じキャンバスと右ドックに出す */
   const showLive = useCallback((ds: LaidOutDataset, key: string, focusNode: number) => {
+    // 前のデータセットのノード・ホップへのホバーを持ち越さない（同じ番号が別のものを指す）
+    setHover(null);
     setLiveData({ ds, key });
     setSelection({ type: 'node', id: focusNode });
     setLastNode(focusNode);
@@ -205,11 +309,13 @@ export function ExploreProvider(
     setLiveData(null);
     // 選択していた番号は元のデータセットでは別のものを指す。持ち越さない
     setSelection(null);
+    setHover(null);
     setTab('overview');
   }, []);
 
   const zoomBy = useCallback((factor: number, sx?: number, sy?: number) => {
     stopTween();
+    autoFitRef.current = false;
     setView((v) => {
       if (sx === undefined || sy === undefined) {
         const k = clampK(v.k * factor);
@@ -221,8 +327,22 @@ export function ExploreProvider(
     });
   }, [viewport.w, viewport.h]);
 
+  const panelsRef = useRef(panels);
+  panelsRef.current = panels;
   const togglePanel = useCallback((p: PanelId) => {
+    // 開き直したプレビューは畳まずに出す（閉じる前に畳んでいたかは持ち越さない）
+    if (!panelsRef.current[p] && p === 'preview') setCompactState((c) => (c.preview ? { ...c, preview: false } : c));
     setPanels((s) => ({ ...s, [p]: !s[p] }));
+  }, []);
+
+  const setCompact = useCallback((p: CompactId, v: boolean) => {
+    setCompactState((c) => (c[p] === v ? c : { ...c, [p]: v }));
+  }, []);
+
+  const setViewByUser = useCallback((v: View) => {
+    stopTween();
+    autoFitRef.current = false;
+    setView(v);
   }, []);
 
 
@@ -266,13 +386,13 @@ export function ExploreProvider(
 
   const value = useMemo<Ctx>(() => ({
     data, live, showLive, clearLive,
-    selection, scope, hover, hoverNote, tab, panels, showLabels, pageFilter, view, viewport,
-    select, clearSelection, setHover, setHoverNote, setTab, togglePanel, setShowLabels,
-    setPageFilter, setView, setViewport, zoomBy, fit, focusOn,
+    selection, scope, hover, hoverNote, tab, panels, compact, showLabels, pageFilter, view, viewport,
+    select, clearSelection, setHover, setHoverNote, setTab, togglePanel, setCompact, registerObstacles,
+    setViewByUser, setShowLabels, setPageFilter, setView, setViewport, zoomBy, fit, focusOn,
   }), [
     data, live, showLive, clearLive,
-    selection, scope, hover, hoverNote, tab, panels, showLabels, pageFilter, view, viewport,
-    select, clearSelection, togglePanel, setViewport, zoomBy, fit, focusOn,
+    selection, scope, hover, hoverNote, tab, panels, compact, showLabels, pageFilter, view, viewport,
+    select, clearSelection, togglePanel, setCompact, registerObstacles, setViewByUser, setViewport, zoomBy, fit, focusOn,
   ]);
 
   return <ExploreCtx.Provider value={value}>{children}</ExploreCtx.Provider>;

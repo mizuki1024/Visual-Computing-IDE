@@ -2,6 +2,7 @@
 /* 表示設定（凡例）。線の形だけで判別できること。色は補助である（NFR-30）。 */
 import { useExplore } from '@/state/ExploreStore';
 import FloatingPanel from './FloatingPanel';
+import { LEFT_COLUMN_BOTTOM } from './MinimapPanel';
 
 const ROWS: [React.ReactNode, React.ReactNode][] = [
   [<svg key="a" width="34" height="13" aria-hidden>
@@ -30,9 +31,11 @@ const ROWS: [React.ReactNode, React.ReactNode][] = [
 ];
 
 export default function LegendPanel() {
-  const { showLabels, setShowLabels } = useExplore();
+  const { showLabels, setShowLabels, viewport } = useExplore();
+  // 7C-2: 設計寸法（キャンバスの高さ 952）より低い窓では、下端から積む（1440×900 で「全体」が画面外に出ていた）
+  const pos = viewport.h >= 952 ? { top: 566 } : { bottom: LEFT_COLUMN_BOTTOM.legend };
   return (
-    <FloatingPanel id="legend" title="表示設定" style={{ left: 16, top: 566, width: 236 }}>
+    <FloatingPanel id="legend" title="表示設定" style={{ left: 16, width: 236, ...pos }}>
       <div className="lgb">
         {ROWS.map(([icon, text], i) => (
           <div key={i} style={{ display: 'contents' }}>

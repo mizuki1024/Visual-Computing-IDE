@@ -10,7 +10,8 @@
  *   - 失敗は 03d 1.1節の4要素（事実 / 理由 / わからないこと / 次の操作）で書く
  *   - 押せないボタンには、押せない理由を添える（IX-23 / IX-24）
  * ========================================================================== */
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useExplore } from '@/state/ExploreStore';
 import FloatingPanel from './FloatingPanel';
 import Why from '../common/Why';
 import { RUN_STATE_LABEL, useRuntime, type Finding } from '@/state/RuntimeStore';
@@ -58,8 +59,22 @@ export default function RuntimePanel() {
   /** このブラウザが IDE に転送 URL で来ているか（中継の URL がループバックでない） */
   const viaForwarding = !!preview?.origin && !/^https?:\/\/(127\.0\.0\.1|localhost|\[::1\])(:|\/|$)/.test(preview.origin);
   const [showLog, setShowLog] = useState(false);
+  const { compact, setCompact } = useExplore();
 
   const state = runtime?.state ?? 'idle';
+  /*
+   * 7C-2: 実行中は「状態・PID・ポート・停止」の1段に畳む（所見・設定・環境変数・出力は［詳細］で開く）。
+   * 畳むのは実行中だけ。検出・起動の前、起動中、停止・エラーのときは従来どおり全部を出す
+   * （利用者が入力し、理由を読む必要があるため）。新しく実行中になったら、また畳んだ状態から始める
+   */
+  const prevState = useRef(state);
+  useEffect(() => {
+    if (state === 'running' && prevState.current !== 'running') setCompact('runtime', true);
+    prevState.current = state;
+  }, [state, setCompact]);
+  const folded = state === 'running' && compact.runtime;
+  const findingCount = (runtime?.error ? 1 : 0) + (runtime?.targetChanges ? 1 : 0)
+    + (inspection?.findings.length ?? 0);
   const elapsed = useElapsedSec(runtime?.startedAt ?? null, state === 'starting');
   const busy = pending !== null || state === 'starting' || state === 'stopping' || state === 'validating';
   const startable = !!inspection
@@ -77,8 +92,13 @@ export default function RuntimePanel() {
 
   return (
     <FloatingPanel id="runtime" title="プロジェクトと実行" note="Phase 7A"
-      style={{ right: 16, top: 62, width: 330 }}>
-      <div className="rt">
+      style={{ right: 16, top: 62, width: 330 }}
+      fold={state === 'running' ? {
+        expanded: !folded, onToggle: () => setCompact('runtime', !folded),
+        showLabel: '詳細', hideLabel: '畳む',
+        hint: folded ? 'プロジェクトの構成・所見・計装・環境変数・出力を表示します' : '状態・PID・停止の1段に畳みます（経路図を広く見るため）',
+      } : undefined}>
+      <div className={`rt${folded ? ' rt-compact' : ''}`} data-compact={folded ? 'on' : 'off'}>
         {/* ------------------------------------------------ プロジェクトの指定 */}
         <label className="rt-lbl" htmlFor="rt-path">プロジェクトのパス（絶対パス）</label>
         <div className="rt-row">
@@ -215,8 +235,14 @@ export default function RuntimePanel() {
 
         {runtime?.error && <FindingCard f={runtime.error} />}
         {runtime?.targetChanges && <FindingCard f={runtime.targetChanges} />}
+        {folded && (
+          <p className="rt-note rt-csum" title={findingCount > 0 ? `所見 ${findingCount} 件・計装・環境変数・出力は［詳細］で表示します` : undefined}>
+            {inspection?.name ?? runtime?.project?.name ?? '—'}
+            {findingCount > 0 && <> — 所見 {findingCount} 件・計装・環境変数・出力は［詳細］で表示します</>}
+          </p>
+        )}
         {apiError && (
-          <div className="rt-card blocker">
+          <div className="rt-card blocker rt-api">
             <b>IDE の API に届きませんでした。</b>
             <p>{apiError}</p>
             <p className="imp">実行状態を確認できません。表示は最後に取得できた内容です。</p>

@@ -30,6 +30,23 @@ const box = (cx: number, cy: number, w: number, h: number): Rect => ({
 
 /** 全体表示が収めるべき内容の範囲。描いているものから算出する。 */
 export function contentBounds(ds: LaidOutDataset): Rect {
+  return boundsOf(ds, true);
+}
+
+/**
+ * Phase 7C-2: 経路だけの範囲（経路外の減光した通信と、その見出しを含めない）。
+ * 実ページの選択・観測の経路を描いた直後に、経路を覆われない領域へ収めるために使う
+ * （全体表示は contentBounds で、経路外も含めて収める）
+ */
+export function pathBounds(ds: LaidOutDataset): Rect {
+  return boundsOf(ds, false);
+}
+
+/** 切断の注記の幅。和文 11px・10px の字幅で見積もる（7C-2: 固定の 130px では長い理由がはみ出した） */
+const cutTextWidth = (c: { head: string; sub: string }) =>
+  Math.max(130, c.head.length * 11, c.sub.length * 10) + 20;
+
+function boundsOf(ds: LaidOutDataset, withOffPath: boolean): Rect {
   let r: Rect | null = null;
   const add = (b: Rect) => { r = r ? union(r, b) : b; };
 
@@ -42,12 +59,14 @@ export function contentBounds(ds: LaidOutDataset): Rect {
     if (n.plinth) add(box(n.plinth.x, n.plinth.y + 7, 150, 40));
   }
   for (const h of ds.hops) {
-    if (h.tag) add(box(h.tag.x, h.tag.y - 9, 180, 46));
+    if (h.tag) add(h.tag.below ? { x: h.tag.x - 30, y: h.tag.y - 12, w: 30 + h.tag.label.length * 10.5 + 10, h: 44 } : box(h.tag.x, h.tag.y - 9, 180, 46));
   }
-  for (const o of ds.offPath.nodes) add(box(o.x, o.y, o.size * 1.6, o.size * 2.2));
-  add(box(ds.offPath.caption.x + 120, ds.offPath.caption.y - 5, 250, 24));
+  if (withOffPath) {
+    for (const o of ds.offPath.nodes) add(box(o.x, o.y, o.size * 1.6, o.size * 2.2));
+    add(box(ds.offPath.caption.x + 120, ds.offPath.caption.y - 5, 250, 24));
+  }
   for (const c of ds.cuts) {
-    add({ x: c.text.x - 10, y: c.text.y - 16, w: 130, h: 60 });
+    add({ x: c.text.x - 10, y: c.text.y - 16, w: cutTextWidth(c), h: 60 });
     add(box(c.mark.x, c.mark.y, 48, 36));
   }
 

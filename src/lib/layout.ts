@@ -26,7 +26,7 @@ export interface LaidOutHop extends ModelHop {
   /** ホップ1本 = 独立した線分（03b 3.3節。隣接ホップを1本に繋がない） */
   d: string;
   /** キャンバスに語を残すのは「観測できていないこと」だけ（表示規則10） */
-  tag?: { x: number; y: number; label: string };
+  tag?: { x: number; y: number; label: string; below?: boolean };
 }
 
 export interface LaidOutCut extends Cut {
@@ -215,8 +215,12 @@ export function layout(ds: Dataset): LaidOutDataset {
     const b = at(h.to);
     const d = g?.d ?? curve(a, b);
     // 語を置く位置は線の中点。推定のホップにだけ付く（表示規則10）
+    /*
+     * 7C-2: 実測データの自動配置では、語（例「由来は静的解析による推定」）を印の**下**に左揃えで置く。
+     * 印の上に置くと、短いホップ（② → ②'）では ② の札と ②' の図形の下に語が隠れていた
+     */
     const tag = h.tagLabel
-      ? { label: h.tagLabel, ...(g?.tag ?? { x: Math.round((a.x + b.x) / 2), y: Math.round((a.y + b.y) / 2) }) }
+      ? { label: h.tagLabel, ...(g?.tag ?? { x: Math.round((a.x + b.x) / 2), y: Math.round((a.y + b.y) / 2), below: true }) }
       : undefined;
     return { ...h, d, tag };
   });

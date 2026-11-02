@@ -35,7 +35,12 @@ export default function HoverCard() {
   const isNode = hover.type === 'node';
   const n = isNode ? byIdIn(data, hover.id as number) : null;
   const h = isNode ? null : hopByIdIn(data, hover.id as string);
-  const o = (n ?? h)!;
+  const o = n ?? h;
+  /*
+   * 7C-2: ホバー中の対象が、差し替わったデータセットに無いことがある（全体表示で図が動き、止まっている
+   * ポインタの下に別の線が来た直後に、選択の図へ差し替わった場合など）。そのときは何も出さない
+   */
+  if (!o) return null;
   const est = o.observability === 'estimated';
   // ★ は最弱環の印。どのホップが★かはデータが持つ（ID を決め打ちにしない）
   const star = h?.star === true;
