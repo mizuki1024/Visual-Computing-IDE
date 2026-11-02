@@ -1,0 +1,54 @@
+{
+ "at": "2026-11-02T17:04:02.447Z",
+ "method": "B: isolated working copy + second next dev",
+ "steps": [
+  {
+   "k": "copy",
+   "ms": 323,
+   "kbWithoutNodeModules": 84,
+   "nodeModules": "hardlink"
+  },
+  {
+   "k": "apply-in-copy",
+   "status": "applied",
+   "fixtureUnchanged": true
+  },
+  {
+   "k": "first-200",
+   "ok": true,
+   "ms": 8838
+  },
+  {
+   "k": "measure",
+   "Mobile": {
+    "ms": 1216,
+    "pads": [
+     "20px"
+    ],
+    "count": 10,
+    "control": "16px"
+   },
+   "Desktop": {
+    "ms": 557,
+    "pads": [
+     "24px"
+    ],
+    "count": 10,
+    "control": "24px"
+   }
+  },
+  {
+   "k": "memory",
+   "rssKb": 1344644,
+   "note": "2つ目の開発サーバーのプロセスグループの RSS 合計"
+  },
+  {
+   "k": "cleanup",
+   "removed": true,
+   "fixtureUnchanged": true
+  }
+ ],
+ "nodeModules": "hardlink",
+ "devLogHead": "▲ Next.js 16.4.3 (Turbopack)\n- Local:         http://127.0.0.1:3270\n- Network:       http://127.0.0.1:3270\n✓ Ready in 749ms\n✓ Running next.config.mjs took 52ms\n\n○ Compiling /properties ...\n GET /properties 200 in 808ms (next.js: 393ms, application-code: 416ms)\n GET /properties 200 in 230ms (next.js: 4ms, application-code: 226ms)\n GET /properties 200 in 82ms (next.js: 1.9ms, application-code: 81ms)\n\u001b[?25h\n",
+ "devLogTail": "✓ Running next.config.mjs took 52ms\n\n○ Compiling /properties ...\n GET /properties 200 in 808ms (next.js: 393ms, application-code: 416ms)\n GET /properties 200 in 230ms (next.js: 4ms, application-code: 226ms)\n GET /properties 200 in 82ms (next.js: 1.9ms, application-code: 81ms)\n\u001b[?25h\n"
+}

@@ -1,0 +1,215 @@
+{
+ "at": "2026-11-02T17:03:49.851Z",
+ "node": "v22.23.4",
+ "results": [
+  {
+   "id": "RV01",
+   "expectation": "src/ の中のシンボリックリンクが src/ の外（プロジェクト内）を指すとき、safePath は null を返す",
+   "result": "FAIL",
+   "evidence": {
+    "returned": "outside-src.cfg"
+   }
+  },
+  {
+   "id": "RV02",
+   "expectation": "そのリンク経由の applyOne は outside-scope で拒否し、src/ の外のファイルを変えない",
+   "result": "FAIL",
+   "evidence": {
+    "status": "applied",
+    "outsideFileBefore": "value = \"p-4\"",
+    "outsideFileAfter": "value = \"p-5\""
+   }
+  },
+  {
+   "id": "RV03",
+   "expectation": "照合〜rename の間の外部変更は、保持されるか、少なくとも結果が applied にならない（既知の限界の確認）",
+   "result": "FAIL",
+   "evidence": {
+    "status": "applied",
+    "written": true,
+    "externalChangeKept": false,
+    "readBackEqualsAfter": true
+   }
+  },
+  {
+   "id": "RV04",
+   "expectation": "複数ファイルの適用中に未着手のファイルへ入った外部変更は上書きしない（committed にしない）",
+   "result": "FAIL",
+   "evidence": {
+    "outcome": "committed",
+    "files": [
+     [
+      "PropertyCard.tsx",
+      "written",
+      "at-after"
+     ],
+     [
+      "SiteNotice.tsx",
+      "written",
+      "at-after"
+     ],
+     [
+      "PropertyList.tsx",
+      "written",
+      "at-after"
+     ]
+    ],
+    "externalChangeKept": false
+   }
+  },
+  {
+   "id": "RV05",
+   "expectation": "state=committed のジャーナルには recoverJournal が何も書かない（確定した変更を巻き戻さない）",
+   "result": "FAIL",
+   "evidence": {
+    "txOutcome": "committed",
+    "journalStateBefore": "committed",
+    "recover": {
+     "state": "recovered",
+     "files": [
+      {
+       "rel": "src/components/PropertyCard.tsx",
+       "action": "restored",
+       "content": "at-before"
+      },
+      {
+       "rel": "src/components/SiteNotice.tsx",
+       "action": "restored",
+       "content": "at-before"
+      },
+      {
+       "rel": "src/components/PropertyList.tsx",
+       "action": "restored",
+       "content": "at-before"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "RV06a",
+   "expectation": "rename の前に落ちても、対象ファイルは元の内容のまま（途中で切れたファイルにならない）",
+   "result": "PASS",
+   "evidence": {
+    "exit": 71,
+    "targetUnchanged": true
+   }
+  },
+  {
+   "id": "RV06b",
+   "expectation": "rename の前に落ちても、利用者の作業ツリー（src/ の中）に一時ファイルを残さない",
+   "result": "FAIL",
+   "evidence": {
+    "leftInSrcComponents": [
+     ".PropertyCard.tsx.vcide-71d557f21785.tmp"
+    ],
+    "note": "この名前は .gitignore の対象外（git check-ignore で確認）。起動時の掃除も無い"
+   }
+  },
+  {
+   "id": "RV07",
+   "expectation": "選んだ要素の行が消えた後、古い識別子は「特定できません」になり、同じ位置に来た別の要素へは照合しない",
+   "result": "FAIL",
+   "evidence": {
+    "selectedSourceLine": "<dd>{property.pref}</dd>",
+    "status": "resolved",
+    "resolvedTo": "src/components/PropertyCard.tsx:12:11",
+    "resolvedSourceLine": "<dd>{property.utility}</dd>",
+    "checksPassed": 6
+   }
+  },
+  {
+   "id": "RV08",
+   "expectation": "選んだ要素が消えた後の古い位置では source-mismatch になり、別の要素の token を書き換えない",
+   "result": "FAIL",
+   "evidence": {
+    "ok": true,
+    "reason": null,
+    "wouldPatch": "<div className=\"rounded border p-5 shadow\">second</div>",
+    "note": "実際の流れでは draft の baseHash が新しい内容から作られるため、照合（RV07）を通った後はこの位置へ書ける"
+   }
+  },
+  {
+   "id": "RS01",
+   "expectation": "使用中のポートでは起動せず（終了コード 2）、そのポートの無関係なプロセスは生きたまま",
+   "result": "PASS",
+   "evidence": {
+    "exit": 2,
+    "unrelatedStillListening": true,
+    "stderr": "ポート 3360 は既に使われています。古いハーネス・開発サーバーを止めてください。"
+   }
+  },
+  {
+   "id": "RS05",
+   "expectation": "計測のみ: ハーネスの開発サーバー（/properties をコンパイル済み）のプロセスグループの RSS 合計",
+   "result": "MEASURED",
+   "evidence": {
+    "rssKb": 600312,
+    "processes": 5,
+    "method": "shadow-preview.mjs と同じ（pgrep -g の VmRSS の合計。共有ページを重複して数える）"
+   }
+  },
+  {
+   "id": "RS02",
+   "expectation": "サーバーの検証は、開いている2つの幅の計測が揃わなければ passed にしない（Desktop の計測が欠けた要求）",
+   "result": "FAIL",
+   "evidence": {
+    "verify": "passed",
+    "artboards": [
+     "Mobile"
+    ],
+    "verifiedRevision": "ef273facf057",
+    "note": "現在の UI の collect() は計測失敗でも空の items で2幅を送るので失敗になる。サーバー自身は2幅を要求していない"
+   }
+  },
+  {
+   "id": "RS04",
+   "expectation": "検証の時点のコードの版が適用直後の版と違えば、その版で検証済み（verifiedRevision = revAfter）と記録しない",
+   "result": "FAIL",
+   "evidence": {
+    "verify": "passed",
+    "verifiedRevision": "ef273facf057",
+    "revAfter": "ef273facf057",
+    "currentRevision": "b0d4dc39858e"
+   }
+  },
+  {
+   "id": "RS-cleanup-revert",
+   "expectation": "後片付けの取り消し",
+   "result": "PASS",
+   "evidence": {
+    "status": "reverted"
+   }
+  },
+  {
+   "id": "RS06",
+   "expectation": "ハーネスの停止で、所有する開発サーバー（プロセスグループ）も止まり、ポートが空く",
+   "result": "PASS",
+   "evidence": {
+    "listening": [
+     false,
+     false,
+     false
+    ],
+    "devProcesses": null
+   }
+  },
+  {
+   "id": "RS07",
+   "expectation": "第2部の後、題材 src/ は写しとバイト一致（戻したファイル数は記録のみ）",
+   "result": "PASS",
+   "evidence": {
+    "restoredFiles": 0
+   }
+  },
+  {
+   "id": "RV99",
+   "expectation": "第1部・第2部の後、題材の版は開始時と同じ",
+   "result": "PASS",
+   "evidence": {
+    "rev0": "e75cfba70b46",
+    "now": "e75cfba70b46"
+   }
+  }
+ ]
+}
