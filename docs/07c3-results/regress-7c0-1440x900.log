@@ -1,0 +1,84 @@
+
+## S0 IDE を開いた直後
+  - overlap.initial: {"nodes":7,"covered":0,"offscreen":0,"coveredList":[]}
+
+## S1 プロジェクトを開く（対応状況と制約が分かる）
+  - verdict: supported
+  - runtimePanel: プロジェクトと実行 ⏎ Phase 7A ⏎ ✕ ⏎ プロジェクトのパス（絶対パス） ⏎ 検出 ⏎  ⏎ ブラウザからフォルダ選択ダイアログは開けません。パスを入力する方式です。 ⏎  ⏎ 対応 ⏎ poc01-fixture-app ⏎ ルート ⏎ /home/user/Visual-Computing-IDE/poc/fixture-app ⏎ Next.js ⏎ 16.4.3 （宣言 ^16.4.3） ⏎ ルーター ⏎ src/app ⏎ 依存 ⏎ インストール済み （npm） ⏎ プロジェクトより上の階層に lockfile またはワークスペースの宣言があります（/home/u
+  - verdict.invalid: invalid
+  - runtimePanel.invalid: プロジェクトと実行 ⏎ Phase 7A ⏎ ✕ ⏎ プロジェクトのパス（絶対パス） ⏎ 検出 ⏎  ⏎ ブラウザからフォルダ選択ダイアログは開けません。パスを入力する方式です。 ⏎  ⏎ 指定が不正 ⏎ — ⏎ ルート ⏎ — ⏎ Next.js ⏎ — ⏎ ルーター ⏎ — ⏎ 依存 ⏎ 未インストール ⏎ 指定されたパスが存在しません（/nonexistent/path/app）。 ⏎  ⏎ そのパスにファイルもディレクトリもありません。 ⏎  ⏎ プロジェクトの構成は判定できません。 ⏎  ⏎ パスを確認して入力し直してください。 ⏎  ⏎ ポート ⏎ 計装つき ⏎ PoC-01 方式2（NODE_OPTIONS の
+  - verdict.again: supported
+
+## S2 開発サーバーを起動する（状態が正確に表示される）
+  - start: {"states":["未起動","起動中","実行中"],"preview":"live","ms":2928}
+  - status.runtime: {"state":"running","pid":4363,"port":3000,"readyMs":2679,"instrumentation":"enabled","anchors":"enabled","env":{"passed":["HOME","HTTPS_PROXY","NODE_EXTRA_CA_CERTS","NODE_OPTIONS","NO_PROXY","NPM_CONFIG_USERCONFIG","PATH","SHELL","SSL_CERT_FILE","TERM","https_
+  - runtimePanel: プロジェクトと実行 ⏎ Phase 7A ⏎ 詳細 ▾ ⏎ ✕ ⏎ 停止する ⏎ 実行中 ⏎ PID 4363 ⏎ :3000 ⏎ 2679 ms ⏎  ⏎ poc01-fixture-app — 所見 3 件・計装・環境変数・出力は［詳細］で表示します
+
+## S3 実ページをプレビューする（遷移・再読み込み）
+  - after goto /lin-a: {"path":"/lin-a","http":"200","loads":"2"}
+  - after reload: {"path":"/lin-a","http":"200","loads":"3"}
+  - after goto 404: {"path":"/no-such-page","http":"404","foot":"HTTP 404 — ページが見つかりません（開発サーバーの応答）\n/no-such-page"}
+
+## S4 要素を選ぶ（対応する React ソースが分かる）
+  - pick li: {"selection":"resolved","at":"src/app/lin-a/page.tsx:18:11","component":"LinA","reason":"","binding":"identified","docSeq":"5","lineage":"linked","lineageReason":"","lineageStage":"","outcome":"confirmed","cands":"poc.listings.region","ms":4043,"before":""}
+  - previewPanel: ↻ ⏎ 移動 ⏎ 選択 ⏎  ⏎ 選択: <li> → LinA src/app/lin-a/page.tsx:18:11 （同じ JSX の要素 3 個のうち 1 番目。どの使用箇所かは区別していません） ⏎  ⏎ 解除 ⏎  ⏎ 文書: 通信 #5 の応答と同定。由来（静的解析による推定）: poc.listings.region ⏎  ⏎ 観測（いまの起動）: 通信 5 件・SQL 3 本（実行した呼び出し位置を特定 3 本） ⏎  ⏎ #5 GET /lin-a — 200 / SQL 1 / 位置 1 ⏎ #4 GET /no-such-page — 40
+  - dock: 詳細 ⏎ 経路 ⏎ 固定 ⏎ この値の出所 ⏎ poc.listings . region ⏎ 推定 ⏎  ⏎ 17 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 ⏎  ⏎ 実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。 ⏎  ⏎ 概要 ⏎ 根拠 ⏎ ★ ⏎ いちばん弱いところ ⏎ ②→⑤この表示値の由来（取得結果のどの項目か） ⏎  ⏎ 取得結果のどの項目がこの表示値になったかは、ソースの静的解析による推定です。実行時に観測したものではありません（表示された値も、取得した行も読んでいません）。文書・呼び出
+  - overlap.afterSelect: {"nodes":9,"covered":0,"offscreen":0,"coveredList":[]}
+
+## S5 データの由来を追う（限定対象で DB カラムまで）
+  - showBound: {"shown":"5","withSel":"on","count":"5","sql":"3"}
+  - previewPanel: ↻ ⏎ 移動 ⏎ 選択 ⏎  ⏎ 選択: <li> → LinA src/app/lin-a/page.tsx:18:11 （同じ JSX の要素 3 個のうち 1 番目。どの使用箇所かは区別していません） ⏎  ⏎ 解除 ⏎  ⏎ 文書: 通信 #5 の応答と同定。由来（静的解析による推定）: poc.listings.region ⏎  ⏎ 観測（いまの起動）: 通信 5 件・SQL 3 本（実行した呼び出し位置を特定 3 本） ⏎  ⏎ #5 GET /lin-a — 200 / SQL 1 / 位置 1 ⏎ #4 GET /no-such-page — 40
+  - canvas: / ⏎ /lin-a ⏎ /lin-a ⏎ /no-such-page ⏎ 選択していない経路（いまの起動の他の通信） ⏎ ここより上流は結んでいません ⏎ この通信を起こしたコード・表示された値 ⏎ ブラウザ ⏎ localhost:3000 ⏎ 開発サーバー ⏎ localhost:3000 ⏎ PostgreSQL ⏎ 由来は静的解析による推定 ⏎ 推定 ⏎ 1 ⏎ 表示された値 ⏎ <li> ⏎ 2 ⏎ コンポーネント ⏎ LinA ⏎ 3 ⏎ 通信 ⏎ GET /lin-a ⏎ 4 ⏎ サーバー処理 ⏎ /lin-a ⏎ 5 ⏎ コンポーネント ⏎ LinA ⏎ 6 ⏎ 実行SQL ⏎ 7 ⏎ テーブル ⏎ listings ⏎ 8 ⏎ カラ
+  - dock: 詳細 ⏎ 経路 ⏎ 固定 ⏎ この値の出所 ⏎ poc.listings . region ⏎ 推定 ⏎  ⏎ 17 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 ⏎  ⏎ 実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。 ⏎  ⏎ 概要 ⏎ 根拠 ⏎ ★ ⏎ いちばん弱いところ ⏎ ②→⑤この表示値の由来（取得結果のどの項目か） ⏎  ⏎ 取得結果のどの項目がこの表示値になったかは、ソースの静的解析による推定です。実行時に観測したものではありません（表示された値も、取得した行も読んでいません）。文書・呼び出
+  - overlap.lineage: {"nodes":9,"covered":0,"offscreen":0,"coveredList":[]}
+  - overlap.raw: {"panels":[{"name":"ページ","x":16,"y":64,"w":200,"h":150},{"name":"プレビュー","x":232,"y":64,"w":336,"h":229},{"name":"表示設定","x":16,"y":534,"w":236,"h":196},{"name":"全体","x":16,"y":760,"w":236,"h":124},{"name":"プロジェクトと実行","x":734,"y":110,"w":330,"h":96}],"nodes":[{"
+  - markdownLeaks: []
+  - overlap.afterFit: {"nodes":9,"covered":0,"offscreen":0,"coveredList":[]}
+  - overlap.runtimeClosed: {"nodes":9,"covered":0,"offscreen":0,"coveredList":[]}
+
+## S6 推定を見る（実測と推定を誤認しない）
+  - nodeLabels: ["表示された値 <li> のテキスト #0","サーバー処理 render route (app) /lin-a — 34ms","テーブル poc.listings","コンポーネント src/app/lin-a/page.tsx:18","通信 GET /lin-a — 200 — 74ms","コンポーネント src/app/lin-a/page.tsx:12","実行SQL SELECT id, region FROM poc.listings ORDER BY id LIMIT $0 — 11ms","
+  - edgesObs: []
+  - dock.badge1: 詳細 ⏎ 経路 ⏎ 固定 ⏎ この値の出所 ⏎ poc.listings . region ⏎ 推定 ⏎  ⏎ 17 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 ⏎  ⏎ 実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。 ⏎  ⏎ 概要 ⏎ 根拠 ⏎ ★ ⏎ いちばん弱いところ ⏎ ②→⑤この表示値の由来（取得結果のどの項目か） ⏎  ⏎ 取得結果のどの項目がこの表示値になったかは、ソースの静的解析による推定です。実行時に観測したものではありません（表示された値も、取得した行も読んでいません）。文書・呼び出
+  - markdownLeaks.badge1: []
+  - dock.badge2: 詳細 ⏎ 経路 ⏎ 固定 ⏎ この値の出所 ⏎ poc.listings . region ⏎ 推定 ⏎  ⏎ 17 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 ⏎  ⏎ 実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。 ⏎  ⏎ 概要 ⏎ 根拠 ⏎ ★ ⏎ いちばん弱いところ ⏎ ②→⑤この表示値の由来（取得結果のどの項目か） ⏎  ⏎ 取得結果のどの項目がこの表示値になったかは、ソースの静的解析による推定です。実行時に観測したものではありません（表示された値も、取得した行も読んでいません）。文書・呼び出
+  - markdownLeaks.badge2: []
+  - dock.badge3: 詳細 ⏎ 経路 ⏎ 固定 ⏎ この値の出所 ⏎ poc.listings . region ⏎ 推定 ⏎  ⏎ 17 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 ⏎  ⏎ 実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。 ⏎  ⏎ 概要 ⏎ 根拠 ⏎ ★ ⏎ いちばん弱いところ ⏎ ②→⑤この表示値の由来（取得結果のどの項目か） ⏎  ⏎ 取得結果のどの項目がこの表示値になったかは、ソースの静的解析による推定です。実行時に観測したものではありません（表示された値も、取得した行も読んでいません）。文書・呼び出
+  - markdownLeaks.badge3: []
+  - dock.badge4: 詳細 ⏎ 経路 ⏎ 固定 ⏎ この値の出所 ⏎ poc.listings . region ⏎ 推定 ⏎  ⏎ 17 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 ⏎  ⏎ 実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。 ⏎  ⏎ 概要 ⏎ 根拠 ⏎ ★ ⏎ いちばん弱いところ ⏎ ②→⑤この表示値の由来（取得結果のどの項目か） ⏎  ⏎ 取得結果のどの項目がこの表示値になったかは、ソースの静的解析による推定です。実行時に観測したものではありません（表示された値も、取得した行も読んでいません）。文書・呼び出
+  - markdownLeaks.badge4: []
+  - dock.badge5: 詳細 ⏎ 経路 ⏎ 固定 ⏎ この値の出所 ⏎ poc.listings . region ⏎ 推定 ⏎  ⏎ 17 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 ⏎  ⏎ 実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。 ⏎  ⏎ 概要 ⏎ 根拠 ⏎ ★ ⏎ いちばん弱いところ ⏎ ②→⑤この表示値の由来（取得結果のどの項目か） ⏎  ⏎ 取得結果のどの項目がこの表示値になったかは、ソースの静的解析による推定です。実行時に観測したものではありません（表示された値も、取得した行も読んでいません）。文書・呼び出
+  - markdownLeaks.badge5: []
+  - dock.badge6: 詳細 ⏎ 経路 ⏎ 固定 ⏎ この値の出所 ⏎ poc.listings . region ⏎ 推定 ⏎  ⏎ 17 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 ⏎  ⏎ 実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。 ⏎  ⏎ 概要 ⏎ 根拠 ⏎ ★ ⏎ いちばん弱いところ ⏎ ②→⑤この表示値の由来（取得結果のどの項目か） ⏎  ⏎ 取得結果のどの項目がこの表示値になったかは、ソースの静的解析による推定です。実行時に観測したものではありません（表示された値も、取得した行も読んでいません）。文書・呼び出
+  - markdownLeaks.badge6: []
+  - markdownLeaks: []
+
+## S7 特定不能な値を選ぶ（理由と限界が理解できる）
+  - pick g-shadow (lineage cut): {"selection":"resolved","at":"src/app/lin-g/page.tsx:28:7","component":"LinG","reason":"","binding":"identified","docSeq":"6","lineage":"cut","lineageReason":"no-reference","lineageStage":"static","outcome":"","cands":"","ms":826,"before":"src/app/lin-a/page.t
+  - previewPanel: ↻ ⏎ 移動 ⏎ 選択 ⏎  ⏎ 選択: <p> → LinG src/app/lin-g/page.tsx:28:7 ⏎  ⏎ 解除 ⏎  ⏎ 文書: 通信 #6 の応答と同定。由来は結んでいません — 静的解析: 静的解析で、この値からデータ取得の結果への参照の連鎖を解けません（定数・追えない関数・条件の判定など）（固定値の経路 1 本） ⏎  ⏎ 観測（いまの起動）: 通信 6 件・SQL 4 本（実行した呼び出し位置を特定 4 本） ⏎  ⏎ #6 GET /lin-g — 200 / SQL 1 / 位置 1 ⏎ #5 GET /lin-a — 200 /
+  - dock: 詳細 ⏎ 経路 ⏎ 固定 ⏎ 選んだ値 — 描画位置と値の由来 ⏎ 描画位置 ⏎ 特定済み ⏎ 実測 ⏎ src/app/lin-g/page.tsx:28 ⏎ LinG ⏎ 値の由来 ⏎ 未確認 ⏎ DB のどのテーブル・カラムから来たかは、まだ分かっていません ⏎ 切れた段階 ⏎ 静的解析 ⏎ 理由 ⏎ 静的解析で、この値からデータ取得の結果への参照の連鎖を解けません（定数・追えない関数・条件の判定など）（固定値の経路 1 本） ⏎  ⏎ 3 か所のうち 0 か所が推定です。「実測」は描画位置までの話で、値の出所（DB）が実測で分かったという意味ではありません。 ⏎  ⏎ 描画位置＝こ
+  - pick vendor/unresolvable: {"selection":"resolved","at":"src/app/cards/page.tsx:49:9","component":"Cards","reason":"","binding":"identified","docSeq":"7","lineage":"cut","lineageReason":"no-value-site","lineageStage":"static","outcome":"","cands":"","ms":549,"before":"src/app/lin-g/page
+  - previewPanel: ↻ ⏎ 移動 ⏎ 選択 ⏎  ⏎ 選択: <span> → Cards src/app/cards/page.tsx:49:9 ⏎  ⏎ 解除 ⏎  ⏎ 文書: 通信 #7 の応答と同定。由来は結んでいません — 静的解析: 選択した要素の直下に、値を描く式（JSX の {…}）がありません（src/app/cards/page.tsx:49:9 の <span>） ⏎  ⏎ 観測（いまの起動）: 通信 8 件・SQL 5 本（実行した呼び出し位置を特定 4 本） ⏎  ⏎ #8 GET /api/listings — 200 / SQL 1 / 位置 0 ⏎ #7
+  - dock: 詳細 ⏎ 経路 ⏎ 固定 ⏎ 選んだ値 — 描画位置と値の由来 ⏎ 描画位置 ⏎ 特定済み ⏎ 実測 ⏎ src/app/cards/page.tsx:49 ⏎ Cards ⏎ 値の由来 ⏎ 未確認 ⏎ DB のどのテーブル・カラムから来たかは、まだ分かっていません ⏎ 切れた段階 ⏎ 静的解析 ⏎ 理由 ⏎ 選択した要素の直下に、値を描く式（JSX の {…}）がありません（src/app/cards/page.tsx:49:9 の <span>） ⏎  ⏎ 3 か所のうち 0 か所が推定です。「実測」は描画位置までの話で、値の出所（DB）が実測で分かったという意味ではありません
+  - pick lin-c (candidates): {"selection":"resolved","at":"src/app/lin-c/page.tsx:20:7","component":"LinC","reason":"","binding":"identified","docSeq":"9","lineage":"linked","lineageReason":"","lineageStage":"","outcome":"candidates","cands":"poc.listings.region,poc.listings.code","ms":82
+  - previewPanel: ↻ ⏎ 移動 ⏎ 選択 ⏎  ⏎ 選択: <p> → LinC src/app/lin-c/page.tsx:20:7 ⏎  ⏎ 解除 ⏎  ⏎ 文書: 通信 #9 の応答と同定。由来（静的解析による推定）: 2 候補のいずれか（listings.region / listings.code）。1つに決めていません ⏎  ⏎ 観測（いまの起動）: 通信 9 件・SQL 6 本（実行した呼び出し位置を特定 5 本） ⏎  ⏎ #9 GET /lin-c — 200 / SQL 1 / 位置 1 ⏎ #8 GET /api/listings — 200 / SQL 1 
+  - dock: 詳細 ⏎ 経路 ⏎ 固定 ⏎ この値の出所 ⏎ poc.listings . 2 候補のいずれか ⏎ 推定 ⏎  ⏎ 19 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 ⏎  ⏎ 実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。 ⏎  ⏎ 概要 ⏎ 根拠 ⏎ ★ ⏎ いちばん弱いところ ⏎ ②→⑤この表示値の由来（取得結果のどの項目か） ⏎  ⏎ 取得結果のどの項目がこの表示値になったかは、ソースの静的解析による推定です。実行時に観測したものではありません（表示された値も、取得した行も読んでいません）。文書・
+  - markdownLeaks: []
+
+## S8 停止・再起動する（古い情報が混入しない）
+  - pick before stop: {"selection":"resolved","at":"src/app/lin-a/page.tsx:18:11","component":"LinA","reason":"","binding":"identified","docSeq":"10","lineage":"linked","lineageReason":"","lineageStage":"","outcome":"confirmed","cands":"poc.listings.region","ms":509,"before":"src/a
+  - stop: {"ms":1675,"preview":"stopped","selection":"cleared"}
+  - previewPanel: ↻ ⏎ 開発サーバーのページを表示しているときだけ使えます。 ⏎ 移動 ⏎ 開発サーバーのページを表示しているときだけ使えます。 ⏎ 選択 ⏎ 開発サーバーのページを表示しているときだけ使えます。 ⏎  ⏎ 開発サーバーが実行中ではなくなったため、選択を解除しました。 ⏎  ⏎ 開発サーバーが実行中ではなくなったため、観測の表示を消しました（実測中ではありません）。 ⏎  ⏎ 開発サーバーは停止しています。プレビューは表示していません。
+  - canvas: ページ ⏎ ✕ ⏎ ⌕ ⏎  ⏎ まだページを観測していません ⏎  ⏎ ページの切替は未実装です（観測しているページの経路だけを描いています） ⏎  ⏎ プレビュー ⏎ 開発サーバー ⏎ ✕ ⏎ ↻ ⏎ 開発サーバーのページを表示しているときだけ使えます。 ⏎ 移動 ⏎ 開発サーバーのページを表示しているときだけ使えます。 ⏎ 選択 ⏎ 開発サーバーのページを表示しているときだけ使えます。 ⏎  ⏎ 開発サーバーが実行中ではなくなったため、選択を解除しました。 ⏎  ⏎ 開発サーバーが実行中ではなくなったため、観測の表示を消しました（実測中ではありません）。 ⏎  ⏎ 開発サーバーは停止しています。
+  - dock: 詳細 ⏎ ページ ⏎ 固定 ⏎ プロジェクトの状態 ⏎ 開発サーバーは停止しています ⏎ いまの状態 ⏎ 停止したため、それまでの起動で観測した経路は表示していません。 ⏎ まだ分からないこと ⏎ 実行していない間は、値の経路（実測）は取得できません。 ⏎ 次にすること ⏎ 右の「プロジェクトと実行」で［起動］を押すと、新しい観測から描き直します。 ⏎  ⏎ ここには、あなたのプロジェクトで観測した経路だけを描きます。別のアプリの見本（合成デモ）は、 選んだときだけ表示します。合成デモを見る
+  - old pid alive after stop: {"pid":4363,"alive":false}
+  - restart: {"states":["停止しています","起動中","実行中"],"preview":"live","ms":2553}
+  - restart.runtime: {"pid":4434,"startedAt":"2026-11-02T12:38:41.661Z","prevStartedAt":"2026-11-02T12:38:17.587Z"}
+  - after restart: {"selection":"cleared","lineage":"","obsCount":"3","obsShown":""}
+  - previewPanel: ↻ ⏎ 移動 ⏎ 選択 ⏎  ⏎ 開発サーバーが実行中ではなくなったため、選択を解除しました。 ⏎  ⏎ 観測（いまの起動）: 通信 3 件・SQL 3 本（実行した呼び出し位置を特定 1 本） ⏎  ⏎ #3 GET /api/stats — 200 / SQL 2 / 位置 0 ⏎ #2 GET / — 200 / SQL 0 ⏎ #1 GET /lin-a — 応答なし / SQL 1 / 位置 1 ⏎ 表示
+  - canvas: ページ ⏎ ✕ ⏎ ⌕ ⏎  ⏎ まだページを観測していません ⏎  ⏎ ページの切替は未実装です（観測しているページの経路だけを描いています） ⏎  ⏎ プレビュー ⏎ 開発サーバー ⏎ 畳む ▴ ⏎ ✕ ⏎ ↻ ⏎ 移動 ⏎ 選択 ⏎  ⏎ 開発サーバーが実行中ではなくなったため、選択を解除しました。 ⏎  ⏎ 観測（いまの起動）: 通信 3 件・SQL 3 本（実行した呼び出し位置を特定 1 本） ⏎  ⏎ #3 GET /api/stats — 200 / SQL 2 / 位置 0 ⏎ #2 GET / — 200 / SQL 0 ⏎ #1 GET /lin-a — 応答なし / SQL 1 
+  - old-run observations: {"status":200,"observation":null,"stale":"stale-run"}
+  - pick after restart: {"selection":"resolved","at":"src/app/lin-a/page.tsx:18:11","component":"LinA","reason":"","binding":"identified","docSeq":"4","lineage":"linked","lineageReason":"","lineageStage":"","outcome":"confirmed","cands":"poc.listings.region","ms":816,"before":""}
+  - detect enabled after restart: true
+  - detect enabled after stop: true
+  - previewPanel.final: ↻ ⏎ 開発サーバーのページを表示しているときだけ使えます。 ⏎ 移動 ⏎ 開発サーバーのページを表示しているときだけ使えます。 ⏎ 選択 ⏎ 開発サーバーのページを表示しているときだけ使えます。 ⏎  ⏎ 開発サーバーが実行中ではなくなったため、選択を解除しました。 ⏎  ⏎ 開発サーバーが実行中ではなくなったため、観測の表示を消しました（実測中ではありません）。 ⏎  ⏎ 開発サーバーは停止しています。プレビューは表示していません。

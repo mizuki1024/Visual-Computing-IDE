@@ -16,11 +16,14 @@ import RuntimePanel from './panels/RuntimePanel';
 import DetailDock from './dock/DetailDock';
 import { useExplore } from '@/state/ExploreStore';
 import { RuntimeProvider } from '@/state/RuntimeStore';
+import { CanvasEmpty, DemoBanner, ProjectBridge } from './empty/ProjectEmpty';
 
 export default function AppShell() {
-  const { data } = useExplore();
+  const { data, placeholder, live } = useExplore();
   return (
     <RuntimeProvider>
+      {/* 7C-3: プロジェクトの状態を探索の状態へ渡す（合成デモを出すかを決める） */}
+      <ProjectBridge />
       <div className="app">
         <GlobalBar />
         <div className="stage">
@@ -32,11 +35,15 @@ export default function AppShell() {
             <CanvasControls />
             {/* Phase 7A。プロジェクトの指定と開発サーバーの起動・停止 */}
             <RuntimePanel />
+            {/* 7C-3（P1-9）: プロジェクトを開いている間、合成デモの代わりに出す空の状態 */}
+            <CanvasEmpty />
+            <DemoBanner />
             {/*
               データの出所を常時表示する（表示規則11）。
               合成なら「合成データ」と言い、実測なら計装方式を言う。文言はデータが持つ。
             */}
             <div className={`note synth${data.origin === 'measured' ? ' measured' : ''}`}
+              data-notice={live ? 'live' : placeholder ? 'project-empty' : data.origin}
               style={{ right: 16, bottom: 14 }}
               onPointerDown={(e) => e.stopPropagation()}>
               {data.notice}

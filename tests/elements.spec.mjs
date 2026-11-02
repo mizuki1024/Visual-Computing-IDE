@@ -65,12 +65,15 @@ eq('derives の線を描いていない', await count('g.hp[aria-label*="derives
 console.log('\n2b. 到達していない終点を「出所」と言い切らない');
 await page.locator('g.nd[aria-label^="表示された値"]').first().click();
 await page.waitForTimeout(250);
-const claim = await page.locator('.dock .claim .src').innerText();
-ok('主張はたどり着けたソース位置', claim.includes('RegionBadge.tsx'), claim);
+/* 7C-3（P1-10）: DB へ届いていない値は「この値の出所 <位置> 実測」と言わず、描画位置と値の由来を分ける */
+const claim = await page.locator('.dock [data-vo="render"]').innerText();
+ok('描画位置はたどり着けたソース位置（特定済み・実測）', claim.includes('RegionBadge.tsx') && claim.includes('特定済み') && claim.includes('実測'), claim);
 ok('到達していないテーブル・カラムを出所と書かない',
   !claim.includes('listings') && !claim.includes('region ('), claim);
-ok('途中で途切れていることを書いてある',
-  (await page.locator('.dock .sum').innerText()).includes('ここから先はたどれていません'));
+ok('値の由来は「未確認」と書いてある', (await page.locator('.dock [data-vo="lineage"]').innerText()).includes('未確認'));
+ok('切れた段（この記録では由来を評価していない）を書いてある',
+  (await page.locator('.dock [data-vo="stage"]').innerText()).includes('この記録では行っていません'));
+ok('見出し「この値の出所」を出さない', !(await page.locator('.dock .sum').first().innerText()).includes('この値の出所'));
 
 /* --------------------------------- 3. 値を選ぶと出所が読める */
 console.log('\n3. 値を選ぶと、描いたコンポーネントとソース位置まで読める');

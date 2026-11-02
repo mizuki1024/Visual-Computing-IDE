@@ -22,7 +22,11 @@ export default function PagesPanel() {
             <div><b>{p.name}</b><s>{p.path}</s></div>
           </div>
         ))}
-        {list.length === 0 && <p className="pgnone">一致するページがありません</p>}
+        {list.length === 0 && (
+          <p className="pgnone">
+            {data.pages.length === 0 ? 'まだページを観測していません' : '一致するページがありません'}
+          </p>
+        )}
       </div>
       <p className="pgnone" style={{ paddingTop: 0 }}>
         ページの切替は未実装です（観測しているページの経路だけを描いています）

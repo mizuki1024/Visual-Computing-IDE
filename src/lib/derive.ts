@@ -3,7 +3,7 @@
  * 定数として埋め込まないこと（02d 2.3節 / 申し送り 5.2節）。
  * ========================================================================== */
 import type { LaidOutDataset } from './layout';
-import { type Observability, type PathDetail } from './model';
+import { CUT_STAGE, type Observability, type PathDetail } from './model';
 import { byIdIn, type TraceHop, type TraceNode } from './trace';
 
 /**
@@ -120,6 +120,63 @@ export function summarize(ds: DS): PathSummaryModel {
     truncated,
   };
 }
+
+/* ========================================================================== */
+/* Phase 7C-3（P1-10）: 選んだ値の「描画位置」と「値の由来」を分けて言う           */
+/*                                                                            */
+/* 経路が DB（テーブル・カラム）まで届いていないとき、従来の見出し               */
+/* 「この値の出所 <描画位置> 実測」は、値の出所が実測で分かったように読めた。      */
+/* 描画位置が実測で分かっていても、値がどのカラムから来たかは別の問いである。      */
+/* 届いていないときだけ、この形で出す（届いている経路の表示は変えない）。          */
+/* ========================================================================== */
+
+export interface ValueOriginModel {
+  /** 選んだ値を画面に描いたコードの位置（renders の先のコンポーネント） */
+  render:
+    | { status: 'identified'; at: string; component: string; observability: Observability }
+    | { status: 'unidentified' };
+  /** どの段で切れたか（Cut.stage）。記録が段を持たなければ null */
+  stage: string | null;
+  /** 切れた理由（段の語を前置きしていれば外した本文） */
+  reason: string;
+}
+
+/**
+ * 値のノードから DB（テーブル・カラム）へ届いていない経路について、描画位置と切断を返す。
+ * 値のノードが無い、または DB まで届いている（推定を含む）なら null — 従来の経路サマリを出す。
+ */
+export function valueOrigin(ds: DS): ValueOriginModel | null {
+  const value = ds.nodes.find((n) => n.kind === 'value');
+  if (!value) return null;
+  const reach = reachableFrom(ds, value.id);
+  if (ds.nodes.some((n) => (n.kind === 'table' || n.kind === 'column') && reach.has(n.id))) return null;
+
+  const rendersHop = ds.hops.find((h) => h.relation === 'renders' && h.from === value.id);
+  const comp = rendersHop ? byIdIn(ds, rendersHop.to) : undefined;
+  const render: ValueOriginModel['render'] = comp && comp.kind === 'component'
+    ? {
+      status: 'identified',
+      at: comp.identifier,
+      component: comp.chipSub,
+      observability: rendersHop!.observability === 'measured' && comp.observability === 'measured' ? 'measured' : 'estimated',
+    }
+    : { status: 'unidentified' };
+
+  // 切断は、たどれたいちばん先（コンポーネント）から生えているものを優先する
+  const cut = (comp && ds.cuts.find((c) => c.from === comp.id))
+    ?? ds.cuts.find((c) => c.from === value.id)
+    ?? ds.cuts.find((c) => reach.has(c.from));
+  const stage = cut?.stage ?? null;
+  const reason = !cut
+    ? 'ここから先のつながりを観測していません'
+    : stage === CUT_STAGE.pending
+      ? 'この値がどこから来たかの評価が、まだ終わっていません（評価中か、評価できませんでした）'
+      : stage === CUT_STAGE.notEvaluated
+        ? 'この記録データは、値の由来を評価していない段階のものです'
+        : stage && cut.sub.startsWith(`${stage}: `) ? cut.sub.slice(stage.length + 2) : cut.sub;
+  return { render, stage, reason };
+}
+
 
 export const word = (o: Observability) => (o === 'measured' ? '実測' : '推定');
 

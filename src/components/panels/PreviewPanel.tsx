@@ -36,13 +36,33 @@ function Card({ no, region, plan, scale, date, b, children }: {
 }
 
 export default function PreviewPanel() {
-  const { data, selection, select, compact, setCompact, viewport } = useExplore();
+  const { data, selection, select, compact, setCompact, viewport, placeholder } = useExplore();
   const { runtime, liveSeen } = useRuntime();
   /*
    * Phase 7B-1: IDE が開発サーバーを扱っている間は、同じパネルの中身を実プレビューにする。
    * それ以外（プロジェクト未指定・この画面で起動を観測していない）は、以下の従来の表示のまま。
    */
   if (wantsLivePreview(runtime, liveSeen)) return <LivePreview />;
+  /*
+   * 7C-3（P1-9）: プロジェクトを開いていて、まだ開発サーバーのページが無いとき。
+   * 合成の見本サイト（別のアプリの物件一覧）は出さない
+   */
+  if (placeholder) {
+    return (
+      <FloatingPanel id="preview" title="プレビュー" note="現物"
+        style={{ left: PREVIEW_LEFT, top: 16, width: previewWidth(viewport.w) }}>
+        <div data-preview-state="project-empty" style={{ padding: '6px 4px 2px' }}>
+          <p className="pgnone">
+            開発サーバーを起動すると、ここにあなたのプロジェクトのページが表示されます。
+          </p>
+          <p className="pgnone" style={{ paddingTop: 0 }}>
+            ページが出たら［選択］を押し、調べたい値をクリックします。
+          </p>
+        </div>
+        <div className="pvfoot"><em>まだページを表示していません</em></div>
+      </FloatingPanel>
+    );
+  }
   /* 7C-2: 全体表示などで畳んだときは、見本の画面を隠して下の1行（何を選べるか・選んだか）だけ残す */
   const fold = {
     expanded: !compact.preview, onToggle: () => setCompact('preview', !compact.preview),

@@ -304,7 +304,9 @@ try {
     ok('右ドックに React コンポーネント', d.includes('RegionBadge'), d.slice(0, 400));
     ok('右ドックにソースファイルと行・列', d.includes(TRUTH.badge), d.slice(0, 600));
     ok('右ドックに特定方法', d.includes('要素自身の識別子') || d.includes('ビルド時に注入した要素識別子'));
-    ok('右ドックは値の由来を断定しない（ここから先はたどれていない）', d.includes('ここから先はたどれていません'), d.slice(0, 600));
+    /* 7C-3（P1-10）: 「ここから先はたどれていません」に代えて、描画位置（特定済み）と値の由来（未確認）を分けて言う */
+    ok('右ドックは値の由来を断定しない（描画位置は特定済み・値の由来は未確認・「この値の出所」と言わない）',
+      d.includes('特定済み') && d.includes('値の由来') && d.includes('未確認') && !d.includes('この値の出所'), d.slice(0, 600));
     ok('キャンバスは実ページの選択に差し替わる（① 表示された値 ② コンポーネント）',
       (await page.locator('g.nd[aria-label^="表示された値"]').count()) === 1 && (await page.locator('g.nd[aria-label^="コンポーネント"]').count()) === 1,
       await page.locator('g.nd').evaluateAll((els) => els.map((e) => e.getAttribute('aria-label'))));
@@ -488,8 +490,11 @@ try {
     await waitPv('stopped', 60000);
     await waitSel('cleared', 10000);
     ok('停止したら選択を解除し、そう書く', /選択を解除しました/.test(await pv().innerText()));
-    eq('停止したらキャンバスは元のデータセットに戻る（ノード数）', await page.locator('g.nd').count(), nodesBase);
-    eq('停止したらキャンバスの注記も元に戻る', await page.locator('.note.synth').innerText(), noticeBase);
+    /* 7C-3（P1-9）: 停止後は前の選択も、合成デモ（別のアプリ）も描かない。プロジェクトの状態を出す */
+    eq('停止したらキャンバスに経路を描かない（前の選択も合成デモも出さない）', await page.locator('g.nd').count(), 0);
+    eq('停止したらキャンバスの注記はプロジェクトの空の状態（合成デモの注記に戻さない）', await page.locator('.note.synth').getAttribute('data-notice'), 'project-empty');
+    ok('停止したら注記は合成デモのものではない', (await page.locator('.note.synth').innerText()) !== noticeBase);
+    eq('停止したらキャンバスと右ドックは「停止しています」の状態', await page.locator('.cv-empty').getAttribute('data-project-phase'), 'stopped');
     phase.negativeApi = true;
     const staleWhileStopped = await page.evaluate(async (run) => (await fetch('/api/runtime/anchor', { method: 'POST', headers: { 'content-type': 'application/json', 'x-vcide-request': '1' }, body: JSON.stringify({ run, selection: { tag: 'h1', anchorOnSelf: null, anchorOrdinal: null, anchorInstanceCount: 0, ancestorAnchors: [], textNodeIndex: null, valueShape: null, formControl: false, path: '/' } }) })).status, run1);
     eq('停止中は選択を解決しない（409）', staleWhileStopped, 409);
@@ -513,7 +518,7 @@ try {
     eq('理由は stale-run', stale.body.error?.code, 'stale-run');
     await sleep(300);
     phase.negativeApi = false;
-    eq('起動し直した後、キャンバスに古い選択が残っていない', await page.locator('g.nd').count(), nodesBase);
+    eq('起動し直した後、キャンバスに古い選択が残っていない（合成デモも描かない）', await page.locator('g.nd').count(), 0);
     // 選択モードを入れずにクリックしても選ばない（ページの操作として通る）
     const reqs = anchorBodies.length;
     await frame().locator('a[href="/listings"]').click();
@@ -532,9 +537,12 @@ try {
   }
 
   /* ============================================ 8. 既存の探索に戻れる */
-  console.log('\n8. 解除すると、合成・記録データの探索に戻る');
+  console.log('\n8. 解除すると経路の無い状態に戻る。合成デモは明示的に選べば探索できる（7C-3）');
   await pv().locator('.pvselrow .rt-b', { hasText: '解除' }).click();
-  eq('解除するとノード数が元に戻る', await page.locator('g.nd').count(), nodesBase);
+  eq('解除すると、実行中の「まだ経路がありません」に戻る（合成デモは描かない）', JSON.stringify([await page.locator('g.nd').count(), await page.locator('.cv-empty').getAttribute('data-project-phase')]), JSON.stringify([0, 'running']));
+  await page.locator('.cv-empty .pe-demo').click();
+  eq('［合成デモを見る］で元のデータセットを描ける（ノード数）', await page.locator('g.nd').count(), nodesBase);
+  ok('合成デモの間は、別のアプリの見本だと注記する', (await page.locator('.demo-banner').innerText()).includes('データではありません'));
   // キーボードの番号で選ぶ（03b 7章）。右上のパネルの大きさに左右されない操作で確かめる
   await page.keyboard.press('1');
   ok('元のデータセットのノードを選べる', (await page.locator('.nd.sel').count()) >= 1);

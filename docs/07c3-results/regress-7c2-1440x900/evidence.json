@@ -1,0 +1,2697 @@
+{
+ "base": "http://127.0.0.1:3100",
+ "viewport": "1440x900",
+ "startedAt": "2026-11-02T12:37:35.082Z",
+ "scenarios": [
+  {
+   "id": "K1",
+   "title": "IDE を初めて開く",
+   "steps": [
+    {
+     "k": "measure.open",
+     "v": {
+      "k": 0.544,
+      "chipFontPx": 6.5,
+      "nodes": 7,
+      "nodesHidden": 0,
+      "chips": 7,
+      "chipsHidden": 0,
+      "tags": 2,
+      "tagsHidden": 0,
+      "cuts": 1,
+      "cutsHidden": 0,
+      "hops": 7,
+      "hopsHidden": 0,
+      "estimatedHops": [
+       "応答のどの項目が、この値になったか（推定） 隠れ0%・外0%・破線あり",
+       "カラムと応答項目の対応づけ（推定） 隠れ0%・外0%・破線あり"
+      ],
+      "hiddenList": [],
+      "panels": [
+       "ページ 16,64 200×286",
+       "プレビュー 232,64 336×331 畳み:off",
+       "表示設定 16,534 236×196",
+       "全体 16,760 236×124",
+       "キャンバス操作 583,64 481×36",
+       "プロジェクトと実行 734,110 330×293",
+       "注記 766,857 298×29"
+      ]
+     }
+    },
+    {
+     "k": "overlap7c0.open",
+     "v": {
+      "nodes": 7,
+      "covered": 0,
+      "offscreen": 0,
+      "coveredList": []
+     }
+    },
+    {
+     "k": "measure.open.fit",
+     "v": {
+      "k": 0.534,
+      "chipFontPx": 6.4,
+      "nodes": 7,
+      "nodesHidden": 0,
+      "chips": 7,
+      "chipsHidden": 0,
+      "tags": 2,
+      "tagsHidden": 0,
+      "cuts": 1,
+      "cutsHidden": 0,
+      "hops": 7,
+      "hopsHidden": 0,
+      "estimatedHops": [
+       "応答のどの項目が、この値になったか（推定） 隠れ0%・外0%・破線あり",
+       "カラムと応答項目の対応づけ（推定） 隠れ0%・外0%・破線あり"
+      ],
+      "hiddenList": [],
+      "panels": [
+       "ページ 16,64 200×286",
+       "プレビュー 232,64 336×60 畳み:on",
+       "表示設定 16,534 236×196",
+       "全体 16,760 236×124",
+       "キャンバス操作 583,64 481×36",
+       "プロジェクトと実行 734,110 330×293",
+       "注記 766,857 298×29"
+      ]
+     }
+    },
+    {
+     "k": "overlap7c0.open.fit",
+     "v": {
+      "nodes": 7,
+      "covered": 0,
+      "offscreen": 0,
+      "coveredList": []
+     }
+    }
+   ],
+   "error": null
+  },
+  {
+   "id": "K2",
+   "title": "開発サーバーを起動する（実行中は「プロジェクトと実行」を1段に畳む）",
+   "steps": [
+    {
+     "k": "verdict",
+     "v": "supported"
+    },
+    {
+     "k": "start",
+     "v": {
+      "preview": "live",
+      "ms": 2261
+     }
+    },
+    {
+     "k": "runtimePanel.box",
+     "v": {
+      "x": 734,
+      "y": 110,
+      "width": 330,
+      "height": 95.71875
+     }
+    },
+    {
+     "k": "runtimePanel.text",
+     "v": "プロジェクトと実行\nPhase 7A\n詳細 ▾\n✕\n停止する\n実行中\nPID 4092\n:3000\n2150 ms\n\npoc01-fixture-app — 所見 3 件・計装・環境変数・出力は［詳細］で表示します"
+    }
+   ],
+   "error": null
+  },
+  {
+   "id": "K3",
+   "title": "プレビューでページを操作する",
+   "steps": [
+    {
+     "k": "404",
+     "v": {
+      "http": "404"
+     }
+    }
+   ],
+   "error": null
+  },
+  {
+   "id": "K4",
+   "title": "/lin-a の値を選び、DB カラムまで表示する",
+   "steps": [
+    {
+     "k": "pick",
+     "v": {
+      "selection": "resolved",
+      "at": "src/app/lin-a/page.tsx:18:11",
+      "reason": "",
+      "lineage": "linked",
+      "lineageReason": "",
+      "outcome": "confirmed",
+      "cands": "poc.listings.region",
+      "docSeq": "6"
+     }
+    },
+    {
+     "k": "measure.selecting",
+     "v": {
+      "k": 0.427,
+      "chipFontPx": 5.1,
+      "nodes": 9,
+      "nodesHidden": 0,
+      "chips": 9,
+      "chipsHidden": 0,
+      "tags": 1,
+      "tagsHidden": 0,
+      "cuts": 1,
+      "cutsHidden": 0,
+      "hops": 8,
+      "hopsHidden": 0,
+      "estimatedHops": [
+       "この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"
+      ],
+      "hiddenList": [],
+      "panels": [
+       "ページ 16,64 200×150",
+       "プレビュー 232,64 336×622 畳み:off",
+       "表示設定 16,534 236×196",
+       "全体 16,760 236×124",
+       "キャンバス操作 583,64 481×36",
+       "プロジェクトと実行 734,110 330×96 畳み:on",
+       "注記 333,857 731×29"
+      ]
+     }
+    },
+    {
+     "k": "overlap7c0.selecting",
+     "v": {
+      "nodes": 9,
+      "covered": 0,
+      "offscreen": 0,
+      "coveredList": []
+     }
+    },
+    {
+     "k": "measure.explore",
+     "v": {
+      "k": 0.716,
+      "chipFontPx": 8.6,
+      "nodes": 9,
+      "nodesHidden": 0,
+      "chips": 9,
+      "chipsHidden": 0,
+      "tags": 1,
+      "tagsHidden": 0,
+      "cuts": 1,
+      "cutsHidden": 0,
+      "hops": 8,
+      "hopsHidden": 0,
+      "estimatedHops": [
+       "この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"
+      ],
+      "hiddenList": [],
+      "panels": [
+       "ページ 16,64 200×150",
+       "プレビュー 232,64 336×229 畳み:on",
+       "表示設定 16,534 236×196",
+       "全体 16,760 236×124",
+       "キャンバス操作 583,64 481×36",
+       "プロジェクトと実行 734,110 330×96 畳み:on",
+       "注記 333,857 731×29"
+      ]
+     }
+    },
+    {
+     "k": "overlap7c0.explore",
+     "v": {
+      "nodes": 9,
+      "covered": 0,
+      "offscreen": 0,
+      "coveredList": []
+     }
+    },
+    {
+     "k": "showBound",
+     "v": {
+      "shown": "6",
+      "withSel": "on"
+     }
+    },
+    {
+     "k": "measure.explore.withObs",
+     "v": {
+      "k": 0.716,
+      "chipFontPx": 8.6,
+      "nodes": 9,
+      "nodesHidden": 0,
+      "chips": 9,
+      "chipsHidden": 0,
+      "tags": 1,
+      "tagsHidden": 0,
+      "cuts": 1,
+      "cutsHidden": 0,
+      "hops": 8,
+      "hopsHidden": 0,
+      "estimatedHops": [
+       "この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"
+      ],
+      "hiddenList": [],
+      "panels": [
+       "ページ 16,64 200×150",
+       "プレビュー 232,64 336×229 畳み:on",
+       "表示設定 16,534 236×196",
+       "全体 16,760 236×124",
+       "キャンバス操作 583,64 481×36",
+       "プロジェクトと実行 734,110 330×96 畳み:on",
+       "注記 333,857 731×29"
+      ]
+     }
+    },
+    {
+     "k": "overlap7c0.explore.withObs",
+     "v": {
+      "nodes": 9,
+      "covered": 0,
+      "offscreen": 0,
+      "coveredList": []
+     }
+    },
+    {
+     "k": "previewPanel.text",
+     "v": "プレビュー\n開発サーバー\nページを表示 ▾\n✕\n↻\n移動\n選択\n\n選択: <li> → LinA src/app/lin-a/page.tsx:18:11 （同じ JSX の要素 3 個のうち 1 番目。どの使用箇所かは区別していません）\n\n解除\n\n文書: 通信 #6 の応答と同定。由来（静的解析による推定）: poc.listings.region\n\n観測（いまの起動）: 通信 6 件・SQL 5 本（実行した呼び出し位置を特定 3 本）\n\n#6 GET /lin-a — 200 / SQL 1 / 位置 1\n#5 GET /no-such-page — 404 / SQL 0\n#4 GET /lin-a — 200 / SQL 1 / 位置 1\n#3 GET /lin-a — 200 / SQL 1 / 位置 1\n#2 GET /api/stats — 200 / SQL 2 / 位置 0\n#1 GET / — 200 / SQL 0\n表示\n解除\n\n選択した要素と、それを描いた文書の通信 #6 を並べています。値の由来は静的解析による推定で結んでいます（実行時に値を観測したものではありません）。\n\nHTTP 200\n/lin-a"
+    }
+   ],
+   "error": null
+  },
+  {
+   "id": "K5",
+   "title": "推定の接続線と最弱環を確かめる（キャンバスと右ドック）",
+   "steps": [
+    {
+     "k": "measure.estimate",
+     "v": {
+      "k": 0.716,
+      "chipFontPx": 8.6,
+      "nodes": 9,
+      "nodesHidden": 0,
+      "chips": 9,
+      "chipsHidden": 0,
+      "tags": 1,
+      "tagsHidden": 0,
+      "cuts": 1,
+      "cutsHidden": 0,
+      "hops": 8,
+      "hopsHidden": 0,
+      "estimatedHops": [
+       "この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"
+      ],
+      "hiddenList": [],
+      "panels": [
+       "ページ 16,64 200×150",
+       "プレビュー 232,64 336×229 畳み:on",
+       "表示設定 16,534 236×196",
+       "全体 16,760 236×124",
+       "キャンバス操作 583,64 481×36",
+       "プロジェクトと実行 734,110 330×96 畳み:on",
+       "注記 333,857 731×29"
+      ]
+     }
+    },
+    {
+     "k": "overlap7c0.estimate",
+     "v": {
+      "nodes": 9,
+      "covered": 0,
+      "offscreen": 0,
+      "coveredList": []
+     }
+    },
+    {
+     "k": "weakestOnCanvas",
+     "v": {
+      "starTags": 0,
+      "note": "実ページの経路では ★ の印をキャンバスに付けていない（7B-3B-2 からの仕様。右ドックの ★ と［ここを見る］で示す）"
+     }
+    },
+    {
+     "k": "measure.dock.lookHere",
+     "v": {
+      "k": 0.716,
+      "chipFontPx": 8.6,
+      "nodes": 9,
+      "nodesHidden": 0,
+      "chips": 9,
+      "chipsHidden": 0,
+      "tags": 1,
+      "tagsHidden": 0,
+      "cuts": 1,
+      "cutsHidden": 0,
+      "hops": 8,
+      "hopsHidden": 0,
+      "estimatedHops": [
+       "この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"
+      ],
+      "hiddenList": [],
+      "panels": [
+       "ページ 16,64 200×150",
+       "プレビュー 232,64 336×229 畳み:on",
+       "表示設定 16,534 236×196",
+       "全体 16,760 236×124",
+       "キャンバス操作 583,64 481×36",
+       "プロジェクトと実行 734,110 330×96 畳み:on",
+       "注記 333,857 731×29"
+      ]
+     }
+    },
+    {
+     "k": "overlap7c0.dock.lookHere",
+     "v": {
+      "nodes": 9,
+      "covered": 0,
+      "offscreen": 0,
+      "coveredList": []
+     }
+    },
+    {
+     "k": "measure.dock.badge6",
+     "v": {
+      "k": 0.716,
+      "chipFontPx": 8.6,
+      "nodes": 9,
+      "nodesHidden": 0,
+      "chips": 9,
+      "chipsHidden": 0,
+      "tags": 1,
+      "tagsHidden": 0,
+      "cuts": 1,
+      "cutsHidden": 0,
+      "hops": 8,
+      "hopsHidden": 0,
+      "estimatedHops": [
+       "この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"
+      ],
+      "hiddenList": [],
+      "panels": [
+       "ページ 16,64 200×150",
+       "プレビュー 232,64 336×229 畳み:on",
+       "表示設定 16,534 236×196",
+       "全体 16,760 236×124",
+       "キャンバス操作 583,64 481×36",
+       "プロジェクトと実行 734,110 330×96 畳み:on",
+       "注記 333,857 731×29"
+      ]
+     }
+    },
+    {
+     "k": "overlap7c0.dock.badge6",
+     "v": {
+      "nodes": 9,
+      "covered": 0,
+      "offscreen": 0,
+      "coveredList": []
+     }
+    }
+   ],
+   "error": null
+  },
+  {
+   "id": "K6",
+   "title": "［全体表示］を押す",
+   "steps": [
+    {
+     "k": "measure.fit.folded",
+     "v": {
+      "k": 0.604,
+      "chipFontPx": 7.2,
+      "nodes": 9,
+      "nodesHidden": 0,
+      "chips": 9,
+      "chipsHidden": 0,
+      "tags": 1,
+      "tagsHidden": 0,
+      "cuts": 1,
+      "cutsHidden": 0,
+      "hops": 8,
+      "hopsHidden": 0,
+      "estimatedHops": [
+       "この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"
+      ],
+      "hiddenList": [],
+      "panels": [
+       "ページ 16,64 200×150",
+       "プレビュー 232,64 336×229 畳み:on",
+       "表示設定 16,534 236×196",
+       "全体 16,760 236×124",
+       "キャンバス操作 583,64 481×36",
+       "プロジェクトと実行 734,110 330×96 畳み:on",
+       "注記 333,857 731×29"
+      ]
+     }
+    },
+    {
+     "k": "overlap7c0.fit.folded",
+     "v": {
+      "nodes": 9,
+      "covered": 0,
+      "offscreen": 0,
+      "coveredList": []
+     }
+    },
+    {
+     "k": "measure.expanded.both",
+     "v": {
+      "k": 0.35,
+      "chipFontPx": 4.2,
+      "nodes": 9,
+      "nodesHidden": 2,
+      "chips": 9,
+      "chipsHidden": 3,
+      "tags": 1,
+      "tagsHidden": 0,
+      "cuts": 1,
+      "cutsHidden": 1,
+      "hops": 8,
+      "hopsHidden": 1,
+      "estimatedHops": [
+       "この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"
+      ],
+      "hiddenList": [
+       "表示された値 <li> のテキスト #0 ←  外66%",
+       "テーブル poc.listings ← プレビュー:100%",
+       "札 1: 表示された値<li> ←  外100%",
+       "札 6: 実行SQL ← プレビュー:83%",
+       "札 7: テーブルlistings ← プレビュー:100%",
+       "切断: ここより上流は結んでいませんこの通信を起こしたコード・表示された値 ←  外89%",
+       "線 そのSQLが読んだテーブル（実測） 隠れ64% 外0% ← プレビュー"
+      ],
+      "panels": [
+       "ページ 16,64 200×150",
+       "プレビュー 232,64 336×622 畳み:off",
+       "表示設定 16,534 236×196",
+       "全体 16,760 236×124",
+       "キャンバス操作 583,64 481×36",
+       "プロジェクトと実行 734,110 330×762 畳み:off",
+       "注記 333,857 731×29"
+      ]
+     }
+    },
+    {
+     "k": "overlap7c0.expanded.both",
+     "v": {
+      "nodes": 9,
+      "covered": 1,
+      "offscreen": 0,
+      "coveredList": [
+       "テーブル poc.listings ← プレビュー:100%"
+      ]
+     }
+    },
+    {
+     "k": "measure.fit.fromExpanded",
+     "v": {
+      "k": 0.604,
+      "chipFontPx": 7.2,
+      "nodes": 9,
+      "nodesHidden": 0,
+      "chips": 9,
+      "chipsHidden": 0,
+      "tags": 1,
+      "tagsHidden": 0,
+      "cuts": 1,
+      "cutsHidden": 0,
+      "hops": 8,
+      "hopsHidden": 0,
+      "estimatedHops": [
+       "この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"
+      ],
+      "hiddenList": [],
+      "panels": [
+       "ページ 16,64 200×150",
+       "プレビュー 232,64 336×229 畳み:on",
+       "表示設定 16,534 236×196",
+       "全体 16,760 236×124",
+       "キャンバス操作 583,64 481×36",
+       "プロジェクトと実行 734,110 330×96 畳み:on",
+       "注記 333,857 731×29"
+      ]
+     }
+    },
+    {
+     "k": "overlap7c0.fit.fromExpanded",
+     "v": {
+      "nodes": 9,
+      "covered": 0,
+      "offscreen": 0,
+      "coveredList": []
+     }
+    }
+   ],
+   "error": null
+  },
+  {
+   "id": "K7",
+   "title": "特定不能な要素・由来が切れる要素を選ぶ",
+   "steps": [
+    {
+     "k": "pick g-shadow",
+     "v": {
+      "selection": "resolved",
+      "at": "src/app/lin-g/page.tsx:28:7",
+      "reason": "",
+      "lineage": "cut",
+      "lineageReason": "no-reference",
+      "outcome": "",
+      "cands": "",
+      "docSeq": "7"
+     }
+    },
+    {
+     "k": "measure.cut",
+     "v": {
+      "k": 1.104,
+      "chipFontPx": 13.3,
+      "nodes": 2,
+      "nodesHidden": 0,
+      "chips": 2,
+      "chipsHidden": 0,
+      "tags": 0,
+      "tagsHidden": 0,
+      "cuts": 1,
+      "cutsHidden": 0,
+      "hops": 1,
+      "hopsHidden": 0,
+      "estimatedHops": [],
+      "hiddenList": [],
+      "panels": [
+       "ページ 16,64 200×150",
+       "プレビュー 232,64 336×207 畳み:on",
+       "表示設定 16,534 236×196",
+       "全体 16,760 236×124",
+       "キャンバス操作 583,64 481×36",
+       "プロジェクトと実行 734,110 330×96 畳み:on",
+       "注記 599,857 465×29"
+      ]
+     }
+    },
+    {
+     "k": "overlap7c0.cut",
+     "v": {
+      "nodes": 2,
+      "covered": 0,
+      "offscreen": 0,
+      "coveredList": []
+     }
+    },
+    {
+     "k": "dock",
+     "v": "詳細\n経路\n固定\n選んだ値 — 描画位置と値の由来\n描画位置\n特定済み\n実測\nsrc/app/lin-g/page.tsx:28\nLinG\n値の由来\n未確認\nDB のどのテーブル・カラムから来たかは、まだ分かっていません\n切れた段階\n静的解析\n理由\n静的解析で、この値からデータ取得の結果への参照の連鎖を解けません（定数・追えない関数・条件の判定など）（固定値の経路 1 本）\n\n3 か所のうち 0 か所が推定です。「実測」は描画位置までの話で、値の出所（DB）が実測で分かったという意味ではありません。\n\n描画位置＝この値を画面に描いたコードの場所。値の由来＝その値が DB のどのカラムから来たか。 未確認＝調べたが、根拠をもって結べなかった（推測では埋めません）。\n\n概要\n根拠\n経路のステップ（2）\n1\n表示された値\n<p> のテキスト #0\n実測\nこの値を描いたコンポーネント\n2\nコンポーネント\nsrc/app/lin-g/page.tsx:28\n実測\n取得手段\nビルド時に注入した要素識別子\n定義\nsrc/app/lin-g/page.tsx:28\n位置（行・列）\n28 行 7 列 — src/app/lin-g/page.tsx:28:7\nJSX\n<p data-poc-field=\"g-shadow\">{region}</p>\nコンポーネント\nLinG（src/app/lin-"
+    },
+    {
+     "k": "pick vendor",
+     "v": {
+      "selection": "unresolved",
+      "at": "",
+      "reason": "anchor-missing",
+      "lineage": "",
+      "lineageReason": "",
+      "outcome": "",
+      "cands": "",
+      "docSeq": ""
+     }
+    },
+    {
+     "k": "measure.unresolved",
+     "v": {
+      "k": 1.25,
+      "chipFontPx": 15,
+      "nodes": 1,
+      "nodesHidden": 0,
+      "chips": 1,
+      "chipsHidden": 0,
+      "tags": 0,
+      "tagsHidden": 0,
+      "cuts": 1,
+      "cutsHidden": 0,
+      "hops": 0,
+      "hopsHidden": 0,
+      "estimatedHops": [],
+      "hiddenList": [],
+      "panels": [
+       "ページ 16,64 200×150",
+       "プレビュー 232,64 336×188 畳み:on",
+       "表示設定 16,534 236×196",
+       "全体 16,760 236×124",
+       "キャンバス操作 583,64 481×36",
+       "プロジェクトと実行 734,110 330×96 畳み:on",
+       "注記 599,857 465×29"
+      ]
+     }
+    },
+    {
+     "k": "overlap7c0.unresolved",
+     "v": {
+      "nodes": 1,
+      "covered": 0,
+      "offscreen": 0,
+      "coveredList": []
+     }
+    }
+   ],
+   "error": null
+  },
+  {
+   "id": "K8",
+   "title": "実行パネルとプレビューを展開・収納する（マウスとキーボード）",
+   "steps": [
+    {
+     "k": "measure.k8.base",
+     "v": {
+      "k": 0.716,
+      "chipFontPx": 8.6,
+      "nodes": 9,
+      "nodesHidden": 0,
+      "chips": 9,
+      "chipsHidden": 0,
+      "tags": 1,
+      "tagsHidden": 0,
+      "cuts": 1,
+      "cutsHidden": 0,
+      "hops": 8,
+      "hopsHidden": 0,
+      "estimatedHops": [
+       "この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"
+      ],
+      "hiddenList": [],
+      "panels": [
+       "ページ 16,64 200×150",
+       "プレビュー 232,64 336×229 畳み:on",
+       "表示設定 16,534 236×196",
+       "全体 16,760 236×124",
+       "キャンバス操作 583,64 481×36",
+       "プロジェクトと実行 734,110 330×96 畳み:on",
+       "注記 333,857 731×29"
+      ]
+     }
+    },
+    {
+     "k": "overlap7c0.k8.base",
+     "v": {
+      "nodes": 9,
+      "covered": 0,
+      "offscreen": 0,
+      "coveredList": []
+     }
+    },
+    {
+     "k": "keep.before",
+     "v": {
+      "selection": "resolved",
+      "at": "src/app/lin-a/page.tsx:18:11",
+      "lineage": "linked",
+      "docSeq": "10",
+      "loads": "8",
+      "conn": "8",
+      "obsShown": "10",
+      "session": "2026-11-02T12:37:40.515Z",
+      "nodes": 9
+     }
+    },
+    {
+     "k": "tabs to preview fold",
+     "v": 11
+    },
+    {
+     "k": "measure.pv.expanded",
+     "v": {
+      "k": 0.427,
+      "chipFontPx": 5.1,
+      "nodes": 9,
+      "nodesHidden": 0,
+      "chips": 9,
+      "chipsHidden": 0,
+      "tags": 1,
+      "tagsHidden": 0,
+      "cuts": 1,
+      "cutsHidden": 0,
+      "hops": 8,
+      "hopsHidden": 0,
+      "estimatedHops": [
+       "この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"
+      ],
+      "hiddenList": [],
+      "panels": [
+       "ページ 16,64 200×150",
+       "プレビュー 232,64 336×622 畳み:off",
+       "表示設定 16,534 236×196",
+       "全体 16,760 236×124",
+       "キャンバス操作 583,64 481×36",
+       "プロジェクトと実行 734,110 330×96 畳み:on",
+       "注記 333,857 731×29"
+      ]
+     }
+    },
+    {
+     "k": "overlap7c0.pv.expanded",
+     "v": {
+      "nodes": 9,
+      "covered": 0,
+      "offscreen": 0,
+      "coveredList": []
+     }
+    },
+    {
+     "k": "measure.pv.refolded",
+     "v": {
+      "k": 0.716,
+      "chipFontPx": 8.6,
+      "nodes": 9,
+      "nodesHidden": 0,
+      "chips": 9,
+      "chipsHidden": 0,
+      "tags": 1,
+      "tagsHidden": 0,
+      "cuts": 1,
+      "cutsHidden": 0,
+      "hops": 8,
+      "hopsHidden": 0,
+      "estimatedHops": [
+       "この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"
+      ],
+      "hiddenList": [],
+      "panels": [
+       "ページ 16,64 200×150",
+       "プレビュー 232,64 336×229 畳み:on",
+       "表示設定 16,534 236×196",
+       "全体 16,760 236×124",
+       "キャンバス操作 583,64 481×36",
+       "プロジェクトと実行 734,110 330×96 畳み:on",
+       "注記 333,857 731×29"
+      ]
+     }
+    },
+    {
+     "k": "overlap7c0.pv.refolded",
+     "v": {
+      "nodes": 9,
+      "covered": 0,
+      "offscreen": 0,
+      "coveredList": []
+     }
+    },
+    {
+     "k": "tabs to runtime fold",
+     "v": 32
+    },
+    {
+     "k": "measure.rt.expanded",
+     "v": {
+      "k": 0.411,
+      "chipFontPx": 4.9,
+      "nodes": 9,
+      "nodesHidden": 0,
+      "chips": 9,
+      "chipsHidden": 0,
+      "tags": 1,
+      "tagsHidden": 0,
+      "cuts": 1,
+      "cutsHidden": 0,
+      "hops": 8,
+      "hopsHidden": 0,
+      "estimatedHops": [
+       "この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"
+      ],
+      "hiddenList": [],
+      "panels": [
+       "ページ 16,64 200×150",
+       "プレビュー 232,64 336×229 畳み:on",
+       "表示設定 16,534 236×196",
+       "全体 16,760 236×124",
+       "キャンバス操作 583,64 481×36",
+       "プロジェクトと実行 734,110 330×762 畳み:off",
+       "注記 333,857 731×29"
+      ]
+     }
+    },
+    {
+     "k": "overlap7c0.rt.expanded",
+     "v": {
+      "nodes": 9,
+      "covered": 0,
+      "offscreen": 0,
+      "coveredList": []
+     }
+    },
+    {
+     "k": "measure.rt.reopened",
+     "v": {
+      "k": 0.716,
+      "chipFontPx": 8.6,
+      "nodes": 9,
+      "nodesHidden": 0,
+      "chips": 9,
+      "chipsHidden": 0,
+      "tags": 1,
+      "tagsHidden": 0,
+      "cuts": 1,
+      "cutsHidden": 0,
+      "hops": 8,
+      "hopsHidden": 0,
+      "estimatedHops": [
+       "この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"
+      ],
+      "hiddenList": [],
+      "panels": [
+       "ページ 16,64 200×150",
+       "プレビュー 232,64 336×229 畳み:on",
+       "表示設定 16,534 236×196",
+       "全体 16,760 236×124",
+       "キャンバス操作 583,64 481×36",
+       "プロジェクトと実行 734,110 330×96 畳み:on",
+       "注記 333,857 731×29"
+      ]
+     }
+    },
+    {
+     "k": "overlap7c0.rt.reopened",
+     "v": {
+      "nodes": 9,
+      "covered": 0,
+      "offscreen": 0,
+      "coveredList": []
+     }
+    },
+    {
+     "k": "measure.leftClosed",
+     "v": {
+      "k": 0.794,
+      "chipFontPx": 9.5,
+      "nodes": 9,
+      "nodesHidden": 0,
+      "chips": 9,
+      "chipsHidden": 0,
+      "tags": 1,
+      "tagsHidden": 0,
+      "cuts": 1,
+      "cutsHidden": 0,
+      "hops": 8,
+      "hopsHidden": 0,
+      "estimatedHops": [
+       "この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"
+      ],
+      "hiddenList": [],
+      "panels": [
+       "プレビュー 232,64 336×229 畳み:on",
+       "キャンバス操作 583,64 481×36",
+       "プロジェクトと実行 734,110 330×96 畳み:on",
+       "注記 333,857 731×29"
+      ]
+     }
+    },
+    {
+     "k": "overlap7c0.leftClosed",
+     "v": {
+      "nodes": 9,
+      "covered": 0,
+      "offscreen": 0,
+      "coveredList": []
+     }
+    },
+    {
+     "k": "measure.leftReopened",
+     "v": {
+      "k": 0.716,
+      "chipFontPx": 8.6,
+      "nodes": 9,
+      "nodesHidden": 0,
+      "chips": 9,
+      "chipsHidden": 0,
+      "tags": 1,
+      "tagsHidden": 0,
+      "cuts": 1,
+      "cutsHidden": 0,
+      "hops": 8,
+      "hopsHidden": 0,
+      "estimatedHops": [
+       "この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"
+      ],
+      "hiddenList": [],
+      "panels": [
+       "ページ 16,64 200×150",
+       "プレビュー 232,64 336×229 畳み:on",
+       "表示設定 16,534 236×196",
+       "全体 16,760 236×124",
+       "キャンバス操作 583,64 481×36",
+       "プロジェクトと実行 734,110 330×96 畳み:on",
+       "注記 333,857 731×29"
+      ]
+     }
+    },
+    {
+     "k": "overlap7c0.leftReopened",
+     "v": {
+      "nodes": 9,
+      "covered": 0,
+      "offscreen": 0,
+      "coveredList": []
+     }
+    },
+    {
+     "k": "repick",
+     "v": {
+      "selection": "resolved",
+      "at": "src/app/lin-a/page.tsx:18:11",
+      "reason": "",
+      "lineage": "linked",
+      "lineageReason": "",
+      "outcome": "confirmed",
+      "cands": "poc.listings.region",
+      "docSeq": "10"
+     }
+    },
+    {
+     "k": "measure.repick.explore",
+     "v": {
+      "k": 0.716,
+      "chipFontPx": 8.6,
+      "nodes": 9,
+      "nodesHidden": 0,
+      "chips": 9,
+      "chipsHidden": 0,
+      "tags": 1,
+      "tagsHidden": 0,
+      "cuts": 1,
+      "cutsHidden": 0,
+      "hops": 8,
+      "hopsHidden": 0,
+      "estimatedHops": [
+       "この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"
+      ],
+      "hiddenList": [],
+      "panels": [
+       "ページ 16,64 200×150",
+       "プレビュー 232,64 336×229 畳み:on",
+       "表示設定 16,534 236×196",
+       "全体 16,760 236×124",
+       "キャンバス操作 583,64 481×36",
+       "プロジェクトと実行 734,110 330×96 畳み:on",
+       "注記 333,857 731×29"
+      ]
+     }
+    },
+    {
+     "k": "overlap7c0.repick.explore",
+     "v": {
+      "nodes": 9,
+      "covered": 0,
+      "offscreen": 0,
+      "coveredList": []
+     }
+    }
+   ],
+   "error": null
+  },
+  {
+   "id": "K9",
+   "title": "停止・再起動する",
+   "steps": [
+    {
+     "k": "stop",
+     "v": {
+      "ms": 224,
+      "preview": "stopped",
+      "selection": "cleared"
+     }
+    },
+    {
+     "k": "measure.stopped",
+     "v": {
+      "k": 1.25,
+      "chipFontPx": 15,
+      "nodes": 0,
+      "nodesHidden": 0,
+      "chips": 0,
+      "chipsHidden": 0,
+      "tags": 0,
+      "tagsHidden": 0,
+      "cuts": 0,
+      "cutsHidden": 0,
+      "hops": 0,
+      "hopsHidden": 0,
+      "estimatedHops": [],
+      "hiddenList": [],
+      "panels": [
+       "ページ 16,64 200×145",
+       "プレビュー 232,64 336×464",
+       "表示設定 16,534 236×196",
+       "全体 16,823 236×61",
+       "キャンバス操作 583,64 481×36",
+       "プロジェクトと実行 734,110 330×762",
+       "注記 817,857 247×29"
+      ]
+     }
+    },
+    {
+     "k": "overlap7c0.stopped",
+     "v": {
+      "nodes": 0,
+      "covered": 0,
+      "offscreen": 0,
+      "coveredList": []
+     }
+    },
+    {
+     "k": "restart",
+     "v": {
+      "preview": "live",
+      "ms": 2470
+     }
+    },
+    {
+     "k": "measure.restart.explore",
+     "v": {
+      "k": 0.716,
+      "chipFontPx": 8.6,
+      "nodes": 9,
+      "nodesHidden": 0,
+      "chips": 9,
+      "chipsHidden": 0,
+      "tags": 1,
+      "tagsHidden": 0,
+      "cuts": 1,
+      "cutsHidden": 0,
+      "hops": 8,
+      "hopsHidden": 0,
+      "estimatedHops": [
+       "この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"
+      ],
+      "hiddenList": [],
+      "panels": [
+       "ページ 16,64 200×150",
+       "プレビュー 232,64 336×229 畳み:on",
+       "表示設定 16,534 236×196",
+       "全体 16,760 236×124",
+       "キャンバス操作 583,64 481×36",
+       "プロジェクトと実行 734,110 330×96 畳み:on",
+       "注記 332,857 732×29"
+      ]
+     }
+    },
+    {
+     "k": "overlap7c0.restart.explore",
+     "v": {
+      "nodes": 9,
+      "covered": 0,
+      "offscreen": 0,
+      "coveredList": []
+     }
+    }
+   ],
+   "error": null
+  }
+ ],
+ "checks": [
+  {
+   "scenario": "K1",
+   "id": "open.fit.nodes",
+   "name": "open.fit: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）",
+   "ok": true,
+   "got": {
+    "o": [],
+    "s": []
+   }
+  },
+  {
+   "scenario": "K1",
+   "id": "open.fit.all",
+   "name": "open.fit: 札・推定の印・切断の印・接続線も隠れていない",
+   "ok": true,
+   "got": []
+  },
+  {
+   "scenario": "K2",
+   "id": "run.compact",
+   "name": "実行中は「プロジェクトと実行」が畳まれる",
+   "ok": true,
+   "got": "on"
+  },
+  {
+   "scenario": "K2",
+   "id": "run.height",
+   "name": "畳んだ「プロジェクトと実行」の高さが 110px 以下",
+   "ok": true,
+   "got": {
+    "x": 734,
+    "y": 110,
+    "width": 330,
+    "height": 95.71875
+   }
+  },
+  {
+   "scenario": "K2",
+   "id": "run.stopVisible",
+   "name": "畳んでも［停止する］が見えて押せる",
+   "ok": true,
+   "got": null
+  },
+  {
+   "scenario": "K3",
+   "id": "pv.expanded",
+   "name": "ページを操作している間、プレビューは広がっている",
+   "ok": true,
+   "got": "off"
+  },
+  {
+   "scenario": "K4",
+   "id": "pick.linked",
+   "name": "/lin-a の値が DB カラムまで結ばれる",
+   "ok": true,
+   "got": {
+    "selection": "resolved",
+    "at": "src/app/lin-a/page.tsx:18:11",
+    "reason": "",
+    "lineage": "linked",
+    "lineageReason": "",
+    "outcome": "confirmed",
+    "cands": "poc.listings.region",
+    "docSeq": "6"
+   }
+  },
+  {
+   "scenario": "K4",
+   "id": "pick.expandedWhileSelecting",
+   "name": "選択モードの間は、プレビューは広がったまま（選び直せる）",
+   "ok": true,
+   "got": "off"
+  },
+  {
+   "scenario": "K4",
+   "id": "pick.folded",
+   "name": "選択モードを抜けると、プレビューのページ表示が畳まれる",
+   "ok": true,
+   "got": "on"
+  },
+  {
+   "scenario": "K4",
+   "id": "pick.selKept",
+   "name": "畳んでも選択の行は残る",
+   "ok": true,
+   "got": "resolved"
+  },
+  {
+   "scenario": "K4",
+   "id": "explore.nodes",
+   "name": "explore: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）",
+   "ok": true,
+   "got": {
+    "o": [],
+    "s": []
+   }
+  },
+  {
+   "scenario": "K4",
+   "id": "explore.all",
+   "name": "explore: 札・推定の印・切断の印・接続線も隠れていない",
+   "ok": true,
+   "got": []
+  },
+  {
+   "scenario": "K4",
+   "id": "toolbar.noCover",
+   "name": "右上の操作バーが、パネルのボタン（畳む・閉じる等）を覆っていない",
+   "ok": true,
+   "got": []
+  },
+  {
+   "scenario": "K4",
+   "id": "explore.withObs.nodes",
+   "name": "explore.withObs: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）",
+   "ok": true,
+   "got": {
+    "o": [],
+    "s": []
+   }
+  },
+  {
+   "scenario": "K4",
+   "id": "explore.withObs.all",
+   "name": "explore.withObs: 札・推定の印・切断の印・接続線も隠れていない",
+   "ok": true,
+   "got": []
+  },
+  {
+   "scenario": "K5",
+   "id": "estimate.nodes",
+   "name": "estimate: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）",
+   "ok": true,
+   "got": {
+    "o": [],
+    "s": []
+   }
+  },
+  {
+   "scenario": "K5",
+   "id": "estimate.all",
+   "name": "estimate: 札・推定の印・切断の印・接続線も隠れていない",
+   "ok": true,
+   "got": []
+  },
+  {
+   "scenario": "K5",
+   "id": "est.lines",
+   "name": "推定の接続線がある・破線で描かれ・隠れていない",
+   "ok": true,
+   "got": [
+    {
+     "label": "この表示値の由来（取得結果のどの項目か）（推定）",
+     "estimated": true,
+     "dashed": true,
+     "hiddenPct": 0,
+     "outsidePct": 0,
+     "by": []
+    }
+   ]
+  },
+  {
+   "scenario": "K5",
+   "id": "est.tag",
+   "name": "推定の接続線に添えた「推定」の印がキャンバスで見える",
+   "ok": true,
+   "got": [
+    {
+     "label": "estimate: 由来は静的解析による推定推定",
+     "rect": {
+      "x": 514,
+      "y": 639,
+      "w": 87,
+      "h": 27
+     },
+     "coveredBy": [],
+     "outside": 0
+    }
+   ]
+  },
+  {
+   "scenario": "K5",
+   "id": "est.font",
+   "name": "ラベル札の文字が 9px 以上（12px × 倍率）",
+   "ok": false,
+   "got": 8.6
+  },
+  {
+   "scenario": "K5",
+   "id": "dock.weakest",
+   "name": "右ドックに ★ いちばん弱いところ と推定の説明",
+   "ok": true,
+   "got": "詳細\n経路\n固定\nこの値の出所\npoc.listings . region\n推定\n\n17 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。\n\n実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。\n\n概要\n根拠\n★\nいちばん弱いところ\n②→⑤この表示値の由来（取得結果のどの項目か）\n\n取得結果のどの項目がこの表示値になったかは、ソースの静的解析による推定です。実行時に観測したものではありません（表示された値も、取得した行も読んでいません）。文書・呼び出し位置・SQL は実測ですが、それで推定が実測に変わることはありません。推定の状"
+  },
+  {
+   "scenario": "K5",
+   "id": "dock.lookHere.nodes",
+   "name": "dock.lookHere: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）",
+   "ok": true,
+   "got": {
+    "o": [],
+    "s": []
+   }
+  },
+  {
+   "scenario": "K5",
+   "id": "dock.lookHere.all",
+   "name": "dock.lookHere: 札・推定の印・切断の印・接続線も隠れていない",
+   "ok": true,
+   "got": []
+  },
+  {
+   "scenario": "K5",
+   "id": "dock.lookHere",
+   "name": "右ドックの［ここを見る］で最弱環のホップを選ぶ（右ドックがホップの説明に変わり、経路は隠れない）",
+   "ok": true,
+   "got": {
+    "hidden": [],
+    "dock": "詳細\n経路\n固定\nこの値の出所\npoc.listings . region\n推定\n\n17 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。\n\n実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。\n\n概要\n根拠\n★\nいちばん弱いところ\n②→⑤この表示値の由来（取得結果のどの項目か）\n\n取得結果のどの項目がこの表示値になったかは、ソース"
+   }
+  },
+  {
+   "scenario": "K5",
+   "id": "dock.badge",
+   "name": "番号キー 6 でステップを選ぶと右ドックが追従する",
+   "ok": true,
+   "got": null
+  },
+  {
+   "scenario": "K5",
+   "id": "dock.badge6.nodes",
+   "name": "dock.badge6: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）",
+   "ok": true,
+   "got": {
+    "o": [],
+    "s": []
+   }
+  },
+  {
+   "scenario": "K5",
+   "id": "dock.badge6.all",
+   "name": "dock.badge6: 札・推定の印・切断の印・接続線も隠れていない",
+   "ok": true,
+   "got": []
+  },
+  {
+   "scenario": "K6",
+   "id": "fit.folded.nodes",
+   "name": "fit.folded: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）",
+   "ok": true,
+   "got": {
+    "o": [],
+    "s": []
+   }
+  },
+  {
+   "scenario": "K6",
+   "id": "fit.folded.all",
+   "name": "fit.folded: 札・推定の印・切断の印・接続線も隠れていない",
+   "ok": true,
+   "got": []
+  },
+  {
+   "scenario": "K6",
+   "id": "fit.pre",
+   "name": "前提: プレビューと「プロジェクトと実行」を広げた",
+   "ok": true,
+   "got": {
+    "pv": "off",
+    "rt": "off"
+   }
+  },
+  {
+   "scenario": "K6",
+   "id": "fit.folds",
+   "name": "［全体表示］（0 キー）でプレビューと「プロジェクトと実行」が畳まれる",
+   "ok": true,
+   "got": {
+    "pv": "on",
+    "rt": "on"
+   }
+  },
+  {
+   "scenario": "K6",
+   "id": "fit.fromExpanded.nodes",
+   "name": "fit.fromExpanded: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）",
+   "ok": true,
+   "got": {
+    "o": [],
+    "s": []
+   }
+  },
+  {
+   "scenario": "K6",
+   "id": "fit.fromExpanded.all",
+   "name": "fit.fromExpanded: 札・推定の印・切断の印・接続線も隠れていない",
+   "ok": true,
+   "got": []
+  },
+  {
+   "scenario": "K7",
+   "id": "nav.expands",
+   "name": "移動するとページの表示が広がる",
+   "ok": true,
+   "got": "off"
+  },
+  {
+   "scenario": "K7",
+   "id": "cut.lineage",
+   "name": "由来が切れる（理由つき）",
+   "ok": true,
+   "got": {
+    "selection": "resolved",
+    "at": "src/app/lin-g/page.tsx:28:7",
+    "reason": "",
+    "lineage": "cut",
+    "lineageReason": "no-reference",
+    "outcome": "",
+    "cands": "",
+    "docSeq": "7"
+   }
+  },
+  {
+   "scenario": "K7",
+   "id": "cut.nodes",
+   "name": "cut: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）",
+   "ok": true,
+   "got": {
+    "o": [],
+    "s": []
+   }
+  },
+  {
+   "scenario": "K7",
+   "id": "cut.all",
+   "name": "cut: 札・推定の印・切断の印・接続線も隠れていない",
+   "ok": true,
+   "got": []
+  },
+  {
+   "scenario": "K7",
+   "id": "unres.status",
+   "name": "外部 UI の要素は「特定できません」",
+   "ok": true,
+   "got": {
+    "selection": "unresolved",
+    "at": "",
+    "reason": "anchor-missing",
+    "lineage": "",
+    "lineageReason": "",
+    "outcome": "",
+    "cands": "",
+    "docSeq": ""
+   }
+  },
+  {
+   "scenario": "K7",
+   "id": "unres.folded",
+   "name": "特定できなくても、選んだ後は経路図（理由の図）を優先する",
+   "ok": true,
+   "got": "on"
+  },
+  {
+   "scenario": "K7",
+   "id": "unresolved.nodes",
+   "name": "unresolved: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）",
+   "ok": true,
+   "got": {
+    "o": [],
+    "s": []
+   }
+  },
+  {
+   "scenario": "K7",
+   "id": "unresolved.all",
+   "name": "unresolved: 札・推定の印・切断の印・接続線も隠れていない",
+   "ok": true,
+   "got": []
+  },
+  {
+   "scenario": "K7",
+   "id": "unres.dock",
+   "name": "右ドックに特定できない理由",
+   "ok": true,
+   "got": "詳細\n経路\n固定\n選んだ値 — 描画位置と値の由来\n描画位置\n特定できません\n値の由来\n未確認\nDB のどのテーブル・カラムから来たかは、まだ分かっていません\n切れた段階\n描画位置の特定\n理由\nこの要素自身に要素識別子がありません\n\n1 か所のうち 0 か所が推定です。描画位置が分からないため、その先はたどっていません。\n\n描画位置＝この値を画面に描いたコードの場所。値の由来＝その値が DB のどのカラムから来たか。 未確認＝調べたが、根拠をもって結べなかった（推測では埋めません）。\n\n概要\n根拠\n経路のステップ（1）\n1\n選択した要素\n<h3> のテキスト #0\n実測\n取得手段\nブラウザのD"
+  },
+  {
+   "scenario": "K8",
+   "id": "k8.base.nodes",
+   "name": "k8.base: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）",
+   "ok": true,
+   "got": {
+    "o": [],
+    "s": []
+   }
+  },
+  {
+   "scenario": "K8",
+   "id": "k8.base.all",
+   "name": "k8.base: 札・推定の印・切断の印・接続線も隠れていない",
+   "ok": true,
+   "got": []
+  },
+  {
+   "scenario": "K8",
+   "id": "kbd.reachPv",
+   "name": "Tab だけでプレビューの［ページを表示］に届く",
+   "ok": true,
+   "got": 11
+  },
+  {
+   "scenario": "K8",
+   "id": "kbd.focusRing",
+   "name": "フォーカスが見える（:focus-visible）",
+   "ok": true,
+   "got": null
+  },
+  {
+   "scenario": "K8",
+   "id": "kbd.pvExpand",
+   "name": "Enter でページの表示を広げる",
+   "ok": true,
+   "got": "off"
+  },
+  {
+   "scenario": "K8",
+   "id": "kbd.pvKeep",
+   "name": "広げても選択・表示経路・観測・文書が変わらない（再読み込みしない）",
+   "ok": true,
+   "got": {
+    "k0": {
+     "selection": "resolved",
+     "at": "src/app/lin-a/page.tsx:18:11",
+     "lineage": "linked",
+     "docSeq": "10",
+     "loads": "8",
+     "conn": "8",
+     "obsShown": "10",
+     "session": "2026-11-02T12:37:40.515Z",
+     "nodes": 9
+    },
+    "k1": {
+     "selection": "resolved",
+     "at": "src/app/lin-a/page.tsx:18:11",
+     "lineage": "linked",
+     "docSeq": "10",
+     "loads": "8",
+     "conn": "8",
+     "obsShown": "10",
+     "session": "2026-11-02T12:37:40.515Z",
+     "nodes": 9
+    }
+   }
+  },
+  {
+   "scenario": "K8",
+   "id": "pv.sameDoc",
+   "name": "広げると同じページ（/lin-a）がそのまま見える",
+   "ok": true,
+   "got": null
+  },
+  {
+   "scenario": "K8",
+   "id": "kbd.pvFold",
+   "name": "もう一度 Enter で畳む",
+   "ok": true,
+   "got": "on"
+  },
+  {
+   "scenario": "K8",
+   "id": "kbd.pvKeep2",
+   "name": "畳んでも選択・表示経路・観測・文書が変わらない",
+   "ok": true,
+   "got": {
+    "selection": "resolved",
+    "at": "src/app/lin-a/page.tsx:18:11",
+    "lineage": "linked",
+    "docSeq": "10",
+    "loads": "8",
+    "conn": "8",
+    "obsShown": "10",
+    "session": "2026-11-02T12:37:40.515Z",
+    "nodes": 9
+   }
+  },
+  {
+   "scenario": "K8",
+   "id": "pv.refolded.nodes",
+   "name": "pv.refolded: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）",
+   "ok": true,
+   "got": {
+    "o": [],
+    "s": []
+   }
+  },
+  {
+   "scenario": "K8",
+   "id": "pv.refolded.all",
+   "name": "pv.refolded: 札・推定の印・切断の印・接続線も隠れていない",
+   "ok": true,
+   "got": []
+  },
+  {
+   "scenario": "K8",
+   "id": "kbd.reachRt",
+   "name": "Tab だけで「プロジェクトと実行」の［詳細］に届く",
+   "ok": true,
+   "got": 32
+  },
+  {
+   "scenario": "K8",
+   "id": "kbd.rtExpand",
+   "name": "Space で詳細を開く（所見・計装・環境変数が見える）",
+   "ok": true,
+   "got": "off"
+  },
+  {
+   "scenario": "K8",
+   "id": "kbd.rtFold",
+   "name": "もう一度 Space で畳む",
+   "ok": true,
+   "got": "on"
+  },
+  {
+   "scenario": "K8",
+   "id": "kbd.rtKeep",
+   "name": "開閉しても選択・表示経路・観測・文書が変わらない",
+   "ok": true,
+   "got": {
+    "selection": "resolved",
+    "at": "src/app/lin-a/page.tsx:18:11",
+    "lineage": "linked",
+    "docSeq": "10",
+    "loads": "8",
+    "conn": "8",
+    "obsShown": "10",
+    "session": "2026-11-02T12:37:40.515Z",
+    "nodes": 9
+   }
+  },
+  {
+   "scenario": "K8",
+   "id": "kbd.rtClose",
+   "name": "操作バーの［実行］を Enter で閉じられる",
+   "ok": true,
+   "got": null
+  },
+  {
+   "scenario": "K8",
+   "id": "kbd.rtOpen",
+   "name": "もう一度 Enter で開く（実行中なので畳んだまま）",
+   "ok": true,
+   "got": "on"
+  },
+  {
+   "scenario": "K8",
+   "id": "rt.reopened.nodes",
+   "name": "rt.reopened: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）",
+   "ok": true,
+   "got": {
+    "o": [],
+    "s": []
+   }
+  },
+  {
+   "scenario": "K8",
+   "id": "rt.reopened.all",
+   "name": "rt.reopened: 札・推定の印・切断の印・接続線も隠れていない",
+   "ok": true,
+   "got": []
+  },
+  {
+   "scenario": "K8",
+   "id": "leftClosed.nodes",
+   "name": "leftClosed: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）",
+   "ok": true,
+   "got": {
+    "o": [],
+    "s": []
+   }
+  },
+  {
+   "scenario": "K8",
+   "id": "leftClosed.all",
+   "name": "leftClosed: 札・推定の印・切断の印・接続線も隠れていない",
+   "ok": true,
+   "got": []
+  },
+  {
+   "scenario": "K8",
+   "id": "leftReopened.nodes",
+   "name": "leftReopened: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）",
+   "ok": true,
+   "got": {
+    "o": [],
+    "s": []
+   }
+  },
+  {
+   "scenario": "K8",
+   "id": "leftReopened.all",
+   "name": "leftReopened: 札・推定の印・切断の印・接続線も隠れていない",
+   "ok": true,
+   "got": []
+  },
+  {
+   "scenario": "K8",
+   "id": "repick.expand",
+   "name": "畳んだ状態の［選択］で、ページの表示が広がり選択モードに入る",
+   "ok": true,
+   "got": {
+    "f": "off",
+    "m": "on"
+   }
+  },
+  {
+   "scenario": "K8",
+   "id": "repick.linked",
+   "name": "別の要素（2つ目の li）を選べる・DB カラムまで結ばれる",
+   "ok": true,
+   "got": {
+    "selection": "resolved",
+    "at": "src/app/lin-a/page.tsx:18:11",
+    "reason": "",
+    "lineage": "linked",
+    "lineageReason": "",
+    "outcome": "confirmed",
+    "cands": "poc.listings.region",
+    "docSeq": "10"
+   }
+  },
+  {
+   "scenario": "K8",
+   "id": "repick.explore.nodes",
+   "name": "repick.explore: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）",
+   "ok": true,
+   "got": {
+    "o": [],
+    "s": []
+   }
+  },
+  {
+   "scenario": "K8",
+   "id": "repick.explore.all",
+   "name": "repick.explore: 札・推定の印・切断の印・接続線も隠れていない",
+   "ok": true,
+   "got": []
+  },
+  {
+   "scenario": "K9",
+   "id": "stop.full",
+   "name": "停止中は「プロジェクトと実行」を全部出す（起動し直せる）",
+   "ok": true,
+   "got": "off"
+  },
+  {
+   "scenario": "K9",
+   "id": "stop.pv",
+   "name": "停止中のプレビューは、停止していると読める（畳まない）",
+   "ok": true,
+   "got": "off"
+  },
+  {
+   "scenario": "K9",
+   "id": "restart.newPid",
+   "name": "再起動で別のプロセスになる",
+   "ok": true,
+   "got": {
+    "a": 4155,
+    "b": 4092
+   }
+  },
+  {
+   "scenario": "K9",
+   "id": "restart.compact",
+   "name": "再起動後、実行中はまた畳む",
+   "ok": true,
+   "got": "on"
+  },
+  {
+   "scenario": "K9",
+   "id": "restart.selCleared",
+   "name": "前の起動の選択は残らない",
+   "ok": true,
+   "got": "cleared"
+  },
+  {
+   "scenario": "K9",
+   "id": "restart.linked",
+   "name": "再起動後も DB カラムまで結ばれる",
+   "ok": true,
+   "got": {
+    "selection": "resolved",
+    "at": "src/app/lin-a/page.tsx:18:11",
+    "reason": "",
+    "lineage": "linked",
+    "lineageReason": "",
+    "outcome": "confirmed",
+    "cands": "poc.listings.region",
+    "docSeq": "4"
+   }
+  },
+  {
+   "scenario": "K9",
+   "id": "restart.explore.nodes",
+   "name": "restart.explore: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）",
+   "ok": true,
+   "got": {
+    "o": [],
+    "s": []
+   }
+  },
+  {
+   "scenario": "K9",
+   "id": "restart.explore.all",
+   "name": "restart.explore: 札・推定の印・切断の印・接続線も隠れていない",
+   "ok": true,
+   "got": []
+  }
+ ],
+ "measures": [
+  {
+   "scenario": "K1",
+   "label": "open",
+   "summary": {
+    "k": 0.544,
+    "chipFontPx": 6.5,
+    "nodes": 7,
+    "nodesHidden": 0,
+    "chips": 7,
+    "chipsHidden": 0,
+    "tags": 2,
+    "tagsHidden": 0,
+    "cuts": 1,
+    "cutsHidden": 0,
+    "hops": 7,
+    "hopsHidden": 0,
+    "estimatedHops": [
+     "応答のどの項目が、この値になったか（推定） 隠れ0%・外0%・破線あり",
+     "カラムと応答項目の対応づけ（推定） 隠れ0%・外0%・破線あり"
+    ],
+    "hiddenList": [],
+    "panels": [
+     "ページ 16,64 200×286",
+     "プレビュー 232,64 336×331 畳み:off",
+     "表示設定 16,534 236×196",
+     "全体 16,760 236×124",
+     "キャンバス操作 583,64 481×36",
+     "プロジェクトと実行 734,110 330×293",
+     "注記 766,857 298×29"
+    ]
+   },
+   "overlap7c0": {
+    "nodes": 7,
+    "covered": 0,
+    "offscreen": 0,
+    "coveredList": []
+   }
+  },
+  {
+   "scenario": "K1",
+   "label": "open.fit",
+   "summary": {
+    "k": 0.534,
+    "chipFontPx": 6.4,
+    "nodes": 7,
+    "nodesHidden": 0,
+    "chips": 7,
+    "chipsHidden": 0,
+    "tags": 2,
+    "tagsHidden": 0,
+    "cuts": 1,
+    "cutsHidden": 0,
+    "hops": 7,
+    "hopsHidden": 0,
+    "estimatedHops": [
+     "応答のどの項目が、この値になったか（推定） 隠れ0%・外0%・破線あり",
+     "カラムと応答項目の対応づけ（推定） 隠れ0%・外0%・破線あり"
+    ],
+    "hiddenList": [],
+    "panels": [
+     "ページ 16,64 200×286",
+     "プレビュー 232,64 336×60 畳み:on",
+     "表示設定 16,534 236×196",
+     "全体 16,760 236×124",
+     "キャンバス操作 583,64 481×36",
+     "プロジェクトと実行 734,110 330×293",
+     "注記 766,857 298×29"
+    ]
+   },
+   "overlap7c0": {
+    "nodes": 7,
+    "covered": 0,
+    "offscreen": 0,
+    "coveredList": []
+   }
+  },
+  {
+   "scenario": "K4",
+   "label": "selecting",
+   "summary": {
+    "k": 0.427,
+    "chipFontPx": 5.1,
+    "nodes": 9,
+    "nodesHidden": 0,
+    "chips": 9,
+    "chipsHidden": 0,
+    "tags": 1,
+    "tagsHidden": 0,
+    "cuts": 1,
+    "cutsHidden": 0,
+    "hops": 8,
+    "hopsHidden": 0,
+    "estimatedHops": [
+     "この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"
+    ],
+    "hiddenList": [],
+    "panels": [
+     "ページ 16,64 200×150",
+     "プレビュー 232,64 336×622 畳み:off",
+     "表示設定 16,534 236×196",
+     "全体 16,760 236×124",
+     "キャンバス操作 583,64 481×36",
+     "プロジェクトと実行 734,110 330×96 畳み:on",
+     "注記 333,857 731×29"
+    ]
+   },
+   "overlap7c0": {
+    "nodes": 9,
+    "covered": 0,
+    "offscreen": 0,
+    "coveredList": []
+   }
+  },
+  {
+   "scenario": "K4",
+   "label": "explore",
+   "summary": {
+    "k": 0.716,
+    "chipFontPx": 8.6,
+    "nodes": 9,
+    "nodesHidden": 0,
+    "chips": 9,
+    "chipsHidden": 0,
+    "tags": 1,
+    "tagsHidden": 0,
+    "cuts": 1,
+    "cutsHidden": 0,
+    "hops": 8,
+    "hopsHidden": 0,
+    "estimatedHops": [
+     "この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"
+    ],
+    "hiddenList": [],
+    "panels": [
+     "ページ 16,64 200×150",
+     "プレビュー 232,64 336×229 畳み:on",
+     "表示設定 16,534 236×196",
+     "全体 16,760 236×124",
+     "キャンバス操作 583,64 481×36",
+     "プロジェクトと実行 734,110 330×96 畳み:on",
+     "注記 333,857 731×29"
+    ]
+   },
+   "overlap7c0": {
+    "nodes": 9,
+    "covered": 0,
+    "offscreen": 0,
+    "coveredList": []
+   }
+  },
+  {
+   "scenario": "K4",
+   "label": "explore.withObs",
+   "summary": {
+    "k": 0.716,
+    "chipFontPx": 8.6,
+    "nodes": 9,
+    "nodesHidden": 0,
+    "chips": 9,
+    "chipsHidden": 0,
+    "tags": 1,
+    "tagsHidden": 0,
+    "cuts": 1,
+    "cutsHidden": 0,
+    "hops": 8,
+    "hopsHidden": 0,
+    "estimatedHops": [
+     "この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"
+    ],
+    "hiddenList": [],
+    "panels": [
+     "ページ 16,64 200×150",
+     "プレビュー 232,64 336×229 畳み:on",
+     "表示設定 16,534 236×196",
+     "全体 16,760 236×124",
+     "キャンバス操作 583,64 481×36",
+     "プロジェクトと実行 734,110 330×96 畳み:on",
+     "注記 333,857 731×29"
+    ]
+   },
+   "overlap7c0": {
+    "nodes": 9,
+    "covered": 0,
+    "offscreen": 0,
+    "coveredList": []
+   }
+  },
+  {
+   "scenario": "K5",
+   "label": "estimate",
+   "summary": {
+    "k": 0.716,
+    "chipFontPx": 8.6,
+    "nodes": 9,
+    "nodesHidden": 0,
+    "chips": 9,
+    "chipsHidden": 0,
+    "tags": 1,
+    "tagsHidden": 0,
+    "cuts": 1,
+    "cutsHidden": 0,
+    "hops": 8,
+    "hopsHidden": 0,
+    "estimatedHops": [
+     "この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"
+    ],
+    "hiddenList": [],
+    "panels": [
+     "ページ 16,64 200×150",
+     "プレビュー 232,64 336×229 畳み:on",
+     "表示設定 16,534 236×196",
+     "全体 16,760 236×124",
+     "キャンバス操作 583,64 481×36",
+     "プロジェクトと実行 734,110 330×96 畳み:on",
+     "注記 333,857 731×29"
+    ]
+   },
+   "overlap7c0": {
+    "nodes": 9,
+    "covered": 0,
+    "offscreen": 0,
+    "coveredList": []
+   }
+  },
+  {
+   "scenario": "K5",
+   "label": "dock.lookHere",
+   "summary": {
+    "k": 0.716,
+    "chipFontPx": 8.6,
+    "nodes": 9,
+    "nodesHidden": 0,
+    "chips": 9,
+    "chipsHidden": 0,
+    "tags": 1,
+    "tagsHidden": 0,
+    "cuts": 1,
+    "cutsHidden": 0,
+    "hops": 8,
+    "hopsHidden": 0,
+    "estimatedHops": [
+     "この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"
+    ],
+    "hiddenList": [],
+    "panels": [
+     "ページ 16,64 200×150",
+     "プレビュー 232,64 336×229 畳み:on",
+     "表示設定 16,534 236×196",
+     "全体 16,760 236×124",
+     "キャンバス操作 583,64 481×36",
+     "プロジェクトと実行 734,110 330×96 畳み:on",
+     "注記 333,857 731×29"
+    ]
+   },
+   "overlap7c0": {
+    "nodes": 9,
+    "covered": 0,
+    "offscreen": 0,
+    "coveredList": []
+   }
+  },
+  {
+   "scenario": "K5",
+   "label": "dock.badge6",
+   "summary": {
+    "k": 0.716,
+    "chipFontPx": 8.6,
+    "nodes": 9,
+    "nodesHidden": 0,
+    "chips": 9,
+    "chipsHidden": 0,
+    "tags": 1,
+    "tagsHidden": 0,
+    "cuts": 1,
+    "cutsHidden": 0,
+    "hops": 8,
+    "hopsHidden": 0,
+    "estimatedHops": [
+     "この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"
+    ],
+    "hiddenList": [],
+    "panels": [
+     "ページ 16,64 200×150",
+     "プレビュー 232,64 336×229 畳み:on",
+     "表示設定 16,534 236×196",
+     "全体 16,760 236×124",
+     "キャンバス操作 583,64 481×36",
+     "プロジェクトと実行 734,110 330×96 畳み:on",
+     "注記 333,857 731×29"
+    ]
+   },
+   "overlap7c0": {
+    "nodes": 9,
+    "covered": 0,
+    "offscreen": 0,
+    "coveredList": []
+   }
+  },
+  {
+   "scenario": "K6",
+   "label": "fit.folded",
+   "summary": {
+    "k": 0.604,
+    "chipFontPx": 7.2,
+    "nodes": 9,
+    "nodesHidden": 0,
+    "chips": 9,
+    "chipsHidden": 0,
+    "tags": 1,
+    "tagsHidden": 0,
+    "cuts": 1,
+    "cutsHidden": 0,
+    "hops": 8,
+    "hopsHidden": 0,
+    "estimatedHops": [
+     "この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"
+    ],
+    "hiddenList": [],
+    "panels": [
+     "ページ 16,64 200×150",
+     "プレビュー 232,64 336×229 畳み:on",
+     "表示設定 16,534 236×196",
+     "全体 16,760 236×124",
+     "キャンバス操作 583,64 481×36",
+     "プロジェクトと実行 734,110 330×96 畳み:on",
+     "注記 333,857 731×29"
+    ]
+   },
+   "overlap7c0": {
+    "nodes": 9,
+    "covered": 0,
+    "offscreen": 0,
+    "coveredList": []
+   }
+  },
+  {
+   "scenario": "K6",
+   "label": "expanded.both",
+   "summary": {
+    "k": 0.35,
+    "chipFontPx": 4.2,
+    "nodes": 9,
+    "nodesHidden": 2,
+    "chips": 9,
+    "chipsHidden": 3,
+    "tags": 1,
+    "tagsHidden": 0,
+    "cuts": 1,
+    "cutsHidden": 1,
+    "hops": 8,
+    "hopsHidden": 1,
+    "estimatedHops": [
+     "この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"
+    ],
+    "hiddenList": [
+     "表示された値 <li> のテキスト #0 ←  外66%",
+     "テーブル poc.listings ← プレビュー:100%",
+     "札 1: 表示された値<li> ←  外100%",
+     "札 6: 実行SQL ← プレビュー:83%",
+     "札 7: テーブルlistings ← プレビュー:100%",
+     "切断: ここより上流は結んでいませんこの通信を起こしたコード・表示された値 ←  外89%",
+     "線 そのSQLが読んだテーブル（実測） 隠れ64% 外0% ← プレビュー"
+    ],
+    "panels": [
+     "ページ 16,64 200×150",
+     "プレビュー 232,64 336×622 畳み:off",
+     "表示設定 16,534 236×196",
+     "全体 16,760 236×124",
+     "キャンバス操作 583,64 481×36",
+     "プロジェクトと実行 734,110 330×762 畳み:off",
+     "注記 333,857 731×29"
+    ]
+   },
+   "overlap7c0": {
+    "nodes": 9,
+    "covered": 1,
+    "offscreen": 0,
+    "coveredList": [
+     "テーブル poc.listings ← プレビュー:100%"
+    ]
+   }
+  },
+  {
+   "scenario": "K6",
+   "label": "fit.fromExpanded",
+   "summary": {
+    "k": 0.604,
+    "chipFontPx": 7.2,
+    "nodes": 9,
+    "nodesHidden": 0,
+    "chips": 9,
+    "chipsHidden": 0,
+    "tags": 1,
+    "tagsHidden": 0,
+    "cuts": 1,
+    "cutsHidden": 0,
+    "hops": 8,
+    "hopsHidden": 0,
+    "estimatedHops": [
+     "この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"
+    ],
+    "hiddenList": [],
+    "panels": [
+     "ページ 16,64 200×150",
+     "プレビュー 232,64 336×229 畳み:on",
+     "表示設定 16,534 236×196",
+     "全体 16,760 236×124",
+     "キャンバス操作 583,64 481×36",
+     "プロジェクトと実行 734,110 330×96 畳み:on",
+     "注記 333,857 731×29"
+    ]
+   },
+   "overlap7c0": {
+    "nodes": 9,
+    "covered": 0,
+    "offscreen": 0,
+    "coveredList": []
+   }
+  },
+  {
+   "scenario": "K7",
+   "label": "cut",
+   "summary": {
+    "k": 1.104,
+    "chipFontPx": 13.3,
+    "nodes": 2,
+    "nodesHidden": 0,
+    "chips": 2,
+    "chipsHidden": 0,
+    "tags": 0,
+    "tagsHidden": 0,
+    "cuts": 1,
+    "cutsHidden": 0,
+    "hops": 1,
+    "hopsHidden": 0,
+    "estimatedHops": [],
+    "hiddenList": [],
+    "panels": [
+     "ページ 16,64 200×150",
+     "プレビュー 232,64 336×207 畳み:on",
+     "表示設定 16,534 236×196",
+     "全体 16,760 236×124",
+     "キャンバス操作 583,64 481×36",
+     "プロジェクトと実行 734,110 330×96 畳み:on",
+     "注記 599,857 465×29"
+    ]
+   },
+   "overlap7c0": {
+    "nodes": 2,
+    "covered": 0,
+    "offscreen": 0,
+    "coveredList": []
+   }
+  },
+  {
+   "scenario": "K7",
+   "label": "unresolved",
+   "summary": {
+    "k": 1.25,
+    "chipFontPx": 15,
+    "nodes": 1,
+    "nodesHidden": 0,
+    "chips": 1,
+    "chipsHidden": 0,
+    "tags": 0,
+    "tagsHidden": 0,
+    "cuts": 1,
+    "cutsHidden": 0,
+    "hops": 0,
+    "hopsHidden": 0,
+    "estimatedHops": [],
+    "hiddenList": [],
+    "panels": [
+     "ページ 16,64 200×150",
+     "プレビュー 232,64 336×188 畳み:on",
+     "表示設定 16,534 236×196",
+     "全体 16,760 236×124",
+     "キャンバス操作 583,64 481×36",
+     "プロジェクトと実行 734,110 330×96 畳み:on",
+     "注記 599,857 465×29"
+    ]
+   },
+   "overlap7c0": {
+    "nodes": 1,
+    "covered": 0,
+    "offscreen": 0,
+    "coveredList": []
+   }
+  },
+  {
+   "scenario": "K8",
+   "label": "k8.base",
+   "summary": {
+    "k": 0.716,
+    "chipFontPx": 8.6,
+    "nodes": 9,
+    "nodesHidden": 0,
+    "chips": 9,
+    "chipsHidden": 0,
+    "tags": 1,
+    "tagsHidden": 0,
+    "cuts": 1,
+    "cutsHidden": 0,
+    "hops": 8,
+    "hopsHidden": 0,
+    "estimatedHops": [
+     "この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"
+    ],
+    "hiddenList": [],
+    "panels": [
+     "ページ 16,64 200×150",
+     "プレビュー 232,64 336×229 畳み:on",
+     "表示設定 16,534 236×196",
+     "全体 16,760 236×124",
+     "キャンバス操作 583,64 481×36",
+     "プロジェクトと実行 734,110 330×96 畳み:on",
+     "注記 333,857 731×29"
+    ]
+   },
+   "overlap7c0": {
+    "nodes": 9,
+    "covered": 0,
+    "offscreen": 0,
+    "coveredList": []
+   }
+  },
+  {
+   "scenario": "K8",
+   "label": "pv.expanded",
+   "summary": {
+    "k": 0.427,
+    "chipFontPx": 5.1,
+    "nodes": 9,
+    "nodesHidden": 0,
+    "chips": 9,
+    "chipsHidden": 0,
+    "tags": 1,
+    "tagsHidden": 0,
+    "cuts": 1,
+    "cutsHidden": 0,
+    "hops": 8,
+    "hopsHidden": 0,
+    "estimatedHops": [
+     "この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"
+    ],
+    "hiddenList": [],
+    "panels": [
+     "ページ 16,64 200×150",
+     "プレビュー 232,64 336×622 畳み:off",
+     "表示設定 16,534 236×196",
+     "全体 16,760 236×124",
+     "キャンバス操作 583,64 481×36",
+     "プロジェクトと実行 734,110 330×96 畳み:on",
+     "注記 333,857 731×29"
+    ]
+   },
+   "overlap7c0": {
+    "nodes": 9,
+    "covered": 0,
+    "offscreen": 0,
+    "coveredList": []
+   }
+  },
+  {
+   "scenario": "K8",
+   "label": "pv.refolded",
+   "summary": {
+    "k": 0.716,
+    "chipFontPx": 8.6,
+    "nodes": 9,
+    "nodesHidden": 0,
+    "chips": 9,
+    "chipsHidden": 0,
+    "tags": 1,
+    "tagsHidden": 0,
+    "cuts": 1,
+    "cutsHidden": 0,
+    "hops": 8,
+    "hopsHidden": 0,
+    "estimatedHops": [
+     "この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"
+    ],
+    "hiddenList": [],
+    "panels": [
+     "ページ 16,64 200×150",
+     "プレビュー 232,64 336×229 畳み:on",
+     "表示設定 16,534 236×196",
+     "全体 16,760 236×124",
+     "キャンバス操作 583,64 481×36",
+     "プロジェクトと実行 734,110 330×96 畳み:on",
+     "注記 333,857 731×29"
+    ]
+   },
+   "overlap7c0": {
+    "nodes": 9,
+    "covered": 0,
+    "offscreen": 0,
+    "coveredList": []
+   }
+  },
+  {
+   "scenario": "K8",
+   "label": "rt.expanded",
+   "summary": {
+    "k": 0.411,
+    "chipFontPx": 4.9,
+    "nodes": 9,
+    "nodesHidden": 0,
+    "chips": 9,
+    "chipsHidden": 0,
+    "tags": 1,
+    "tagsHidden": 0,
+    "cuts": 1,
+    "cutsHidden": 0,
+    "hops": 8,
+    "hopsHidden": 0,
+    "estimatedHops": [
+     "この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"
+    ],
+    "hiddenList": [],
+    "panels": [
+     "ページ 16,64 200×150",
+     "プレビュー 232,64 336×229 畳み:on",
+     "表示設定 16,534 236×196",
+     "全体 16,760 236×124",
+     "キャンバス操作 583,64 481×36",
+     "プロジェクトと実行 734,110 330×762 畳み:off",
+     "注記 333,857 731×29"
+    ]
+   },
+   "overlap7c0": {
+    "nodes": 9,
+    "covered": 0,
+    "offscreen": 0,
+    "coveredList": []
+   }
+  },
+  {
+   "scenario": "K8",
+   "label": "rt.reopened",
+   "summary": {
+    "k": 0.716,
+    "chipFontPx": 8.6,
+    "nodes": 9,
+    "nodesHidden": 0,
+    "chips": 9,
+    "chipsHidden": 0,
+    "tags": 1,
+    "tagsHidden": 0,
+    "cuts": 1,
+    "cutsHidden": 0,
+    "hops": 8,
+    "hopsHidden": 0,
+    "estimatedHops": [
+     "この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"
+    ],
+    "hiddenList": [],
+    "panels": [
+     "ページ 16,64 200×150",
+     "プレビュー 232,64 336×229 畳み:on",
+     "表示設定 16,534 236×196",
+     "全体 16,760 236×124",
+     "キャンバス操作 583,64 481×36",
+     "プロジェクトと実行 734,110 330×96 畳み:on",
+     "注記 333,857 731×29"
+    ]
+   },
+   "overlap7c0": {
+    "nodes": 9,
+    "covered": 0,
+    "offscreen": 0,
+    "coveredList": []
+   }
+  },
+  {
+   "scenario": "K8",
+   "label": "leftClosed",
+   "summary": {
+    "k": 0.794,
+    "chipFontPx": 9.5,
+    "nodes": 9,
+    "nodesHidden": 0,
+    "chips": 9,
+    "chipsHidden": 0,
+    "tags": 1,
+    "tagsHidden": 0,
+    "cuts": 1,
+    "cutsHidden": 0,
+    "hops": 8,
+    "hopsHidden": 0,
+    "estimatedHops": [
+     "この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"
+    ],
+    "hiddenList": [],
+    "panels": [
+     "プレビュー 232,64 336×229 畳み:on",
+     "キャンバス操作 583,64 481×36",
+     "プロジェクトと実行 734,110 330×96 畳み:on",
+     "注記 333,857 731×29"
+    ]
+   },
+   "overlap7c0": {
+    "nodes": 9,
+    "covered": 0,
+    "offscreen": 0,
+    "coveredList": []
+   }
+  },
+  {
+   "scenario": "K8",
+   "label": "leftReopened",
+   "summary": {
+    "k": 0.716,
+    "chipFontPx": 8.6,
+    "nodes": 9,
+    "nodesHidden": 0,
+    "chips": 9,
+    "chipsHidden": 0,
+    "tags": 1,
+    "tagsHidden": 0,
+    "cuts": 1,
+    "cutsHidden": 0,
+    "hops": 8,
+    "hopsHidden": 0,
+    "estimatedHops": [
+     "この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"
+    ],
+    "hiddenList": [],
+    "panels": [
+     "ページ 16,64 200×150",
+     "プレビュー 232,64 336×229 畳み:on",
+     "表示設定 16,534 236×196",
+     "全体 16,760 236×124",
+     "キャンバス操作 583,64 481×36",
+     "プロジェクトと実行 734,110 330×96 畳み:on",
+     "注記 333,857 731×29"
+    ]
+   },
+   "overlap7c0": {
+    "nodes": 9,
+    "covered": 0,
+    "offscreen": 0,
+    "coveredList": []
+   }
+  },
+  {
+   "scenario": "K8",
+   "label": "repick.explore",
+   "summary": {
+    "k": 0.716,
+    "chipFontPx": 8.6,
+    "nodes": 9,
+    "nodesHidden": 0,
+    "chips": 9,
+    "chipsHidden": 0,
+    "tags": 1,
+    "tagsHidden": 0,
+    "cuts": 1,
+    "cutsHidden": 0,
+    "hops": 8,
+    "hopsHidden": 0,
+    "estimatedHops": [
+     "この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"
+    ],
+    "hiddenList": [],
+    "panels": [
+     "ページ 16,64 200×150",
+     "プレビュー 232,64 336×229 畳み:on",
+     "表示設定 16,534 236×196",
+     "全体 16,760 236×124",
+     "キャンバス操作 583,64 481×36",
+     "プロジェクトと実行 734,110 330×96 畳み:on",
+     "注記 333,857 731×29"
+    ]
+   },
+   "overlap7c0": {
+    "nodes": 9,
+    "covered": 0,
+    "offscreen": 0,
+    "coveredList": []
+   }
+  },
+  {
+   "scenario": "K9",
+   "label": "stopped",
+   "summary": {
+    "k": 1.25,
+    "chipFontPx": 15,
+    "nodes": 0,
+    "nodesHidden": 0,
+    "chips": 0,
+    "chipsHidden": 0,
+    "tags": 0,
+    "tagsHidden": 0,
+    "cuts": 0,
+    "cutsHidden": 0,
+    "hops": 0,
+    "hopsHidden": 0,
+    "estimatedHops": [],
+    "hiddenList": [],
+    "panels": [
+     "ページ 16,64 200×145",
+     "プレビュー 232,64 336×464",
+     "表示設定 16,534 236×196",
+     "全体 16,823 236×61",
+     "キャンバス操作 583,64 481×36",
+     "プロジェクトと実行 734,110 330×762",
+     "注記 817,857 247×29"
+    ]
+   },
+   "overlap7c0": {
+    "nodes": 0,
+    "covered": 0,
+    "offscreen": 0,
+    "coveredList": []
+   }
+  },
+  {
+   "scenario": "K9",
+   "label": "restart.explore",
+   "summary": {
+    "k": 0.716,
+    "chipFontPx": 8.6,
+    "nodes": 9,
+    "nodesHidden": 0,
+    "chips": 9,
+    "chipsHidden": 0,
+    "tags": 1,
+    "tagsHidden": 0,
+    "cuts": 1,
+    "cutsHidden": 0,
+    "hops": 8,
+    "hopsHidden": 0,
+    "estimatedHops": [
+     "この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"
+    ],
+    "hiddenList": [],
+    "panels": [
+     "ページ 16,64 200×150",
+     "プレビュー 232,64 336×229 畳み:on",
+     "表示設定 16,534 236×196",
+     "全体 16,760 236×124",
+     "キャンバス操作 583,64 481×36",
+     "プロジェクトと実行 734,110 330×96 畳み:on",
+     "注記 332,857 732×29"
+    ]
+   },
+   "overlap7c0": {
+    "nodes": 9,
+    "covered": 0,
+    "offscreen": 0,
+    "coveredList": []
+   }
+  }
+ ],
+ "consoleErrors": [],
+ "finishedAt": "2026-11-02T12:38:13.465Z",
+ "result": {
+  "checks": 77,
+  "failed": 1,
+  "failedIds": [
+   "est.font"
+  ]
+ }
+}

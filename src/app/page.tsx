@@ -27,7 +27,8 @@ export default async function Page(
   const q = await searchParams;
   const key: DatasetKey = KEYS[q.data ?? ''] ?? 'synthetic';
   return (
-    <ExploreProvider data={buildDataset(key)}>
+    /* 7C-3: ?data= で明示的に選んだデータセットは、プロジェクトを開いていても描く */
+    <ExploreProvider data={buildDataset(key)} explicitDemo={typeof q.data === 'string' && q.data !== ''}>
       <AppShell />
     </ExploreProvider>
   );

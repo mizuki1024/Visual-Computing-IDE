@@ -21,6 +21,7 @@ import {
   centerOn, fitAll, fitBounds, freeRegionAmong, keepInside, zoomAt, clampK, type View,
 } from '@/lib/view';
 import { contentBounds, pathBounds, type Rect } from '@/lib/geometry';
+import { emptyDataset, type ProjectContext } from '@/lib/projectPhase';
 
 export type PanelId = 'pages' | 'preview' | 'legend' | 'minimap' | 'runtime';
 /**
@@ -68,6 +69,18 @@ interface Ctx {
   live: { key: string } | null;
   showLive: (ds: LaidOutDataset, key: string, focusNode: number) => void;
   clearLive: () => void;
+  /**
+   * Phase 7C-3（P1-9）: 実プロジェクトを開いていて、合成デモを選んでいない間の状態。
+   * null でないとき `data` は経路の無いデータセットで、キャンバスと右ドックは空の状態を出す
+   * （別のアプリの合成シナリオを描かない）。実ページの選択（live）があればそちらを描く
+   */
+  placeholder: ProjectContext | null;
+  /** いま IDE が扱っているプロジェクト（RuntimeStore から渡される）。null = 開いていない */
+  project: ProjectContext | null;
+  setProject: (p: ProjectContext | null) => void;
+  /** 合成デモ（ページを開いたときのデータセット）を、プロジェクトを開いている間も明示的に見ているか */
+  demoChosen: boolean;
+  setDemoChosen: (v: boolean) => void;
   /** null = 段階0（未選択の俯瞰）。空パネルではなくページの概要を出す（ST-16） */
   selection: SelectionRef | null;
   scope: Scope;
@@ -106,10 +119,19 @@ interface Ctx {
 const ExploreCtx = createContext<Ctx | null>(null);
 
 export function ExploreProvider(
-  { children, data: baseData }: { children: ReactNode; data: LaidOutDataset },
+  { children, data: baseData, explicitDemo = false }: {
+    children: ReactNode; data: LaidOutDataset;
+    /** URL の ?data= で、描くデータセットを明示的に選んだか（7C-3: そのときはプロジェクトを開いても描く） */
+    explicitDemo?: boolean;
+  },
 ) {
   const [liveData, setLiveData] = useState<{ ds: LaidOutDataset; key: string } | null>(null);
-  const data = liveData?.ds ?? baseData;
+  /* 7C-3（P1-9）: プロジェクトを開いている間は、明示的に選ばない限り合成デモを描かない */
+  const [project, setProjectState] = useState<ProjectContext | null>(null);
+  const [demoChosen, setDemoChosen] = useState(explicitDemo);
+  const placeholder = project && !demoChosen ? project : null;
+  const emptyData = useMemo(() => (placeholder ? emptyDataset(placeholder) : null), [placeholder]);
+  const data = liveData?.ds ?? emptyData ?? baseData;
   // 既定は未選択。ページを開いた時点で俯瞰が出ている（UXR-04 / 03a 5節）
   const [selection, setSelection] = useState<SelectionRef | null>(null);
   // ホップ選択から Esc で戻る先（03c 5.1「ホップ選択 → 選択_経路あり」）。
@@ -293,6 +315,35 @@ export function ExploreProvider(
     setTab('overview');
   }, []);
 
+  /*
+   * 7C-3: プロジェクトの段階を受け取る。起動を始めたら（開いた・停止・失敗 → 起動中）、
+   * 合成デモの明示的な選択を解く — 自分のプロジェクトを動かし始めた後に、別のアプリの見本を残さない
+   */
+  const projectRef = useRef<ProjectContext | null>(null);
+  const setProject = useCallback((p: ProjectContext | null) => {
+    const prev = projectRef.current;
+    if (prev === p || (prev && p && prev.phase === p.phase && prev.name === p.name
+      && prev.restarted === p.restarted && prev.blocked === p.blocked)) return;
+    projectRef.current = p;
+    if (p && (p.phase === 'starting' || p.phase === 'running') && prev?.phase !== 'starting' && prev?.phase !== 'running') {
+      setDemoChosen(false);
+    }
+    setProjectState(p);
+  }, []);
+  /* 描く元（合成デモ ↔ 空の状態）が変わったら、選択とホバーを持ち越さない（同じ番号が別のものを指す） */
+  const baseKind = liveData ? 'live' : placeholder ? 'empty' : 'base';
+  const lastBaseKind = useRef(baseKind);
+  useEffect(() => {
+    if (lastBaseKind.current === baseKind) return;
+    const was = lastBaseKind.current;
+    lastBaseKind.current = baseKind;
+    // live への切り替えは showLive が選択を決め、live からの解除は clearLive が扱う
+    if (was === 'live' || baseKind === 'live') return;
+    setSelection(null);
+    setHover(null);
+    setTab('overview');
+  }, [baseKind]);
+
   /* Phase 7B-2: 実ページの選択を、同じキャンバスと右ドックに出す */
   const showLive = useCallback((ds: LaidOutDataset, key: string, focusNode: number) => {
     // 前のデータセットのノード・ホップへのホバーを持ち越さない（同じ番号が別のものを指す）
@@ -385,12 +436,12 @@ export function ExploreProvider(
   const live = useMemo(() => (liveData ? { key: liveData.key } : null), [liveData]);
 
   const value = useMemo<Ctx>(() => ({
-    data, live, showLive, clearLive,
+    data, live, showLive, clearLive, placeholder, project, setProject, demoChosen, setDemoChosen,
     selection, scope, hover, hoverNote, tab, panels, compact, showLabels, pageFilter, view, viewport,
     select, clearSelection, setHover, setHoverNote, setTab, togglePanel, setCompact, registerObstacles,
     setViewByUser, setShowLabels, setPageFilter, setView, setViewport, zoomBy, fit, focusOn,
   }), [
-    data, live, showLive, clearLive,
+    data, live, showLive, clearLive, placeholder, project, setProject, demoChosen,
     selection, scope, hover, hoverNote, tab, panels, compact, showLabels, pageFilter, view, viewport,
     select, clearSelection, togglePanel, setCompact, registerObstacles, setViewByUser, setViewport, zoomBy, fit, focusOn,
   ]);

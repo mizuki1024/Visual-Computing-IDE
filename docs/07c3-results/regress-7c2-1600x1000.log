@@ -1,0 +1,161 @@
+
+## K1 IDE を初めて開く
+  - measure.open: {"k":1,"chipFontPx":12,"nodes":7,"nodesHidden":1,"chips":7,"chipsHidden":1,"tags":2,"tagsHidden":0,"cuts":1,"cutsHidden":1,"hops":7,"hopsHidden":0,"estimatedHops":["応答のどの項目が、この値になったか（推定） 隠れ0%・外0%・破線あり","カラムと応答項目の対応づけ（推定） 隠れ0%・外0%・破線あり"],"hiddenList":["サーバー処理 Next.js API Route — 98ms ← プロジェクトと実行:39%"
+  - overlap7c0.open: {"nodes":7,"covered":1,"offscreen":0,"coveredList":["サーバー処理 Next.js API Route — 98ms ← プロジェクトと実行:39%"]}
+  - measure.open.fit: {"k":0.661,"chipFontPx":7.9,"nodes":7,"nodesHidden":0,"chips":7,"chipsHidden":0,"tags":2,"tagsHidden":0,"cuts":1,"cutsHidden":0,"hops":7,"hopsHidden":0,"estimatedHops":["応答のどの項目が、この値になったか（推定） 隠れ0%・外0%・破線あり","カラムと応答項目の対応づけ（推定） 隠れ0%・外0%・破線あり"],"hiddenList":[],"panels":["ページ 16,64 200×286","プレビュー 232,6
+  - overlap7c0.open.fit: {"nodes":7,"covered":0,"offscreen":0,"coveredList":[]}
+  ✓ [open.fit.nodes] open.fit: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）
+  ✓ [open.fit.all] open.fit: 札・推定の印・切断の印・接続線も隠れていない
+
+## K2 開発サーバーを起動する（実行中は「プロジェクトと実行」を1段に畳む）
+  - verdict: supported
+  - start: {"preview":"live","ms":2623}
+  ✓ [run.compact] 実行中は「プロジェクトと実行」が畳まれる
+  - runtimePanel.box: {"x":894,"y":110,"width":330,"height":95.71875}
+  ✓ [run.height] 畳んだ「プロジェクトと実行」の高さが 110px 以下
+  ✓ [run.stopVisible] 畳んでも［停止する］が見えて押せる
+  - runtimePanel.text: プロジェクトと実行 ⏎ Phase 7A ⏎ 詳細 ▾ ⏎ ✕ ⏎ 停止する ⏎ 実行中 ⏎ PID 3783 ⏎ :3000 ⏎ 2208 ms ⏎  ⏎ poc01-fixture-app — 所見 3 件・計装・環境変数・出力は［詳細］で表示します
+
+## K3 プレビューでページを操作する
+  - 404: {"http":"404"}
+  ✓ [pv.expanded] ページを操作している間、プレビューは広がっている
+
+## K4 /lin-a の値を選び、DB カラムまで表示する
+  - pick: {"selection":"resolved","at":"src/app/lin-a/page.tsx:18:11","reason":"","lineage":"linked","lineageReason":"","outcome":"confirmed","cands":"poc.listings.region","docSeq":"6"}
+  ✓ [pick.linked] /lin-a の値が DB カラムまで結ばれる
+  ✓ [pick.expandedWhileSelecting] 選択モードの間は、プレビューは広がったまま（選び直せる）
+  - measure.selecting: {"k":0.522,"chipFontPx":6.3,"nodes":9,"nodesHidden":0,"chips":9,"chipsHidden":0,"tags":1,"tagsHidden":0,"cuts":1,"cutsHidden":0,"hops":8,"hopsHidden":0,"estimatedHops":["この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"],"hiddenList":[],"panels":["ページ 16,64 200×150","プレビュー 232,64 392×563 畳み:off","表示設定 16,614 
+  - overlap7c0.selecting: {"nodes":9,"covered":0,"offscreen":0,"coveredList":[]}
+  ✓ [pick.folded] 選択モードを抜けると、プレビューのページ表示が畳まれる
+  ✓ [pick.selKept] 畳んでも選択の行は残る
+  - measure.explore: {"k":0.862,"chipFontPx":10.3,"nodes":9,"nodesHidden":0,"chips":9,"chipsHidden":0,"tags":1,"tagsHidden":0,"cuts":1,"cutsHidden":0,"hops":8,"hopsHidden":0,"estimatedHops":["この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"],"hiddenList":[],"panels":["ページ 16,64 200×150","プレビュー 232,64 392×229 畳み:on","表示設定 16,614 
+  - overlap7c0.explore: {"nodes":9,"covered":0,"offscreen":0,"coveredList":[]}
+  ✓ [explore.nodes] explore: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）
+  ✓ [explore.all] explore: 札・推定の印・切断の印・接続線も隠れていない
+  ✓ [toolbar.noCover] 右上の操作バーが、パネルのボタン（畳む・閉じる等）を覆っていない
+  - showBound: {"shown":"6","withSel":"on"}
+  - measure.explore.withObs: {"k":0.862,"chipFontPx":10.3,"nodes":9,"nodesHidden":0,"chips":9,"chipsHidden":0,"tags":1,"tagsHidden":0,"cuts":1,"cutsHidden":0,"hops":8,"hopsHidden":0,"estimatedHops":["この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"],"hiddenList":[],"panels":["ページ 16,64 200×150","プレビュー 232,64 392×229 畳み:on","表示設定 16,614 
+  - overlap7c0.explore.withObs: {"nodes":9,"covered":0,"offscreen":0,"coveredList":[]}
+  ✓ [explore.withObs.nodes] explore.withObs: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）
+  ✓ [explore.withObs.all] explore.withObs: 札・推定の印・切断の印・接続線も隠れていない
+  - previewPanel.text: プレビュー ⏎ 開発サーバー ⏎ ページを表示 ▾ ⏎ ✕ ⏎ ↻ ⏎ 移動 ⏎ 選択 ⏎  ⏎ 選択: <li> → LinA src/app/lin-a/page.tsx:18:11 （同じ JSX の要素 3 個のうち 1 番目。どの使用箇所かは区別していません） ⏎  ⏎ 解除 ⏎  ⏎ 文書: 通信 #6 の応答と同定。由来（静的解析による推定）: poc.listings.region ⏎  ⏎ 観測（いまの起動）: 通信 6 件・SQL 5 本（実行した呼び出し位置を特定 3 本） ⏎  ⏎ #6 GET /lin-a — 200 / SQL 1 / 位置 1 ⏎ #5 GET /no-such-page — 404 / SQL 0 ⏎ #4 GET
+
+## K5 推定の接続線と最弱環を確かめる（キャンバスと右ドック）
+  - measure.estimate: {"k":0.862,"chipFontPx":10.3,"nodes":9,"nodesHidden":0,"chips":9,"chipsHidden":0,"tags":1,"tagsHidden":0,"cuts":1,"cutsHidden":0,"hops":8,"hopsHidden":0,"estimatedHops":["この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"],"hiddenList":[],"panels":["ページ 16,64 200×150","プレビュー 232,64 392×229 畳み:on","表示設定 16,614 
+  - overlap7c0.estimate: {"nodes":9,"covered":0,"offscreen":0,"coveredList":[]}
+  ✓ [estimate.nodes] estimate: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）
+  ✓ [estimate.all] estimate: 札・推定の印・切断の印・接続線も隠れていない
+  ✓ [est.lines] 推定の接続線がある・破線で描かれ・隠れていない
+  ✓ [est.tag] 推定の接続線に添えた「推定」の印がキャンバスで見える
+  - weakestOnCanvas: {"starTags":0,"note":"実ページの経路では ★ の印をキャンバスに付けていない（7B-3B-2 からの仕様。右ドックの ★ と［ここを見る］で示す）"}
+  ✓ [est.font] ラベル札の文字が 9px 以上（12px × 倍率）
+  ✓ [dock.weakest] 右ドックに ★ いちばん弱いところ と推定の説明
+  - measure.dock.lookHere: {"k":0.862,"chipFontPx":10.3,"nodes":9,"nodesHidden":0,"chips":9,"chipsHidden":0,"tags":1,"tagsHidden":0,"cuts":1,"cutsHidden":0,"hops":8,"hopsHidden":0,"estimatedHops":["この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"],"hiddenList":[],"panels":["ページ 16,64 200×150","プレビュー 232,64 392×229 畳み:on","表示設定 16,614 
+  - overlap7c0.dock.lookHere: {"nodes":9,"covered":0,"offscreen":0,"coveredList":[]}
+  ✓ [dock.lookHere.nodes] dock.lookHere: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）
+  ✓ [dock.lookHere.all] dock.lookHere: 札・推定の印・切断の印・接続線も隠れていない
+  ✓ [dock.lookHere] 右ドックの［ここを見る］で最弱環のホップを選ぶ（右ドックがホップの説明に変わり、経路は隠れない）
+  ✓ [dock.badge] 番号キー 6 でステップを選ぶと右ドックが追従する
+  - measure.dock.badge6: {"k":0.862,"chipFontPx":10.3,"nodes":9,"nodesHidden":0,"chips":9,"chipsHidden":0,"tags":1,"tagsHidden":0,"cuts":1,"cutsHidden":0,"hops":8,"hopsHidden":0,"estimatedHops":["この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"],"hiddenList":[],"panels":["ページ 16,64 200×150","プレビュー 232,64 392×229 畳み:on","表示設定 16,614 
+  - overlap7c0.dock.badge6: {"nodes":9,"covered":0,"offscreen":0,"coveredList":[]}
+  ✓ [dock.badge6.nodes] dock.badge6: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）
+  ✓ [dock.badge6.all] dock.badge6: 札・推定の印・切断の印・接続線も隠れていない
+
+## K6 ［全体表示］を押す
+  - measure.fit.folded: {"k":0.718,"chipFontPx":8.6,"nodes":9,"nodesHidden":0,"chips":9,"chipsHidden":0,"tags":1,"tagsHidden":0,"cuts":1,"cutsHidden":0,"hops":8,"hopsHidden":0,"estimatedHops":["この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"],"hiddenList":[],"panels":["ページ 16,64 200×150","プレビュー 232,64 392×229 畳み:on","表示設定 16,614 2
+  - overlap7c0.fit.folded: {"nodes":9,"covered":0,"offscreen":0,"coveredList":[]}
+  ✓ [fit.folded.nodes] fit.folded: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）
+  ✓ [fit.folded.all] fit.folded: 札・推定の印・切断の印・接続線も隠れていない
+  ✓ [fit.pre] 前提: プレビューと「プロジェクトと実行」を広げた
+  - measure.expanded.both: {"k":0.35,"chipFontPx":4.2,"nodes":9,"nodesHidden":0,"chips":9,"chipsHidden":0,"tags":1,"tagsHidden":0,"cuts":1,"cutsHidden":0,"hops":8,"hopsHidden":0,"estimatedHops":["この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"],"hiddenList":[],"panels":["ページ 16,64 200×150","プレビュー 232,64 392×563 畳み:off","表示設定 16,614 2
+  - overlap7c0.expanded.both: {"nodes":9,"covered":0,"offscreen":0,"coveredList":[]}
+  ✓ [fit.folds] ［全体表示］（0 キー）でプレビューと「プロジェクトと実行」が畳まれる
+  - measure.fit.fromExpanded: {"k":0.718,"chipFontPx":8.6,"nodes":9,"nodesHidden":0,"chips":9,"chipsHidden":0,"tags":1,"tagsHidden":0,"cuts":1,"cutsHidden":0,"hops":8,"hopsHidden":0,"estimatedHops":["この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"],"hiddenList":[],"panels":["ページ 16,64 200×150","プレビュー 232,64 392×229 畳み:on","表示設定 16,614 2
+  - overlap7c0.fit.fromExpanded: {"nodes":9,"covered":0,"offscreen":0,"coveredList":[]}
+  ✓ [fit.fromExpanded.nodes] fit.fromExpanded: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）
+  ✓ [fit.fromExpanded.all] fit.fromExpanded: 札・推定の印・切断の印・接続線も隠れていない
+
+## K7 特定不能な要素・由来が切れる要素を選ぶ
+  ✓ [nav.expands] 移動するとページの表示が広がる
+  - pick g-shadow: {"selection":"resolved","at":"src/app/lin-g/page.tsx:28:7","reason":"","lineage":"cut","lineageReason":"no-reference","outcome":"","cands":"","docSeq":"7"}
+  ✓ [cut.lineage] 由来が切れる（理由つき）
+  - measure.cut: {"k":1.25,"chipFontPx":15,"nodes":2,"nodesHidden":0,"chips":2,"chipsHidden":0,"tags":0,"tagsHidden":0,"cuts":1,"cutsHidden":0,"hops":1,"hopsHidden":0,"estimatedHops":[],"hiddenList":[],"panels":["ページ 16,64 200×150","プレビュー 232,64 392×207 畳み:on","表示設定 16,614 236×196","全体 16,840 236×124","キャンバス操作 743,6
+  - overlap7c0.cut: {"nodes":2,"covered":0,"offscreen":0,"coveredList":[]}
+  ✓ [cut.nodes] cut: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）
+  ✓ [cut.all] cut: 札・推定の印・切断の印・接続線も隠れていない
+  - dock: 詳細 ⏎ 経路 ⏎ 固定 ⏎ 選んだ値 — 描画位置と値の由来 ⏎ 描画位置 ⏎ 特定済み ⏎ 実測 ⏎ src/app/lin-g/page.tsx:28 ⏎ LinG ⏎ 値の由来 ⏎ 未確認 ⏎ DB のどのテーブル・カラムから来たかは、まだ分かっていません ⏎ 切れた段階 ⏎ 静的解析 ⏎ 理由 ⏎ 静的解析で、この値からデータ取得の結果への参照の連鎖を解けません（定数・追えない関数・条件の判定など）（固定値の経路 1 本） ⏎  ⏎ 3 か所のうち 0 か所が推定です。「実測」は描画位置までの話で、値の出所（DB）が実測で分かったという意味ではありません。 ⏎  ⏎ 描画位置＝この値を画面に描いたコードの場所。値の由来＝その値が DB のどのカラムから来たか
+  - pick vendor: {"selection":"unresolved","at":"","reason":"anchor-missing","lineage":"","lineageReason":"","outcome":"","cands":"","docSeq":""}
+  ✓ [unres.status] 外部 UI の要素は「特定できません」
+  ✓ [unres.folded] 特定できなくても、選んだ後は経路図（理由の図）を優先する
+  - measure.unresolved: {"k":1.25,"chipFontPx":15,"nodes":1,"nodesHidden":0,"chips":1,"chipsHidden":0,"tags":0,"tagsHidden":0,"cuts":1,"cutsHidden":0,"hops":0,"hopsHidden":0,"estimatedHops":[],"hiddenList":[],"panels":["ページ 16,64 200×150","プレビュー 232,64 392×188 畳み:on","表示設定 16,614 236×196","全体 16,840 236×124","キャンバス操作 743,6
+  - overlap7c0.unresolved: {"nodes":1,"covered":0,"offscreen":0,"coveredList":[]}
+  ✓ [unresolved.nodes] unresolved: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）
+  ✓ [unresolved.all] unresolved: 札・推定の印・切断の印・接続線も隠れていない
+  ✓ [unres.dock] 右ドックに特定できない理由
+
+## K8 実行パネルとプレビューを展開・収納する（マウスとキーボード）
+  - measure.k8.base: {"k":0.862,"chipFontPx":10.3,"nodes":9,"nodesHidden":0,"chips":9,"chipsHidden":0,"tags":1,"tagsHidden":0,"cuts":1,"cutsHidden":0,"hops":8,"hopsHidden":0,"estimatedHops":["この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"],"hiddenList":[],"panels":["ページ 16,64 200×150","プレビュー 232,64 392×229 畳み:on","表示設定 16,614 
+  - overlap7c0.k8.base: {"nodes":9,"covered":0,"offscreen":0,"coveredList":[]}
+  ✓ [k8.base.nodes] k8.base: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）
+  ✓ [k8.base.all] k8.base: 札・推定の印・切断の印・接続線も隠れていない
+  - keep.before: {"selection":"resolved","at":"src/app/lin-a/page.tsx:18:11","lineage":"linked","docSeq":"10","loads":"8","conn":"8","obsShown":"10","session":"2026-11-02T12:36:57.360Z","nodes":9}
+  - tabs to preview fold: 11
+  ✓ [kbd.reachPv] Tab だけでプレビューの［ページを表示］に届く
+  ✓ [kbd.focusRing] フォーカスが見える（:focus-visible）
+  ✓ [kbd.pvExpand] Enter でページの表示を広げる
+  ✓ [kbd.pvKeep] 広げても選択・表示経路・観測・文書が変わらない（再読み込みしない）
+  - measure.pv.expanded: {"k":0.522,"chipFontPx":6.3,"nodes":9,"nodesHidden":0,"chips":9,"chipsHidden":0,"tags":1,"tagsHidden":0,"cuts":1,"cutsHidden":0,"hops":8,"hopsHidden":0,"estimatedHops":["この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"],"hiddenList":[],"panels":["ページ 16,64 200×150","プレビュー 232,64 392×563 畳み:off","表示設定 16,614 
+  - overlap7c0.pv.expanded: {"nodes":9,"covered":0,"offscreen":0,"coveredList":[]}
+  ✓ [pv.sameDoc] 広げると同じページ（/lin-a）がそのまま見える
+  ✓ [kbd.pvFold] もう一度 Enter で畳む
+  ✓ [kbd.pvKeep2] 畳んでも選択・表示経路・観測・文書が変わらない
+  - measure.pv.refolded: {"k":0.862,"chipFontPx":10.3,"nodes":9,"nodesHidden":0,"chips":9,"chipsHidden":0,"tags":1,"tagsHidden":0,"cuts":1,"cutsHidden":0,"hops":8,"hopsHidden":0,"estimatedHops":["この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"],"hiddenList":[],"panels":["ページ 16,64 200×150","プレビュー 232,64 392×229 畳み:on","表示設定 16,614 
+  - overlap7c0.pv.refolded: {"nodes":9,"covered":0,"offscreen":0,"coveredList":[]}
+  ✓ [pv.refolded.nodes] pv.refolded: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）
+  ✓ [pv.refolded.all] pv.refolded: 札・推定の印・切断の印・接続線も隠れていない
+  - tabs to runtime fold: 32
+  ✓ [kbd.reachRt] Tab だけで「プロジェクトと実行」の［詳細］に届く
+  ✓ [kbd.rtExpand] Space で詳細を開く（所見・計装・環境変数が見える）
+  - measure.rt.expanded: {"k":0.557,"chipFontPx":6.7,"nodes":9,"nodesHidden":0,"chips":9,"chipsHidden":0,"tags":1,"tagsHidden":0,"cuts":1,"cutsHidden":0,"hops":8,"hopsHidden":0,"estimatedHops":["この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"],"hiddenList":[],"panels":["ページ 16,64 200×150","プレビュー 232,64 392×229 畳み:on","表示設定 16,614 2
+  - overlap7c0.rt.expanded: {"nodes":9,"covered":0,"offscreen":0,"coveredList":[]}
+  ✓ [kbd.rtFold] もう一度 Space で畳む
+  ✓ [kbd.rtKeep] 開閉しても選択・表示経路・観測・文書が変わらない
+  ✓ [kbd.rtClose] 操作バーの［実行］を Enter で閉じられる
+  ✓ [kbd.rtOpen] もう一度 Enter で開く（実行中なので畳んだまま）
+  - measure.rt.reopened: {"k":0.862,"chipFontPx":10.3,"nodes":9,"nodesHidden":0,"chips":9,"chipsHidden":0,"tags":1,"tagsHidden":0,"cuts":1,"cutsHidden":0,"hops":8,"hopsHidden":0,"estimatedHops":["この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"],"hiddenList":[],"panels":["ページ 16,64 200×150","プレビュー 232,64 392×229 畳み:on","表示設定 16,614 
+  - overlap7c0.rt.reopened: {"nodes":9,"covered":0,"offscreen":0,"coveredList":[]}
+  ✓ [rt.reopened.nodes] rt.reopened: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）
+  ✓ [rt.reopened.all] rt.reopened: 札・推定の印・切断の印・接続線も隠れていない
+  - measure.leftClosed: {"k":0.943,"chipFontPx":11.3,"nodes":9,"nodesHidden":0,"chips":9,"chipsHidden":0,"tags":1,"tagsHidden":0,"cuts":1,"cutsHidden":0,"hops":8,"hopsHidden":0,"estimatedHops":["この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"],"hiddenList":[],"panels":["プレビュー 232,64 392×229 畳み:on","キャンバス操作 743,64 481×36","プロジェクトと実
+  - overlap7c0.leftClosed: {"nodes":9,"covered":0,"offscreen":0,"coveredList":[]}
+  ✓ [leftClosed.nodes] leftClosed: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）
+  ✓ [leftClosed.all] leftClosed: 札・推定の印・切断の印・接続線も隠れていない
+  - measure.leftReopened: {"k":0.862,"chipFontPx":10.3,"nodes":9,"nodesHidden":0,"chips":9,"chipsHidden":0,"tags":1,"tagsHidden":0,"cuts":1,"cutsHidden":0,"hops":8,"hopsHidden":0,"estimatedHops":["この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"],"hiddenList":[],"panels":["ページ 16,64 200×150","プレビュー 232,64 392×229 畳み:on","表示設定 16,614 
+  - overlap7c0.leftReopened: {"nodes":9,"covered":0,"offscreen":0,"coveredList":[]}
+  ✓ [leftReopened.nodes] leftReopened: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）
+  ✓ [leftReopened.all] leftReopened: 札・推定の印・切断の印・接続線も隠れていない
+  ✓ [repick.expand] 畳んだ状態の［選択］で、ページの表示が広がり選択モードに入る
+  - repick: {"selection":"resolved","at":"src/app/lin-a/page.tsx:18:11","reason":"","lineage":"linked","lineageReason":"","outcome":"confirmed","cands":"poc.listings.region","docSeq":"10"}
+  ✓ [repick.linked] 別の要素（2つ目の li）を選べる・DB カラムまで結ばれる
+  - measure.repick.explore: {"k":0.862,"chipFontPx":10.3,"nodes":9,"nodesHidden":0,"chips":9,"chipsHidden":0,"tags":1,"tagsHidden":0,"cuts":1,"cutsHidden":0,"hops":8,"hopsHidden":0,"estimatedHops":["この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"],"hiddenList":[],"panels":["ページ 16,64 200×150","プレビュー 232,64 392×229 畳み:on","表示設定 16,614 
+  - overlap7c0.repick.explore: {"nodes":9,"covered":0,"offscreen":0,"coveredList":[]}
+  ✓ [repick.explore.nodes] repick.explore: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）
+  ✓ [repick.explore.all] repick.explore: 札・推定の印・切断の印・接続線も隠れていない
+
+## K9 停止・再起動する
+  - stop: {"ms":1870,"preview":"stopped","selection":"cleared"}
+  ✓ [stop.full] 停止中は「プロジェクトと実行」を全部出す（起動し直せる）
+  ✓ [stop.pv] 停止中のプレビューは、停止していると読める（畳まない）
+  - measure.stopped: {"k":1.25,"chipFontPx":15,"nodes":0,"nodesHidden":0,"chips":0,"chipsHidden":0,"tags":0,"tagsHidden":0,"cuts":0,"cutsHidden":0,"hops":0,"hopsHidden":0,"estimatedHops":[],"hiddenList":[],"panels":["ページ 16,64 200×145","プレビュー 232,64 392×464","表示設定 16,614 236×196","全体 16,840 236×61","キャンバス操作 743,64 481×3
+  - overlap7c0.stopped: {"nodes":0,"covered":0,"offscreen":0,"coveredList":[]}
+  - restart: {"preview":"live","ms":2464}
+  ✓ [restart.newPid] 再起動で別のプロセスになる
+  ✓ [restart.compact] 再起動後、実行中はまた畳む
+  ✓ [restart.selCleared] 前の起動の選択は残らない
+  ✓ [restart.linked] 再起動後も DB カラムまで結ばれる
+  - measure.restart.explore: {"k":0.862,"chipFontPx":10.3,"nodes":9,"nodesHidden":0,"chips":9,"chipsHidden":0,"tags":1,"tagsHidden":0,"cuts":1,"cutsHidden":0,"hops":8,"hopsHidden":0,"estimatedHops":["この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"],"hiddenList":[],"panels":["ページ 16,64 200×150","プレビュー 232,64 392×229 畳み:on","表示設定 16,614 
+  - overlap7c0.restart.explore: {"nodes":9,"covered":0,"offscreen":0,"coveredList":[]}
+  ✓ [restart.explore.nodes] restart.explore: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）
+  ✓ [restart.explore.all] restart.explore: 札・推定の印・切断の印・接続線も隠れていない
+
+判定の材料: 77 件中 0 件が不成立 []

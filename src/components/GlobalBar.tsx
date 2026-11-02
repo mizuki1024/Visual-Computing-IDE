@@ -21,7 +21,9 @@ const DOT: Record<string, string> = {
 };
 
 export default function GlobalBar() {
-  const { data } = useExplore();
+  const { data, placeholder, live: liveSel } = useExplore();
+  /* 7C-3: プロジェクトの空の状態では、経路が無い。「切断なし」と言わない */
+  const noPath = !!placeholder && !liveSel;
   const { runtime, inspection } = useRuntime();
   const cuts = data.cuts;
   // 実測の状態を出すのは、IDE が実際に何かを掴んでいるときだけ
@@ -64,16 +66,18 @@ export default function GlobalBar() {
         * 意味しない。推定の関係が残っていれば、確からしさは最弱環が決める
         * （OBS-10）。文言はそこに踏み込まない。
         */}
-      <Why reason={cuts.length
+      <Why reason={noPath
+        ? 'まだ経路がありません。値を選ぶと、その経路の対応範囲をここに出します。'
+        : cuts.length
         ? `追跡できなかった箇所が ${cuts.length} 件あります：${cuts[0].kind}`
         : 'この経路には、追跡できなかった箇所がありません。'}
-        detail={cuts.length
+        detail={noPath ? undefined : cuts.length
           ? cuts.map((c) => c.where).join(' / ')
           : '切断が無いことは「全部実測できた」ことを意味しません。'
             + '推定の関係が残っている場合、経路全体の確からしさはいちばん弱いところが決めます。'}>
         <div className="sup">
           <span aria-hidden>◬</span> 対応範囲{' '}
-          <b>{cuts.length ? `部分対応・${cuts.length}件` : '切断なし'}</b>
+          <b>{noPath ? '経路なし' : cuts.length ? `部分対応・${cuts.length}件` : '切断なし'}</b>
         </div>
       </Why>
 
@@ -115,6 +119,17 @@ export default function GlobalBar() {
               </div>
             </Why>
           </>
+        )
+        : placeholder
+        ? (
+          /* 7C-3: プロジェクトを開いて、まだ起動していない。データセットの記録（合成デモの実行環境）を出さない */
+          <Why align="r" reason="開発サーバーはまだ起動していません。"
+            detail="右の「プロジェクトと実行」で［起動］を押すと、ここに状態が出ます。">
+            <div className="chipbar" aria-disabled="true" data-runtime-chip="not-started">
+              <span className="dot" style={{ background: 'var(--tx4)' }} />
+              開発サーバー 未起動
+            </div>
+          </Why>
         )
         : (
           <>

@@ -17,7 +17,8 @@ const PAD = 8;
 
 export default function MinimapPanel() {
   const { data, view, viewport } = useExplore();
-  const page = summarizePage(data);
+  // 7C-3: 経路の無いデータセット（プロジェクトの空の状態）では、ページの要約を作らない
+  const page = data.nodes.length ? summarizePage(data) : null;
   const c = contentBounds(data);
   // 視野の枠が常に見えるよう、内容の範囲を少し広げた世界を描く
   const m = 0.14;
@@ -36,8 +37,9 @@ export default function MinimapPanel() {
 
   return (
     <FloatingPanel id="minimap" title="全体"
-      right={<i>{page.pathShown} / {page.pathTotal} 経路</i>}
+      right={<i>{page ? `${page.pathShown} / ${page.pathTotal} 経路` : '経路なし'}</i>}
       style={{ left: 16, width: 236, ...(viewport.h >= 952 ? { top: 792 } : { bottom: LEFT_COLUMN_BOTTOM.minimap }) }}>
+      {!page ? <p className="pgnone">まだ経路がありません</p> : (
       <div className="mmwrap">
         <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label="全体図">
           <defs><clipPath id="mmclip"><rect x="0" y="0" width={W} height={H} /></clipPath></defs>
@@ -64,6 +66,7 @@ export default function MinimapPanel() {
             stroke="#7e76bd" strokeWidth="1.2" opacity=".8" clipPath="url(#mmclip)" />
         </svg>
       </div>
+      )}
     </FloatingPanel>
   );
 }

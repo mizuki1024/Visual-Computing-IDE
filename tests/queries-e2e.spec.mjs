@@ -622,7 +622,9 @@ try {
   const oldSql = new Set(old.dataAccess.map((d) => d.spanId));
   await rtPanel().locator('.rt-b', { hasText: '停止する' }).click();
   await waitPv('stopped', 60000);
-  eq('停止したらキャンバスは元のデータセット（ノード数）', await page.locator('g.nd').count(), nodesBase);
+  /* 7C-3（P1-9）: 停止後は前の観測も合成デモも描かない */
+  eq('停止したらキャンバスに経路を描かない（前の観測も合成デモも出さない）', await page.locator('g.nd').count(), 0);
+  ok('前提: プロジェクトを開く前は合成デモを描いていた', nodesBase > 0, nodesBase);
   eq('停止中は観測を返さない', await staleOf(run1), '200/null/stale-run');
   await rtPanel().locator('.rt-b.go', { hasText: '起動する' }).click();
   await waitPv('live');

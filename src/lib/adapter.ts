@@ -15,7 +15,7 @@
  * 「画面に出したいから実測にする」経路は存在しない。
  * ========================================================================== */
 import {
-  ATTRIBUTION_SCOPE_NOTE, hop, node, type Convergence, type Cut, type Dataset, type ModelHop,
+  ATTRIBUTION_SCOPE_NOTE, CUT_STAGE, hop, node, type Convergence, type Cut, type Dataset, type ModelHop,
   type ModelHopInput, type ModelNode, type OffPath, type OverviewRow, type SourceId,
 } from './model';
 import type {
@@ -638,6 +638,7 @@ export function fromObservation(obs: ObservationBundle): AdapterResult {
     sub: 'props の由来（応答のどの項目がこの値になったか）',
     where: 'コンポーネントの props / 応答の項目',
     kind: 'derives は構造的に推定（02a 3.5.1）。本PoCでは関係を作らない',
+    stage: CUT_STAGE.notEvaluated,
   };
   /*
    * この通信を開始した箇所の証拠が無いときだけ、通信から切断を生やす。
@@ -1475,6 +1476,7 @@ export function fromRscObservation(obs: ObservationBundle): AdapterResult {
       kind: lin
         ? '静的解析で参照の連鎖を解けなかったため、関係を作らない（OBS-05）'
         : 'derives は構造的に推定（02a 3.5.1）。本PoCでは関係を作らない',
+      stage: lin && lin.outcome === 'none' ? LINEAGE_STAGE_LABEL.static : CUT_STAGE.notEvaluated,
     });
   }
   if (vc.componentId === undefined && !hasAttribution) {
@@ -1727,6 +1729,7 @@ export function fromLiveSelection(input: LiveSelectionInput): AdapterResult {
         sub: input.lineage?.cut ? lineageCutText(input.lineage) : 'props の由来（この値がどこから来たか）',
         where: 'コンポーネントの props / 通信の応答',
         kind: 'derives は構造的に推定（02a 3.5.1）。7B-2 では関係を作らない',
+        stage: input.lineage?.cut ? LINEAGE_STAGE_LABEL[input.lineage.cut.stage] : CUT_STAGE.pending,
       });
     }
   }
@@ -1764,6 +1767,7 @@ export function fromLiveSelection(input: LiveSelectionInput): AdapterResult {
       sub: label,
       where: 'React コンポーネント / ソース位置',
       kind: '根拠が無いため、コンポーネントを作らない（推測で埋めない）',
+      stage: CUT_STAGE.render,
     });
     skipped.push({ what: `選択 <${sel.tag}>`, why: `特定不能: ${why.reason}${why.detail ? ` — ${why.detail}` : ''}` });
   }
@@ -2020,6 +2024,9 @@ export function fromLiveRun(obs: LiveRunObservation, seq: number, opts: LiveRunO
               ? '由来の評価は別の通信（この要素を描いた文書）について行いました。この通信の SQL とは結びません'
               : 'この値が右の SQL の結果から来たかは確認していません（props の由来）',
           kind: 'supplies / derives を作らない。同じコンポーネントの中にあることを根拠にしない',
+          stage: opts.lineage?.cut
+            ? LINEAGE_STAGE_LABEL[opts.lineage.cut.stage]
+            : opts.lineage && opts.lineage.status === 'linked' ? CUT_STAGE.otherDocument : CUT_STAGE.pending,
         }
         : c);
     }
@@ -2377,6 +2384,7 @@ export function fromLiveRun(obs: LiveRunObservation, seq: number, opts: LiveRunO
       sub: '由来の取得位置のノードを描けなかったため、線を引いていません',
       where: 'コンポーネントの props / 取得結果の項目',
       kind: '描けない端点に線を引かない',
+      stage: CUT_STAGE.drawing,
     });
   }
   /* 選択した要素のコンポーネントに、SQL の位置との関係を書く */

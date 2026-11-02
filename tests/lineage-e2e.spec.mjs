@@ -546,6 +546,7 @@ try {
   eq('文書を同定しない（client-navigation）', await pvAttr('data-doc-binding'), 'client-navigation');
   eq('由来は結ばない・欠けた段は「文書の同定」', [await pvAttr('data-lineage'), await pvAttr('data-lineage-reason'), await pvAttr('data-lineage-stage')], ['cut', 'document-unidentified', 'document']);
   ok('パネルの行に理由（クライアント側の遷移）', (await rowText()).includes('クライアント側の遷移'), await rowText());
+  eq('右ドック（7C-3）: 切れた段階は「文書の同定」・値の由来は「未確認」', [await page.locator('aside.dock [data-vo="stage"]').innerText().catch(() => ''), (await page.locator('aside.dock [data-vo="lineage"]').innerText().catch(() => '')).includes('未確認')], ['文書の同定', true]);
   {
     const ds = datasetOf(rSoft);
     eq('supplies を作らない', relOf(ds, 'supplies').length, 0);
@@ -562,6 +563,16 @@ try {
   eq('g-shadow（列名と同じ名前の局所変数・定数）: 結ばない（no-reference / 静的解析）', [await pvAttr('data-lineage-reason'), await pvAttr('data-lineage-stage')], ['no-reference', 'static']);
   eq('g-shadow: 文書は同定できている（切れたのは静的解析の段）', await pvAttr('data-doc-binding'), 'identified');
   ok('g-shadow: パネルとキャンバスに理由（静的解析）', (await rowText()).includes('静的解析') && (await canvasText()).includes('静的解析'));
+  {
+    /* 7C-3（P1-10）: 右ドックで、描画位置（実測で特定済み）と値の由来（未確認）を分け、切れた段と理由を出す */
+    const vo = (k) => page.locator(`aside.dock [data-vo="${k}"]`).innerText({ timeout: 3000 }).catch(() => '');
+    const render = await vo('render');
+    ok('右ドック: 描画位置は「特定済み」「実測」とソース位置', render.includes('特定済み') && render.includes('実測') && render.includes('src/app/lin-g/page.tsx'), render);
+    ok('右ドック: 値の由来は「未確認」', (await vo('lineage')).includes('未確認'));
+    eq('右ドック: 切れた段階は「静的解析」', await vo('stage'), '静的解析');
+    ok('右ドック: 理由（参照の連鎖を解けない）', (await vo('reason')).includes('参照の連鎖'), await vo('reason'));
+    ok('右ドック: 見出し「この値の出所」を出さない（取得元が分かったように見せない）', !(await dockText()).includes('この値の出所'));
+  }
   {
     const o = await obsOf(run1);
     const gDoc = o.exchanges.filter((e) => e.path === '/lin-g' && e.docToken).at(-1);
@@ -655,7 +666,9 @@ try {
   const oldSel = linCalls.find((c) => c.body.selection.path === '/lin-a').body.selection;
   await rtPanel().locator('.rt-b', { hasText: '停止する' }).click();
   await waitPv('stopped', 60000);
-  eq('停止したらキャンバスは元のデータセット', await page.locator('g.nd').count(), nodesBase);
+  /* 7C-3（P1-9）: 停止後は前の選択・観測も合成デモも描かない */
+  eq('停止したらキャンバスに経路を描かない（前の選択も合成デモも出さない）', await page.locator('g.nd').count(), 0);
+  ok('前提: プロジェクトを開く前は合成デモを描いていた', nodesBase > 0, nodesBase);
   phase.negativeApi = true;
   eq('停止中は由来の API が観測を返さない（409）', (await callLineage({ run: run1, selection: oldSel, document: { token: tokA2, soft: false } })).status, 409);
   phase.negativeApi = false;

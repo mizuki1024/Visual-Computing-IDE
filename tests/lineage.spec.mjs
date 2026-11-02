@@ -144,15 +144,22 @@ await shot('lin-g-stage0');
 
 await page.locator('g.nd').first().click();
 await page.waitForTimeout(350);
-const claimG = await page.locator('.sum .claim .src').first().innerText();
-ok('主張はコードの位置までで止まる', claimG.startsWith('src/app/lin-g/page.tsx'), claimG);
-ok('主張にテーブル名・カラム名が出ない',
+/* 7C-3（P1-10）: 描画位置（実測）と値の由来（未確認）を分け、切れた段と理由を右ドックに出す */
+const claimG = await page.locator('.sum [data-vo="render"]').first().innerText();
+ok('描画位置はコードの位置までで止まる', claimG.includes('src/app/lin-g/page.tsx'), claimG);
+ok('描画位置にテーブル名・カラム名が出ない',
   !claimG.includes('poc.listings') && !claimG.includes('region'), claimG);
-eq('経路全体の語は「実測」である（嘘の推定を足していない）',
-  await page.locator('.sum .chip-est').first().innerText(), '実測');
+eq('描画位置の語は「実測」である（嘘の推定を足していない）',
+  await page.locator('.sum [data-vo="render"] .chip-est').first().innerText(), '実測');
+ok('値の由来は「未確認」', (await page.locator('.sum [data-vo="lineage"]').innerText()).includes('未確認'));
+eq('切れた段は「静的解析」', await page.locator('.sum [data-vo="stage"]').innerText(), '静的解析');
+ok('理由（静的解析でも候補を出せなかった）が右ドックにある',
+  (await page.locator('.sum [data-vo="reason"]').innerText()).includes('静的解析でも候補を出せませんでした'));
+ok('見出し「この値の出所」を出さない（出所が実測で分かったように読ませない）',
+  !(await page.locator('.sum').first().innerText()).includes('この値の出所'));
 eq('★ブロックは出ない（推定の関係が1つも無い）', await count('.weak'), 0);
-ok('たどれていないことが明示される',
-  (await page.locator('.sum .hint').first().innerText()).includes('ここから先はたどれていません'));
+ok('「実測」は描画位置までの話だと明示される',
+  (await page.locator('.sum').first().innerText()).includes('描画位置までの話'));
 eq('番号付きリストに推定の関係行は無い', await count('.steps .rel.est'), 0);
 await shot('lin-g-selected');
 
@@ -212,6 +219,18 @@ ok('既存の RSC データセットでは ② と ②" の間に線が無いま
   }));
 ok('既存の RSC データセットの主張は従来どおりコードの位置までである',
   derive.summarize(RSC).truncated === true, derive.summarize(RSC).claim);
+/* 7C-3（P1-10）: DB に届いていない値だけ、描画位置と値の由来を分ける。届いている経路は従来どおり */
+eq('valueOrigin: DB に届いている経路（合成・PoC-01・ケースA・ケースC）では使わない',
+  [SYNTH, MEASURED, LIN_A, LIN_C].map((d) => derive.valueOrigin(d)).every((v) => v === null), true);
+eq('valueOrigin: 値のノードが無い経路（Gate A）では使わない', derive.valueOrigin(SVC), null);
+{
+  const g = derive.valueOrigin(LIN_G);
+  eq('valueOrigin(ケースG): 描画位置は特定済み・実測', `${g?.render.status}/${g?.render.observability}`, 'identified/measured');
+  eq('valueOrigin(ケースG): 切れた段は静的解析', g?.stage, '静的解析');
+  for (const [name, d] of [['PoC-03', ELEMENTS], ['PoC-05', FLOWS], ['PoC-02', RSC]]) {
+    eq(`valueOrigin(${name}): 由来を評価していない記録だと言う`, derive.valueOrigin(d)?.stage, '値の由来の評価（この記録では行っていません）');
+  }
+}
 for (const [name, key, n] of [['合成', 'synthetic', 7], ['PoC-01', 'measured', 7],
   ['PoC-03', 'elements', 9], ['PoC-05', 'flows', 10], ['PoC-02', 'rsc', 10],
   ['PoC-02(Gate A)', 'rsc-svc', 9]]) {

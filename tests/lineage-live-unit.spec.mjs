@@ -32,6 +32,9 @@ const OB = require_('../.libjs/server/observations.js');
 const GW = require_('../.libjs/server/previewGateway.js');
 const AC = require_('../.libjs/server/access.js');
 const LN = require_('../.libjs/server/lineage.js');
+const D = require_('../.libjs/lib/derive.js');
+const L = require_('../.libjs/lib/layout.js');
+const PH = require_('../.libjs/lib/projectPhase.js');
 const REPO = path.resolve(import.meta.dirname, '..');
 const FIX = path.join(REPO, 'poc', 'fixture-app');
 const SQLP = await import(path.join(REPO, 'poc', 'runner', 'lib', 'sqlparse.mjs'));
@@ -264,6 +267,9 @@ const cLinA = callOf(LINA, 'pool.query(');
   ok('変換: カラム poc.listings.region のノードがある', ds.nodes.some((n) => n.kind === 'column' && n.identifier === 'poc.listings.region'));
   eq('変換: validateDataset() を通過する', M.validateDataset(ds), []);
   ok('変換: 値のコンポーネントに「由来は未確認」の切断を付けない', !ds.cuts.some((c) => c.from === h.from));
+  /* 7C-3（P1-10）: 結べた経路の右ドックは従来どおり（描画位置と値の由来を分けた表示にしない） */
+  eq('右ドック（7C-3）: 結べた経路では valueOrigin を使わない', D.valueOrigin(L.layout(ds)), null);
+  eq('右ドック: 結べた経路の主張は従来どおり列まで・推定', [D.summarize(L.layout(ds)).claim, D.summarize(L.layout(ds)).observability], ['poc.listings . region', 'estimated']);
   ok('変換: 値のノードに文書の同定（通信 #1）と「値と SQL 結果の対応ではない」を書く', ds.nodes.find((n) => n.kind === 'value').overview.some((r) => r.v.includes('通信 #1') && r.v.includes('表示された値と SQL の結果の対応ではありません')));
   // 否定: 同じ評価を別の通信の描画に使わない
   const obs2 = makeObs({ exchanges: [{ seq: 1, path: '/lin-a', doc: DOC(1) }, { seq: 2, path: '/lin-a', doc: DOC(2) }], sql: [
@@ -404,6 +410,13 @@ console.log('\n6. 変換: 成立しない経路では線を作らず、理由を
     const only = A.fromLiveSelection({ ...selFor('/lin-a', aLinA, 'LinA'), lineage: l }).dataset;
     ok(`${name}: 選択だけの描画でも切断に理由を書く`, only.cuts.some((x) => x.sub.startsWith(stage)));
     eq(`${name}: 選択だけの描画に supplies は無い`, only.hops.filter((h) => h.relation === 'supplies').length, 0);
+    /* 7C-3（P1-10）: 右ドックは描画位置（実測で特定済み）と値の由来（未確認）を分け、切れた段と理由を出す */
+    for (const [how, d] of [['SQL と並べた描画', ds], ['選択だけの描画', only]]) {
+      const vo = D.valueOrigin(L.layout(d));
+      eq(`${name}（${how}）: 右ドックの描画位置は特定済み・実測`, [vo?.render.status, vo?.render.observability, vo?.render.at?.endsWith(':18')], ['identified', 'measured', true]);
+      eq(`${name}（${how}）: 右ドックの切れた段 = ${stage}`, vo?.stage, stage);
+      ok(`${name}（${how}）: 右ドックの理由は段の語を重ねず、理由の本文を出す`, !!vo && vo.reason.length > 0 && !vo.reason.startsWith(stage), vo?.reason);
+    }
   }
   /* 評価を持たない（7B-3B-1 の形の）並べ方は従来どおり結ばない */
   const plain = A.fromLiveRun(linAObs(), 1, { selection: selFor('/lin-a', aLinA, 'LinA') }).dataset;
@@ -417,6 +430,40 @@ console.log('\n6. 変換: 成立しない経路では線を作らず、理由を
   ok('supplies の端点（ソース位置）を落とすと validateDataset が拒否する', M.validateDataset(noEnd).some((v) => v.includes('endpoints')));
   const noOri = { ...ds, hops: ds.hops.map((h) => (h.relation === 'supplies' ? { ...h, orientation: 'along-data' } : h)) };
   ok('supplies の向きを along-data にすると validateDataset が拒否する（端点の型が合わない）', M.validateDataset(noOri).length > 0);
+}
+
+/* ========================================================================== */
+console.log('\n7. 右ドックの切断の段（7C-3 P1-10）と、プロジェクトを開いている間の空の状態（P1-9）');
+{
+  /* 評価を待っている間（選択だけ・由来の評価なし）は「まだ結果が無い」と言う。「出所が分かった」と言わない */
+  const pending = D.valueOrigin(L.layout(A.fromLiveSelection(selFor('/lin-a', aLinA, 'LinA')).dataset));
+  eq('評価の前: 描画位置は特定済み・段は「値の由来の評価（結果がまだありません）」', [pending?.render.status, pending?.stage], ['identified', '値の由来の評価（結果がまだありません）']);
+  /* 要素を特定できない（要素識別子が無い） */
+  const un = A.fromLiveSelection({ ...sel('/cards'), resolution: { status: 'unresolved', reason: 'anchor-missing', detail: '', context: null } }).dataset;
+  const vu = D.valueOrigin(L.layout(un));
+  eq('特定できない要素: 描画位置は特定できない・段は「描画位置の特定」', [vu?.render.status, vu?.stage], ['unidentified', '描画位置の特定']);
+  eq('特定できない要素: 理由は特定できなかった理由', vu?.reason, A.LIVE_UNRESOLVED_LABEL['anchor-missing']);
+  eq('切断の段は validateDataset に影響しない', M.validateDataset(un), []);
+
+  /* P1-9: 段階の決め方（画面は状態を作らない — 開発サーバーの状態と検出結果だけ） */
+  eq('プロジェクト未指定（idle・検出なし）→ null（合成デモを出してよい）', PH.projectPhaseOf('idle', false), null);
+  eq('状態が取れていない（null）・検出なし → null', PH.projectPhaseOf(null, false), null);
+  eq('検出済み・未起動 → opened', PH.projectPhaseOf('idle', true), 'opened');
+  eq('検証中・起動中 → starting', [PH.projectPhaseOf('validating', true), PH.projectPhaseOf('starting', true)], ['starting', 'starting']);
+  eq('実行中・停止処理中・停止・失敗', ['running', 'stopping', 'stopped', 'error'].map((s) => PH.projectPhaseOf(s, true)), ['running', 'stopping', 'stopped', 'error']);
+  const ctx = (phase, extra = {}) => ({ phase, name: 'poc01-fixture-app', restarted: false, blocked: false, ...extra });
+  const cards = ['opened', 'starting', 'running', 'stopping', 'stopped', 'error'].map((p) => PH.emptyCard(ctx(p)));
+  ok('空の状態の文面は4要素（何が起きたか・状態・わからないこと・次にすること）をすべて持つ', cards.every((c) => c.head && c.why && c.unknown && c.next), cards);
+  eq('起動前: 「まだ起動していません」と［起動］の案内', [/まだ起動していません/.test(cards[0].head), /［起動］/.test(cards[0].next)], [true, true]);
+  eq('起動中: ページを開いて値を選ぶ操作を案内する', /ページを開いて値を選んで/.test(cards[1].next), true);
+  eq('実行中・選択前: 「まだ経路がありません」と［選択］の案内', [cards[2].head, /［選択］/.test(cards[2].next)], ['まだ経路がありません', true]);
+  ok('停止後: 以前の起動の経路は表示しないと言う', /表示していません/.test(cards[4].why), cards[4]);
+  ok('再起動後: 新しい観測を待っていると言う', /新しい観測を待っています/.test(PH.emptyCard(ctx('running', { restarted: true })).why));
+  ok('起動できないプロジェクト: 「プロジェクトと実行」の理由へ案内する', /理由/.test(PH.emptyCard(ctx('opened', { blocked: true })).next));
+  const e = PH.emptyDataset(ctx('running'));
+  eq('空のデータセットはノード・ホップ・切断・経路外・ページを持たない（合成のものを1つも持たない）', [e.nodes.length, e.hops.length, e.cuts.length, e.offPath.nodes.length, e.pages.length], [0, 0, 0, 0, 0]);
+  ok('空のデータセットの注記は「合成デモは非表示」', e.notice.includes('合成デモは非表示'), e.notice);
+  ok('空のデータセットの名前は合成のアプリの名前ではない', e.project === 'poc01-fixture-app');
 }
 
 console.log(fails.length ? `\n✗ ${fails.length} 件失敗 / ${pass} 件通過` : `\n✓ すべて通過 — ${pass} 件通過 / 0 件失敗`);

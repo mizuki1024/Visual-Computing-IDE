@@ -238,6 +238,26 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 /* 注記 */
 .note{position:absolute;z-index:3;font-size:10px;line-height:1.6;border-radius:8px;padding:6px 11px;letter-spacing:.02em}
 .note.synth{color:#8a7a58;border:1px dashed #3d3626;background:rgba(10,9,6,.72);font-size:9.5px}
+/* 7C-3（P1-9）: プロジェクトを開いている間の空の状態と、明示的に選んだ合成デモの注記 */
+.cv-empty{position:absolute;z-index:3;left:268px;bottom:64px;width:min(430px,calc(100% - 268px - 362px));min-width:260px;
+  padding:13px 15px;border-radius:11px;border:1px solid var(--edge);background:rgba(15,18,24,.92);
+  box-shadow:0 10px 30px rgba(0,0,0,.45)}
+.cv-empty b{display:block;font-size:14px;color:var(--tx);letter-spacing:.02em}
+.cv-empty p{font-size:11.5px;line-height:1.65;color:var(--tx2);margin-top:7px}
+.cv-empty .pe-demo-line{font-size:10.5px;color:var(--tx3);margin-top:10px;padding-top:9px;border-top:1px dashed var(--line)}
+.pe-demo{height:22px;padding:0 8px;font-size:10.5px;margin:0 3px}
+.note.demo-banner{color:#e3c48f;border:1px solid rgba(194,160,110,.6);background:rgba(28,22,10,.94);font-size:11px;
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;max-width:520px}
+.note.demo-banner b{color:#f0d29c}
+.note.demo-banner .rt-b{height:22px;padding:0 8px;font-size:10.5px}
+.sum.pe .pe-head{font-size:14.5px;font-weight:600;color:var(--tx)}
+.pe-rows{display:grid;grid-template-columns:auto 1fr;gap:7px 12px;margin-top:12px;font-size:11.5px;line-height:1.6;align-items:baseline}
+.pe-rows dt{color:var(--tx3);white-space:nowrap}
+.pe-rows dd{color:var(--tx2)}
+.pe-rows dd.pe-next{color:var(--tx)}
+.dock-demo{margin:10px 14px 0;padding:8px 10px;border-radius:8px;font-size:11px;line-height:1.6;
+  color:#e3c48f;border:1px solid rgba(194,160,110,.45);background:rgba(194,160,110,.07)}
+.dock-demo .rt-b{height:22px;padding:0 8px;font-size:10.5px;margin-left:6px}
 
 /* ---------------------------------------------------------------- 右の固定ドック */
 .dock{flex:0 0 360px;width:360px;background:var(--panel);border-left:1px solid #1f2634;
@@ -255,6 +275,16 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .chip-est{font-size:10.5px;padding:2px 8px;border-radius:5px;color:#c3b9ee;
   border:1px dashed rgba(157,147,224,.5);background:rgba(157,147,224,.07);letter-spacing:.04em}
 .sum p{font-size:11.5px;line-height:1.62;color:var(--tx2);margin-top:9px}
+/* 7C-3（P1-10）: 描画位置と値の由来を分けて言う */
+.vo-rows{display:grid;grid-template-columns:auto 1fr;gap:7px 12px;font-size:11.5px;align-items:baseline}
+.vo-rows dt{color:var(--tx3);white-space:nowrap}
+.vo-rows dd{color:var(--tx);display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 7px;min-width:0}
+.vo-st{font-size:11px;font-weight:600;padding:1px 7px;border-radius:5px;white-space:nowrap}
+.vo-st.ok{color:#9ccbb3;border:1px solid rgba(120,183,154,.38);background:rgba(120,183,154,.08)}
+.vo-st.no{color:#d9b884;border:1px solid rgba(194,160,110,.42);background:rgba(194,160,110,.08)}
+.vo-at{font-family:var(--mono);font-size:12px;color:var(--tx);overflow-wrap:anywhere}
+.vo-sub{font-size:10.5px;color:var(--tx3);line-height:1.5}
+.vo-reason{font-size:11px;line-height:1.6;color:var(--tx2)}
 .hint{font-size:10px;line-height:1.6;color:var(--tx4);margin-top:7px;padding-top:7px;border-top:1px dashed var(--line)}
 .dtabs{display:flex;gap:4px;padding:9px 14px 0}
 .dtabs button{font-size:11px;padding:5px 13px;border-radius:7px;color:var(--tx3);border:1px solid transparent}

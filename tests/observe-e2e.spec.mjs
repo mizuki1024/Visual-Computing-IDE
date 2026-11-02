@@ -301,7 +301,9 @@ try {
   /* http の転送ホストは「信頼できる origin」ではないので、Chrome は Sec-Fetch-* を送らない。
    * そのとき種類は推測せず unknown になる（https の Codespaces なら document になるはず — 未検証） */
   ok('種類は Sec-Fetch-Dest があれば document、無ければ unknown（推測しない）', o1?.exchanges.filter((e) => e.path === '/').every((e) => e.kind === 'document' || e.kind === 'unknown'), o1?.exchanges.map((e) => e.kind));
-  eq('観測は自動では描かない（キャンバスは元のまま）', await page.locator('g.nd').count(), nodesBase);
+  /* 7C-3（P1-9）: 実行中・選択前は合成デモも描かない（「まだ経路がありません」） */
+  eq('観測は自動では描かない（経路はまだ無い。合成デモも描かない）', JSON.stringify([await page.locator('g.nd').count(), await page.locator('.cv-empty').getAttribute('data-project-phase')]), JSON.stringify([0, 'running']));
+  ok('前提: プロジェクトを開く前は合成デモを描いていた', nodesBase > 0, nodesBase);
   eq('中継は IDE の生存確認を描かない（中継を通らない処理は数だけ）', o1.exchanges.every((e) => e.startMs >= Date.parse(o1.session.startedAt)), true);
 
   /* ============================================ 2. 実行中のアプリから新しい HTTP・SQL を観測する */
@@ -438,8 +440,9 @@ try {
   await waitPv('stopped', 60000);
   eq('停止したら観測の行は出さない', await obsRow().count(), 0);
   ok('停止したら「実測中ではありません」と書く', (await pv().innerText()).includes('実測中ではありません'), await pv().innerText());
-  eq('停止したらキャンバスは元のデータセット（ノード数）', await page.locator('g.nd').count(), nodesBase);
-  eq('停止したらキャンバスの注記も元に戻る', await page.locator('.note.synth').innerText(), noticeBase);
+  eq('停止したらキャンバスに経路を描かない（前の観測も合成デモも出さない）', await page.locator('g.nd').count(), 0);
+  eq('停止したらキャンバスの注記はプロジェクトの空の状態（合成デモの注記に戻さない）', await page.locator('.note.synth').getAttribute('data-notice'), 'project-empty');
+  ok('停止したら注記は合成デモのものではない', (await page.locator('.note.synth').innerText()) !== noticeBase);
   eq('停止中は観測を返さない（observation: null・理由 stale-run）', await staleOf(run1), '200/null/stale-run');
   await shot('03-stopped');
 
@@ -452,7 +455,7 @@ try {
   const o7 = await obsOf(run2);
   ok('新しいセッション（開始時刻が違う）', o7 && o7.session.startedAt !== o1.session.startedAt);
   ok('新しいセッションに前の起動の通信が無い', o7.exchanges.every((e) => !traces1.has(e.trace?.traceId)) && o7.exchanges.every((e) => e.startMs >= Date.parse(run2.startedAt)), o7.exchanges);
-  eq('再起動直後はキャンバスに前の観測が残っていない', await page.locator('g.nd').count(), nodesBase);
+  eq('再起動直後はキャンバスに前の観測が残っていない（合成デモも描かない）', await page.locator('g.nd').count(), 0);
   ok('新しい観測の一覧に前の起動の通信が無い（/lin-d など）', !(await obsRow().innerText()).includes('/lin-d'));
 
   /* ---------------------------------------------- 7. 計装なしの起動: 情報が無ければ未観測と書く */

@@ -98,9 +98,9 @@ export default function FlowScene() {
         {/* ホップ（オブジェクトの後ろ） */}
         {hopEls('back')}
 
-        {/* ⑤ の分岐点。⑥ と ⑦ は ⑤ から分かれる（⑥→⑦ の線は存在しない） */}
-        <circle cx={branchPoint.x} cy={branchPoint.y} r={4 / Math.sqrt(k)}
-          fill="#0b0e14" stroke="#8aa4cc" strokeWidth={widthFor(k, 1.6)} />
+        {/* ⑤ の分岐点。⑥ と ⑦ は ⑤ から分かれる（⑥→⑦ の線は存在しない）。経路が無ければ描かない（7C-3） */}
+        {nodes.length > 0 && <circle cx={branchPoint.x} cy={branchPoint.y} r={4 / Math.sqrt(k)}
+          fill="#0b0e14" stroke="#8aa4cc" strokeWidth={widthFor(k, 1.6)} />}
 
         {/* 追跡できなかった箇所。線を消さずに止める */}
         {cuts.map((c, i) => <CutMarker key={i} cut={c} k={k} />)}
