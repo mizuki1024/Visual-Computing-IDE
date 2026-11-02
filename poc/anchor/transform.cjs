@@ -10,6 +10,9 @@
  *   3. `html` / `head` / `body` は注入しない（Next.js が所有する要素）。
  *   4. 識別子は `relPath:line:col` の決定的ハッシュ。再ビルドで変わらない。
  *      元のパスは DOM に出さない（マニフェスト経由で解く）。
+ *      **識別子は位置だけから決まるので、ソースが変わると同じ識別子が別の要素を指しうる**（06h レビュー F-01）。
+ *      そこで各要素に、変換した**ソース全体の版**（内容のハッシュ）を `data-vcide-rev` として並べて付け、
+ *      対応表にも同じ版を書く。IDE は「DOM の版 = 対応表の版 = いま読んだファイルの版」でなければ位置を出さない。
  *   5. 変換できなかった理由は捨てずに返す（特定不能を「無反応」にしない — FR-11b）。
  * ========================================================================== */
 const crypto = require('node:crypto');
@@ -27,6 +30,15 @@ const SKIP_TAGS = new Set(['html', 'head', 'body']);
 /** 02a 4章の識別子規約に合わせた不透明な ID。`relPath:line:col` から決まる。 */
 function anchorId(relPath, line, col) {
   return crypto.createHash('sha1').update(`${relPath}:${line}:${col}`).digest('hex').slice(0, 10);
+}
+
+/**
+ * ソースの版。変換に渡された**ファイルの内容そのもの**（UTF-8）の sha1 の先頭16桁。
+ * IDE（src/server/anchors.ts の sourceRevision）はファイルを読み直して同じ規則で計算し、照合する。
+ * 内容のハッシュなので元のソースは DOM から復元できない。
+ */
+function sourceRevision(code) {
+  return crypto.createHash('sha1').update(code, 'utf8').digest('hex').slice(0, 16);
 }
 
 const isPascal = (s) => typeof s === 'string' && /^[A-Z]/.test(s);
@@ -52,10 +64,11 @@ function declName(node) {
 /**
  * @param {string} code  元のソース（.tsx / .jsx）
  * @param {string} relPath プロジェクトルートからの相対パス（識別子の素）
- * @returns {{code:string, anchors:object[], skipped:object[], usages:object[],
+ * @returns {{code:string, rev:string, anchors:object[], skipped:object[], usages:object[],
  *            components:object[]}}
  */
 function transform(code, relPath) {
+  const rev = sourceRevision(code);
   const sf = ts.createSourceFile(
     relPath, code, ts.ScriptTarget.Latest, /* setParentNodes */ false,
     /\.tsx?$/.test(relPath) ? ts.ScriptKind.TSX : ts.ScriptKind.JSX,
@@ -120,7 +133,7 @@ function transform(code, relPath) {
       id, tag: name, file: relPath, line: where.line, col: where.col,
       component: owner.name, componentLine: owner.line,
     });
-    edits.push({ at: open.tagName.end, text: ` data-vcide="${id}"` });
+    edits.push({ at: open.tagName.end, text: ` data-vcide="${id}" data-vcide-rev="${rev}"` });
   }
 
   function walk(node) {
@@ -145,7 +158,7 @@ function transform(code, relPath) {
   for (const e of [...edits].sort((a, b) => b.at - a.at)) {
     out = out.slice(0, e.at) + e.text + out.slice(e.at);
   }
-  return { code: out, anchors, skipped, usages, components };
+  return { code: out, rev, anchors, skipped, usages, components };
 }
 
-module.exports = { transform, anchorId, TS_LOAD_MS };
+module.exports = { transform, anchorId, sourceRevision, TS_LOAD_MS };

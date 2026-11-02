@@ -33,6 +33,7 @@ import {
 import {
   RELAY_ID_HEADER, RELAY_TRACE_HEADER, classifyRelayRequest, parseTraceparent, type LiveExchange,
 } from '../lib/liveObservation';
+import { PROTOCOL_VERSION } from '../lib/previewProtocol';
 
 /** 中継が自分で答えるパス。対象のアプリのパスと重ならない名前にする */
 export const AGENT_PREFIX = '/__vcide_preview/';
@@ -104,7 +105,7 @@ export function parentPatterns(cfg: AccessConfig): { s: string; h: string; p: st
  *      リスナーで止める）ので、アプリのスクリプトはこの port を手にできない
  *   3. 以後の知らせ（場所・選択）はその port だけで送る
  *
- * 送るもの: パス・タイトル・最初の文書の HTTP 状態・要素識別子・タグ名・何番目か・
+ * 送るもの: パス・タイトル・最初の文書の HTTP 状態・要素識別子・ソースの版（内容のハッシュ。F-01）・タグ名・何番目か・
  * テキストの文字数と文字種。**本文・属性・フォームの値・Cookie は送らない。**
  * 選択は、選択モードのときの利用者の本物のクリック（isTrusted）だけで起こる。
  */
@@ -124,7 +125,7 @@ export function agentJs(cfg: AccessConfig): string {
   /* アプリが後から書き換えても影響を受けないよう、使う関数を先に取っておく */
   var getAttr = Element.prototype.getAttribute, qsa = Document.prototype.querySelectorAll;
   var rect = Element.prototype.getBoundingClientRect, addL = W.addEventListener.bind(W);
-  var ID = /^[0-9a-f]{10}$/, port = null, nonce = null, queue = [], selecting = false, seq = 0;
+  var ID = /^[0-9a-f]{10}$/, REV = /^[0-9a-f]{16}$/, port = null, nonce = null, queue = [], selecting = false, seq = 0;
   var hoverBox = null, selBox = null, hoverEl = null, selEl = null, raf = 0;
   function allowed(o){
     try { var u = new URL(o);
@@ -133,7 +134,7 @@ export function agentJs(cfg: AccessConfig): string {
     } catch (e) {}
     return false;
   }
-  function post(m){ m.source = 'vcide-preview'; m.v = 2; m.nonce = nonce; try { pm.call(port, m); } catch (e) {} }
+  function post(m){ m.source = 'vcide-preview'; m.v = ${PROTOCOL_VERSION}; m.nonce = nonce; try { pm.call(port, m); } catch (e) {} }
   function send(m){ if (port) post(m); else if (queue.length < 20) queue.push(m); }
   function where(kind){
     send({ kind: kind, path: location.pathname + location.search + location.hash,
@@ -141,6 +142,8 @@ export function agentJs(cfg: AccessConfig): string {
   }
   /* ---------------------------------------------------------- 要素の選択 */
   function anchorOf(el){ var v = getAttr.call(el, 'data-vcide'); return v && ID.test(v) ? v : null; }
+  /* F-01: その要素を描いたときのソースの版。識別子と同じ要素の属性だけを読む（無ければ null） */
+  function revOf(el){ var v = getAttr.call(el, 'data-vcide-rev'); return v && REV.test(v) ? v : null; }
   function cls(t){
     var j = /[\\u3040-\\u30ff\\u3400-\\u9fff\\uff00-\\uffef]/.test(t), l = /[A-Za-z]/.test(t), d = /[0-9]/.test(t);
     if (j && !l && !d) return 'cjk'; if (j) return 'mixed';
@@ -149,8 +152,8 @@ export function agentJs(cfg: AccessConfig): string {
   function describe(t){
     var el = t && t.nodeType === 3 ? t.parentElement : t;
     if (!el || el.nodeType !== 1) return null;
-    var self = anchorOf(el), anc = [], p = el.parentElement;
-    while (p && anc.length < 32) { var a = anchorOf(p); if (a) anc.push(a); p = p.parentElement; }
+    var self = anchorOf(el), anc = [], ancRev = [], p = el.parentElement;
+    while (p && anc.length < 32) { var a = anchorOf(p); if (a) { anc.push(a); ancRev.push(revOf(p)); } p = p.parentElement; }
     var ord = null, cnt = 0;
     if (self) { var all = qsa.call(D, '[data-vcide="' + self + '"]'); cnt = all.length;
       for (var i = 0; i < all.length; i++) if (all[i] === el) ord = i;
@@ -165,8 +168,8 @@ export function agentJs(cfg: AccessConfig): string {
       if (v.length) { ti = k; shape = { chars: Math.min(v.length, 1000000), cls: cls(v) }; }
       k++;
     }
-    return { tag: tag, anchorOnSelf: self, anchorOrdinal: ord, anchorInstanceCount: cnt,
-      ancestorAnchors: anc, textNodeIndex: ti, valueShape: shape, formControl: form, path: location.pathname };
+    return { tag: tag, anchorOnSelf: self, anchorRev: self ? revOf(el) : null, anchorOrdinal: ord, anchorInstanceCount: cnt,
+      ancestorAnchors: anc, ancestorRevs: ancRev, textNodeIndex: ti, valueShape: shape, formControl: form, path: location.pathname };
   }
   function box(color){
     var b = D.createElement('div');
@@ -221,14 +224,14 @@ export function agentJs(cfg: AccessConfig): string {
     port = e.ports[0]; nonce = d.nonce;
     port.onmessage = function(m){
       var x = m.data;
-      if (x && x.source === 'vcide-ide' && x.v === 2 && x.nonce === nonce && x.kind === 'mode' && typeof x.select === 'boolean') setMode(x.select);
+      if (x && x.source === 'vcide-ide' && x.v === ${PROTOCOL_VERSION} && x.nonce === nonce && x.kind === 'mode' && typeof x.select === 'boolean') setMode(x.select);
     };
     post({ kind: 'connected' });
     for (var i = 0; i < queue.length; i++) post(queue[i]);
     queue = [];
   }, true);
   var ao = location.ancestorOrigins, target = ao && ao.length ? (allowed(ao[0]) ? ao[0] : null) : '*';
-  if (target !== null) { try { P.postMessage({ source: 'vcide-preview', v: 2, kind: 'hello' }, target); } catch (e) {} }
+  if (target !== null) { try { P.postMessage({ source: 'vcide-preview', v: ${PROTOCOL_VERSION}, kind: 'hello' }, target); } catch (e) {} }
   var ps = history.pushState, rs = history.replaceState;
   history.pushState = function(){ var r = ps.apply(this, arguments); soft = true; where('navigate'); return r; };
   history.replaceState = function(){ var r = rs.apply(this, arguments); where('replace'); return r; };

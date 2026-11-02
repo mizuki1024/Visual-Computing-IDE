@@ -70,8 +70,9 @@ module.exports = function vcideAnchorLoader(source) {
     });
     return source;
   }
+  /* rev: 変換したソースの版（DOM の data-vcide-rev と同じ値）。対応表の位置はこの版のソースについてのもの */
   writeManifest(outDir, rel, {
-    file: rel, anchors: r.anchors, usages: r.usages, skipped: r.skipped,
+    file: rel, rev: r.rev, anchors: r.anchors, usages: r.usages, skipped: r.skipped,
     components: r.components,
   });
   return r.code;

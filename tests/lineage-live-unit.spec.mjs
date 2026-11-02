@@ -123,8 +123,8 @@ console.log('\n2. 中継: HTML の応答ごとに文書の識別子を作り、�
 console.log('\n3. プレビューの知らせ: select に doc / soft');
 {
   const nonce = 'n'.repeat(20);
-  const sel = { tag: 'li', anchorOnSelf: 'abcdef0123', anchorOrdinal: 0, anchorInstanceCount: 1, ancestorAnchors: [], textNodeIndex: 0, valueShape: { chars: 2, cls: 'cjk' }, formControl: false, path: '/lin-a' };
-  const base = { source: 'vcide-preview', v: 2, nonce, kind: 'select', seq: 1, selection: sel };
+  const sel = { tag: 'li', anchorOnSelf: 'abcdef0123', anchorRev: '0123456789abcdef', anchorOrdinal: 0, anchorInstanceCount: 1, ancestorAnchors: [], ancestorRevs: [], textNodeIndex: 0, valueShape: { chars: 2, cls: 'cjk' }, formControl: false, path: '/lin-a' };
+  const base = { source: 'vcide-preview', v: 3, nonce, kind: 'select', seq: 1, selection: sel };
   eq('doc と soft を受け取る', PP.parseAgentMessage({ ...base, doc: DOC(1), soft: false }, nonce)?.document, { token: DOC(1), soft: false });
   eq('doc が無い（古いスクリプト）→ token null', PP.parseAgentMessage(base, nonce)?.document, { token: null, soft: null });
   eq('doc の形が違えば捨てる', PP.parseAgentMessage({ ...base, doc: 'zz', soft: false }, nonce), null);

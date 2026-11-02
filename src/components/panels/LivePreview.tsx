@@ -24,6 +24,7 @@ import {
 } from '@/lib/previewProtocol';
 import {
   LIVE_UNRESOLVED_LABEL, fromLiveRun, fromLiveSelection, liveExchangeLabel, liveExchangeLinks, lineageCutText,
+  liveResolutionRevisions as revisionsOf, sameLiveResolution as sameResolution,
   type LiveResolution, type LiveSelectionInput,
 } from '@/lib/adapter';
 import {
@@ -40,10 +41,15 @@ interface Conn { port: MessagePort; nonce: string; serverKey: string }
 /** 選択の状態（パネルの1行と、右ドックへの反映） */
 type LiveSel =
   | { status: 'resolving'; tag: string; path: string }
-  | { status: 'resolved'; tag: string; path: string; component: string; at: string; ordinal: number; count: number }
+  | {
+    status: 'resolved'; tag: string; path: string; component: string; at: string; ordinal: number; count: number;
+    /** F-01: この選択の通し番号と、照合に使ったソースの版（選んだ要素と、照合に通った祖先のファイルごと） */
+    seq: number; revs: Record<string, string>;
+  }
   | { status: 'unresolved'; tag: string; path: string; reason: string; label: string }
   | { status: 'error'; tag: string; path: string; message: string }
-  | { status: 'cleared'; message: string };
+  /** cause: 解除した理由（source-changed = コードが変更された。server = 開発サーバーの停止・再起動） */
+  | { status: 'cleared'; message: string; cause?: 'source-changed' | 'server' };
 
 const POST_HEADERS = { 'content-type': 'application/json', 'x-vcide-request': '1' } as const;
 
@@ -66,6 +72,14 @@ const LINEAGE_RETRY_MS = 1000;
 /** 一時的でありうる理由（時間が経てば観測に入る）。それ以外は取り直さない */
 const LINEAGE_TRANSIENT = new Set(['no-server-link', 'fetch-not-measured', 'fetch-site-unverified']);
 const DOC_TRANSIENT = new Set(['token-not-in-session']);
+/** F-01: 解決済みの選択が依存するソースの版を確かめ直す間隔 */
+const REVISION_POLL_MS = 1500;
+
+const changedText = (files: string[]): string =>
+  (files.length
+    ? `コードが変更されたため（${files.join('・')}）、選択を解除しました。`
+    : '照合したソースの版を確かめられないため、選択を解除しました。')
+  + '前の要素の情報は表示していません。プレビューの再描画の後、もう一度選択してください。';
 
 /** 選択の行に出す、文書の同定と由来の1行 */
 function lineageLine(l: LiveLineage): string {
@@ -208,6 +222,8 @@ export default function LivePreview() {
   const [obsError, setObsError] = useState<string | null>(null);
   const [obsPick, setObsPick] = useState<number | null>(null);
   const [obsShown, setObsShown] = useState<{ seq: number; sig: string; withSel: boolean } | null>(null);
+  const obsShownRef = useRef(obsShown);
+  obsShownRef.current = obsShown;
   const [obsNote, setObsNote] = useState<string | null>(null);
   /** 7C-1: 証拠（詳細）がまだ届いていない通信の［表示］。届いたら描く */
   const [pendingShow, setPendingShow] = useState<number | null>(null);
@@ -369,6 +385,8 @@ export default function LivePreview() {
   const sendMode = useCallback((c: Conn | null, on: boolean) => {
     c?.port.postMessage({ source: IDE_SOURCE, v: PROTOCOL_VERSION, nonce: c.nonce, kind: 'mode', select: on });
   }, []);
+  const sendModeRef = useRef(sendMode);
+  sendModeRef.current = sendMode;
 
   /** 選択を IDE の対応表で解決する。位置は受け取らない（送ってくるのは識別子だけ） */
   /**
@@ -381,7 +399,7 @@ export default function LivePreview() {
     if (!rt?.pid || !rt.startedAt) return;
     /* 7C-1: 取り直しを待つ間に別の選択・停止・再起動があったら、要求そのものを出さない（結果は従来も捨てていた） */
     if (mySeq !== selSeqRef.current || serverKeyRef.current !== key) return;
-    let j: { observation?: LiveRunObservation; lineage?: LiveLineage; error?: { message: string } };
+    let j: { observation?: LiveRunObservation; lineage?: LiveLineage; resolution?: LiveResolution; error?: { message: string } };
     try {
       const r = await fetch('/api/runtime/lineage', {
         method: 'POST', headers: POST_HEADERS,
@@ -396,6 +414,13 @@ export default function LivePreview() {
     }
     if (mySeq !== selSeqRef.current || serverKeyRef.current !== key) return;
     if (!j.lineage || !j.observation) return;
+    /* F-01: 由来の評価はサーバーが要素をもう一度照合して行う。その照合が、この選択と同じ要素・同じ版でなければ
+     * （その間にコードが変わった）、結果を使わず選択を無効にする。別の要素の由来をこの選択に付けない */
+    if (!sameResolution(input.resolution, j.resolution)) {
+      const was = revisionsOf(input.resolution);
+      invalidateRef.current(mySeq, was ? Object.keys(was) : []);
+      return;
+    }
     const l = j.lineage;
     setLin(l);
     linRef.current = l;
@@ -483,6 +508,7 @@ export default function LivePreview() {
         status: 'resolved', tag: sel.tag, path: sel.path, component: res.anchor.component,
         at: `${res.anchor.file}:${res.anchor.line}:${res.anchor.col}`,
         ordinal: sel.anchorOrdinal ?? 0, count: sel.anchorInstanceCount,
+        seq: mySeq, revs: revisionsOf(res) ?? {},
       });
       void evaluate(input, key, mySeq);
     } else {
@@ -494,6 +520,70 @@ export default function LivePreview() {
   // msg の title は表示用。古くても判定には使わない
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showLive, evaluate]);
+
+  /**
+   * F-01: コードが変更されたため、選択を無効にする。**選択の行だけでなく、右ドック・キャンバスに出していた
+   * 前の要素の情報も消す**（現在の情報として残さない）。待っている解決・由来の評価・版の確かめの応答も捨てる。
+   * mySeq がいまの選択でなければ何もしない（遅れて届いた古い確かめで、新しい選択を消さない）
+   */
+  const invalidate = (mySeq: number, files: string[]) => {
+    if (mySeq !== selSeqRef.current) return;
+    selSeqRef.current += 1;
+    lastSelRef.current = null;
+    setLin(null);
+    setObsPick(null);
+    setPendingShow(null);
+    if (!obsShownRef.current || obsShownRef.current.withSel) { setObsShown(null); clearLive(); }
+    setCompact('preview', false);         // 選び直せるよう、ページの表示に戻す
+    /* プレビューの中の「選んだ要素」の枠も消す。HMR の後、同じ DOM ノードは別の要素になりうる（React が再利用する）。
+     * 既存の知らせ（選択モードの切り替え）だけで行う: 切ると枠が消え、選択モードなら入れ直す */
+    sendModeRef.current(connRef.current, false);
+    if (selectModeRef.current) sendModeRef.current(connRef.current, true);
+    setLiveSel({ status: 'cleared', cause: 'source-changed', message: changedText(files) });
+  };
+  const invalidateRef = useRef(invalidate);
+  invalidateRef.current = invalidate;
+
+  /* F-01: 解決済みの選択が依存するファイル（選んだ要素と、照合に通った祖先）の版を確かめ続ける。
+   * 版が変わった・読めなくなった → 選択を無効にする（無関係なファイルの変更では無効にしない） */
+  const watchSeq = liveSel?.status === 'resolved' ? liveSel.seq : null;
+  const watchRevs = liveSel?.status === 'resolved' ? liveSel.revs : null;
+  useEffect(() => {
+    if (watchSeq === null || !watchRevs || !serverKey) return undefined;
+    const key = serverKey;
+    const mySeq = watchSeq;
+    const files = Object.keys(watchRevs);
+    let alive = true;
+    let timer = 0;
+    if (!files.length) {
+      // 版の無い解決（起きないはず）。照合したと言えないので無効にする
+      invalidateRef.current(mySeq, []);
+      return undefined;
+    }
+    const tick = async () => {
+      const rt = runRef.current;
+      if (!alive || !rt?.pid || !rt.startedAt) return;
+      let got: Record<string, string | null> | null = null;
+      try {
+        const r = await fetch('/api/runtime/source-revisions', {
+          method: 'POST', headers: POST_HEADERS,
+          body: JSON.stringify({ run: { instance: rt.instance, pid: rt.pid, startedAt: rt.startedAt }, files }),
+        });
+        const j = await r.json() as { revisions?: Record<string, string | null> };
+        got = j.revisions ?? null;
+      } catch { got = null; }
+      // 返事を待つ間に、別の選択・解除・停止・再起動があったら捨てる
+      if (!alive || mySeq !== selSeqRef.current || serverKeyRef.current !== key) return;
+      if (got) {
+        const changed = files.filter((f) => got![f] !== watchRevs[f]);
+        if (changed.length) { invalidateRef.current(mySeq, changed); return; }
+      }
+      // 確かめられなかった（通信の失敗・409）ときは、次の確かめを待つ。409 は停止・再起動の処理が選択を解除する
+      timer = window.setTimeout(() => { void tick(); }, REVISION_POLL_MS);
+    };
+    timer = window.setTimeout(() => { void tick(); }, REVISION_POLL_MS);
+    return () => { alive = false; window.clearTimeout(timer); };
+  }, [watchSeq, watchRevs, serverKey]);
 
   const onPortMessage = useCallback((c: Conn, data: unknown) => {
     const m = parseAgentMessage(data, c.nonce);
@@ -564,7 +654,7 @@ export default function LivePreview() {
       setObsNote(serverKey ? '開発サーバーが起動し直されたため、前の起動の観測を消しました。' : '開発サーバーが実行中ではなくなったため、観測の表示を消しました（実測中ではありません）。');
       clearLive();
       setLiveSel((cur) => (cur && cur.status !== 'cleared'
-        ? { status: 'cleared', message: serverKey ? '開発サーバーが起動し直されたため、前の選択を解除しました。' : '開発サーバーが実行中ではなくなったため、選択を解除しました。' }
+        ? { status: 'cleared', cause: 'server', message: serverKey ? '開発サーバーが起動し直されたため、前の選択を解除しました。' : '開発サーバーが実行中ではなくなったため、選択を解除しました。' }
         : cur));
     }
   }, [serverKey, closeAll, clearLive, setCompact]);
@@ -655,6 +745,7 @@ export default function LivePreview() {
         data-sel-at={liveSel?.status === 'resolved' ? liveSel.at : ''}
         data-sel-component={liveSel?.status === 'resolved' ? liveSel.component : ''}
         data-sel-reason={liveSel?.status === 'unresolved' ? liveSel.reason : ''}
+        data-sel-cleared={liveSel?.status === 'cleared' ? (liveSel.cause ?? '') : undefined}
         data-doc-binding={lin ? (lin.binding.status === 'identified' ? 'identified' : lin.binding.reason) : ''}
         data-doc-seq={lin?.binding.status === 'identified' ? lin.binding.seq : ''}
         data-lineage={lin?.status ?? ''} data-lineage-reason={lin?.cut?.reason ?? ''}

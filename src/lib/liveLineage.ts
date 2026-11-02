@@ -55,7 +55,7 @@ export type ResolveLineage = (site: LinSite, sqlByQuery: Map<string, LinSqlEntry
 export interface EvaluateLineageInput {
   obs: LiveRunObservation;
   binding: DocBinding;
-  /** 要素識別子が指す、照合済みの JSX 要素の位置（7B-2 の6段の照合を通ったもの）。無ければ null */
+  /** 要素識別子が指す、照合済みの JSX 要素の位置（7B-2 の照合（F-01 でソースの版を足した7段）を通ったもの）。無ければ null */
   anchor: { file: string; line: number; col: number; tag: string; component: string } | null;
   /** 静的解析の結果。解析器を使えなければ null（理由は analyzerError） */
   analysis: LinAnalysis | null;

@@ -1,0 +1,25 @@
+edit-poc review repro — part 1 (engine, disposable copies only)
+  FAIL  RV01 src/ の中のシンボリックリンクが src/ の外（プロジェクト内）を指すとき、safePath は null を返す
+        {"returned":"outside-src.cfg"}
+  FAIL  RV02 そのリンク経由の applyOne は outside-scope で拒否し、src/ の外のファイルを変えない
+        {"status":"applied","outsideFileBefore":"value = \"p-4\"","outsideFileAfter":"value = \"p-5\""}
+  FAIL  RV03 照合〜rename の間の外部変更は、保持されるか、少なくとも結果が applied にならない（既知の限界の確認）
+        {"status":"applied","written":true,"externalChangeKept":false,"readBackEqualsAfter":true}
+  FAIL  RV04 複数ファイルの適用中に未着手のファイルへ入った外部変更は上書きしない（committed にしない）
+        {"outcome":"committed","files":[["PropertyCard.tsx","written","at-after"],["SiteNotice.tsx","written","at-after"],["PropertyList.tsx","written","at-after"]],"externalChangeKept":false}
+  FAIL  RV05 state=committed のジャーナルには recoverJournal が何も書かない（確定した変更を巻き戻さない）
+        {"txOutcome":"committed","journalStateBefore":"committed","recover":{"state":"recovered","files":[{"rel":"src/components/PropertyCard.tsx","action":"restored","content":"at-before"},{"rel":"src/components/SiteNotice.tsx","action":"restored","content":"at-before"},{"rel":"src/components/PropertyList.tsx","action":"restored","content":"at-before"}]}}
+  PASS  RV06a rename の前に落ちても、対象ファイルは元の内容のまま（途中で切れたファイルにならない）
+        {"exit":71,"targetUnchanged":true}
+  FAIL  RV06b rename の前に落ちても、利用者の作業ツリー（src/ の中）に一時ファイルを残さない
+        {"leftInSrcComponents":[".PropertyCard.tsx.vcide-0ff19a52d5e7.tmp"],"note":"この名前は .gitignore の対象外（git check-ignore で確認）。起動時の掃除も無い"}
+  PASS  RV07 選んだ要素の行が消えた後、古い識別子は「特定できません」になり、同じ位置に来た別の要素へは照合しない
+        {"selectedSourceLine":"<dd>{property.pref}</dd>","status":"unresolved","resolvedTo":null,"resolvedSourceLine":null,"checksPassed":0}
+  FAIL  RV08 選んだ要素が消えた後の古い位置では source-mismatch になり、別の要素の token を書き換えない
+        {"ok":true,"reason":null,"wouldPatch":"<div className=\"rounded border p-5 shadow\">second</div>","note":"実際の流れでは draft の baseHash が新しい内容から作られるため、照合（RV07）を通った後はこの位置へ書ける"}
+
+part 2 skipped（REVIEW_ISOLATED=1 と、作業ツリーとは別の使い捨てのコピーが必要）
+  PASS  RV99 第1部・第2部の後、題材の版は開始時と同じ
+        {"rev0":"e75cfba70b46","now":"e75cfba70b46"}
+
+3 PASS / 7 FAIL / 0 MEASURED

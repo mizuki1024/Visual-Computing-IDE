@@ -9,19 +9,22 @@
  *
  * 検査の方針
  *   - 型・版・種別・値の範囲を見る。**知らないキーがあれば捨てる**（余計な中身を受け取らない）
- *   - 送ってよいのは「要素識別子・タグ名・何番目か・テキストの文字数と文字種・パス」だけ。
+ *   - 送ってよいのは「要素識別子・ソースの版（内容のハッシュ）・タグ名・何番目か・テキストの文字数と文字種・パス」だけ。
  *     本文・属性・フォームの値・Cookie は形の上で入る場所が無い
  *   - 選択の中のソース位置は**受け取らない**。位置は IDE が自分の対応表から引く（anchors.ts）
  *
  * 純粋な関数だけを置く（画面・サーバーの両方と、素の Node のテストから使う）。
  * ========================================================================== */
 
-export const PROTOCOL_VERSION = 2;
+/** 3: 選択に、要素を描いたソースの版（anchorRev・ancestorRevs）を足した（06h レビュー F-01 への対処） */
+export const PROTOCOL_VERSION = 3;
 export const AGENT_SOURCE = 'vcide-preview';
 export const IDE_SOURCE = 'vcide-ide';
 
 /** 要素識別子の形（poc/anchor/transform.cjs の anchorId: sha1 の先頭10桁） */
 export const ANCHOR_ID_RE = /^[0-9a-f]{10}$/;
+/** ソースの版の形（poc/anchor/transform.cjs の sourceRevision: 内容の sha1 の先頭16桁） */
+export const SOURCE_REV_RE = /^[0-9a-f]{16}$/;
 const TAG_RE = /^[a-zA-Z][a-zA-Z0-9-]{0,63}$/;
 const NONCE_RE = /^[A-Za-z0-9_-]{16,64}$/;
 export const VALUE_CLASSES = ['cjk', 'latin', 'digits', 'mixed', 'other'] as const;
@@ -37,11 +40,20 @@ export interface ElementSelection {
   tag: string;
   /** **この要素自身に付いていた**識別子。祖先のものではない */
   anchorOnSelf: string | null;
+  /**
+   * この要素自身に付いていた**ソースの版**（`data-vcide-rev`）。この要素を描いたときに変換したファイルの内容のハッシュ。
+   * 識別子は位置（ファイル:行:列）だけから決まるので、ソースが変わると同じ識別子が別の要素を指しうる。
+   * IDE はこの版が、対応表の版・いま読み直したファイルの版と一致するときだけ位置を出す（F-01）。
+   * 識別子が無ければ null。識別子があって版が無い（版を付けない古い変換結果）なら null で、IDE は特定しない
+   */
+  anchorRev: string | null;
   /** 同一識別子の DOM 要素のうち何番目か（0 始まり） */
   anchorOrdinal: number | null;
   anchorInstanceCount: number;
   /** 祖先の識別子（近い順）。包含関係の文脈であって、この要素の出所ではない */
   ancestorAnchors: string[];
+  /** 祖先それぞれのソースの版（ancestorAnchors と同じ長さ・同じ順。無ければ null） */
+  ancestorRevs: (string | null)[];
   /** 直下の空でないテキストノードの索引。無ければ null */
   textNodeIndex: number | null;
   /** 値の形だけ。値そのものは送らない */
@@ -98,22 +110,27 @@ export function isAgentHello(d: unknown): boolean {
 /** 選択の中身の検査。サーバー（解決の API）でも同じものを使う */
 export function parseSelection(v: unknown): ElementSelection | null {
   if (!isObj(v)) return null;
-  const KEYS = ['tag', 'anchorOnSelf', 'anchorOrdinal', 'anchorInstanceCount', 'ancestorAnchors',
-    'textNodeIndex', 'valueShape', 'formControl', 'path'] as const;
-  if (!onlyKeys(v, KEYS)) return null;
+  const KEYS = ['tag', 'anchorOnSelf', 'anchorRev', 'anchorOrdinal', 'anchorInstanceCount', 'ancestorAnchors',
+    'ancestorRevs', 'textNodeIndex', 'valueShape', 'formControl', 'path'] as const;
+  /* 知らないキーは捨てる。版（anchorRev・ancestorRevs）は**必ず**ある（無い＝版を知らない送り手の選択は受けない） */
+  if (!onlyKeys(v, KEYS) || !('anchorRev' in v) || !('ancestorRevs' in v)) return null;
   if (typeof v.tag !== 'string' || !TAG_RE.test(v.tag)) return null;
   const self = v.anchorOnSelf;
   if (self !== null && (typeof self !== 'string' || !ANCHOR_ID_RE.test(self))) return null;
   if (!isInt(v.anchorInstanceCount, 0, MAX_COUNT)) return null;
   const ord = v.anchorOrdinal;
+  const rev = v.anchorRev;
+  if (rev !== null && (typeof rev !== 'string' || !SOURCE_REV_RE.test(rev))) return null;
   if (self === null) {
-    // 識別子が無いなら、何番目かも数も無い
-    if (ord !== null || v.anchorInstanceCount !== 0) return null;
+    // 識別子が無いなら、何番目かも数も版も無い
+    if (ord !== null || v.anchorInstanceCount !== 0 || rev !== null) return null;
   } else if (!isInt(ord, 0, MAX_COUNT) || v.anchorInstanceCount < 1 || ord >= v.anchorInstanceCount) {
     return null;
   }
   if (!Array.isArray(v.ancestorAnchors) || v.ancestorAnchors.length > MAX_ANCESTORS
     || !v.ancestorAnchors.every((a) => typeof a === 'string' && ANCHOR_ID_RE.test(a))) return null;
+  if (!Array.isArray(v.ancestorRevs) || v.ancestorRevs.length !== v.ancestorAnchors.length
+    || !v.ancestorRevs.every((r) => r === null || (typeof r === 'string' && SOURCE_REV_RE.test(r)))) return null;
   const ti = v.textNodeIndex;
   if (ti !== null && !isInt(ti, 0, MAX_COUNT)) return null;
   if (typeof v.formControl !== 'boolean') return null;
@@ -128,8 +145,9 @@ export function parseSelection(v: unknown): ElementSelection | null {
   }
   if (!isPath(v.path)) return null;
   return {
-    tag: v.tag, anchorOnSelf: self as string | null, anchorOrdinal: ord as number | null,
+    tag: v.tag, anchorOnSelf: self as string | null, anchorRev: rev as string | null, anchorOrdinal: ord as number | null,
     anchorInstanceCount: v.anchorInstanceCount, ancestorAnchors: [...v.ancestorAnchors] as string[],
+    ancestorRevs: [...v.ancestorRevs] as (string | null)[],
     textNodeIndex: ti as number | null, valueShape, formControl: v.formControl, path: v.path,
   };
 }

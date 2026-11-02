@@ -10,8 +10,14 @@
  *   2. 識別子が、いま実行中の開発サーバーの対応表に載っている
  *   3. 対応表のファイルが対象プロジェクトの注入範囲（src/）の中にある（パスの抜け道・シンボリックリンクを含めて）
  *   4. 識別子を (ファイル:行:列) から計算し直すと一致する（変換器と同じ規則。対応表の書き換えを見抜く）
- *   5. DOM のタグと対応表のタグが一致する
- *   6. **ソースを読み直して**（変換器とは別に構文解析して）その位置に同じタグの JSX があり、
+ *   5. **ソースの版が3つとも一致する**（06h レビュー F-01 への対処）:
+ *        DOM の版（その要素に付いていた data-vcide-rev = その要素を描いたときに変換したファイルの内容）
+ *      = 対応表の版（同じ変換が書いた rev）
+ *      = いま IDE がファイルを読み直した内容の版（下の 7 の照合に使うのと同じバイト列）
+ *      識別子は位置（ファイル:行:列）だけから決まるので、ソースが変わると同じ識別子が別の要素を指す。
+ *      版が違えば、古い DOM・古い対応表・途中で変わったソースのどれかであり、位置を出さない
+ *   6. DOM のタグと対応表のタグが一致する
+ *   7. **ソースを読み直して**（変換器とは別に構文解析して）その位置に同じタグの JSX があり、
  *      囲むコンポーネントが対応表と一致する（PoC-03 の srcverify.mjs と同じ照合）
  * 1 つでも欠ければ「特定できません」と理由を返す。推測で埋めない。
  *
@@ -22,7 +28,7 @@ import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { ideRoot, runtimeDir } from './ide';
-import { ANCHOR_ID_RE, MAX_ANCESTORS, type ElementSelection } from '../lib/previewProtocol';
+import { ANCHOR_ID_RE, MAX_ANCESTORS, SOURCE_REV_RE, type ElementSelection } from '../lib/previewProtocol';
 
 /** 注入範囲（01b Q-03 C-3）。poc/fixture-app/next.config.mjs の ANCHOR_OPTS.scope と同じ */
 export const ANCHOR_SCOPE = 'src';
@@ -92,11 +98,17 @@ export function anchorEnv(projectRoot: string, support: AnchorSupport): Record<s
 export const anchorIdOf = (rel: string, line: number, col: number): string =>
   createHash('sha1').update(`${rel}:${line}:${col}`).digest('hex').slice(0, 10);
 
+/** ソースの版。変換器（poc/anchor/transform.cjs の sourceRevision）と同じ規則: 内容（UTF-8）の sha1 の先頭16桁 */
+export const sourceRevision = (code: string): string =>
+  createHash('sha1').update(code, 'utf8').digest('hex').slice(0, 16);
+
 /* --------------------------------------------------------------- 対応表 */
 
 export interface ManifestAnchor {
   id: string; tag: string; file: string; line: number; col: number;
   component: string; componentLine: number;
+  /** この記述を書いた変換が見たソースの版（対応表のファイル単位）。版を書かない古い対応表なら null */
+  rev: string | null;
 }
 
 const isStr = (v: unknown): v is string => typeof v === 'string';
@@ -108,15 +120,16 @@ export function readManifest(dir: string): Map<string, ManifestAnchor> {
   let names: string[] = [];
   try { names = fs.readdirSync(dir).filter((n) => /^[0-9a-f]{16}\.json$/.test(n)); } catch { return out; }
   for (const n of names) {
-    let j: { anchors?: unknown[] };
-    try { j = JSON.parse(fs.readFileSync(path.join(dir, n), 'utf8')) as { anchors?: unknown[] }; } catch { continue; }
+    let j: { anchors?: unknown[]; rev?: unknown };
+    try { j = JSON.parse(fs.readFileSync(path.join(dir, n), 'utf8')) as { anchors?: unknown[]; rev?: unknown }; } catch { continue; }
+    const rev = isStr(j.rev) && SOURCE_REV_RE.test(j.rev) ? j.rev : null;
     for (const a of Array.isArray(j.anchors) ? j.anchors : []) {
       const r = a as Record<string, unknown>;
       if (!r || !isStr(r.id) || !ANCHOR_ID_RE.test(r.id) || !isStr(r.tag) || !isStr(r.file)
         || !isPosInt(r.line) || !isPosInt(r.col) || !isStr(r.component) || !isPosInt(r.componentLine)) continue;
       out.set(r.id, {
         id: r.id, tag: r.tag, file: r.file, line: r.line, col: r.col,
-        component: r.component, componentLine: r.componentLine,
+        component: r.component, componentLine: r.componentLine, rev,
       });
     }
   }
@@ -182,17 +195,26 @@ interface SourceIndex {
   /** 'use client' がファイルの先頭にあるか */
   useClient: boolean;
   lines: string[];
+  /** この索引を作った内容の版 */
+  rev: string;
 }
 
-const sourceCache = new Map<string, { mtimeMs: number; size: number; idx: SourceIndex }>();
+/** 内容の版ごとの索引。F-01: 時刻・大きさではなく**内容**で引く（同じ大きさ・同じ時刻の書き換えを取り違えない） */
+const sourceCache = new Map<string, SourceIndex>();
+
+/** ファイルを1回だけ読み、その内容の版を返す。版の照合と構文解析は、必ずこの同じ内容に対して行う */
+function readSource(abs: string): { code: string; rev: string } | null {
+  try {
+    const code = fs.readFileSync(abs, 'utf8');
+    return { code, rev: sourceRevision(code) };
+  } catch { return null; }
+}
 
 /** poc/runner/lib/srcverify.mjs と同じ照合。変換器とは別に、その場でソースを構文解析する */
-function indexSource(ts: TS, abs: string, rel: string): SourceIndex | null {
-  let st: fs.Stats;
-  try { st = fs.statSync(abs); } catch { return null; }
+function indexSource(ts: TS, src: { code: string; rev: string }, abs: string, rel: string): SourceIndex {
   const hit = sourceCache.get(abs);
-  if (hit && hit.mtimeMs === st.mtimeMs && hit.size === st.size) return hit.idx;
-  const code = fs.readFileSync(abs, 'utf8');
+  if (hit && hit.rev === src.rev) return hit;
+  const { code } = src;
   const sf = ts.createSourceFile(rel, code, ts.ScriptTarget.Latest, false,
     rel.endsWith('.tsx') ? ts.ScriptKind.TSX : ts.ScriptKind.JSX);
   const at: SourceIndex['at'] = new Map();
@@ -229,8 +251,8 @@ function indexSource(ts: TS, abs: string, rel: string): SourceIndex | null {
   const first = sf.statements[0];
   const useClient = !!first && ts.isExpressionStatement(first) && ts.isStringLiteral(first.expression)
     && first.expression.text === 'use client';
-  const idx = { at, useClient, lines: code.split('\n') };
-  sourceCache.set(abs, { mtimeMs: st.mtimeMs, size: st.size, idx });
+  const idx = { at, useClient, lines: code.split('\n'), rev: src.rev };
+  sourceCache.set(abs, idx);
   return idx;
 }
 
@@ -238,11 +260,15 @@ function indexSource(ts: TS, abs: string, rel: string): SourceIndex | null {
 
 export type UnresolvedReason =
   | 'anchor-missing' | 'injection-unavailable' | 'anchor-not-in-manifest'
-  | 'outside-scope' | 'id-mismatch' | 'tag-mismatch' | 'source-mismatch' | 'verifier-unavailable';
+  | 'outside-scope' | 'id-mismatch' | 'tag-mismatch' | 'source-mismatch' | 'verifier-unavailable'
+  /* F-01: ソースの版 */
+  | 'revision-missing' | 'source-changed' | 'manifest-stale';
 
-export interface VerifiedAnchor extends ManifestAnchor {
+export interface VerifiedAnchor extends Omit<ManifestAnchor, 'rev'> {
   /** 照合した行のテキスト1行（ソースから読んだもの。DOM からではない） */
   sourceLine: string;
+  /** 照合したソースの版（DOM・対応表・読み直した内容で一致したもの） */
+  rev: string;
 }
 
 export type AnchorResolution =
@@ -271,20 +297,26 @@ const CHECKS = [
   'いま実行中の開発サーバーのビルドが書いた対応表に、その識別子がある',
   '対応表のファイルが注入範囲（src/）の中にある',
   '識別子を「ファイル:行:列」から計算し直すと一致する',
+  '要素に付いていたソースの版が、対応表の版・いま読み直したファイルの版と一致する（コード変更前の DOM・対応表で解釈しない）',
   'DOM のタグと対応表のタグが一致する',
-  'ソースを読み直し、その位置に同じタグの JSX があり、囲むコンポーネントが一致する',
+  'ソースを読み直し（版を確かめたのと同じ内容）、その位置に同じタグの JSX があり、囲むコンポーネントが一致する',
 ];
+
+/** 再選択を求める文言（画面にも同じ趣旨で出す） */
+export const RESELECT_HINT = 'コードが変更されたため、この選択は以前の要素を指している可能性があります。'
+  + 'プレビューの再描画を待ってから、もう一度選択してください。';
 
 /** 1つの識別子を照合する。通れば位置を、通らなければ理由を返す */
 function verifyOne(
-  projectRoot: string, manifest: Map<string, ManifestAnchor>, id: string, domTag: string | null,
+  projectRoot: string, manifest: Map<string, ManifestAnchor>, id: string, domTag: string | null, domRev: string | null,
 ): { ok: true; anchor: VerifiedAnchor; useClient: boolean } | { ok: false; reason: UnresolvedReason; detail: string } {
   const m = manifest.get(id);
   if (!m) {
     return {
       ok: false, reason: 'anchor-not-in-manifest',
       detail: `識別子 ${id} は、いま実行中の開発サーバーの対応表にありません。`
-        + 'まだコンパイルされていないか、別の起動・別のビルドのページから来た識別子です。',
+        + 'まだコンパイルされていないか、別の起動・別のビルドのページ、またはコードが変更される前の表示から来た識別子です。'
+        + 'プレビューの再描画を待ってから、もう一度選択してください。',
     };
   }
   const abs = safeSourcePath(projectRoot, m.file);
@@ -294,6 +326,38 @@ function verifyOne(
   if (anchorIdOf(m.file, m.line, m.col) !== id) {
     return { ok: false, reason: 'id-mismatch', detail: `対応表の位置（${m.file}:${m.line}:${m.col}）から計算した識別子が ${id} と一致しません。` };
   }
+  /* F-01: ソースの版。位置だけでは、変更前後の要素が同じだと判断しない */
+  if (domRev === null) {
+    return {
+      ok: false, reason: 'revision-missing',
+      detail: `この要素には、描いたときのソースの版（data-vcide-rev）が付いていません（${m.file}）。`
+        + '版を付けない以前の変換結果（IDE の更新前のビルドのキャッシュなど）から描かれた可能性があります。'
+        + '版を照合できないため、この要素を特定しません。ファイルを保存し直すと、そのファイルの要素には版が付きます。',
+    };
+  }
+  if (m.rev === null) {
+    return {
+      ok: false, reason: 'revision-missing',
+      detail: `対応表の ${m.file} の記述に、ソースの版がありません（版を書かない以前のローダが書いた対応表）。版を照合できないため、この要素を特定しません。`,
+    };
+  }
+  const src = readSource(abs);
+  if (!src) {
+    return { ok: false, reason: 'source-mismatch', detail: `${m.file} を読み直せません（ソースが変わった可能性があります）。` };
+  }
+  if (domRev !== src.rev) {
+    return {
+      ok: false, reason: 'source-changed',
+      detail: `この要素は ${m.file} の版 ${domRev} から描かれましたが、いまのファイルは版 ${src.rev} です。${RESELECT_HINT}`,
+    };
+  }
+  if (m.rev !== src.rev) {
+    return {
+      ok: false, reason: 'manifest-stale',
+      detail: `対応表の ${m.file} は版 ${m.rev} についてのもので、いまのファイル（版 ${src.rev}）と一致しません（再コンパイル待ち）。`
+        + '少し待ってから、もう一度選択してください。',
+    };
+  }
   if (domTag !== null && m.tag !== domTag) {
     return { ok: false, reason: 'tag-mismatch', detail: `DOM の要素は <${domTag}> ですが、対応表の位置の JSX は <${m.tag}> です。` };
   }
@@ -301,9 +365,10 @@ function verifyOne(
   if (!ts) {
     return { ok: false, reason: 'verifier-unavailable', detail: 'ソースを読み直す構文解析器（typescript）を読み込めないため、照合できません。照合していない位置は出しません。' };
   }
-  const idx = indexSource(ts, abs, m.file);
-  const hit = idx?.at.get(`${m.line}:${m.col}`);
-  if (!idx || !hit) {
+  /* 版を確かめたのと同じ内容（src）を構文解析する。読み直しの間にファイルが変わっても取り違えない */
+  const idx = indexSource(ts, src, abs, m.file);
+  const hit = idx.at.get(`${m.line}:${m.col}`);
+  if (!hit) {
     return { ok: false, reason: 'source-mismatch', detail: `${m.file}:${m.line}:${m.col} に JSX の要素がありません（ソースが変わった可能性があります）。` };
   }
   if (hit.tag !== m.tag || hit.component !== m.component) {
@@ -313,7 +378,11 @@ function verifyOne(
     };
   }
   const line = (idx.lines[m.line - 1] ?? '').trim();
-  return { ok: true, anchor: { ...m, sourceLine: line.length > 200 ? `${line.slice(0, 199)}…` : line }, useClient: idx.useClient };
+  return {
+    ok: true,
+    anchor: { ...m, rev: src.rev, sourceLine: line.length > 200 ? `${line.slice(0, 199)}…` : line },
+    useClient: idx.useClient,
+  };
 }
 
 export function resolveSelection(
@@ -325,10 +394,11 @@ export function resolveSelection(
   const manifest = readManifest(anchorOutDir(projectRoot));
   /* 祖先は文脈。照合できたものだけを使う */
   const ancestors: VerifiedAnchor[] = [];
-  for (const id of sel.ancestorAnchors.slice(0, MAX_ANCESTORS)) {
-    const r = verifyOne(projectRoot, manifest, id, null);
+  const ancRevs = Array.isArray(sel.ancestorRevs) ? sel.ancestorRevs : [];
+  sel.ancestorAnchors.slice(0, MAX_ANCESTORS).forEach((id, i) => {
+    const r = verifyOne(projectRoot, manifest, id, null, ancRevs[i] ?? null);
     if (r.ok) ancestors.push(r.anchor);
-  }
+  });
   const nearest = ancestors[0]
     ? { tag: ancestors[0].tag, component: ancestors[0].component, file: ancestors[0].file, line: ancestors[0].line }
     : null;
@@ -343,7 +413,7 @@ export function resolveSelection(
       context: nearest,
     };
   }
-  const r = verifyOne(projectRoot, manifest, sel.anchorOnSelf, sel.tag);
+  const r = verifyOne(projectRoot, manifest, sel.anchorOnSelf, sel.tag, sel.anchorRev ?? null);
   if (!r.ok) return { status: 'unresolved', reason: r.reason, detail: r.detail, context: nearest };
 
   const chain = [r.anchor.component];
@@ -353,4 +423,24 @@ export function resolveSelection(
     directive: r.useClient ? 'use-client' : 'none',
     checks: CHECKS,
   };
+}
+
+/* ------------------------------------------------- 選択の後の版の確かめ（F-01） */
+
+/** 一度に確かめるファイルの数の上限（選んだ要素 1 ＋ 祖先 MAX_ANCESTORS） */
+export const MAX_REVISION_FILES = MAX_ANCESTORS + 1;
+
+/**
+ * 解決済みの選択が依存するファイルの、**いまの**版を返す。画面は、解決したときの版と比べて、
+ * 違えば選択を無効にする（コード変更前の選択を、変更後の別の要素の情報として残さない）。
+ * 注入範囲（src/ の .tsx / .jsx）の外・読めないファイルは null（＝確かめられない → 画面は無効にする）。
+ * 返すのは内容のハッシュだけで、内容そのものは返さない。
+ */
+export function sourceRevisionsOf(projectRoot: string, files: string[]): Record<string, string | null> {
+  const out: Record<string, string | null> = {};
+  for (const f of files.slice(0, MAX_REVISION_FILES)) {
+    const abs = safeSourcePath(projectRoot, f);
+    out[f] = abs ? (readSource(abs)?.rev ?? null) : null;
+  }
+  return out;
 }

@@ -384,7 +384,7 @@ try {
     const fr = page.frames().find((f) => f.url().startsWith(`http://${PV_HOST}/`));
     // (a) アプリのスクリプトが window.postMessage で選択を偽る
     await fr.evaluate((ids) => {
-      parent.postMessage({ source: 'vcide-preview', v: 2, kind: 'select', nonce: 'x'.repeat(24), seq: 99, selection: { tag: 'span', anchorOnSelf: ids, anchorOrdinal: 0, anchorInstanceCount: 1, ancestorAnchors: [], textNodeIndex: null, valueShape: null, formControl: false, path: '/' } }, '*');
+      parent.postMessage({ source: 'vcide-preview', v: 3, kind: 'select', nonce: 'x'.repeat(24), seq: 99, selection: { tag: 'span', anchorOnSelf: ids, anchorRev: '0123456789abcdef', anchorOrdinal: 0, anchorInstanceCount: 1, ancestorAnchors: [], ancestorRevs: [], textNodeIndex: null, valueShape: null, formControl: false, path: '/' } }, '*');
       parent.postMessage({ source: 'vcide-preview', v: 1, kind: 'ready', path: '/evil', title: 'x', status: 200, soft: false, from: 'app' }, '*');
       parent.postMessage('<html>not a message</html>', '*');
     }, '0123456789');
@@ -397,7 +397,7 @@ try {
     const stolen = await fr.evaluate(async () => {
       window.__stolen = [];
       addEventListener('message', (e) => { window.__stolen.push({ kind: e.data?.kind ?? null, ports: e.ports?.length ?? 0 }); });
-      parent.postMessage({ source: 'vcide-preview', v: 2, kind: 'hello' }, '*');
+      parent.postMessage({ source: 'vcide-preview', v: 3, kind: 'hello' }, '*');
       await new Promise((r) => setTimeout(r, 800));
       return window.__stolen;
     });
@@ -425,17 +425,20 @@ try {
         const r = await fetch('/api/runtime/anchor', { method: 'POST', headers: { 'content-type': 'application/json', 'x-vcide-request': '1' }, body: JSON.stringify(body) });
         return { status: r.status, body: await r.json() };
       };
-      const base = { tag: 'h1', anchorOnSelf: null, anchorOrdinal: null, anchorInstanceCount: 0, ancestorAnchors: [], textNodeIndex: null, valueShape: null, formControl: false, path: '/' };
+      const base = { tag: 'h1', anchorOnSelf: null, anchorRev: null, anchorOrdinal: null, anchorInstanceCount: 0, ancestorAnchors: [], ancestorRevs: [], textNodeIndex: null, valueShape: null, formControl: false, path: '/' };
       return {
         extraKey: await call({ run, selection: { ...base, html: '<p>secret</p>' } }),
         location: await call({ run, selection: { ...base, file: 'src/app/page.tsx', line: 1 } }),
         badId: await call({ run, selection: { ...base, anchorOnSelf: '../../etc', anchorOrdinal: 0, anchorInstanceCount: 1 } }),
+        /* F-01: ソースの版のキーを持たない選択（版を知らない送り手）は受けない */
+        noRev: await call({ run, selection: (({ anchorRev, ancestorRevs, ...o }) => o)(base) }),
         noHeader: (await fetch('/api/runtime/anchor', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ run, selection: base }) })).status,
       };
     }, { run: run1 });
     eq('(e) 知らないキー（本文など）を含む選択は 400', api.extraKey.status, 400);
     eq('(e) 選択にソース位置を書いて送っても受けない（400）', api.location.status, 400);
     eq('(e) 識別子の形でないもの（パスなど）は 400', api.badId.status, 400);
+    eq('(e) F-01: ソースの版のキーを持たない選択は 400', api.noRev.status, 400);
     eq('(e) 変更操作の独自ヘッダが無ければ拒否', api.noHeader, 403);
     const fromPreview = await (await browser.newPage()).goto(`http://${PV_HOST}/__vcide_preview/agent.js`).then(async (r) => {
       const tab = r.frame().page();
@@ -474,8 +477,9 @@ try {
     const keys = new Set();
     for (const x of log) { try { const o = JSON.parse(x); Object.keys(o).forEach((k) => keys.add(k)); if (o.selection) Object.keys(o.selection).forEach((k) => keys.add(`selection.${k}`)); } catch { /* 文字列 */ } }
     /* 7B-3B-2: select に doc（中継がこの文書の応答に付けた識別子。16 進 32 桁の乱数で、ページの内容を含まない）を足した */
+    /* F-01: select に要素・祖先のソースの版（anchorRev・ancestorRevs。内容の sha1 の先頭16桁で、ソースもページの内容も含まない）を足した */
     const allowedKeys = ['source', 'v', 'kind', 'nonce', 'path', 'title', 'status', 'soft', 'from', 'select', 'seq', 'selection', 'doc',
-      'selection.tag', 'selection.anchorOnSelf', 'selection.anchorOrdinal', 'selection.anchorInstanceCount', 'selection.ancestorAnchors',
+      'selection.tag', 'selection.anchorOnSelf', 'selection.anchorRev', 'selection.anchorOrdinal', 'selection.anchorInstanceCount', 'selection.ancestorAnchors', 'selection.ancestorRevs',
       'selection.textNodeIndex', 'selection.valueShape', 'selection.formControl', 'selection.path'];
     ok('知らせのキーは決めたものだけ', [...keys].every((k) => allowedKeys.includes(k)), [...keys]);
     const inputSel = log.map((x) => { try { return JSON.parse(x); } catch { return null; } }).find((o) => o?.selection?.tag === 'input');
@@ -496,7 +500,7 @@ try {
     ok('停止したら注記は合成デモのものではない', (await page.locator('.note.synth').innerText()) !== noticeBase);
     eq('停止したらキャンバスと右ドックは「停止しています」の状態', await page.locator('.cv-empty').getAttribute('data-project-phase'), 'stopped');
     phase.negativeApi = true;
-    const staleWhileStopped = await page.evaluate(async (run) => (await fetch('/api/runtime/anchor', { method: 'POST', headers: { 'content-type': 'application/json', 'x-vcide-request': '1' }, body: JSON.stringify({ run, selection: { tag: 'h1', anchorOnSelf: null, anchorOrdinal: null, anchorInstanceCount: 0, ancestorAnchors: [], textNodeIndex: null, valueShape: null, formControl: false, path: '/' } }) })).status, run1);
+    const staleWhileStopped = await page.evaluate(async (run) => (await fetch('/api/runtime/anchor', { method: 'POST', headers: { 'content-type': 'application/json', 'x-vcide-request': '1' }, body: JSON.stringify({ run, selection: { tag: 'h1', anchorOnSelf: null, anchorRev: null, anchorOrdinal: null, anchorInstanceCount: 0, ancestorAnchors: [], ancestorRevs: [], textNodeIndex: null, valueShape: null, formControl: false, path: '/' } }) })).status, run1);
     eq('停止中は選択を解決しない（409）', staleWhileStopped, 409);
     await sleep(300);
     phase.negativeApi = false;
@@ -511,7 +515,7 @@ try {
     ok('前提: 別の起動（PID か開始時刻が違う）', run2.pid !== run1.pid || run2.startedAt !== run1.startedAt, { run1, run2 });
     phase.negativeApi = true;
     const stale = await page.evaluate(async (run) => {
-      const r = await fetch('/api/runtime/anchor', { method: 'POST', headers: { 'content-type': 'application/json', 'x-vcide-request': '1' }, body: JSON.stringify({ run, selection: { tag: 'h1', anchorOnSelf: null, anchorOrdinal: null, anchorInstanceCount: 0, ancestorAnchors: [], textNodeIndex: null, valueShape: null, formControl: false, path: '/' } }) });
+      const r = await fetch('/api/runtime/anchor', { method: 'POST', headers: { 'content-type': 'application/json', 'x-vcide-request': '1' }, body: JSON.stringify({ run, selection: { tag: 'h1', anchorOnSelf: null, anchorRev: null, anchorOrdinal: null, anchorInstanceCount: 0, ancestorAnchors: [], ancestorRevs: [], textNodeIndex: null, valueShape: null, formControl: false, path: '/' } }) });
       return { status: r.status, body: await r.json() };
     }, run1);
     eq('前の起動のページから来た選択は解決しない（409）', stale.status, 409);

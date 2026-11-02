@@ -1586,7 +1586,11 @@ export function countObservation(obs: ObservationBundle) {
 /* ========================================================================== */
 
 /** 解決の結果（src/server/anchors.ts の AnchorResolution と同じ形。層2はサーバーを import しない） */
-type LiveAnchor = Omit<ObsElementAnchor, 'verified' | 'sourceLine'> & { sourceLine: string };
+type LiveAnchor = Omit<ObsElementAnchor, 'verified' | 'sourceLine'> & {
+  sourceLine: string;
+  /** F-01: 照合したソースの版（DOM・対応表・読み直したファイルで一致したもの）。画面はこの版が変われば選択を無効にする */
+  rev?: string;
+};
 export type LiveResolution =
   | {
     status: 'resolved';
@@ -1608,6 +1612,8 @@ export interface LiveSelectionInput {
   selection: {
     tag: string; anchorOnSelf: string | null; anchorOrdinal: number | null; anchorInstanceCount: number;
     ancestorAnchors: string[]; textNodeIndex: number | null;
+    /** F-01: 要素・祖先に付いていたソースの版（previewProtocol の ElementSelection と同じ） */
+    anchorRev?: string | null; ancestorRevs?: (string | null)[];
     valueShape: { chars: number; cls: string } | null; formControl: boolean; path: string;
   };
   resolution: LiveResolution;
@@ -1622,6 +1628,32 @@ export interface LiveSelectionInput {
   lineage?: LiveLineage;
 }
 
+/**
+ * F-01: 解決の結果から「どのファイルのどの版に対して照合したか」を取り出す（選んだ要素と、照合に通った祖先）。
+ * 画面はこの版を覚えておき、いまの版と違えば選択を無効にする。版の無い解決・同じファイルに別の版が混ざった解決は
+ * 照合したと言えないので null（画面は無効にする）
+ */
+export function liveResolutionRevisions(res: LiveResolution): Record<string, string> | null {
+  if (res.status !== 'resolved' || !res.anchor.rev) return null;
+  const out: Record<string, string> = { [res.anchor.file]: res.anchor.rev };
+  for (const a of res.ancestors) {
+    if (!a.rev) return null;
+    if (out[a.file] !== undefined && out[a.file] !== a.rev) return null;
+    out[a.file] = a.rev;
+  }
+  return out;
+}
+
+/** F-01: 同じ要素・同じ版に照合した結果か（位置だけでなく、依存するファイルの版も比べる） */
+export function sameLiveResolution(a: LiveResolution, b: LiveResolution | null | undefined): boolean {
+  if (!b || a.status !== 'resolved' || b.status !== 'resolved') return false;
+  const ra = liveResolutionRevisions(a); const rb = liveResolutionRevisions(b);
+  if (!ra || !rb) return false;
+  const ka = Object.keys(ra).sort(); const kb = Object.keys(rb).sort();
+  return a.anchor.id === b.anchor.id && a.anchor.file === b.anchor.file && a.anchor.line === b.anchor.line
+    && a.anchor.col === b.anchor.col && ka.length === kb.length && ka.every((k, i) => k === kb[i] && ra[k] === rb[k]);
+}
+
 /** 特定できなかった理由の見出し（anchors.ts の UnresolvedReason） */
 export const LIVE_UNRESOLVED_LABEL: Record<string, string> = {
   'anchor-missing': 'この要素自身に要素識別子がありません',
@@ -1632,6 +1664,10 @@ export const LIVE_UNRESOLVED_LABEL: Record<string, string> = {
   'tag-mismatch': 'DOM の要素と対応表の要素が一致しません',
   'source-mismatch': 'ソースを読み直した結果が対応表と一致しません',
   'verifier-unavailable': 'ソースを読み直せません',
+  /* F-01: ソースの版 */
+  'source-changed': 'コードが変更されています。プレビューの再描画の後に、もう一度選択してください',
+  'manifest-stale': '対応表がいまのソースの版と一致しません（再コンパイル待ち）。少し待ってから、もう一度選択してください',
+  'revision-missing': 'この要素にはソースの版が付いていないため、照合できません',
 };
 
 const LIVE_METHOD = '方式1 ビルド時の要素識別子注入（JSX へ data-vcide を挿入）';

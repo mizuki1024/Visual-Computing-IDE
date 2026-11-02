@@ -35,14 +35,17 @@ const eq = (name, a, b) => ok(name, a === b, a);
 /* ===================================================== 1. 知らせの検査 */
 console.log('\n1. 知らせの検査（受け取る側はすべて検査する）');
 const N = 'n'.repeat(22);
+const REV = '0123456789abcdef';
 const SEL = {
-  tag: 'span', anchorOnSelf: '9d8bc0d72e', anchorOrdinal: 1, anchorInstanceCount: 3,
-  ancestorAnchors: ['2dbe4989ce'], textNodeIndex: 0, valueShape: { chars: 5, cls: 'cjk' }, formControl: false, path: '/cards',
+  tag: 'span', anchorOnSelf: '9d8bc0d72e', anchorRev: REV, anchorOrdinal: 1, anchorInstanceCount: 3,
+  ancestorAnchors: ['2dbe4989ce'], ancestorRevs: [REV], textNodeIndex: 0, valueShape: { chars: 5, cls: 'cjk' }, formControl: false, path: '/cards',
 };
-const msg = (o) => ({ source: 'vcide-preview', v: 2, nonce: N, ...o });
-ok('hello は中身を持たない形だけ受ける', P.isAgentHello({ source: 'vcide-preview', v: 2, kind: 'hello' }));
-ok('hello に余計なキーがあれば受けない', !P.isAgentHello({ source: 'vcide-preview', v: 2, kind: 'hello', path: '/' }));
+eq('通信の版は 3（F-01: 選択にソースの版を足した）', P.PROTOCOL_VERSION, 3);
+const msg = (o) => ({ source: 'vcide-preview', v: 3, nonce: N, ...o });
+ok('hello は中身を持たない形だけ受ける', P.isAgentHello({ source: 'vcide-preview', v: 3, kind: 'hello' }));
+ok('hello に余計なキーがあれば受けない', !P.isAgentHello({ source: 'vcide-preview', v: 3, kind: 'hello', path: '/' }));
 ok('版の違う hello は受けない', !P.isAgentHello({ source: 'vcide-preview', v: 1, kind: 'hello' }));
+ok('版 2（ソースの版を持たない選択の送り手）の hello は受けない', !P.isAgentHello({ source: 'vcide-preview', v: 2, kind: 'hello' }));
 ok('正しい選択は受ける', P.parseAgentMessage(msg({ kind: 'select', seq: 1, selection: SEL }), N)?.kind === 'select');
 eq('nonce が違えば捨てる', P.parseAgentMessage(msg({ kind: 'select', seq: 1, selection: SEL }), 'm'.repeat(22)), null);
 eq('版が違えば捨てる', P.parseAgentMessage({ ...msg({ kind: 'connected' }), v: 1 }, N), null);
@@ -58,14 +61,23 @@ eq('テキストノードが無いのに値の形があれば捨てる', P.parse
 eq('文字種は決めたものだけ', P.parseSelection({ ...SEL, valueShape: { chars: 5, cls: 'アオバ台' } }), null);
 eq('パスは / で始まるものだけ（別の origin の URL を受けない）', P.parseSelection({ ...SEL, path: 'https://evil.example/' }), null);
 eq('// で始まるパスも受けない', P.parseSelection({ ...SEL, path: '//evil.example/' }), null);
-eq('祖先が多すぎれば捨てる', P.parseSelection({ ...SEL, ancestorAnchors: Array(33).fill('2dbe4989ce') }), null);
+eq('祖先が多すぎれば捨てる', P.parseSelection({ ...SEL, ancestorAnchors: Array(33).fill('2dbe4989ce'), ancestorRevs: Array(33).fill(REV) }), null);
+/* F-01: ソースの版 */
+eq('F-01: ソースの版のキーが無い選択は捨てる（版を知らない送り手）', P.parseSelection((({ anchorRev, ...o }) => o)(SEL)), null);
+eq('F-01: 祖先の版のキーが無い選択は捨てる', P.parseSelection((({ ancestorRevs, ...o }) => o)(SEL)), null);
+eq('F-01: 版の形でないものは捨てる', P.parseSelection({ ...SEL, anchorRev: 'src/a.tsx:1:1' }), null);
+eq('F-01: 祖先の版の数が祖先の数と違えば捨てる', P.parseSelection({ ...SEL, ancestorRevs: [] }), null);
+eq('F-01: 祖先の版の形も検査する', P.parseSelection({ ...SEL, ancestorRevs: ['x'] }), null);
+eq('F-01: 識別子が無いのに版があれば捨てる', P.parseSelection({ ...SEL, anchorOnSelf: null, anchorOrdinal: null, anchorInstanceCount: 0 }), null);
+ok('F-01: 識別子があって版が無い（null）選択は形としては受ける（解決で「版がありません」になる）', P.parseSelection({ ...SEL, anchorRev: null })?.anchorRev === null);
+ok('F-01: 祖先の版は null を含められる', P.parseSelection({ ...SEL, ancestorRevs: [null] })?.ancestorRevs[0] === null);
 eq('配列を選択として受けない', P.parseSelection([SEL]), null);
 eq('場所の知らせの状態は HTTP の範囲だけ', P.parseAgentMessage(msg({ kind: 'ready', path: '/', title: '', status: 999, soft: false, from: 'app' }), N), null);
 ok('場所の知らせ（正しい形）は受ける', P.parseAgentMessage(msg({ kind: 'ready', path: '/a?b#c', title: 't', status: 200, soft: false, from: 'app' }), N)?.path === '/a?b#c');
 ok('起動の鍵は形を検査する', P.parseRunKey({ instance: 'x', pid: 1, startedAt: 't' }) && !P.parseRunKey({ instance: 'x', pid: -1, startedAt: 't' }) && !P.parseRunKey({ instance: 'x', pid: 1, startedAt: 't', extra: 1 }));
 
 /* ===================================================== 2. 識別子 → ソース位置 */
-console.log('\n2. 識別子 → ソース位置（照合の6段）');
+console.log('\n2. 識別子 → ソース位置（照合の7段。F-01 でソースの版を足した）');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'vcide-7b2-'));
 const outside = fs.mkdtempSync(path.join(os.tmpdir(), 'vcide-7b2-out-'));
 const root = path.join(tmp, 'app');
@@ -89,11 +101,12 @@ fs.writeFileSync(path.join(root, 'src', 'page.tsx'), PAGE);
 fs.writeFileSync(path.join(root, 'next.config.mjs'), "const A = process.env.POC03_ANCHOR === '1'; export default {};\n");
 const outDir = AN.anchorOutDir(root);
 fs.mkdirSync(outDir, { recursive: true });
-const writeManifest = (name, file, anchors) => fs.writeFileSync(path.join(outDir, `${name}.json`), JSON.stringify({ file, anchors }));
+/* 対応表はローダ（poc/anchor/loader.cjs）と同じ形: ファイル単位に、変換したソースの版（rev）を持つ */
+const writeManifest = (name, file, anchors, rev) => fs.writeFileSync(path.join(outDir, `${name}.json`), JSON.stringify({ file, anchors, ...(rev ? { rev } : {}) }));
 const tB = transform(BADGE, 'src/components/Badge.tsx');
 const tP = transform(PAGE, 'src/page.tsx');
-writeManifest('a'.repeat(16), 'src/components/Badge.tsx', tB.anchors);
-writeManifest('b'.repeat(16), 'src/page.tsx', tP.anchors);
+writeManifest('a'.repeat(16), 'src/components/Badge.tsx', tB.anchors, tB.rev);
+writeManifest('b'.repeat(16), 'src/page.tsx', tP.anchors, tP.rev);
 const idOf = (t, tag) => t.anchors.find((a) => a.tag === tag).id;
 const bId = idOf(tB, 'b');
 const spanId = idOf(tB, 'span');
@@ -113,10 +126,10 @@ ok('対応表の置き場所は IDE の .ide-runtime の中（対象プロジェ
   eq('設定が無いプロジェクトは「使えない」（IDE は設定を書き換えない）', s2.state, 'unavailable');
   ok('理由を言う', /書き換えない/.test(s2.reason), s2.reason);
   eq('使えないときは起動先に何も足さない', Object.keys(AN.anchorEnv(r2, s2)).length, 0);
-  const r = AN.resolveSelection(r2, s2, { ...SEL, anchorOnSelf: bId, tag: 'b' });
+  const r = AN.resolveSelection(r2, s2, { ...SEL, anchorOnSelf: bId, anchorRev: tB.rev, tag: 'b' });
   eq('使えないプロジェクトでの選択は「注入していません」', r.reason, 'injection-unavailable');
 }
-const S = (o) => ({ tag: 'b', anchorOnSelf: bId, anchorOrdinal: 0, anchorInstanceCount: 1, ancestorAnchors: [spanId, mainId], textNodeIndex: 0, valueShape: { chars: 1, cls: 'latin' }, formControl: false, path: '/', ...o });
+const S = (o) => ({ tag: 'b', anchorOnSelf: bId, anchorRev: tB.rev, anchorOrdinal: 0, anchorInstanceCount: 1, ancestorAnchors: [spanId, mainId], ancestorRevs: [tB.rev, tP.rev], textNodeIndex: 0, valueShape: { chars: 1, cls: 'latin' }, formControl: false, path: '/', ...o });
 
 const r = AN.resolveSelection(root, support, S({}));
 eq('要素自身の識別子 → 位置が特定できる', r.status, 'resolved');
@@ -125,10 +138,12 @@ eq('正しいコンポーネント', r.anchor.component, 'Badge');
 eq('ソースから読んだ1行（DOM からではない）', r.anchor.sourceLine, '<b className="t">{v}</b>');
 eq("'use client' が無いファイル", r.directive, 'none');
 eq('包含関係は照合できた祖先から作る（文脈）', r.chain.join(' ← '), 'Badge ← Page');
-eq('照合した根拠を6つ返す', r.checks.length, 6);
-eq("'use client' のあるファイル", AN.resolveSelection(root, support, S({ tag: 'h1', anchorOnSelf: h1Id, ancestorAnchors: [mainId] })).directive, 'use-client');
+eq('照合した根拠を7つ返す（F-01 でソースの版の照合を足した）', r.checks.length, 7);
+eq('照合したソースの版を返す（DOM・対応表・読み直したファイルで一致したもの）', r.anchor.rev, tB.rev);
+ok('祖先にも照合した版を付ける', r.ancestors.every((a) => a.rev === (a.file === 'src/page.tsx' ? tP.rev : tB.rev)), r.ancestors);
+eq("'use client' のあるファイル", AN.resolveSelection(root, support, S({ tag: 'h1', anchorOnSelf: h1Id, anchorRev: tP.rev, ancestorAnchors: [mainId], ancestorRevs: [tP.rev] })).directive, 'use-client');
 
-const miss = AN.resolveSelection(root, support, S({ anchorOnSelf: null, anchorOrdinal: null, anchorInstanceCount: 0 }));
+const miss = AN.resolveSelection(root, support, S({ anchorOnSelf: null, anchorRev: null, anchorOrdinal: null, anchorInstanceCount: 0 }));
 eq('識別子の無い要素は「特定できません」', miss.reason, 'anchor-missing');
 ok('祖先に識別子があっても出所にしない（位置を返さない）', miss.status === 'unresolved' && !('anchor' in miss));
 eq('祖先は文脈として返す', miss.context?.component, 'Badge');
@@ -148,21 +163,34 @@ fs.writeFileSync(path.join(outside, 'Evil.tsx'), 'export default function Evil()
 fs.symlinkSync(path.join(outside, 'Evil.tsx'), path.join(root, 'src', 'Evil.tsx'));
 const evil = transform(fs.readFileSync(path.join(outside, 'Evil.tsx'), 'utf8'), 'src/Evil.tsx').anchors[0];
 writeManifest('f'.repeat(16), 'src/Evil.tsx', [evil]);
-eq('シンボリックリンクでプロジェクトの外へ出るファイルは止める', AN.resolveSelection(root, support, S({ anchorOnSelf: evil.id, ancestorAnchors: [] })).reason, 'outside-scope');
+eq('シンボリックリンクでプロジェクトの外へ出るファイルは止める', AN.resolveSelection(root, support, S({ anchorOnSelf: evil.id, ancestorAnchors: [], ancestorRevs: [] })).reason, 'outside-scope');
 eq('壊れた対応表の記述は読まない（形の検査）', AN.readManifest(outDir).has('1111111111') && !AN.readManifest(outDir).has('zz'), true);
 
-/* ソースが変わった（対応表は古いまま） */
-fs.writeFileSync(path.join(root, 'src', 'components', 'Badge.tsx'), `// 1行足した\n${BADGE}`);
+/* ソースが変わった（対応表は古いまま）。F-01 以降は、版の照合で先に止まる（source-changed） */
+const BADGE_ABS = path.join(root, 'src', 'components', 'Badge.tsx');
+fs.writeFileSync(BADGE_ABS, `// 1行足した\n${BADGE}`);
 const moved = AN.resolveSelection(root, support, S({}));
-eq('ソースが変わって位置に JSX が無ければ止める（古い対応表を信じない）', moved.reason, 'source-mismatch');
-fs.writeFileSync(path.join(root, 'src', 'components', 'Badge.tsx'), BADGE.replace('<b className="t">', '<i className="t">').replace('</b>', '</i>'));
-eq('同じ位置の要素のタグが変わっていれば止める', AN.resolveSelection(root, support, S({})).reason, 'source-mismatch');
-fs.writeFileSync(path.join(root, 'src', 'components', 'Badge.tsx'), BADGE.replace('function Badge', 'function Chip'));
-eq('囲むコンポーネントが変わっていれば止める', AN.resolveSelection(root, support, S({})).reason, 'source-mismatch');
-fs.writeFileSync(path.join(root, 'src', 'components', 'Badge.tsx'), BADGE);
+eq('ソースが変わったら止める（古い DOM の版 ≠ いまのファイルの版）', moved.reason, 'source-changed');
+ok('理由に再選択を求める文言', /もう一度選択/.test(moved.detail), moved.detail);
+/* 版はすべて一致するが、対応表がソースと食い違う（対応表の書き換え）→ 第7段のソースの読み直しで止める */
+const lying = (code) => { const rv = transform(code, 'src/components/Badge.tsx').rev; fs.writeFileSync(BADGE_ABS, code); writeManifest('a'.repeat(16), 'src/components/Badge.tsx', tB.anchors, rv); return rv; };
+{
+  const rv = lying(`// 1行足した\n${BADGE}`);
+  eq('版が揃っていても、位置に JSX が無ければ止める（古い対応表を信じない）', AN.resolveSelection(root, support, S({ anchorRev: rv })).reason, 'source-mismatch');
+}
+{
+  const rv = lying(BADGE.replace('<b className="t">', '<i className="t">').replace('</b>', '</i>'));
+  eq('版が揃っていても、同じ位置の要素のタグが変わっていれば止める', AN.resolveSelection(root, support, S({ anchorRev: rv })).reason, 'source-mismatch');
+}
+{
+  const rv = lying(BADGE.replace('function Badge', 'function Chip'));
+  eq('版が揃っていても、囲むコンポーネントが変わっていれば止める', AN.resolveSelection(root, support, S({ anchorRev: rv })).reason, 'source-mismatch');
+}
+fs.writeFileSync(BADGE_ABS, BADGE);
+writeManifest('a'.repeat(16), 'src/components/Badge.tsx', tB.anchors, tB.rev);
 eq('元に戻せば再び特定できる', AN.resolveSelection(root, support, S({})).status, 'resolved');
 {
-  const r3 = AN.resolveSelection(root, support, S({ ancestorAnchors: ['ffffffffff', spanId] }));
+  const r3 = AN.resolveSelection(root, support, S({ ancestorAnchors: ['ffffffffff', spanId], ancestorRevs: [tB.rev, tB.rev] }));
   eq('照合できない祖先は包含関係に入れない', r3.chain.join(' ← '), 'Badge');
 }
 
@@ -191,8 +219,8 @@ const input = (resolution, sel = S({})) => ({ project: 'app', port: 3000, page: 
   ok('既存の座標付け（layout）を通る', laid.nodes.length === 2 && laid.hops[0].d.startsWith('M '));
 }
 {
-  const res = AN.resolveSelection(root, support, S({ anchorOnSelf: null, anchorOrdinal: null, anchorInstanceCount: 0 }));
-  const { dataset, skipped } = AD.fromLiveSelection(input(res, S({ anchorOnSelf: null, anchorOrdinal: null, anchorInstanceCount: 0 })));
+  const res = AN.resolveSelection(root, support, S({ anchorOnSelf: null, anchorRev: null, anchorOrdinal: null, anchorInstanceCount: 0 }));
+  const { dataset, skipped } = AD.fromLiveSelection(input(res, S({ anchorOnSelf: null, anchorRev: null, anchorOrdinal: null, anchorInstanceCount: 0 })));
   eq('特定できない: 選んだ要素だけ（コンポーネントを作らない）', dataset.nodes.map((n) => n.kind).join(','), 'value');
   eq('特定できない: 関係を作らない', dataset.hops.length, 0);
   ok('特定できない: 理由を概要に書く', dataset.nodes[0].overview.some((x) => x.k === '特定できなかった理由' && /要素識別子がありません/.test(x.v)));
@@ -222,10 +250,12 @@ console.log('\n4. 差し込むスクリプトの宛先');
   /* 7B-3B-2: port への送信は、読み込み時に取っておいた MessagePort.prototype.postMessage で行う
    * （`pm.call(port, m)`）。window への postMessage は従来どおり hello の1か所だけ */
   ok("'*' 宛てに送るのは中身の無い hello だけ（ancestorOrigins が使えない場合）",
-    (js.match(/postMessage\(/g) ?? []).length === 1 && /P\.postMessage\(\{ source: 'vcide-preview', v: 2, kind: 'hello' \}, target\)/.test(js));
+    (js.match(/postMessage\(/g) ?? []).length === 1 && /P\.postMessage\(\{ source: 'vcide-preview', v: 3, kind: 'hello' \}, target\)/.test(js));
   ok('以後は MessagePort で送る（読み込み時に取っておいた送信の関数で）',
     /var pm = MessagePort\.prototype\.postMessage;/.test(js) && /pm\.call\(port, m\)/.test(js) && (js.match(/pm\.call\(/g) ?? []).length === 1);
   ok('本物のクリックだけで選ぶ（isTrusted）', js.includes('e.isTrusted'));
+  ok('F-01: 選んだ要素と祖先に付いていたソースの版（data-vcide-rev）を送る', js.includes("'data-vcide-rev'") && /anchorRev: self \? revOf\(el\) : null/.test(js) && js.includes('ancestorRevs: ancRev'));
+  ok('知らせの版はどこも 3（版 2 の固定値が残っていない）', !/v: 2\b|v === 2\b|m\.v = 2\b/.test(js) && /m\.v = 3;/.test(js) && /x\.v === 3 /.test(js));
   ok('接続の知らせをアプリのリスナーに渡さない（stopImmediatePropagation）', js.includes('stopImmediatePropagation'));
   ok('送り主が親の window で、許した origin のときだけ接続する', js.includes('e.source !== P') && js.includes('allowed(e.origin)'));
   ok('本文・属性・Cookie を読まない', !/innerHTML|outerHTML|textContent|innerText|cookie|localStorage|\.value\b|attributes/.test(js));
