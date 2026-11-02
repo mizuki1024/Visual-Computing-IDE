@@ -1,0 +1,648 @@
+{
+ "at": "2026-11-02T16:23:29.345Z",
+ "browser": "chromium (playwright-core 1.64.1, /opt/pw-browsers/chromium)",
+ "viewport": "1600x1000",
+ "results": [
+  {
+   "id": "E01",
+   "name": "CSS 上のビューポートは 1440×900 と 375×812（倍率と独立）。md は Desktop だけで有効",
+   "ok": true,
+   "evidence": [
+    {
+     "n": "Desktop",
+     "inner": [
+      1440,
+      900,
+      1440,
+      true
+     ],
+     "display": {
+      "x": 226,
+      "y": 182.96875,
+      "width": 722,
+      "height": 452
+     }
+    },
+    {
+     "n": "Mobile",
+     "inner": [
+      375,
+      812,
+      375,
+      false
+     ],
+     "display": {
+      "x": 968,
+      "y": 201.5625,
+      "width": 189.5,
+      "height": 408
+     }
+    }
+   ]
+  },
+  {
+   "id": "E02",
+   "name": "同じ倍率（50%）の表示寸法: 720×450 と 187.5×406。幅の比 = 1440/375・高さの比 = 900/812",
+   "ok": true,
+   "evidence": {
+    "desktop": {
+     "x": 226,
+     "y": 182.96875,
+     "width": 722,
+     "height": 452
+    },
+    "mobile": {
+     "x": 968,
+     "y": 201.5625,
+     "width": 189.5,
+     "height": 408
+    },
+    "note": "表示寸法は枠線 1px×2 を含む"
+   }
+  },
+  {
+   "id": "E03",
+   "name": "map の2番目を選ぶと、共有する定義 PropertyCard.tsx:7:5 の <div> に照合される（6段の照合を通過）",
+   "ok": true,
+   "evidence": {
+    "anchor": {
+     "id": "0dca476ff6",
+     "tag": "div",
+     "file": "src/components/PropertyCard.tsx",
+     "line": 7,
+     "col": 5,
+     "component": "PropertyCard",
+     "componentLine": 5,
+     "sourceLine": "<div className=\"rounded-lg border bg-white p-4 md:p-6 shadow-sm\">"
+    },
+    "ordinal": 1,
+    "checks": 6
+   }
+  },
+  {
+   "id": "E04",
+   "name": "10 個の描画は同じ識別子（同じコード）。描画回数 10 とソース上の利用箇所 2 を別の数として出す",
+   "ok": true,
+   "evidence": {
+    "domIds": [
+     "0dca476ff6"
+    ],
+    "renders": 10,
+    "usages": [
+     {
+      "file": "src/app/favorites/page.tsx",
+      "line": 9,
+      "inComponent": "FavoritesPage"
+     },
+     {
+      "file": "src/components/PropertyList.tsx",
+      "line": 9,
+      "inComponent": "PropertyList"
+     }
+    ],
+    "usageCount": {
+     "staticScan": 2,
+     "manifestOnly": 1,
+     "note": "静的に検出できた数（網羅は保証しない）。manifestOnly は開いたページの対応表だけで数えた場合"
+    }
+   }
+  },
+  {
+   "id": "E05",
+   "name": "画面で選んだ対象（Mobile・2番目）と書き込み先（部品の定義のファイル:行）を別に示し、共有定義の変更を警告する",
+   "ok": true,
+   "evidence": {
+    "dock": "要素 / divPropertyCard の外枠\n      Mobile 375 で選択 · 2番目 / この幅で10回描画⚠ 共有部品の定義を変更します — 部品の定義を変えるため、検出できた利用箇所 2 件すべてに効きます（網羅は保証しません）変更する対象⬡ 部品の定義 PropertyCard.tsx検出できた利用箇所 2件\n      静的走査で検出（網羅は保証しません）。開いたページの対応表だけで数えると 1 件\n      src/app/favorites/page.tsx:9src/components/PropertyList.tsx:9\n      ⓘ この利用箇所だけの変更は不可（内側の余白は定義の中で決まっています）余白（内側）\n        選択した表示幅Mobile 375効いている指定 p-4 / 計算済み 16px\n        変更が適用される幅基本"
+   }
+  },
+  {
+   "id": "E05b",
+   "name": "利用箇所は静的走査で 2 件。開いたページの対応表だけだと 1 件（/favorites は未コンパイル）",
+   "ok": true,
+   "evidence": {
+    "staticScan": 2,
+    "manifestOnly": 1,
+    "note": "静的に検出できた数（網羅は保証しない）。manifestOnly は開いたページの対応表だけで数えた場合"
+   }
+  },
+  {
+   "id": "E06",
+   "name": "別 origin の iframe から受け取った矩形 × 倍率で描いた選択枠が、実要素の画面上の位置と 1px 以内で一致",
+   "ok": true,
+   "evidence": {
+    "element": {
+     "x": 977,
+     "y": 385.5625,
+     "width": 171.5,
+     "height": 57
+    },
+    "overlay": {
+     "x": 977,
+     "y": 385.5625,
+     "width": 171.5,
+     "height": 57
+    }
+   }
+  },
+  {
+   "id": "E07",
+   "name": "同じコードの他の描画は四隅の印（Mobile 9・Desktop 10）。主選択は1つ",
+   "ok": true,
+   "evidence": {
+    "secM": 9,
+    "secD": 10
+   }
+  },
+  {
+   "id": "E08",
+   "name": "現在のコードの計算済み padding: Mobile 16px・Desktop 24px（境界越しに取得）",
+   "ok": true,
+   "evidence": {
+    "mobile": [
+     "16/16/16/16"
+    ],
+    "desktop": [
+     "24/24/24/24"
+    ]
+   }
+  },
+  {
+   "id": "E09",
+   "name": "ブレークポイントと spacing は題材の Tailwind 設定をコンパイルして読む（md=48rem=768px・spacing=0.25rem=4px）",
+   "ok": true,
+   "evidence": {
+    "source": "tailwind-compile",
+    "breakpoints": {
+     "sm": {
+      "css": "40rem",
+      "px": 640
+     },
+     "md": {
+      "css": "48rem",
+      "px": 768
+     },
+     "lg": {
+      "css": "64rem",
+      "px": 1024
+     },
+     "xl": {
+      "css": "80rem",
+      "px": 1280
+     },
+     "2xl": {
+      "css": "96rem",
+      "px": 1536
+     }
+    },
+    "spacing": {
+     "css": "0.25rem",
+     "px": 4
+    },
+    "rootPx": 16
+   }
+  },
+  {
+   "id": "E10",
+   "name": "観測の記録は書き込み前は「現在のコードと一致」",
+   "ok": true,
+   "evidence": {
+    "revision": "e75cfba70b46",
+    "at": 1793636574091,
+    "note": "鮮度の検証用の記録。中身（通信・SQL・由来）は持たない",
+    "freshness": {
+     "state": "current",
+     "label": "現在のコードと一致"
+    }
+   }
+  },
+  {
+   "id": "E11",
+   "name": "コンテナ（値を持たない外枠）では経路を代表1本にまとめず「出所を見る値を選択してください」と案内",
+   "ok": true,
+   "evidence": {
+    "flow": "\n      データフロー（記録） 観測の記録 版 e75cfba · 現在の版 e75cfba · 現在のコードと一致 · 下書きは含みません\n      この要素自体は値を表示していません出所を見る値を選択してください（中の値の経路を代表1本にまとめては表示しません）この PoC では通信・SQL・由来を取得していません。上の見出しは観測の鮮度の状態管理だけを示します。\n    "
+   }
+  },
+  {
+   "id": "E12",
+   "name": "下書きの段階では題材のソースを変更しない",
+   "ok": true,
+   "evidence": {
+    "before": "e6921a96c257",
+    "now": "e6921a96c257"
+   }
+  },
+  {
+   "id": "E13",
+   "name": "適用前プレビュー（予測・方式 A）: Mobile 20px・Desktop 24px。予測であることを測定値と見出しで区別",
+   "ok": true,
+   "evidence": {
+    "mobile": [
+     20,
+     20,
+     20,
+     20
+    ],
+    "desktop": [
+     24,
+     24,
+     24,
+     24
+    ],
+    "heads": [
+     "▨ 適用前プレビュー（予測）· 下書き 1件を反映 · この幅は変化なし（予測）",
+     "▨ 適用前プレビュー（予測）· 下書き 1件を反映 · この幅は変わる（予測）"
+    ]
+   }
+  },
+  {
+   "id": "E14",
+   "name": "N0 は「下書き 1件 · コードは未変更」。書き込み・再描画・検証のチップはまだ無い",
+   "ok": true,
+   "evidence": {}
+  },
+  {
+   "id": "E15",
+   "name": "下書きの Undo（p-5 → p-4）と Redo（→ p-5）はファイルを変えない",
+   "ok": true,
+   "evidence": {
+    "undoValue": "p-4"
+   }
+  },
+  {
+   "id": "E16",
+   "name": "差分は1行だけ: p-4 → p-5。md:p-6・他のクラスは同じ行に残る",
+   "ok": true,
+   "evidence": {
+    "diff": "--- a/src/components/PropertyCard.tsx\n+++ b/src/components/PropertyCard.tsx\n@@ -5,5 +5,5 @@\n export function PropertyCard({ property }: { property: Property }) {\n   return (\n-    <div className=\"rounded-lg border bg-white p-4 md:p-6 shadow-sm\">\n+    <div className=\"rounded-lg border bg-white p-5 md:p-6 shadow-sm\">\n       <div className=\"flex gap-3\">\n         <div className=\"h-16 w-20 shrink-0 rounded bg-emerald-200\" aria-hidden=\"true\" />"
+   }
+  },
+  {
+   "id": "E17",
+   "name": "確認した差分と違う差分（diffHash 不一致）では適用しない",
+   "ok": true,
+   "evidence": {
+    "status": "conflict",
+    "reason": "diff-not-reviewed",
+    "detail": "確認した差分と、いまの差分が一致しません。差分を確認し直してください。",
+    "written": false,
+    "http": 409
+   }
+  },
+  {
+   "id": "E18",
+   "name": "変更案を作った後に外部変更があれば適用しない。ファイルは外部変更のまま（上書きしない）",
+   "ok": true,
+   "evidence": {
+    "file": "a89e7fd27c85"
+   }
+  },
+  {
+   "id": "E19",
+   "name": "再確認でいまの内容から差分を作り直す（基準が外部変更後の内容になる）",
+   "ok": true,
+   "evidence": {
+    "base": "a89e7fd27c85"
+   }
+  },
+  {
+   "id": "E20",
+   "name": "明示的な適用の後にだけソースが変わる: 変更は p-4 → p-5 の1か所だけ（外部変更・コメント・md:p-6 は保持）",
+   "ok": true,
+   "evidence": {
+    "diff": "--- a/src/components/PropertyCard.tsx\n+++ b/src/components/PropertyCard.tsx\n@@ -5,5 +5,5 @@\n export function PropertyCard({ property }: { property: Property }) {\n   return (\n-    <div className=\"rounded-lg border bg-white p-4 md:p-6 shadow-sm\">\n+    <div className=\"rounded-lg border bg-white p-5 md:p-6 shadow-sm\">\n       <div className=\"flex gap-3\">\n         <div className=\"h-16 w-20 shrink-0 rounded bg-emerald-200\" aria-hidden=\"true\" />"
+   }
+  },
+  {
+   "id": "E21",
+   "name": "同じクラスを持つ無関係な要素（SiteNotice）と条件付きクラスのファイルは変わらない",
+   "ok": true,
+   "evidence": {
+    "ctrlM": [
+     16
+    ],
+    "ctrlD": [
+     24
+    ]
+   }
+  },
+  {
+   "id": "E22",
+   "name": "HMR 後の実描画（予測ではない）: Mobile 10 件すべて 20px・Desktop 10 件すべて 24px（md:p-6 が優先）",
+   "ok": true,
+   "evidence": {
+    "mobile": [
+     "20/20/20/20"
+    ],
+    "desktop": [
+     "24/24/24/24"
+    ]
+   }
+  },
+  {
+   "id": "E23",
+   "name": "書き込み・再描画・検証を別々に記録: 書き込み=読み直して一致 / 再描画=HMR / 検証=通過、続けて再読み込みでも通過",
+   "ok": true,
+   "evidence": {
+    "status": {
+     "write": "written-verified",
+     "rerender": "reload",
+     "verify": "passed"
+    },
+    "verifications": [
+     [
+      "hmr",
+      "passed"
+     ],
+     [
+      "reload",
+      "passed"
+     ]
+    ],
+    "rerender": {
+     "ok": true,
+     "ms": 326,
+     "kind": "hmr",
+     "reloaded": []
+    },
+    "revisionHashMs": 0.580778,
+    "revisionFiles": 14
+   }
+  },
+  {
+   "id": "E24",
+   "name": "適用した版と確かめた描画の対応: 再読み込みした文書の版 = 適用後の版（内容ハッシュ）",
+   "ok": true,
+   "evidence": {
+    "revBefore": "8fefbe0e8abd",
+    "revAfter": "897cfb7bd961",
+    "docRevs": [
+     "897cfb7bd961",
+     "897cfb7bd961"
+    ]
+   }
+  },
+  {
+   "id": "E25",
+   "name": "書き込み後、観測の記録は「古い」（新しいコードの実測として出さない）",
+   "ok": true,
+   "evidence": {
+    "state": "stale",
+    "label": "古い（観測の版 e75cfba ≠ 現在 897cfb7）"
+   }
+  },
+  {
+   "id": "E26",
+   "name": "適用・HMR・再読み込みの後も同じ要素の選択を再解決できる（同じ識別子・6段の照合）",
+   "ok": true,
+   "evidence": {
+    "ok": true,
+    "text": "選択を再解決しました（再読み込みの後）— 同じ識別子・src/components/PropertyCard.tsx:7:5・2/10・6段の照合を通過"
+   }
+  },
+  {
+   "id": "E27",
+   "name": "幅の帯は予測で、実際に開いた幅は 375・1440 だけと明示（中間の幅は未確認）",
+   "ok": true,
+   "evidence": {}
+  },
+  {
+   "id": "E22b",
+   "name": "適用・検証の直後、右ドックと選択の札に出す値も新しい描画の実測（p-5・20px）。古い計測を残さない",
+   "ok": true,
+   "evidence": {
+    "swText": "Mobile 375効いている指定 p-5 / 計算済み 20px",
+    "tagText": "p-5 · 20px"
+   }
+  },
+  {
+   "id": "E28",
+   "name": "適用の取り消し: 適用直後の内容と一致したので戻す。外部変更を含む適用前の内容とバイト一致",
+   "ok": true,
+   "evidence": {
+    "revert": {
+     "status": "reverted",
+     "at": "2026-11-02T16:23:00.446Z",
+     "revAfter": "8fefbe0e8abd",
+     "rerender": "reload",
+     "verify": "passed"
+    }
+   }
+  },
+  {
+   "id": "E29",
+   "name": "取り消し後の再描画を確認: Mobile 16px・p-4 に戻る（HMR → 再読み込みでも通過）",
+   "ok": true,
+   "evidence": {
+    "mobile": [
+     "16/16/16/16"
+    ],
+    "verifications": [
+     [
+      "apply",
+      "hmr",
+      "passed"
+     ],
+     [
+      "apply",
+      "reload",
+      "passed"
+     ],
+     [
+      "revert",
+      "hmr",
+      "passed"
+     ],
+     [
+      "revert",
+      "reload",
+      "passed"
+     ]
+    ]
+   }
+  },
+  {
+   "id": "E30",
+   "name": "取り消しで内容が元に戻っても、観測の記録は「古い」のまま（観測の後に書き込んだ）",
+   "ok": true,
+   "evidence": {
+    "state": "stale",
+    "label": "古い（観測の版 e75cfba ≠ 現在 8fefbe0）"
+   }
+  },
+  {
+   "id": "E31",
+   "name": "適用後に外部変更が入ったら、取り消しを拒否し古いファイル全体で上書きしない（外部変更と p-5 が残る）",
+   "ok": true,
+   "evidence": {
+    "refused": "取り消しませんでした — 適用の後にこのファイルが変わっています。適用前の内容で上書きすると、その変更が失われるため取り消しません。--- a/src/components/PropertyCard.tsx\n+++ b/src/components/PropertyCard.tsx\n@@ -8,5 +8,5 @@\n       <div className=\"flex gap-3\">\n      "
+   }
+  },
+  {
+   "id": "E32",
+   "name": "行がずれて識別子が変わったら、選択を維持できない理由を示し、別の要素を黙って選ばない",
+   "ok": true,
+   "evidence": {
+    "note": "選択を維持できません — 識別子 0dca476ff6 の 2 番目が、いまの Mobile の描画にありません（Mobile の DOM が変わった。コードの位置が変わった可能性があります）。別の要素は自動では選びません。最後に確認できた位置: src/components/PropertyCard.tsx:7（PropertyCard）",
+    "oldId": "0dca476ff6",
+    "newIds": [
+     "602d5bcc4a"
+    ]
+   }
+  },
+  {
+   "id": "E33",
+   "name": "古い識別子での変更案・照合は拒否（変更済みのソースの誤った位置へ書かない）",
+   "ok": true,
+   "evidence": {
+    "staleDraft": {
+     "error": "source-mismatch",
+     "detail": "その位置に、選んだ要素の JSX がありません（ソースが変わった可能性があります）",
+     "http": 422
+    },
+    "staleResolve": {
+     "reason": "anchor-not-in-manifest"
+    }
+   }
+  },
+  {
+   "id": "E34",
+   "name": "別の起動インスタンスから来た選択は照合しない",
+   "ok": true,
+   "evidence": {
+    "status": "unresolved",
+    "reason": "stale-instance",
+    "detail": "別の起動の文書から来た選択です。",
+    "http": 409
+   }
+  },
+  {
+   "id": "E35",
+   "name": "条件付きクラス（テンプレート内の三項演算子）は推測で書き換えず、理由付きで編集不可",
+   "ok": true,
+   "evidence": {
+    "editable": {
+     "state": "not-editable",
+     "reason": "conditional-class",
+     "detail": "条件によって変わるクラスです。どの条件の token を書き換えるかを推測しません"
+    },
+    "fpDraft": {
+     "error": "conditional-class",
+     "detail": "条件によって変わるクラスです。どの条件の token を書き換えるかを推測しません",
+     "http": 422
+    }
+   }
+  },
+  {
+   "id": "E36",
+   "name": "HMR が届かないとき: 書き込みは済み、再描画は「確認できません」、検証は「未検証」（適用成功＝検証成功と出さない）",
+   "ok": true,
+   "evidence": {
+    "status": {
+     "write": "written-verified",
+     "rerender": "not-confirmed",
+     "verify": "not-verified"
+    },
+    "chips": {
+     "write": "書き込み 済み（読み直して一致）",
+     "rerender": "再描画 確認できません",
+     "verify": "検証 未検証"
+    }
+   }
+  },
+  {
+   "id": "E36b",
+   "name": "アートボードの見出しも「書き込み前の描画の可能性・文書の版 ≠ コードの版」と示し、現在のコードの描画と呼ばない",
+   "ok": true,
+   "evidence": [
+    "⚠ 書き込み前の描画の可能性 · 文書の版 e75cfba ≠ コードの版 ef273fa · 再描画を確認できません · CSS 1440×900 · md 以上が有効",
+    "⚠ 書き込み前の描画の可能性 · 文書の版 e75cfba ≠ コードの版 ef273fa · 再描画を確認できません · CSS 375×812 · base のみ有効"
+   ]
+  },
+  {
+   "id": "E37",
+   "name": "そのとき画面は書き込み前のコードのまま（16px）で、予測の値を実測として扱っていない",
+   "ok": true,
+   "evidence": {
+    "mobile": [
+     16,
+     16,
+     16,
+     16
+    ]
+   }
+  },
+  {
+   "id": "E38",
+   "name": "HMR を戻して［再読み込みして確認］→ 再読み込みの描画で検証が通過（版も一致）",
+   "ok": true,
+   "evidence": {
+    "status": {
+     "write": "written-verified",
+     "rerender": "reload",
+     "verify": "passed"
+    }
+   }
+  },
+  {
+   "id": "E39",
+   "name": "後片付けの取り消しも照合して戻した（元の内容とバイト一致）",
+   "ok": true,
+   "evidence": {}
+  },
+  {
+   "id": "E40",
+   "name": "iframe のアプリが port を通さずに送った偽の計測は捨てる（拒否 +1）。親自身からの偽の hello は送り主が iframe でないので使わない",
+   "ok": true,
+   "evidence": {
+    "rej0": 1,
+    "rej1": 2
+   }
+  },
+  {
+   "id": "E41",
+   "name": "倍率 35% でも CSS ビューポートは 375 のまま、表示は 1440×0.35 / 375×0.35、選択枠は実要素と 1px 以内",
+   "ok": true,
+   "evidence": {
+    "desktop": {
+     "x": 226,
+     "y": 182.96875,
+     "width": 506,
+     "height": 317
+    },
+    "mobile": {
+     "x": 752,
+     "y": 201.5625,
+     "width": 133.25,
+     "height": 286.1875
+    },
+    "element": {
+     "x": 758.59375,
+     "y": 330.65625,
+     "width": 120.0625,
+     "height": 39.90625
+    },
+    "overlay": {
+     "x": 758.59375,
+     "y": 330.65625,
+     "width": 120.046875,
+     "height": 39.890625
+    }
+   }
+  },
+  {
+   "id": "E42",
+   "name": "画面のスクリプトエラーなし",
+   "ok": true,
+   "evidence": []
+  },
+  {
+   "id": "E99",
+   "name": "題材を元の内容に戻した（戻したファイル 0 件）・全ファイルが写しとバイト一致",
+   "ok": true,
+   "evidence": {
+    "restored": 0
+   }
+  }
+ ]
+}

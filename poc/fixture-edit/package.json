@@ -1,0 +1,22 @@
+{
+  "name": "poc-edit-fixture",
+  "version": "0.0.0",
+  "private": true,
+  "description": "編集 PoC（EP-01/02/03/05/06/07/08/12/13/14/17）専用の架空の題材。IDE 本体のビルドに含めない。実案件のコードではない。",
+  "scripts": {
+    "dev": "next dev -p 3260 -H 127.0.0.1"
+  },
+  "dependencies": {
+    "next": "16.4.3",
+    "react": "19.1.1",
+    "react-dom": "19.1.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/node": "22.10.2",
+    "@types/react": "19.1.8",
+    "@types/react-dom": "19.1.6",
+    "tailwindcss": "4.3.3",
+    "typescript": "5.7.3"
+  }
+}

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="poc-config" content="__CONFIG__">
+<title>編集 PoC — 余白の往復</title>
+<link rel="stylesheet" href="/ui.css">
+<script src="/protocol.js"></script>
+<script src="/ui.js" defer></script>
+</head>
+<body>
+<header class="n0">
+  <span class="brand">GRiDDATA</span>
+  <span class="proj">poc/fixture-edit</span>
+  <span class="badge warn">技術PoC（製品画面ではありません）</span>
+  <span class="chip" data-testid="code-chip">コード · 版 <b id="rev">—</b></span>
+  <span class="chip" data-testid="change-chip" id="changeChip">変更なし</span>
+  <span class="chip" data-testid="write-chip" id="writeChip">書き込み —</span>
+  <span class="chip" data-testid="rerender-chip" id="rerenderChip">再描画 —</span>
+  <span class="chip" data-testid="verify-chip" id="verifyChip">検証 —</span>
+  <span class="spacer"></span>
+  <span class="chip" id="connChip">接続 0/2 · 拒否 <b id="rejected">0</b></span>
+</header>
+<nav class="tabs"><span>探索</span><span>データ</span><span>実行</span><span class="on">編集</span></nav>
+<main class="grid">
+  <aside class="left">
+    <h3>ページ</h3>
+    <div class="page on">/properties<small>2つの幅で表示中</small></div>
+    <div class="page">/favorites<small>開いていません</small></div>
+    <h3>構造 <small>/properties</small></h3>
+    <div id="tree" class="tree"><p class="muted">要素を選ぶと、照合できた包含関係を表示します</p></div>
+  </aside>
+  <section class="center">
+    <div class="toolbar">
+      <span class="seg"><button id="btnSelect" class="on" data-testid="mode-select">▸ 選択</button><button id="btnInteract" data-testid="mode-interact">☝ ページを操作</button></span>
+      <span class="seg"><button id="viewCurrent" class="on" data-testid="view-current">現在のコード</button><button id="viewPreview" data-testid="view-preview" disabled>▨ 適用前プレビュー（予測）</button></span>
+      <span class="seg"><button id="undo" title="下書きの Undo" data-testid="draft-undo" disabled>↶</button><button id="redo" title="下書きの Redo" data-testid="draft-redo" disabled>↷</button></span>
+      <label class="scale">倍率 <select id="scale" data-testid="scale"><option value="0.5" selected>50%</option><option value="0.35">35%</option><option value="0.25">25%</option></select></label>
+    </div>
+    <div class="canvas" id="canvas"></div>
+    <section class="n5" data-testid="dataflow">
+      <h4>データフロー（記録） <span id="freshness" class="muted"></span></h4>
+      <div id="flow" class="flow"><p class="muted">要素を選ぶと表示します</p></div>
+    </section>
+  </section>
+  <aside class="right" id="dock" data-testid="dock">
+    <p class="muted">「選択」でアートボードの要素をクリックしてください</p>
+  </aside>
+</main>
+<footer class="logbar"><details><summary>検証の記録（サーバーと画面）</summary><pre id="log"></pre></details></footer>
+</body>
+</html>

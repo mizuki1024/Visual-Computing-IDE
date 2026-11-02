@@ -1,0 +1,49 @@
+[ready] 検証用画面 http://127.0.0.1:3262 / 中継 http://127.0.0.1:3261 / 題材 127.0.0.1:3260（版 e75cfba70b46）
+POC_EDIT_READY http://127.0.0.1:3262
+[resolve] PropertyCard <div> src/components/PropertyCard.tsx:7:5（2/10）
+[draft] 下書き: p-4 → p-5（ファイルは未変更）
+[resolve] PropertyCard <div> src/components/PropertyCard.tsx:7:5（2/10）
+[draft] 下書きの取り消し（Undo）: 値 p-4（ファイルは未変更）
+[draft] 下書きのやり直し（Redo）: 値 p-5（ファイルは未変更）
+[apply] 適用しません: 確認した差分と、いまの差分が一致しません
+[resolve] PropertyCard <div> src/components/PropertyCard.tsx:7:5（2/10）
+[apply] 適用しません: 変更案を作った後にファイルが変わりました
+[recheck] いまの内容で差分を作り直しました（基準 a89e7fd2）
+[apply] 書き込みました: src/components/PropertyCard.tsx p-4 → p-5（版 8fefbe0e8abd → 897cfb7bd961・読み直して一致）
+[verify] 適用の検証: 再描画=hmr 検証=passed
+[resolve] PropertyCard <div> src/components/PropertyCard.tsx:7:5（2/10）
+[verify] 適用の検証: 再描画=reload 検証=passed
+[resolve] PropertyCard <div> src/components/PropertyCard.tsx:7:5（2/10）
+[revert] 適用を取り消しました: src/components/PropertyCard.tsx p-5 → p-4（版 → 8fefbe0e8abd・読み直して一致）
+[verify] 取り消しの検証: 再描画=hmr 検証=passed
+[resolve] PropertyCard <div> src/components/PropertyCard.tsx:7:5（2/10）
+[verify] 取り消しの検証: 再描画=reload 検証=passed
+[resolve] PropertyCard <div> src/components/PropertyCard.tsx:7:5（2/10）
+[resolve] PropertyCard <div> src/components/PropertyCard.tsx:7:5（2/10）
+[draft] 下書き: p-4 → p-5（ファイルは未変更）
+[apply] 書き込みました: src/components/PropertyCard.tsx p-4 → p-5（版 8fefbe0e8abd → 897cfb7bd961・読み直して一致）
+[verify] 適用の検証: 再描画=hmr 検証=passed
+[resolve] PropertyCard <div> src/components/PropertyCard.tsx:7:5（2/10）
+[verify] 適用の検証: 再描画=reload 検証=passed
+[resolve] PropertyCard <div> src/components/PropertyCard.tsx:7:5（2/10）
+[resolve] PropertyCard <div> src/components/PropertyCard.tsx:7:5（2/10）
+[revert] 取り消しませんでした: refused-changed-after-apply
+[resolve] PropertyCard <div> src/components/PropertyCard.tsx:7:5（2/10）
+[resolve] PropertyCard <div> src/components/PropertyCard.tsx:7:5（2/10）
+[resolve] 特定できません: anchor-not-in-manifest
+[resolve] FilterPanel <div> src/components/FilterPanel.tsx:4:5（1/1）
+[resolve] PropertyCard <div> src/components/PropertyCard.tsx:7:5（2/10）
+[draft] 下書き: p-4 → p-5（ファイルは未変更）
+[fault] 試験用: HMR の WebSocket を遮断
+[apply] 書き込みました: src/components/PropertyCard.tsx p-4 → p-5（版 e75cfba70b46 → ef273facf057・読み直して一致）
+[verify] 適用の検証: 再描画=timeout 検証=not-verified
+[fault] 試験用: HMR の WebSocket を再開
+[verify] 適用の検証: 再描画=reload 検証=passed
+[resolve] PropertyCard <div> src/components/PropertyCard.tsx:7:5（2/10）
+[revert] 適用を取り消しました: src/components/PropertyCard.tsx p-5 → p-4（版 → e75cfba70b46・読み直して一致）
+[verify] 取り消しの検証: 再描画=hmr 検証=passed
+[resolve] PropertyCard <div> src/components/PropertyCard.tsx:7:5（2/10）
+[verify] 取り消しの検証: 再描画=reload 検証=passed
+[resolve] PropertyCard <div> src/components/PropertyCard.tsx:7:5（2/10）
+[resolve] PropertyCard <div> src/components/PropertyCard.tsx:7:5（2/10）
+[resolve] PropertyCard <div> src/components/PropertyCard.tsx:7:5（2/10）

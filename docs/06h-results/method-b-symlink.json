@@ -1,0 +1,39 @@
+{
+ "at": "2026-11-02T16:14:10.958Z",
+ "method": "B: isolated working copy + second next dev",
+ "steps": [
+  {
+   "k": "copy",
+   "ms": 2,
+   "kbWithoutNodeModules": 84,
+   "nodeModules": "symlink"
+  },
+  {
+   "k": "apply-in-copy",
+   "status": "applied",
+   "fixtureUnchanged": true
+  },
+  {
+   "k": "first-200",
+   "ok": false,
+   "ms": 62686
+  },
+  {
+   "k": "measure",
+   "skipped": true
+  },
+  {
+   "k": "memory",
+   "rssKb": 249324,
+   "note": "2つ目の開発サーバーのプロセスグループの RSS 合計"
+  },
+  {
+   "k": "cleanup",
+   "removed": true,
+   "fixtureUnchanged": true
+  }
+ ],
+ "nodeModules": "symlink",
+ "devLogHead": "▲ Next.js 16.4.3 (Turbopack)\n- Local:         http://127.0.0.1:3270\n- Network:       http://127.0.0.1:3270\n✓ Ready in 428ms\n✓ Running next.config.mjs took 24ms\nTurbopack build encountered 1 error:\n./src/app\nError: Could not find the Next.js package (next/package.json)\nResolved from: /home/user/Visual-Computing-IDE/poc/out/edit-shadow/4dd2e941/src/app\nFilesystem root used for resolution: /home/user/Visual-Computing-IDE/poc/out/edit-shadow/4dd2e941\n\nPossible causes:\n  - node_modules is being reorganized by a concurrent install (e.g. pnpm adding a package with a `next` peer dependency). This is transient and should clear once the install completes.\n  - node_modules/next was removed, renamed, or has a broken symlink.\n  - The workspace root is incorrect — see turbopack.root in the Next.js config docs for how to configure it.\n  - In a monorepo, the Next.js package may only exist in a directory above the closest directory containing a package manager lockfile. The workspace root is detected by locating the nearest package manager lockfile.\n  - Next.js is installed globally rather than as a project dependency. This is not supported; install it locally.\n\nNote: To ensure a hermetic build and a portable cache, files outside of the workspace root are not compiled.\n\nhttps://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory\n\n\n\nError: ENOENT: no such file or directory, open '/home/user/Visual-Computing-IDE/poc/out/edit-shadow/4dd2e941/.next/dev/server/pages/_app/build-manifest.json'\n    at ignore-listed frames {\n  errno: -2,\n  code: 'ENOENT',\n  syscall: 'open',\n  path: '/home/user/Visual-Computing-IDE/poc/out/edit-shadow/4dd2e941/.next/dev/server/pages/_app/build-manifest.json'",
+ "devLogTail": "    at ignore-listed frames {\n  errno: -2,\n  code: 'ENOENT',\n  syscall: 'open',\n  path: '/home/user/Visual-Computing-IDE/poc/out/edit-shadow/4dd2e941/.next/dev/server/pages/_app/build-manifest.json'\n}\n\u001b[?25h\n"
+}

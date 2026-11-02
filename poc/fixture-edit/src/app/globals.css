@@ -1,0 +1,3 @@
+/* Tailwind v4 の既定のテーマをそのまま使う（ブレークポイント・spacing を上書きしない）。
+ * 編集 PoC の期待値（p-4=16px / p-5=20px / md:p-6=24px / md=768px）はこの既定から決まる。 */
+@import "tailwindcss";

@@ -136,3 +136,34 @@ PoC-02 ではさらに次を集めない。
 **トレースコンテキストの値**（受け側は「付いていたか」の真偽だけを数える）/
 **呼び出しスタックの引数や変数**（ファイル・行・列・関数名だけを記録する）/
 **絶対パス**（記録の時点で相対パスか分類名に置き換える）。
+
+---
+
+# 編集 PoC（編集トラックの技術PoC）— 余白 p-4 → p-5 の往復
+
+報告書は `docs/06h-edit-poc-report.md`。IDE の製品画面には統合していない。
+
+```
+poc/
+  fixture-edit/           編集 PoC 専用の架空の題材（Next.js 16.4.3 + Tailwind 4.3.3 既定値）。
+                          PropertyCard を /properties（map で10回）と /favorites（1回）から使う。
+                          同じクラスの無関係な要素（SiteNotice）・条件付きクラス（FilterPanel）を含む。
+                          注入は poc/anchor/loader.cjs（POC03_ANCHOR=1）
+  edit/
+    engine.cjs            位置の特定・最小差分・版（内容ハッシュ）・適用・取り消し・複数ファイルのジャーナル
+    tailwind.cjs          題材の Tailwind をコンパイルしてブレークポイントを読む／予測の CSS（方式 A）
+    server.mjs            ハーネス（:3262 画面と API・:3261 中継・:3260 題材の next dev）
+    public/               検証用画面・iframe の中のスクリプト（edit-agent.js）・通信の検査（protocol.js）
+    shadow-preview.mjs    方式 B（隔離した作業コピーで実描画）の比較実験
+    tests/unit.spec.mjs   単体（使い捨てのコピーだけを書き換える）
+    tests/e2e.spec.mjs    実ブラウザ（題材は最初に写しを取り、最後に必ず戻して一致を確認）
+```
+
+```sh
+(cd poc/fixture-edit && npm ci)
+npm run poc:edit:unit
+npm run poc:edit:e2e
+npm run poc:edit            # http://127.0.0.1:3262
+```
+
+書き込む先は `poc/fixture-edit/src/` の中だけ（`engine.safePath`）。作業コピー・ジャーナル・ログは `poc/out/`（Git 管理外）。

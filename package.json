@@ -22,7 +22,11 @@
     "poc:lineage": "node poc/runner/poc04.mjs",
     "poc:lineagedata": "node poc/runner/build-poc04-observation.mjs",
     "poc:sqlimpact": "node poc/runner/sqlimpact.mjs",
-    "runtime:reap": "node scripts/reap-dev-server.mjs"
+    "runtime:reap": "node scripts/reap-dev-server.mjs",
+    "poc:edit": "npm run build:lib && node poc/edit/server.mjs",
+    "poc:edit:unit": "node poc/edit/tests/unit.spec.mjs",
+    "poc:edit:e2e": "npm run build:lib && node poc/edit/tests/e2e.spec.mjs",
+    "poc:edit:method-b": "node poc/edit/shadow-preview.mjs"
   },
   "dependencies": {
     "next": "^16.4.3",
