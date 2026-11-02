@@ -1,0 +1,271 @@
+{
+ "base": "http://127.0.0.1:3100",
+ "viewport": "1600x1000",
+ "startedAt": "2026-11-02T06:59:08.069Z",
+ "scenarios": [
+  {
+   "id": "X1",
+   "title": "2つ目の題材を開く（sample-app）",
+   "steps": [
+    {
+     "k": "verdict",
+     "v": "supported"
+    },
+    {
+     "k": "runtimePanel",
+     "v": "プロジェクトと実行\nPhase 7A\n✕\nプロジェクトのパス（絶対パス）\n検出\n\nブラウザからフォルダ選択ダイアログは開けません。パスを入力する方式です。\n\n対応\nsample-app\nルート\n/var/tmp/vcide-ext/sample-app\nNext.js\n16.4.3 （宣言 16.4.3）\nルーター\nsrc/app\n依存\nインストール済み （npm）\nこのプロジェクトは TypeScript を使っています。\n\nNext.js の開発サーバー（next dev）は、起動時に tsconfig.json の一部の項目を必要な値に書き換え、next-env.d.ts を書き直します（Next.js の既定の振る舞いです）。\n\n書き換えるかどうかは、その時点の tsconfig.json の内容で Next.js が決めます。この検出では事前に判定しません。書き換えるのは next dev であり、IDE は対象プロジェクトに書き込みません。起動後に変化を観測した場合は、その事実を表示します。\n\npackage.json の dev スクリプトは「next dev」です。\n\nIDE はこのスクリプトを実行せず、node_modules の next を直接起動します（任意のシェルコマンドを実行しないため）。\n\ndev スクリプトに書かれた追加の処理（環境変数の設定・前処理など）は実行されません。\n\nポート\n計装つき\nPoC-01 方式2（NODE_OPTIONS の前置）で計装します。対象プロジェクトにはファイルを置きません。\n使えない場合は「適用不可」と表示します。計装なしでも起動と停止は行えます。\n起動する\n停止する\n処理中です。\n停止しています\nPID 7196\n:3000\n起動元\nIDE\n計装\n有効\nHTTP\n応答なし — ポート 3000 は解放されています。\n環境変数\n14 個を渡しました （他の 165 個は渡していません）\nこの IDE がこのプロジェクトの開発サーバーを最初に起動してから、対象プロジェクトの next-env.d.ts（変更） が変わりました。\n\n書き込んだプロセスを特定する出力はありません。IDE は対象プロジェクトに書き込みません。変化は IDE の外（開発サーバーとして起動した next dev を含む）で起きたものです。\n\n変更の中身は IDE では元に戻していません。Next.js の既定の振る舞いによる書き換えは、起動のたびに起こりえます。\n\n差分はプロジェクトのバージョン管理（git diff など）で確認できます。\n\n▸ 標準出力・エラー出力\n22 行"
+    },
+    {
+     "k": "screenshot",
+     "v": "10-extra-inspect.png"
+    }
+   ],
+   "notes": [],
+   "error": null
+  },
+  {
+   "id": "X2",
+   "title": "起動",
+   "steps": [
+    {
+     "k": "start",
+     "v": {
+      "states": [
+       "停止しています",
+       "起動中",
+       "実行中"
+      ],
+      "preview": "live",
+      "ms": 3213
+     }
+    },
+    {
+     "k": "status.runtime",
+     "v": {
+      "state": "running",
+      "port": 3000,
+      "readyMs": 3040,
+      "instrumentation": {
+       "state": "enabled",
+       "reason": null,
+       "spanFile": "/home/user/Visual-Computing-IDE/.ide-runtime/spans/sample-app-1793602749656.jsonl"
+      },
+      "anchors": {
+       "state": "enabled",
+       "reason": null,
+       "scope": "src"
+      },
+      "error": null
+     }
+    },
+    {
+     "k": "runtimePanel",
+     "v": "プロジェクトと実行\nPhase 7A\n✕\nプロジェクトのパス（絶対パス）\n検出\n\nブラウザからフォルダ選択ダイアログは開けません。パスを入力する方式です。\n\n対応\nsample-app\nルート\n/var/tmp/vcide-ext/sample-app\nNext.js\n16.4.3 （宣言 16.4.3）\nルーター\nsrc/app\n依存\nインストール済み （npm）\nこのプロジェクトは TypeScript を使っています。\n\nNext.js の開発サーバー（next dev）は、起動時に tsconfig.json の一部の項目を必要な値に書き換え、next-env.d.ts を書き直します（Next.js の既定の振る舞いです）。\n\n書き換えるかどうかは、その時点の tsconfig.json の内容で Next.js が決めます。この検出では事前に判定しません。書き換えるのは next dev であり、IDE は対象プロジェクトに書き込みません。起動後に変化を観測した場合は、その事実を表示します。\n\npackage.json の dev スクリプトは「next dev」です。\n\nIDE はこのスクリプトを実行せず、node_modules の next を直接起動します（任意のシェルコマンドを実行しないため）。\n\ndev スクリプトに書かれた追加の処理（環境変数の設定・前処理など）は実行されません。\n\nポート\n計装つき\nPoC-01 方式2（NODE_OPTIONS の前置）で計装します。対象プロジェクトにはファイルを置きません。\n使えない場合は「適用不可」と表示します。計装なしでも起動と停止は行えます。\n起動する\n既に実行中です。二重には起動しません。\n停止する\n実行中\nPID 14340\n:3000\n3040 ms\n起動元\nIDE\n計装\n有効\nHTTP\n応答あり（200） 06:59:12\n環境変数\n14 個を渡しました （他の 165 個は渡していません）\nURL\nhttp://127.0.0.1:3000\nこの IDE がこのプロジェクトの開発サーバーを最初に起動してから、対象プロジェクトの next-env.d.ts（変更） が変わりました。\n\n書き込んだプロセスを特定する出力はありません。IDE は対象プロジェクトに書き込みません。変化は IDE の外（開発サーバーとして起動した next dev を含む）で起きたものです。\n\n変更の中身は IDE では元に戻していません。Next.js の既定の振る舞いによる書き換えは、起動のたびに起こりえます。\n\n差分はプロジェクトのバージョン管理（git diff など）で確認できます。\n\n▸ 標準出力・エラー出力\n9 行"
+    },
+    {
+     "k": "screenshot",
+     "v": "11-extra-running.png"
+    }
+   ],
+   "notes": [],
+   "error": null
+  },
+  {
+   "id": "X3",
+   "title": "プレビュー",
+   "steps": [
+    {
+     "k": "home",
+     "v": {
+      "path": "/",
+      "http": "200"
+     }
+    },
+    {
+     "k": "products",
+     "v": {
+      "path": "/products",
+      "http": "200"
+     }
+    },
+    {
+     "k": "screenshot",
+     "v": "12-extra-products.png"
+    }
+   ],
+   "notes": [],
+   "error": null
+  },
+  {
+   "id": "X4",
+   "title": "要素選択",
+   "steps": [
+    {
+     "k": "pick [data-sample=\"name\"]",
+     "v": {
+      "selection": "resolved",
+      "at": "src/app/products/page.tsx:20:13",
+      "component": "ProductList",
+      "reason": "",
+      "binding": "identified",
+      "docSeq": "2",
+      "lineage": "cut",
+      "lineageReason": "fetch-not-measured",
+      "lineageStage": "measured",
+      "outcome": "",
+      "cands": "",
+      "ms": 2031,
+      "before": ""
+     }
+    },
+    {
+     "k": "previewPanel",
+     "v": "↻\n移動\n選択\n\n選択: <span> → ProductList src/app/products/page.tsx:20:13 （同じ JSX の要素 3 個のうち 1 番目。どの使用箇所かは区別していません）\n\n解除\n\n文書: 通信 #2 の応答と同定。由来は結んでいません — 実測との照合: 静的解析が見たデータ取得の呼び出しで実行された SQL を、この文書の通信で観測していません（走っていない SQL の列は由来にしない）（src/app/products/page.tsx:13:24。この文書の通信で実行位置を特定した SQL: なし）\n\n観測（いまの起動）: 通信 2 件・SQL 2 本（実行した呼び出し位置を特定 0 本）\n\n#2 GET /products — 200 / SQL 2 / 位置 0\n#1 GET / — 200 / SQL 0\n表示"
+    },
+    {
+     "k": "dock",
+     "v": "詳細\n経路\n固定\nこの値の出所\nsrc/app/products/page.tsx:20\n実測\n\n3 か所のうち 0 か所が推定です。経路全体は、いちばん弱いところに合わせて「実測」になります。\n\nここから先はたどれていません。つながりを観測できていない箇所は、 キャンバスに「追跡できません」として残しています。\n\n実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。\n\n概要\n根拠\n経路のステップ（2）\n1\n表示された値\n<span> のテキスト #0\n実測\nこの値を描いたコンポーネント\n2\nコンポーネント\nsrc/app/products/page.tsx:20\n実測\n取得手段\nビルド時に注入した要素識別子\n定義\nsrc/app/products/page.tsx:20\n位置（行・列）\n20 行 13 列 — src/app/products/page.tsx:20:13\nJSX\n<span data-sample=\"name\">{row.name}</span>\nコンポーネント\nProductList（src/app/products/page.tsx:11 で定義）\n包含関係\nProductList ← ProductsPage\nこの JSX が生んだ要素\n3 個（どの使用箇所が何番目を描いたかは観測していません）\n注入範囲\nsrc/ のみ。範囲外の要素は特定不能と返します\nファイルの指定\n'use client' はありません。サーバーで描かれたかブラウザで描かれたかは、このファイルだけでは決まりません（読み込み元による）\n帰属の範囲\nこの位置のコードであることまでです。同じコンポーネントが複数回描かれる場合、どの描画が対象かは同定していません\n特定方法\n要素自身の識別子 → いまのビルドの対応表 → ソースの読み直しで照合\n照合\nこの要素自身に付いていた要素識別子（祖先の識別子は使っていない） / いま実行中の開発サーバーのビルドが書いた対応表に、その識別子がある / 対応表のファイルが注入範囲（src/）の中にある / 識別子を「ファイ"
+    },
+    {
+     "k": "pick [data-sample=\"price\"]",
+     "v": {
+      "selection": "resolved",
+      "at": "src/app/products/page.tsx:8:10",
+      "component": "PriceTag",
+      "reason": "",
+      "binding": "identified",
+      "docSeq": "2",
+      "lineage": "cut",
+      "lineageReason": "fetch-not-measured",
+      "lineageStage": "measured",
+      "outcome": "",
+      "cands": "",
+      "ms": 485,
+      "before": "src/app/products/page.tsx:20:13"
+     }
+    },
+    {
+     "k": "previewPanel",
+     "v": "↻\n移動\n選択\n\n選択: <span> → PriceTag src/app/products/page.tsx:8:10 （同じ JSX の要素 3 個のうち 1 番目。どの使用箇所かは区別していません）\n\n解除\n\n文書: 通信 #2 の応答と同定。由来は結んでいません — 実測との照合: 静的解析が見たデータ取得の呼び出しで実行された SQL を、この文書の通信で観測していません（走っていない SQL の列は由来にしない）（src/app/products/page.tsx:13:24。この文書の通信で実行位置を特定した SQL: なし）\n\n観測（いまの起動）: 通信 2 件・SQL 2 本（実行した呼び出し位置を特定 0 本）\n\n#2 GET /products — 200 / SQL 2 / 位置 0\n#1 GET / — 200 / SQL 0\n表示"
+    },
+    {
+     "k": "dock",
+     "v": "詳細\n経路\n固定\nこの値の出所\nsrc/app/products/page.tsx:8\n実測\n\n3 か所のうち 0 か所が推定です。経路全体は、いちばん弱いところに合わせて「実測」になります。\n\nここから先はたどれていません。つながりを観測できていない箇所は、 キャンバスに「追跡できません」として残しています。\n\n実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。\n\n概要\n根拠\n経路のステップ（2）\n1\n表示された値\n<span> のテキスト #0\n実測\nこの値を描いたコンポーネント\n2\nコンポーネント\nsrc/app/products/page.tsx:8\n実測\n取得手段\nビルド時に注入した要素識別子\n定義\nsrc/app/products/page.tsx:8\n位置（行・列）\n8 行 10 列 — src/app/products/page.tsx:8:10\nJSX\nreturn <span className=\"font-mono\" data-sample=\"price\">{price}</span>;\nコンポーネント\nPriceTag（src/app/products/page.tsx:7 で定義）\n包含関係\nPriceTag ← ProductList ← ProductsPage\nこの JSX が生んだ要素\n3 個（どの使用箇所が何番目を描いたかは観測していません）\n注入範囲\nsrc/ のみ。範囲外の要素は特定不能と返します\nファイルの指定\n'use client' はありません。サーバーで描かれたかブラウザで描かれたかは、このファイルだけでは決まりません（読み込み元による）\n帰属の範囲\nこの位置のコードであることまでです。同じコンポーネントが複数回描かれる場合、どの描画が対象かは同定していません\n特定方法\n要素自身の識別子 → いまのビルドの対応表 → ソースの読み直しで照合\n照合\nこの要素自身に付いていた要素識別子（祖先の識別子は使っていない） / いま実行中の開発サーバーのビルドが書いた対応表に、その識別子がある / 対応表のフ"
+    },
+    {
+     "k": "pick [data-sample=\"count\"]",
+     "v": {
+      "selection": "resolved",
+      "at": "src/app/products/page.tsx:16:7",
+      "component": "ProductList",
+      "reason": "",
+      "binding": "identified",
+      "docSeq": "2",
+      "lineage": "cut",
+      "lineageReason": "mixed-text-children",
+      "lineageStage": "static",
+      "outcome": "",
+      "cands": "",
+      "ms": 463,
+      "before": "src/app/products/page.tsx:8:10"
+     }
+    },
+    {
+     "k": "previewPanel",
+     "v": "↻\n移動\n選択\n\n選択: <p> → ProductList src/app/products/page.tsx:16:7\n\n解除\n\n文書: 通信 #2 の応答と同定。由来は結んでいません — 静的解析: 選択した要素の直下に固定の文字と式が混在し、選んだテキストがどれかを決めません（固定の文字 1 箇所・式 1 個）\n\n観測（いまの起動）: 通信 2 件・SQL 2 本（実行した呼び出し位置を特定 0 本）\n\n#2 GET /products — 200 / SQL 2 / 位置 0\n#1 GET / — 200 / SQL 0\n表示"
+    },
+    {
+     "k": "dock",
+     "v": "詳細\n経路\n固定\nこの値の出所\nsrc/app/products/page.tsx:16\n実測\n\n3 か所のうち 0 か所が推定です。経路全体は、いちばん弱いところに合わせて「実測」になります。\n\nここから先はたどれていません。つながりを観測できていない箇所は、 キャンバスに「追跡できません」として残しています。\n\n実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。\n\n概要\n根拠\n経路のステップ（2）\n1\n表示された値\n<p> のテキスト #0\n実測\nこの値を描いたコンポーネント\n2\nコンポーネント\nsrc/app/products/page.tsx:16\n実測\n取得手段\nビルド時に注入した要素識別子\n定義\nsrc/app/products/page.tsx:16\n位置（行・列）\n16 行 7 列 — src/app/products/page.tsx:16:7\nJSX\n<p data-sample=\"count\">件数: {r.rows.length}</p>\nコンポーネント\nProductList（src/app/products/page.tsx:11 で定義）\n包含関係\nProductList ← ProductsPage\nこの JSX が生んだ要素\n1 個（どの使用箇所が何番目を描いたかは観測していません）\n注入範囲\nsrc/ のみ。範囲外の要素は特定不能と返します\nファイルの指定\n'use client' はありません。サーバーで描かれたかブラウザで描かれたかは、このファイルだけでは決まりません（読み込み元による）\n帰属の範囲\nこの位置のコードであることまでです。同じコンポーネントが複数回描かれる場合、どの描画が対象かは同定していません\n特定方法\n要素自身の識別子 → いまのビルドの対応表 → ソースの読み直しで照合\n照合\nこの要素自身に付いていた要素識別子（祖先の識別子は使っていない） / いま実行中の開発サーバーのビルドが書いた対応表に、その識別子がある / 対応表のファイルが注入範囲（src/）の中にある / 識別子を「ファイル"
+    },
+    {
+     "k": "screenshot",
+     "v": "13-extra-select.png"
+    }
+   ],
+   "notes": [],
+   "error": null
+  },
+  {
+   "id": "X5",
+   "title": "通信観測",
+   "steps": [
+    {
+     "k": "showBound",
+     "v": {
+      "shown": "2",
+      "withSel": "on",
+      "count": "2",
+      "sql": "2"
+     }
+    },
+    {
+     "k": "obsRow",
+     "v": "観測（いまの起動）: 通信 2 件・SQL 2 本（実行した呼び出し位置を特定 0 本）\n\n#2 GET /products — 200 / SQL 2 / 位置 0\n#1 GET / — 200 / SQL 0\n表示\n解除"
+    },
+    {
+     "k": "options",
+     "v": [
+      "#2 GET /products — 200 / SQL 2 / 位置 0",
+      "#1 GET / — 200 / SQL 0"
+     ]
+    },
+    {
+     "k": "canvas",
+     "v": "/\n選択していない経路（いまの起動の他の通信）\nこの値の由来は未確認です\n静的解析: 選択した要素の直下に固定の文字と式が混在し、選んだテキストがどれかを決めません（固定の文字 1 箇所・式 1 個）\nここより上流は結んでいません\nこの通信を起こしたコード・表示された値\nブラウザ\nlocalhost:3000\n開発サーバー\nlocalhost:3000\nPostgreSQL\n1\n表示された値\n<p>\n2\nコンポーネント\nProductList\n3\n通信\nGET /products\n4\nサーバー処理\n/products\n5\n実行SQL\n6\n実行SQL\n7\nテーブル\nproducts\nページ\n✕\n⌕\n▤\n/products\n/products\n\nページの切替は未実装です（観測しているページの経路だけを描いています）\n\nプレビュー\n開発サーバー\n✕\n↻\n移動\n選択\n\n選択: <p> → ProductList src/app/products/page.tsx:16:7\n\n解除\n\n文書: 通信 #2 の応答と同定。由来は結んでいません — 静的解析: 選択した要素の直下に固定の文字と式が混在し、選んだテキストがどれかを決めません（固定の文字 1 箇所・式 1 個）\n\n観測（いまの起動）: 通信 2 件・SQL 2 本（実行した呼び出し位置を特定 0 本）\n\n#2 GET /products — 200 / SQL 2 / 位置 0\n#1 GET / — 200 / SQL 0\n表示\n解除\n\n選択した要素と、それを描いた文書の通信 #2 を並べています。値の由来は結んでいません（理由は上の行と右の詳細）。\n\nHTTP 200\n/products\n表示設定\n✕\n実測された関係\n推定の関係\n★\nいちばん弱いところ\n追跡できません\n詳細が未取得の通信 （減光して残す）\nラベルを表示\n全体\n1 / 2 経路\n✕\nページ\nプレビュー\n表示設定\n全体\n実行\n全体表示\n−\n100%\n＋\nプロジェクトと実行\nPhase 7A\n✕\nプロジェクトのパス（絶対パス）\n検出\n\nブラウザからフォルダ選択ダイアログは開けません。パスを入力する方式です。\n\n対応\nsample-app\nルート\n/var/tmp/vcide-ext/sample-app\nNext.js\n16.4.3 （宣言 16.4.3）\nルーター\nsrc/app\n依存\nインストール済み （npm）\nこのプロジェクトは TypeScript を使っています。\n\nNext.js の開発サーバー（next dev）は、起動時に tsconfig.json の一部の項目を必要な値に書き換え、next-env.d.ts を書き直します（Next.js の既定の振る舞いです）。\n\n書き換えるかどうかは、その時点の tsconfig.json"
+    },
+    {
+     "k": "screenshot",
+     "v": "14-extra-observe.png"
+    },
+    {
+     "k": "client options",
+     "v": [
+      "#5 GET /api/products — 200 / SQL 1 / 位置 0",
+      "#4 GET /api/products — 200 / SQL 1 / 位置 0",
+      "#3 GET /client-products — 200 / SQL 0",
+      "#2 GET /products — 200 / SQL 2 / 位置 0",
+      "#1 GET / — 200 / SQL 0"
+     ]
+    },
+    {
+     "k": "pick client-name",
+     "v": {
+      "selection": "resolved",
+      "at": "src/app/client-products/page.tsx:16:11",
+      "component": "ClientProducts",
+      "reason": "",
+      "binding": "identified",
+      "docSeq": "3",
+      "lineage": "cut",
+      "lineageReason": "no-reference",
+      "lineageStage": "static",
+      "outcome": "",
+      "cands": "",
+      "ms": 493,
+      "before": "src/app/products/page.tsx:16:7"
+     }
+    },
+    {
+     "k": "previewPanel",
+     "v": "↻\n移動\n選択\n\n選択: <li> → ClientProducts src/app/client-products/page.tsx:16:11 （同じ JSX の要素 3 個のうち 1 番目。どの使用箇所かは区別していません）\n\n解除\n\n文書: 通信 #3 の応答と同定。由来は結んでいません — 静的解析: 静的解析で、この値からデータ取得の結果への参照の連鎖を解けません（定数・追えない関数・条件の判定など）（追えない経路: call-not-whitelisted:useState）\n\n観測（いまの起動）: 通信 5 件・SQL 4 本（実行した呼び出し位置を特定 0 本）\n\n#5 GET /api/products — 200 / SQL 1 / 位置 0\n#4 GET /api/products — 200 / SQL 1 / 位置 0\n#3 GET /client-products — 200 / SQL 0\n#2 GET /products — 200 / SQL 2 / 位置 0\n#1 GET / — 200 / SQL 0\n表示"
+    },
+    {
+     "k": "screenshot",
+     "v": "15-extra-client-fetch.png"
+    },
+    {
+     "k": "home again",
+     "v": {
+      "path": "/",
+      "http": "200"
+     }
+    }
+   ],
+   "notes": [],
+   "error": null
+  }
+ ],
+ "consoleErrors": [],
+ "finishedAt": "2026-11-02T06:59:26.074Z"
+}

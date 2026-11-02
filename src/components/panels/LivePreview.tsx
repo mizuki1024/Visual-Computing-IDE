@@ -354,6 +354,14 @@ export default function LivePreview() {
       setObsShown({ seq, sig: `${ds.nodes.length}/${ds.hops.length}`, withSel: true });
       setObsPick(seq);
     } else {
+      /* 7C-0: 結べなかったときも、文書を同定できていれば一覧の既定はその通信である（上の obsDefault）。
+       * 一覧は 1.5 秒ごとの取得なので、同定した通信がまだ一覧に無いことがある。そのあいだ既定が
+       * **別のページの通信**に落ちないよう、由来の評価と同時に取った観測（同じ起動）を一覧にも使う。
+       * 一覧の取得のほうが新しければ（件数が多ければ）そちらを残す */
+      if (l.binding.status === 'identified') {
+        const fresh = j.observation;
+        setObs((prev) => (!prev || fresh.exchanges.length >= prev.exchanges.length ? fresh : prev));
+      }
       const { dataset } = fromLiveSelection(withLin);
       const ds = layout(dataset);
       showLive(ds, `${key}#${mySeq}#lin${attempt}`, ds.nodes.find((n) => n.kind === 'component')?.id ?? ds.nodes[0].id);

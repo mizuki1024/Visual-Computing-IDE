@@ -6,6 +6,7 @@
 import { hopArrow, needsCaveat, VALUE_MATCH_CAVEAT } from '@/lib/derive';
 import type { TraceHop } from '@/lib/trace';
 import { useExplore } from '@/state/ExploreStore';
+import Emph from './Emph';
 
 export default function WeakestLink({ hop }: { hop: TraceHop }) {
   const { select } = useExplore();
@@ -13,7 +14,7 @@ export default function WeakestLink({ hop }: { hop: TraceHop }) {
     <section className="weak">
       <div className="wt"><span aria-hidden>★</span> いちばん弱いところ</div>
       <div className="wh"><u>{hopArrow(hop)}</u>{hop.label}</div>
-      <p>{hop.weakness}</p>
+      <p><Emph text={hop.weakness} /></p>
       <div className="ev">
         根拠 {hop.evidence.length} 件：{hop.evidence.map((e, i) => (
           <span key={e}>{i > 0 && ' ／ '}<b>{e}</b></span>

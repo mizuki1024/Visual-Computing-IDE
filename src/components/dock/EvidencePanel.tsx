@@ -6,6 +6,7 @@
 import { SOURCE_LABEL, byIdIn, hopByIdIn, type SelectionRef } from '@/lib/trace';
 import { hopArrow, identifierOf, needsCaveat, spanWindowText, word, VALUE_MATCH_CAVEAT } from '@/lib/derive';
 import { useExplore } from '@/state/ExploreStore';
+import Emph from './Emph';
 
 export default function EvidencePanel({ selection }: { selection: SelectionRef }) {
   const { data } = useExplore();
@@ -31,10 +32,10 @@ export default function EvidencePanel({ selection }: { selection: SelectionRef }
           {window_ && <><dt>時間窓</dt><dd>{window_}</dd></>}
           <dt>根拠 {o.evidence.length} 件</dt>
           <dd>
-            <ul>{o.evidence.map((e) => <li key={e}>{e}</li>)}</ul>
+            <ul>{o.evidence.map((e) => <li key={e}><Emph text={e} /></li>)}</ul>
             {needsCaveat(o.evidence) && <p className="caveat">{VALUE_MATCH_CAVEAT}</p>}
           </dd>
-          {weakness && <><dt>弱点</dt><dd>{weakness}</dd></>}
+          {weakness && <><dt>弱点</dt><dd><Emph text={weakness} /></dd></>}
         </dl>
       </article>
       <p className="ev-note">

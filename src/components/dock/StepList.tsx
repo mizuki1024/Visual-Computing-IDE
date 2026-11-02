@@ -8,6 +8,7 @@ import type { LaidOutDataset } from '@/lib/layout';
 import { type SelectionRef, type TraceHop, type TraceNode } from '@/lib/trace';
 import { circled, hopArrow, identifierOf, metricsText, word } from '@/lib/derive';
 import { useExplore, sameRef } from '@/state/ExploreStore';
+import Emph, { plainEmph } from './Emph';
 
 /** 各ノードへ至るホップ。同じノードに複数入る場合は、たどった順に先に来るほう。 */
 function spine(ds: LaidOutDataset): { node: TraceNode; via: TraceHop | null }[] {
@@ -64,11 +65,11 @@ function Overview({ node }: { node: TraceNode }) {
             <dt>{r.k}</dt>
             {r.go ? (
               <dd className="step">
-                <button type="button" onClick={() => select(r.go!, { focus: true })}>{r.v}</button>
+                <button type="button" onClick={() => select(r.go!, { focus: true })}><Emph text={r.v} /></button>
               </dd>
             ) : (
               // 1行で省略される。省略された全文はホバーで読めるようにする（Phase 7B-2）
-              <dd title={r.fromMetrics ? undefined : r.v}>{r.fromMetrics ? metricsText(node) : r.v}</dd>
+              <dd title={r.fromMetrics ? undefined : plainEmph(r.v)}>{r.fromMetrics ? metricsText(node) : <Emph text={r.v} />}</dd>
             )}
           </div>
         ))}

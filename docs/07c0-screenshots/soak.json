@@ -1,0 +1,206 @@
+{
+ "startedAt": "2026-11-02T07:03:11.421Z",
+ "total": 1500,
+ "rps": 5,
+ "points": [
+  {
+   "sent": 0,
+   "t": 1793602994702,
+   "apiMs": 19,
+   "apiBytes": 10594,
+   "exchanges": 1,
+   "overflow": 0,
+   "spans": 24,
+   "spanFileBytes": 57357
+  },
+  {
+   "sent": 100,
+   "t": 1793603019852,
+   "apiMs": 77,
+   "apiBytes": 1354847,
+   "exchanges": 103,
+   "overflow": 0,
+   "spans": 2685,
+   "spanFileBytes": 4953141
+  },
+  {
+   "sent": 200,
+   "t": 1793603039944,
+   "apiMs": 144,
+   "apiBytes": 2630714,
+   "exchanges": 200,
+   "overflow": 3,
+   "spans": 5208,
+   "spanFileBytes": 9663510
+  },
+  {
+   "sent": 300,
+   "t": 1793603062314,
+   "apiMs": 159,
+   "apiBytes": 2630718,
+   "exchanges": 200,
+   "overflow": 104,
+   "spans": 5208,
+   "spanFileBytes": 14416464
+  },
+  {
+   "sent": 400,
+   "t": 1793603082323,
+   "apiMs": 123,
+   "apiBytes": 2630719,
+   "exchanges": 200,
+   "overflow": 204,
+   "spans": 5208,
+   "spanFileBytes": 19126809
+  },
+  {
+   "sent": 500,
+   "t": 1793603102331,
+   "apiMs": 158,
+   "apiBytes": 2630719,
+   "exchanges": 200,
+   "overflow": 304,
+   "spans": 5208,
+   "spanFileBytes": 23823695
+  },
+  {
+   "sent": 600,
+   "t": 1793603122342,
+   "apiMs": 177,
+   "apiBytes": 2630719,
+   "exchanges": 200,
+   "overflow": 404,
+   "spans": 5208,
+   "spanFileBytes": 28541691
+  },
+  {
+   "sent": 700,
+   "t": 1793603142515,
+   "apiMs": 197,
+   "apiBytes": 2630719,
+   "exchanges": 200,
+   "overflow": 504,
+   "spans": 5208,
+   "spanFileBytes": 33252057
+  },
+  {
+   "sent": 800,
+   "t": 1793603162500,
+   "apiMs": 113,
+   "apiBytes": 2630719,
+   "exchanges": 200,
+   "overflow": 604,
+   "spans": 5208,
+   "spanFileBytes": 37948966
+  },
+  {
+   "sent": 900,
+   "t": 1793603182502,
+   "apiMs": 131,
+   "apiBytes": 2630719,
+   "exchanges": 200,
+   "overflow": 704,
+   "spans": 5208,
+   "spanFileBytes": 42666944
+  },
+  {
+   "sent": 1000,
+   "t": 1793603202609,
+   "apiMs": 176,
+   "apiBytes": 2630719,
+   "exchanges": 200,
+   "overflow": 804,
+   "spans": 5208,
+   "spanFileBytes": 47377322
+  },
+  {
+   "sent": 1100,
+   "t": 1793603222548,
+   "apiMs": 108,
+   "apiBytes": 2630719,
+   "exchanges": 200,
+   "overflow": 904,
+   "spans": 5208,
+   "spanFileBytes": 52074306
+  },
+  {
+   "sent": 1200,
+   "t": 1793603242561,
+   "apiMs": 153,
+   "apiBytes": 2630721,
+   "exchanges": 200,
+   "overflow": 1004,
+   "spans": 5208,
+   "spanFileBytes": 56792384
+  },
+  {
+   "sent": 1300,
+   "t": 1793603262553,
+   "apiMs": 154,
+   "apiBytes": 2630721,
+   "exchanges": 200,
+   "overflow": 1104,
+   "spans": 5208,
+   "spanFileBytes": 61502644
+  },
+  {
+   "sent": 1400,
+   "t": 1793603282608,
+   "apiMs": 190,
+   "apiBytes": 2630721,
+   "exchanges": 200,
+   "overflow": 1204,
+   "spans": 5208,
+   "spanFileBytes": 66199543
+  },
+  {
+   "sent": 1500,
+   "t": 1793603302648,
+   "apiMs": 164,
+   "apiBytes": 2630721,
+   "exchanges": 200,
+   "overflow": 1304,
+   "spans": 5208,
+   "spanFileBytes": 70909885
+  },
+  {
+   "sent": 1500,
+   "t": 1793603305197,
+   "apiMs": 136,
+   "apiBytes": 2630721,
+   "exchanges": 200,
+   "overflow": 1305,
+   "spans": 5208,
+   "spanFileBytes": 70958169
+  }
+ ],
+ "picks": [
+  {
+   "label": "最初",
+   "binding": "identified",
+   "lineage": "linked",
+   "reason": "",
+   "cands": "poc.listings.region",
+   "line": "文書: 通信 #3 の応答と同定。由来（静的解析による推定）: poc.listings.region"
+  },
+  {
+   "label": "通信が 200 件を超えた後",
+   "binding": "token-not-in-session",
+   "lineage": "cut",
+   "reason": "document-unidentified",
+   "cands": "",
+   "line": "文書: 同定できません（この文書の識別子は、いまの起動の観測セッションの通信にありません（別の起動・停止の前の文書、またはまだ応答を送り終えていない））。由来は結んでいません"
+  },
+  {
+   "label": "最後",
+   "binding": "token-not-in-session",
+   "lineage": "cut",
+   "reason": "document-unidentified",
+   "cands": "",
+   "line": "文書: 同定できません（この文書の識別子は、いまの起動の観測セッションの通信にありません（別の起動・停止の前の文書、またはまだ応答を送り終えていない））。由来は結んでいません"
+  }
+ ],
+ "stopMs": 1408,
+ "stoppedPid": 24898,
+ "finishedAt": "2026-11-02T07:08:26.605Z"
+}

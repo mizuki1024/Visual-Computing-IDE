@@ -1,0 +1,271 @@
+{
+ "base": "http://127.0.0.1:3100",
+ "viewport": "1600x1000",
+ "startedAt": "2026-11-02T06:58:35.216Z",
+ "scenarios": [
+  {
+   "id": "X1",
+   "title": "2つ目の題材を開く（sample-app）",
+   "steps": [
+    {
+     "k": "verdict",
+     "v": "supported"
+    },
+    {
+     "k": "runtimePanel",
+     "v": "プロジェクトと実行\nPhase 7A\n✕\nプロジェクトのパス（絶対パス）\n検出\n\nブラウザからフォルダ選択ダイアログは開けません。パスを入力する方式です。\n\n対応\nsample-app\nルート\n/var/tmp/vcide-ext/sample-app\nNext.js\n16.4.3 （宣言 16.4.3）\nルーター\nsrc/app\n依存\nインストール済み （npm）\nこのプロジェクトは TypeScript を使っています。\n\nNext.js の開発サーバー（next dev）は、起動時に tsconfig.json の一部の項目を必要な値に書き換え、next-env.d.ts を書き直します（Next.js の既定の振る舞いです）。\n\n書き換えるかどうかは、その時点の tsconfig.json の内容で Next.js が決めます。この検出では事前に判定しません。書き換えるのは next dev であり、IDE は対象プロジェクトに書き込みません。起動後に変化を観測した場合は、その事実を表示します。\n\npackage.json の dev スクリプトは「next dev」です。\n\nIDE はこのスクリプトを実行せず、node_modules の next を直接起動します（任意のシェルコマンドを実行しないため）。\n\ndev スクリプトに書かれた追加の処理（環境変数の設定・前処理など）は実行されません。\n\nポート\n計装つき\nPoC-01 方式2（NODE_OPTIONS の前置）で計装します。対象プロジェクトにはファイルを置きません。\n使えない場合は「適用不可」と表示します。計装なしでも起動と停止は行えます。\n起動する\n停止する\n処理中です。\n停止しています\nPID 32094\n:3000\n起動元\nIDE\n計装\n有効\nHTTP\n応答なし — ポート 3000 は解放されています。\n環境変数\n14 個を渡しました （他の 165 個は渡していません）\n▸ 標準出力・エラー出力\n115 行"
+    },
+    {
+     "k": "screenshot",
+     "v": "10-extra-inspect.png"
+    }
+   ],
+   "notes": [],
+   "error": null
+  },
+  {
+   "id": "X2",
+   "title": "起動",
+   "steps": [
+    {
+     "k": "start",
+     "v": {
+      "states": [
+       "停止しています",
+       "起動中",
+       "実行中"
+      ],
+      "preview": "live",
+      "ms": 4083
+     }
+    },
+    {
+     "k": "status.runtime",
+     "v": {
+      "state": "running",
+      "port": 3000,
+      "readyMs": 3766,
+      "instrumentation": {
+       "state": "enabled",
+       "reason": null,
+       "spanFile": "/home/user/Visual-Computing-IDE/.ide-runtime/spans/sample-app-1793602716689.jsonl"
+      },
+      "anchors": {
+       "state": "unavailable",
+       "scope": "src",
+       "reason": "next.config.ts は要素識別子の注入（PoC-03 のローダ。POC03_ANCHOR で有効にする）を読み込んでいません。IDE は対象プロジェクトの設定を書き換えないため、このプロジェクトでは要素からソースを特定できません。"
+      },
+      "error": null
+     }
+    },
+    {
+     "k": "runtimePanel",
+     "v": "プロジェクトと実行\nPhase 7A\n✕\nプロジェクトのパス（絶対パス）\n検出\n\nブラウザからフォルダ選択ダイアログは開けません。パスを入力する方式です。\n\n対応\nsample-app\nルート\n/var/tmp/vcide-ext/sample-app\nNext.js\n16.4.3 （宣言 16.4.3）\nルーター\nsrc/app\n依存\nインストール済み （npm）\nこのプロジェクトは TypeScript を使っています。\n\nNext.js の開発サーバー（next dev）は、起動時に tsconfig.json の一部の項目を必要な値に書き換え、next-env.d.ts を書き直します（Next.js の既定の振る舞いです）。\n\n書き換えるかどうかは、その時点の tsconfig.json の内容で Next.js が決めます。この検出では事前に判定しません。書き換えるのは next dev であり、IDE は対象プロジェクトに書き込みません。起動後に変化を観測した場合は、その事実を表示します。\n\npackage.json の dev スクリプトは「next dev」です。\n\nIDE はこのスクリプトを実行せず、node_modules の next を直接起動します（任意のシェルコマンドを実行しないため）。\n\ndev スクリプトに書かれた追加の処理（環境変数の設定・前処理など）は実行されません。\n\nポート\n計装つき\nPoC-01 方式2（NODE_OPTIONS の前置）で計装します。対象プロジェクトにはファイルを置きません。\n使えない場合は「適用不可」と表示します。計装なしでも起動と停止は行えます。\n起動する\n既に実行中です。二重には起動しません。\n停止する\n実行中\nPID 7196\n:3000\n3766 ms\n起動元\nIDE\n計装\n有効\nHTTP\n応答あり（200） 06:58:40\n環境変数\n14 個を渡しました （他の 165 個は渡していません）\nURL\nhttp://127.0.0.1:3000\nこの IDE がこのプロジェクトの開発サーバーを最初に起動してから、対象プロジェクトの next-env.d.ts（変更） が変わりました。\n\n書き込んだプロセスを特定する出力はありません。IDE は対象プロジェクトに書き込みません。変化は IDE の外（開発サーバーとして起動した next dev を含む）で起きたものです。\n\n変更の中身は IDE では元に戻していません。Next.js の既定の振る舞いによる書き換えは、起動のたびに起こりえます。\n\n差分はプロジェクトのバージョン管理（git diff など）で確認できます。\n\n▸ 標準出力・エラー出力\n10 行"
+    },
+    {
+     "k": "screenshot",
+     "v": "11-extra-running.png"
+    }
+   ],
+   "notes": [],
+   "error": null
+  },
+  {
+   "id": "X3",
+   "title": "プレビュー",
+   "steps": [
+    {
+     "k": "home",
+     "v": {
+      "path": "/",
+      "http": "200"
+     }
+    },
+    {
+     "k": "products",
+     "v": {
+      "path": "/products",
+      "http": "200"
+     }
+    },
+    {
+     "k": "screenshot",
+     "v": "12-extra-products.png"
+    }
+   ],
+   "notes": [],
+   "error": null
+  },
+  {
+   "id": "X4",
+   "title": "要素選択",
+   "steps": [
+    {
+     "k": "pick [data-sample=\"name\"]",
+     "v": {
+      "selection": "unresolved",
+      "at": "",
+      "component": "",
+      "reason": "injection-unavailable",
+      "binding": "",
+      "docSeq": "",
+      "lineage": "",
+      "lineageReason": "",
+      "lineageStage": "",
+      "outcome": "",
+      "cands": "",
+      "ms": 740,
+      "before": ""
+     }
+    },
+    {
+     "k": "previewPanel",
+     "v": "↻\n移動\n選択\n\n選択: <span> — 特定できません（このプロジェクトでは要素識別子を注入していません）。理由は右の詳細に出しています\n\n解除\n\n観測（いまの起動）: 通信 2 件・SQL 2 本（実行した呼び出し位置を特定 0 本）\n\n#2 GET /products — 200 / SQL 2 / 位置 0\n#1 GET / — 200 / SQL 0\n表示"
+    },
+    {
+     "k": "dock",
+     "v": "詳細\n経路\n固定\nこの値の出所\n<span> のテキスト #0\n実測\n\n1 か所のうち 0 か所が推定です。経路全体は、いちばん弱いところに合わせて「実測」になります。\n\nここから先はたどれていません。つながりを観測できていない箇所は、 キャンバスに「追跡できません」として残しています。\n\n実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。\n\n概要\n根拠\n経路のステップ（1）\n1\n選択した要素\n<span> のテキスト #0\n実測\n取得手段\nブラウザのDOM直接読み取り\nページ\n/products\n要素\n<span>\n特定できなかった理由\nこのプロジェクトでは要素識別子を注入していません\n詳しく\nnext.config.ts は要素識別子の注入（PoC-03 のローダ。POC03_ANCHOR で有効にする）を読み込んでいません。IDE は対象プロジェクトの設定を書き換えないため、このプロジェクトでは要素からソースを特定できません。\n値の形\n10 文字・英数\n値の保存\n表示された値そのものは保存していません"
+    },
+    {
+     "k": "pick [data-sample=\"price\"]",
+     "v": {
+      "selection": "unresolved",
+      "at": "",
+      "component": "",
+      "reason": "injection-unavailable",
+      "binding": "",
+      "docSeq": "",
+      "lineage": "",
+      "lineageReason": "",
+      "lineageStage": "",
+      "outcome": "",
+      "cands": "",
+      "ms": 459,
+      "before": ""
+     }
+    },
+    {
+     "k": "previewPanel",
+     "v": "↻\n移動\n選択\n\n選択: <span> — 特定できません（このプロジェクトでは要素識別子を注入していません）。理由は右の詳細に出しています\n\n解除\n\n観測（いまの起動）: 通信 2 件・SQL 2 本（実行した呼び出し位置を特定 0 本）\n\n#2 GET /products — 200 / SQL 2 / 位置 0\n#1 GET / — 200 / SQL 0\n表示"
+    },
+    {
+     "k": "dock",
+     "v": "詳細\n経路\n固定\nこの値の出所\n<span> のテキスト #0\n実測\n\n1 か所のうち 0 か所が推定です。経路全体は、いちばん弱いところに合わせて「実測」になります。\n\nここから先はたどれていません。つながりを観測できていない箇所は、 キャンバスに「追跡できません」として残しています。\n\n実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。\n\n概要\n根拠\n経路のステップ（1）\n1\n選択した要素\n<span> のテキスト #0\n実測\n取得手段\nブラウザのDOM直接読み取り\nページ\n/products\n要素\n<span>\n特定できなかった理由\nこのプロジェクトでは要素識別子を注入していません\n詳しく\nnext.config.ts は要素識別子の注入（PoC-03 のローダ。POC03_ANCHOR で有効にする）を読み込んでいません。IDE は対象プロジェクトの設定を書き換えないため、このプロジェクトでは要素からソースを特定できません。\n値の形\n4 文字・数値\n値の保存\n表示された値そのものは保存していません"
+    },
+    {
+     "k": "pick [data-sample=\"count\"]",
+     "v": {
+      "selection": "unresolved",
+      "at": "",
+      "component": "",
+      "reason": "injection-unavailable",
+      "binding": "",
+      "docSeq": "",
+      "lineage": "",
+      "lineageReason": "",
+      "lineageStage": "",
+      "outcome": "",
+      "cands": "",
+      "ms": 497,
+      "before": ""
+     }
+    },
+    {
+     "k": "previewPanel",
+     "v": "↻\n移動\n選択\n\n選択: <p> — 特定できません（このプロジェクトでは要素識別子を注入していません）。理由は右の詳細に出しています\n\n解除\n\n観測（いまの起動）: 通信 2 件・SQL 2 本（実行した呼び出し位置を特定 0 本）\n\n#2 GET /products — 200 / SQL 2 / 位置 0\n#1 GET / — 200 / SQL 0\n表示"
+    },
+    {
+     "k": "dock",
+     "v": "詳細\n経路\n固定\nこの値の出所\n<p> のテキスト #0\n実測\n\n1 か所のうち 0 か所が推定です。経路全体は、いちばん弱いところに合わせて「実測」になります。\n\nここから先はたどれていません。つながりを観測できていない箇所は、 キャンバスに「追跡できません」として残しています。\n\n実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。\n\n概要\n根拠\n経路のステップ（1）\n1\n選択した要素\n<p> のテキスト #0\n実測\n取得手段\nブラウザのDOM直接読み取り\nページ\n/products\n要素\n<p>\n特定できなかった理由\nこのプロジェクトでは要素識別子を注入していません\n詳しく\nnext.config.ts は要素識別子の注入（PoC-03 のローダ。POC03_ANCHOR で有効にする）を読み込んでいません。IDE は対象プロジェクトの設定を書き換えないため、このプロジェクトでは要素からソースを特定できません。\n値の形\n3 文字・和文\n値の保存\n表示された値そのものは保存していません"
+    },
+    {
+     "k": "screenshot",
+     "v": "13-extra-select.png"
+    }
+   ],
+   "notes": [],
+   "error": null
+  },
+  {
+   "id": "X5",
+   "title": "通信観測",
+   "steps": [
+    {
+     "k": "showBound",
+     "v": {
+      "shown": "2",
+      "withSel": "on",
+      "count": "2",
+      "sql": "2"
+     }
+    },
+    {
+     "k": "obsRow",
+     "v": "観測（いまの起動）: 通信 2 件・SQL 2 本（実行した呼び出し位置を特定 0 本）\n\n#2 GET /products — 200 / SQL 2 / 位置 0\n#1 GET / — 200 / SQL 0\n表示\n解除"
+    },
+    {
+     "k": "options",
+     "v": [
+      "#2 GET /products — 200 / SQL 2 / 位置 0",
+      "#1 GET / — 200 / SQL 0"
+     ]
+    },
+    {
+     "k": "canvas",
+     "v": "/\n選択していない経路（いまの起動の他の通信）\nこの要素のソースは特定できません\nこのプロジェクトでは要素識別子を注入していません\nここより上流は結んでいません\nこの通信を起こしたコード・表示された値\nブラウザ\nlocalhost:3000\n開発サーバー\nlocalhost:3000\nPostgreSQL\n6\n選択した要素\n<p>\n1\n通信\nGET /products\n2\nサーバー処理\n/products\n3\n実行SQL\n4\n実行SQL\n5\nテーブル\nproducts\nページ\n✕\n⌕\n▤\n/products\n/products\n\nページの切替は未実装です（観測しているページの経路だけを描いています）\n\nプレビュー\n開発サーバー\n✕\n↻\n移動\n選択\n\n選択: <p> — 特定できません（このプロジェクトでは要素識別子を注入していません）。理由は右の詳細に出しています\n\n解除\n\n観測（いまの起動）: 通信 2 件・SQL 2 本（実行した呼び出し位置を特定 0 本）\n\n#2 GET /products — 200 / SQL 2 / 位置 0\n#1 GET / — 200 / SQL 0\n表示\n解除\n\n選択した要素と、この通信の SQL を並べています。両者は結んでいません（この要素を描いた文書取得がこの通信かは特定していません）。\n\nHTTP 200\n/products\n表示設定\n✕\n実測された関係\n推定の関係\n★\nいちばん弱いところ\n追跡できません\n詳細が未取得の通信 （減光して残す）\nラベルを表示\n全体\n1 / 2 経路\n✕\nページ\nプレビュー\n表示設定\n全体\n実行\n全体表示\n−\n100%\n＋\nプロジェクトと実行\nPhase 7A\n✕\nプロジェクトのパス（絶対パス）\n検出\n\nブラウザからフォルダ選択ダイアログは開けません。パスを入力する方式です。\n\n対応\nsample-app\nルート\n/var/tmp/vcide-ext/sample-app\nNext.js\n16.4.3 （宣言 16.4.3）\nルーター\nsrc/app\n依存\nインストール済み （npm）\nこのプロジェクトは TypeScript を使っています。\n\nNext.js の開発サーバー（next dev）は、起動時に tsconfig.json の一部の項目を必要な値に書き換え、next-env.d.ts を書き直します（Next.js の既定の振る舞いです）。\n\n書き換えるかどうかは、その時点の tsconfig.json の内容で Next.js が決めます。この検出では事前に判定しません。書き換えるのは next dev であり、IDE は対象プロジェクトに書き込みません。起動後に変化を観測した場合は、その事実を表示します。\n\npackage.json の dev スクリプトは「next"
+    },
+    {
+     "k": "screenshot",
+     "v": "14-extra-observe.png"
+    },
+    {
+     "k": "client options",
+     "v": [
+      "#5 GET /api/products — 200 / SQL 1 / 位置 0",
+      "#4 GET /api/products — 200 / SQL 1 / 位置 0",
+      "#3 GET /client-products — 200 / SQL 0",
+      "#2 GET /products — 200 / SQL 2 / 位置 0",
+      "#1 GET / — 200 / SQL 0"
+     ]
+    },
+    {
+     "k": "pick client-name",
+     "v": {
+      "selection": "unresolved",
+      "at": "",
+      "component": "",
+      "reason": "injection-unavailable",
+      "binding": "",
+      "docSeq": "",
+      "lineage": "",
+      "lineageReason": "",
+      "lineageStage": "",
+      "outcome": "",
+      "cands": "",
+      "ms": 737,
+      "before": ""
+     }
+    },
+    {
+     "k": "previewPanel",
+     "v": "↻\n移動\n選択\n\n選択: <li> — 特定できません（このプロジェクトでは要素識別子を注入していません）。理由は右の詳細に出しています\n\n解除\n\n観測（いまの起動）: 通信 5 件・SQL 4 本（実行した呼び出し位置を特定 0 本）\n\n#5 GET /api/products — 200 / SQL 1 / 位置 0\n#4 GET /api/products — 200 / SQL 1 / 位置 0\n#3 GET /client-products — 200 / SQL 0\n#2 GET /products — 200 / SQL 2 / 位置 0\n#1 GET / — 200 / SQL 0\n表示"
+    },
+    {
+     "k": "screenshot",
+     "v": "15-extra-client-fetch.png"
+    },
+    {
+     "k": "home again",
+     "v": {
+      "path": "/",
+      "http": "200"
+     }
+    }
+   ],
+   "notes": [],
+   "error": null
+  }
+ ],
+ "consoleErrors": [],
+ "finishedAt": "2026-11-02T06:58:53.174Z"
+}
