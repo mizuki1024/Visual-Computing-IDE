@@ -13,7 +13,8 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { createHash, randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-import { runtimeDir, spanDirPath, stateFilePath } from './ide';
+import { ideRoot, runtimeDir, spanDirPath, stateFilePath } from './ide';
+import { cleanupSpanFiles, type SpanCleanupResult } from './spanFiles';
 import {
   groupAlive, httpResponds, isPortFree, pidAlive, pidCommand, sleep, waitPortFree,
 } from './net';
@@ -137,6 +138,8 @@ function fingerprint(file: string): FileFingerprint {
   try { return createHash('sha1').update(fs.readFileSync(/* turbopackIgnore: true */ file)).digest('hex'); } catch { return null; }
 }
 const PROBE_INTERVAL_MS = 300;
+/** 7C-1: 停止・異常終了の後に収集ファイルの整理をやり直す時刻（ワーカーの終了を待つ） */
+const SPAN_CLEANUP_RETRY_MS = [3_000, 20_000];
 const STOP_TERM_WAIT_MS = 8_000;
 const STOP_KILL_WAIT_MS = 3_000;
 const PORT_RANGE = { from: 3000, to: 3030 };
@@ -243,9 +246,13 @@ export class DevServerManager {
   /** 停止を自分で始めたか。異常終了と区別するために要る */
   #stopping = false;
   #updatedAt = new Date().toISOString();
+  /** 7C-1: 収集ファイルの整理の直近の結果 */
+  #spanCleanup: SpanCleanupResult | null = null;
 
   constructor() {
     this.#adopt();
+    /* 7C-1: IDE が強制終了した後の残骸を整理する（引き継いだ起動のファイルは守る） */
+    this.#cleanupSpans('ide-start');
     this.#installExitHooks();
   }
 
@@ -364,6 +371,8 @@ export class DevServerManager {
     const insAvail = ins.instrumentation;
     let instrumentation: OwnershipRecord['instrumentation'];
     const runId = `${path.basename(ins.root)}-${Date.now()}`;
+    /* 7C-1: 停止済みの起動の収集ファイルを、新しい起動の前に整理する（実行中のものは消さない） */
+    this.#cleanupSpans('before-start');
     if (!wants) {
       instrumentation = { state: 'disabled', reason: '利用者が計装なしを選びました。', spanFile: null };
     } else if (!insAvail.available || !insAvail.boot) {
@@ -633,7 +642,37 @@ export class DevServerManager {
     };
   }
 
+  /**
+   * 7C-1: 収集ファイルの整理（spanFiles.ts）。守るのは、いまの起動の記録が指すファイルのうち
+   * プロセスがまだ生きているもの。失敗しても起動・停止は止めない（結果に残す）
+   */
+  #cleanupSpans(trigger: string): void {
+    const r = this.#record;
+    const live = r && (pidAlive(r.pid) || groupAlive(r.pid)) ? r.instrumentation.spanFile : null;
+    try {
+      this.#spanCleanup = cleanupSpanFiles({ ideRoot: ideRoot(), protect: [live], trigger });
+      const c = this.#spanCleanup;
+      if (c.removed.length || c.failed.length) {
+        console.info(`[vcide] 収集ファイルの整理（${trigger}）: 削除 ${c.removed.length} 件・${c.removed.reduce((n, x) => n + x.bytes, 0)} バイト／残す ${c.kept.length} 件／失敗 ${c.failed.length} 件`);
+      }
+    } catch (e) {
+      this.#spanCleanup = {
+        at: new Date().toISOString(), trigger, dir: '', skipped: e instanceof Error ? e.message : String(e),
+        removed: [], kept: [], failed: [],
+      };
+    }
+  }
+
+  /** 7C-1: 収集ファイルの整理の直近の結果（ファイル名・件数・理由だけ） */
+  lastSpanCleanup(): Omit<SpanCleanupResult, 'dir'> | null {
+    if (!this.#spanCleanup) return null;
+    const { dir: _d, ...rest } = this.#spanCleanup;
+    void _d;
+    return rest;
+  }
+
   #set(s: RunState): void {
+    const was = this.#state;
     this.#state = s;
     this.#bump();
     /* Phase 7B-3A: 観測セッションは起動ごとに1つ。running で作り、それ以外の状態で閉じる
@@ -641,6 +680,18 @@ export class DevServerManager {
     const r = this.#record;
     if (s === 'running' && r) observations().begin(`${this.#instance}:${r.pid}:${r.startedAt}`);
     else if (s !== 'running') observations().end();
+    /* 7C-1: 停止・異常終了した起動の収集ファイルを整理する（書き手が生きていれば残す）。
+     * 異常終了の直後はワーカーが終わりきっていないことがあるので、少し後にもう一度見る
+     * （その間に次の起動があっても、いまの起動のファイルは守る・書き手の生きているファイルは消さない） */
+    if ((s === 'stopped' || s === 'error') && was !== s) {
+      this.#cleanupSpans(`after-${s}`);
+      for (const ms of SPAN_CLEANUP_RETRY_MS) {
+        setTimeout(() => {
+          const kept = this.#spanCleanup?.kept.some((k) => k.why === 'writer-alive' || k.why === 'protected');
+          if (kept && this.#state !== 'starting' && this.#state !== 'validating') this.#cleanupSpans(`after-${s}-retry`);
+        }, ms).unref();
+      }
+    }
   }
 
   #bump(): void { this.#seq += 1; this.#updatedAt = new Date().toISOString(); }

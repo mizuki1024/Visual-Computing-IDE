@@ -1,0 +1,1513 @@
+{
+ "startedAt": "2026-11-02T08:08:07.042Z",
+ "total": 3000,
+ "rps": 5,
+ "points": [
+  {
+   "sent": 0,
+   "t": 1793606891628,
+   "apiMs": 138,
+   "uiMs": 55,
+   "firstMs": 44,
+   "bytesAll": 10847,
+   "bytesUi": 10920,
+   "bytesUnchanged": 10920,
+   "unchanged": false,
+   "recorded": 1,
+   "exchanges": 1,
+   "evicted": 0,
+   "retainedSpans": 99,
+   "spanRecords": 99,
+   "spansAll": 24,
+   "truncated": false,
+   "budgetEvicted": 0,
+   "spanFileBytes": 66049,
+   "spanDirMB": 0.1,
+   "idePssMB": 118,
+   "devPssMB": 530,
+   "uiBytesTotal": 1034,
+   "uiResponses": 1,
+   "uiUnchanged": 0
+  },
+  {
+   "sent": 100,
+   "t": 1793606916627,
+   "apiMs": 644,
+   "uiMs": 41,
+   "firstMs": 42,
+   "bytesAll": 1355175,
+   "bytesUi": 45500,
+   "bytesUnchanged": 50,
+   "unchanged": true,
+   "recorded": 103,
+   "exchanges": 103,
+   "evicted": 0,
+   "retainedSpans": 2953,
+   "spanRecords": 2953,
+   "spansAll": 2685,
+   "truncated": false,
+   "budgetEvicted": 0,
+   "spanFileBytes": 4946464,
+   "spanDirMB": 4.7,
+   "idePssMB": 359,
+   "devPssMB": 612,
+   "uiBytesTotal": 375845,
+   "uiResponses": 16,
+   "uiUnchanged": 0
+  },
+  {
+   "sent": 200,
+   "t": 1793606937810,
+   "apiMs": 1100,
+   "uiMs": 76,
+   "firstMs": 94,
+   "bytesAll": 2646934,
+   "bytesUi": 72491,
+   "bytesUnchanged": 50,
+   "unchanged": true,
+   "recorded": 203,
+   "exchanges": 201,
+   "evicted": 2,
+   "retainedSpans": 5667,
+   "spanRecords": 5722,
+   "spansAll": 5231,
+   "truncated": false,
+   "budgetEvicted": 0,
+   "spanFileBytes": 9650649,
+   "spanDirMB": 9.2,
+   "idePssMB": 195,
+   "devPssMB": 699,
+   "uiBytesTotal": 1158128,
+   "uiResponses": 30,
+   "uiUnchanged": 0
+  },
+  {
+   "sent": 300,
+   "t": 1793606962460,
+   "apiMs": 1103,
+   "uiMs": 53,
+   "firstMs": 64,
+   "bytesAll": 2646710,
+   "bytesUi": 72697,
+   "bytesUnchanged": 50,
+   "unchanged": true,
+   "recorded": 304,
+   "exchanges": 201,
+   "evicted": 103,
+   "retainedSpans": 5857,
+   "spanRecords": 8542,
+   "spansAll": 5229,
+   "truncated": false,
+   "budgetEvicted": 0,
+   "spanFileBytes": 14410659,
+   "spanDirMB": 13.7,
+   "idePssMB": 208,
+   "devPssMB": 701,
+   "uiBytesTotal": 2265951,
+   "uiResponses": 46,
+   "uiUnchanged": 0
+  },
+  {
+   "sent": 400,
+   "t": 1793606983622,
+   "apiMs": 1118,
+   "uiMs": 67,
+   "firstMs": 65,
+   "bytesAll": 2633916,
+   "bytesUi": 72421,
+   "bytesUnchanged": 50,
+   "unchanged": true,
+   "recorded": 404,
+   "exchanges": 200,
+   "evicted": 204,
+   "retainedSpans": 5999,
+   "spanRecords": 11311,
+   "spansAll": 5203,
+   "truncated": false,
+   "budgetEvicted": 0,
+   "spanFileBytes": 19114748,
+   "spanDirMB": 18.2,
+   "idePssMB": 207,
+   "devPssMB": 706,
+   "uiBytesTotal": 3235860,
+   "uiResponses": 60,
+   "uiUnchanged": 0
+  },
+  {
+   "sent": 500,
+   "t": 1793607004774,
+   "apiMs": 1142,
+   "uiMs": 56,
+   "firstMs": 69,
+   "bytesAll": 2646618,
+   "bytesUi": 72701,
+   "bytesUnchanged": 50,
+   "unchanged": true,
+   "recorded": 504,
+   "exchanges": 201,
+   "evicted": 303,
+   "retainedSpans": 6193,
+   "spanRecords": 14081,
+   "spansAll": 5229,
+   "truncated": false,
+   "budgetEvicted": 0,
+   "spanFileBytes": 23826579,
+   "spanDirMB": 22.7,
+   "idePssMB": 210,
+   "devPssMB": 705,
+   "uiBytesTotal": 4204986,
+   "uiResponses": 74,
+   "uiUnchanged": 0
+  },
+  {
+   "sent": 600,
+   "t": 1793607026053,
+   "apiMs": 1274,
+   "uiMs": 67,
+   "firstMs": 54,
+   "bytesAll": 2646635,
+   "bytesUi": 72705,
+   "bytesUnchanged": 50,
+   "unchanged": true,
+   "recorded": 604,
+   "exchanges": 201,
+   "evicted": 403,
+   "retainedSpans": 6189,
+   "spanRecords": 16850,
+   "spansAll": 5229,
+   "truncated": false,
+   "budgetEvicted": 0,
+   "spanFileBytes": 28530671,
+   "spanDirMB": 27.2,
+   "idePssMB": 210,
+   "devPssMB": 706,
+   "uiBytesTotal": 5175760,
+   "uiResponses": 88,
+   "uiUnchanged": 0
+  },
+  {
+   "sent": 700,
+   "t": 1793607047296,
+   "apiMs": 1154,
+   "uiMs": 69,
+   "firstMs": 72,
+   "bytesAll": 2646567,
+   "bytesUi": 72705,
+   "bytesUnchanged": 72705,
+   "unchanged": false,
+   "recorded": 704,
+   "exchanges": 201,
+   "evicted": 503,
+   "retainedSpans": 6189,
+   "spanRecords": 19620,
+   "spansAll": 5229,
+   "truncated": false,
+   "budgetEvicted": 0,
+   "spanFileBytes": 33255811,
+   "spanDirMB": 31.7,
+   "idePssMB": 210,
+   "devPssMB": 719,
+   "uiBytesTotal": 6077193,
+   "uiResponses": 101,
+   "uiUnchanged": 0
+  },
+  {
+   "sent": 800,
+   "t": 1793607068362,
+   "apiMs": 1027,
+   "uiMs": 66,
+   "firstMs": 70,
+   "bytesAll": 2646577,
+   "bytesUi": 72698,
+   "bytesUnchanged": 72698,
+   "unchanged": false,
+   "recorded": 804,
+   "exchanges": 201,
+   "evicted": 603,
+   "retainedSpans": 6189,
+   "spanRecords": 22389,
+   "spansAll": 5229,
+   "truncated": false,
+   "budgetEvicted": 0,
+   "spanFileBytes": 37959919,
+   "spanDirMB": 36.2,
+   "idePssMB": 210,
+   "devPssMB": 723,
+   "uiBytesTotal": 7047967,
+   "uiResponses": 115,
+   "uiUnchanged": 0
+  },
+  {
+   "sent": 900,
+   "t": 1793607089630,
+   "apiMs": 1180,
+   "uiMs": 78,
+   "firstMs": 65,
+   "bytesAll": 2645763,
+   "bytesUi": 72698,
+   "bytesUnchanged": 72698,
+   "unchanged": false,
+   "recorded": 904,
+   "exchanges": 201,
+   "evicted": 703,
+   "retainedSpans": 6188,
+   "spanRecords": 25158,
+   "spansAll": 5228,
+   "truncated": false,
+   "budgetEvicted": 0,
+   "spanFileBytes": 42664123,
+   "spanDirMB": 40.7,
+   "idePssMB": 210,
+   "devPssMB": 682,
+   "uiBytesTotal": 8018741,
+   "uiResponses": 129,
+   "uiUnchanged": 0
+  },
+  {
+   "sent": 1000,
+   "t": 1793607110755,
+   "apiMs": 1073,
+   "uiMs": 60,
+   "firstMs": 62,
+   "bytesAll": 2646727,
+   "bytesUi": 72719,
+   "bytesUnchanged": 72719,
+   "unchanged": false,
+   "recorded": 1004,
+   "exchanges": 201,
+   "evicted": 803,
+   "retainedSpans": 6189,
+   "spanRecords": 27928,
+   "spansAll": 5229,
+   "truncated": false,
+   "budgetEvicted": 0,
+   "spanFileBytes": 47375935,
+   "spanDirMB": 45.2,
+   "idePssMB": 211,
+   "devPssMB": 687,
+   "uiBytesTotal": 8989533,
+   "uiResponses": 143,
+   "uiUnchanged": 0
+  },
+  {
+   "sent": 1100,
+   "t": 1793607131924,
+   "apiMs": 1121,
+   "uiMs": 57,
+   "firstMs": 56,
+   "bytesAll": 2646740,
+   "bytesUi": 72916,
+   "bytesUnchanged": 72916,
+   "unchanged": false,
+   "recorded": 1104,
+   "exchanges": 201,
+   "evicted": 903,
+   "retainedSpans": 6189,
+   "spanRecords": 30697,
+   "spansAll": 5229,
+   "truncated": false,
+   "budgetEvicted": 0,
+   "spanFileBytes": 52080059,
+   "spanDirMB": 49.7,
+   "idePssMB": 210,
+   "devPssMB": 692,
+   "uiBytesTotal": 9892503,
+   "uiResponses": 156,
+   "uiUnchanged": 0
+  },
+  {
+   "sent": 1200,
+   "t": 1793607153006,
+   "apiMs": 1022,
+   "uiMs": 69,
+   "firstMs": 70,
+   "bytesAll": 2645930,
+   "bytesUi": 73111,
+   "bytesUnchanged": 73111,
+   "unchanged": false,
+   "recorded": 1204,
+   "exchanges": 201,
+   "evicted": 1003,
+   "retainedSpans": 6188,
+   "spanRecords": 33466,
+   "spansAll": 5228,
+   "truncated": false,
+   "budgetEvicted": 0,
+   "spanFileBytes": 56784206,
+   "spanDirMB": 54.2,
+   "idePssMB": 214,
+   "devPssMB": 693,
+   "uiBytesTotal": 10867664,
+   "uiResponses": 170,
+   "uiUnchanged": 0
+  },
+  {
+   "sent": 1300,
+   "t": 1793607174169,
+   "apiMs": 1132,
+   "uiMs": 57,
+   "firstMs": 57,
+   "bytesAll": 2646873,
+   "bytesUi": 73105,
+   "bytesUnchanged": 73105,
+   "unchanged": false,
+   "recorded": 1304,
+   "exchanges": 201,
+   "evicted": 1103,
+   "retainedSpans": 6189,
+   "spanRecords": 36236,
+   "spansAll": 5229,
+   "truncated": false,
+   "budgetEvicted": 0,
+   "spanFileBytes": 61496019,
+   "spanDirMB": 58.6,
+   "idePssMB": 214,
+   "devPssMB": 699,
+   "uiBytesTotal": 11844088,
+   "uiResponses": 184,
+   "uiUnchanged": 0
+  },
+  {
+   "sent": 1400,
+   "t": 1793607195188,
+   "apiMs": 971,
+   "uiMs": 65,
+   "firstMs": 60,
+   "bytesAll": 2646845,
+   "bytesUi": 73111,
+   "bytesUnchanged": 73111,
+   "unchanged": false,
+   "recorded": 1404,
+   "exchanges": 201,
+   "evicted": 1203,
+   "retainedSpans": 6202,
+   "spanRecords": 39018,
+   "spansAll": 5229,
+   "truncated": false,
+   "budgetEvicted": 0,
+   "spanFileBytes": 66200147,
+   "spanDirMB": 63.1,
+   "idePssMB": 214,
+   "devPssMB": 707,
+   "uiBytesTotal": 12750772,
+   "uiResponses": 197,
+   "uiUnchanged": 0
+  },
+  {
+   "sent": 1500,
+   "t": 1793607216551,
+   "apiMs": 1275,
+   "uiMs": 68,
+   "firstMs": 103,
+   "bytesAll": 2645942,
+   "bytesUi": 73111,
+   "bytesUnchanged": 73111,
+   "unchanged": false,
+   "recorded": 1504,
+   "exchanges": 201,
+   "evicted": 1303,
+   "retainedSpans": 6212,
+   "spanRecords": 41798,
+   "spansAll": 5228,
+   "truncated": false,
+   "budgetEvicted": 0,
+   "spanFileBytes": 70904301,
+   "spanDirMB": 67.6,
+   "idePssMB": 224,
+   "devPssMB": 715,
+   "uiBytesTotal": 13727216,
+   "uiResponses": 211,
+   "uiUnchanged": 0
+  },
+  {
+   "sent": 1600,
+   "t": 1793607241182,
+   "apiMs": 1034,
+   "uiMs": 51,
+   "firstMs": 60,
+   "bytesAll": 2646886,
+   "bytesUi": 73107,
+   "bytesUnchanged": 50,
+   "unchanged": true,
+   "recorded": 1605,
+   "exchanges": 201,
+   "evicted": 1404,
+   "retainedSpans": 6189,
+   "spanRecords": 44618,
+   "spansAll": 5229,
+   "truncated": false,
+   "budgetEvicted": 0,
+   "spanFileBytes": 75664309,
+   "spanDirMB": 72.2,
+   "idePssMB": 214,
+   "devPssMB": 720,
+   "uiBytesTotal": 14912879,
+   "uiResponses": 228,
+   "uiUnchanged": 0
+  },
+  {
+   "sent": 1700,
+   "t": 1793607262388,
+   "apiMs": 1019,
+   "uiMs": 61,
+   "firstMs": 55,
+   "bytesAll": 2646887,
+   "bytesUi": 73112,
+   "bytesUnchanged": 50,
+   "unchanged": true,
+   "recorded": 1705,
+   "exchanges": 201,
+   "evicted": 1504,
+   "retainedSpans": 6189,
+   "spanRecords": 47387,
+   "spansAll": 5229,
+   "truncated": false,
+   "budgetEvicted": 0,
+   "spanFileBytes": 80368462,
+   "spanDirMB": 76.6,
+   "idePssMB": 214,
+   "devPssMB": 723,
+   "uiBytesTotal": 15817097,
+   "uiResponses": 241,
+   "uiUnchanged": 0
+  },
+  {
+   "sent": 1800,
+   "t": 1793607283688,
+   "apiMs": 1231,
+   "uiMs": 65,
+   "firstMs": 77,
+   "bytesAll": 2645919,
+   "bytesUi": 73114,
+   "bytesUnchanged": 50,
+   "unchanged": true,
+   "recorded": 1805,
+   "exchanges": 201,
+   "evicted": 1604,
+   "retainedSpans": 6188,
+   "spanRecords": 50156,
+   "spansAll": 5228,
+   "truncated": false,
+   "budgetEvicted": 0,
+   "spanFileBytes": 85072564,
+   "spanDirMB": 81.1,
+   "idePssMB": 214,
+   "devPssMB": 728,
+   "uiBytesTotal": 16793527,
+   "uiResponses": 255,
+   "uiUnchanged": 0
+  },
+  {
+   "sent": 1900,
+   "t": 1793607304990,
+   "apiMs": 1199,
+   "uiMs": 57,
+   "firstMs": 79,
+   "bytesAll": 2646752,
+   "bytesUi": 73106,
+   "bytesUnchanged": 50,
+   "unchanged": true,
+   "recorded": 1905,
+   "exchanges": 201,
+   "evicted": 1704,
+   "retainedSpans": 6189,
+   "spanRecords": 52926,
+   "spansAll": 5229,
+   "truncated": false,
+   "budgetEvicted": 0,
+   "spanFileBytes": 89784316,
+   "spanDirMB": 85.6,
+   "idePssMB": 214,
+   "devPssMB": 733,
+   "uiBytesTotal": 17769957,
+   "uiResponses": 269,
+   "uiUnchanged": 0
+  },
+  {
+   "sent": 2000,
+   "t": 1793607326206,
+   "apiMs": 1165,
+   "uiMs": 62,
+   "firstMs": 69,
+   "bytesAll": 2646791,
+   "bytesUi": 73111,
+   "bytesUnchanged": 73111,
+   "unchanged": false,
+   "recorded": 2005,
+   "exchanges": 201,
+   "evicted": 1804,
+   "retainedSpans": 6189,
+   "spanRecords": 55695,
+   "spansAll": 5229,
+   "truncated": false,
+   "budgetEvicted": 0,
+   "spanFileBytes": 94501807,
+   "spanDirMB": 90.1,
+   "idePssMB": 214,
+   "devPssMB": 789,
+   "uiBytesTotal": 18746388,
+   "uiResponses": 283,
+   "uiUnchanged": 0
+  },
+  {
+   "sent": 2100,
+   "t": 1793607347489,
+   "apiMs": 1154,
+   "uiMs": 58,
+   "firstMs": 78,
+   "bytesAll": 2646869,
+   "bytesUi": 73107,
+   "bytesUnchanged": 73107,
+   "unchanged": false,
+   "recorded": 2105,
+   "exchanges": 201,
+   "evicted": 1904,
+   "retainedSpans": 6189,
+   "spanRecords": 58465,
+   "spansAll": 5229,
+   "truncated": false,
+   "budgetEvicted": 0,
+   "spanFileBytes": 99213666,
+   "spanDirMB": 94.6,
+   "idePssMB": 214,
+   "devPssMB": 792,
+   "uiBytesTotal": 19722832,
+   "uiResponses": 297,
+   "uiUnchanged": 0
+  },
+  {
+   "sent": 2200,
+   "t": 1793607368802,
+   "apiMs": 1289,
+   "uiMs": 54,
+   "firstMs": 62,
+   "bytesAll": 2646849,
+   "bytesUi": 73105,
+   "bytesUnchanged": 73105,
+   "unchanged": false,
+   "recorded": 2205,
+   "exchanges": 201,
+   "evicted": 2004,
+   "retainedSpans": 6189,
+   "spanRecords": 61234,
+   "spansAll": 5229,
+   "truncated": false,
+   "budgetEvicted": 0,
+   "spanFileBytes": 103917782,
+   "spanDirMB": 99.1,
+   "idePssMB": 235,
+   "devPssMB": 799,
+   "uiBytesTotal": 20699274,
+   "uiResponses": 311,
+   "uiUnchanged": 0
+  },
+  {
+   "sent": 2300,
+   "t": 1793607390054,
+   "apiMs": 1190,
+   "uiMs": 62,
+   "firstMs": 62,
+   "bytesAll": 2645933,
+   "bytesUi": 73112,
+   "bytesUnchanged": 73112,
+   "unchanged": false,
+   "recorded": 2305,
+   "exchanges": 201,
+   "evicted": 2104,
+   "retainedSpans": 6188,
+   "spanRecords": 64003,
+   "spansAll": 5228,
+   "truncated": false,
+   "budgetEvicted": 0,
+   "spanFileBytes": 108621933,
+   "spanDirMB": 103.6,
+   "idePssMB": 234,
+   "devPssMB": 802,
+   "uiBytesTotal": 21675718,
+   "uiResponses": 325,
+   "uiUnchanged": 0
+  },
+  {
+   "sent": 2400,
+   "t": 1793607411557,
+   "apiMs": 1449,
+   "uiMs": 62,
+   "firstMs": 58,
+   "bytesAll": 2646886,
+   "bytesUi": 73115,
+   "bytesUnchanged": 73115,
+   "unchanged": false,
+   "recorded": 2405,
+   "exchanges": 201,
+   "evicted": 2204,
+   "retainedSpans": 6189,
+   "spanRecords": 66773,
+   "spansAll": 5229,
+   "truncated": false,
+   "budgetEvicted": 0,
+   "spanFileBytes": 113333751,
+   "spanDirMB": 108.1,
+   "idePssMB": 235,
+   "devPssMB": 810,
+   "uiBytesTotal": 22652162,
+   "uiResponses": 339,
+   "uiUnchanged": 0
+  },
+  {
+   "sent": 2500,
+   "t": 1793607433141,
+   "apiMs": 1504,
+   "uiMs": 56,
+   "firstMs": 59,
+   "bytesAll": 2646806,
+   "bytesUi": 73115,
+   "bytesUnchanged": 73115,
+   "unchanged": false,
+   "recorded": 2505,
+   "exchanges": 201,
+   "evicted": 2304,
+   "retainedSpans": 6213,
+   "spanRecords": 69566,
+   "spansAll": 5229,
+   "truncated": false,
+   "budgetEvicted": 0,
+   "spanFileBytes": 118037822,
+   "spanDirMB": 112.6,
+   "idePssMB": 235,
+   "devPssMB": 787,
+   "uiBytesTotal": 23628592,
+   "uiResponses": 353,
+   "uiUnchanged": 0
+  },
+  {
+   "sent": 2600,
+   "t": 1793607454420,
+   "apiMs": 1252,
+   "uiMs": 58,
+   "firstMs": 57,
+   "bytesAll": 2645846,
+   "bytesUi": 73109,
+   "bytesUnchanged": 73109,
+   "unchanged": false,
+   "recorded": 2605,
+   "exchanges": 201,
+   "evicted": 2404,
+   "retainedSpans": 6212,
+   "spanRecords": 72335,
+   "spansAll": 5228,
+   "truncated": false,
+   "budgetEvicted": 0,
+   "spanFileBytes": 122741926,
+   "spanDirMB": 117.1,
+   "idePssMB": 236,
+   "devPssMB": 793,
+   "uiBytesTotal": 24605022,
+   "uiResponses": 367,
+   "uiUnchanged": 0
+  },
+  {
+   "sent": 2700,
+   "t": 1793607475641,
+   "apiMs": 1162,
+   "uiMs": 62,
+   "firstMs": 65,
+   "bytesAll": 2646870,
+   "bytesUi": 73116,
+   "bytesUnchanged": 50,
+   "unchanged": true,
+   "recorded": 2705,
+   "exchanges": 201,
+   "evicted": 2504,
+   "retainedSpans": 6189,
+   "spanRecords": 75105,
+   "spansAll": 5229,
+   "truncated": false,
+   "budgetEvicted": 0,
+   "spanFileBytes": 127453776,
+   "spanDirMB": 121.5,
+   "idePssMB": 245,
+   "devPssMB": 797,
+   "uiBytesTotal": 25511718,
+   "uiResponses": 380,
+   "uiUnchanged": 0
+  },
+  {
+   "sent": 2800,
+   "t": 1793607496658,
+   "apiMs": 1004,
+   "uiMs": 49,
+   "firstMs": 52,
+   "bytesAll": 2646764,
+   "bytesUi": 73111,
+   "bytesUnchanged": 50,
+   "unchanged": true,
+   "recorded": 2805,
+   "exchanges": 201,
+   "evicted": 2604,
+   "retainedSpans": 6189,
+   "spanRecords": 77874,
+   "spansAll": 5229,
+   "truncated": false,
+   "budgetEvicted": 0,
+   "spanFileBytes": 132157796,
+   "spanDirMB": 126,
+   "idePssMB": 246,
+   "devPssMB": 804,
+   "uiBytesTotal": 26488162,
+   "uiResponses": 394,
+   "uiUnchanged": 0
+  },
+  {
+   "sent": 2900,
+   "t": 1793607517696,
+   "apiMs": 1037,
+   "uiMs": 56,
+   "firstMs": 67,
+   "bytesAll": 2645716,
+   "bytesUi": 73103,
+   "bytesUnchanged": 50,
+   "unchanged": true,
+   "recorded": 2905,
+   "exchanges": 201,
+   "evicted": 2704,
+   "retainedSpans": 6188,
+   "spanRecords": 80643,
+   "spansAll": 5228,
+   "truncated": false,
+   "budgetEvicted": 0,
+   "spanFileBytes": 136861846,
+   "spanDirMB": 130.5,
+   "idePssMB": 236,
+   "devPssMB": 803,
+   "uiBytesTotal": 27464606,
+   "uiResponses": 408,
+   "uiUnchanged": 0
+  },
+  {
+   "sent": 3000,
+   "t": 1793607538875,
+   "apiMs": 1098,
+   "uiMs": 71,
+   "firstMs": 70,
+   "bytesAll": 2645842,
+   "bytesUi": 73105,
+   "bytesUnchanged": 50,
+   "unchanged": true,
+   "recorded": 3005,
+   "exchanges": 201,
+   "evicted": 2804,
+   "retainedSpans": 6188,
+   "spanRecords": 83412,
+   "spansAll": 5228,
+   "truncated": false,
+   "budgetEvicted": 0,
+   "spanFileBytes": 141565962,
+   "spanDirMB": 135,
+   "idePssMB": 246,
+   "devPssMB": 815,
+   "uiBytesTotal": 28441050,
+   "uiResponses": 422,
+   "uiUnchanged": 0
+  },
+  {
+   "sent": 3000,
+   "t": 1793607548272,
+   "apiMs": 1067,
+   "uiMs": 57,
+   "firstMs": 52,
+   "bytesAll": 2645524,
+   "bytesUi": 69200,
+   "bytesUnchanged": 69200,
+   "unchanged": false,
+   "recorded": 3007,
+   "exchanges": 201,
+   "evicted": 2806,
+   "retainedSpans": 6188,
+   "spanRecords": 83536,
+   "spansAll": 5228,
+   "truncated": false,
+   "budgetEvicted": 0,
+   "spanFileBytes": 141689068,
+   "spanDirMB": 135.1,
+   "idePssMB": 236,
+   "devPssMB": 823,
+   "uiBytesTotal": 28789793,
+   "uiResponses": 427,
+   "uiUnchanged": 0
+  }
+ ],
+ "picks": [
+  {
+   "label": "最初",
+   "binding": "identified",
+   "docSeq": 3,
+   "lineage": "linked",
+   "reason": "",
+   "cands": "poc.listings.region",
+   "line": "文書: 通信 #3 の応答と同定。由来（静的解析による推定）: poc.listings.region",
+   "ms": 2576,
+   "docMatches": true,
+   "sqlSpans": 1,
+   "sqlInDocTrace": true,
+   "recordedAtPick": 3,
+   "evictedAtPick": 0
+  },
+  {
+   "label": "250 要求の後",
+   "binding": "identified",
+   "docSeq": 254,
+   "lineage": "linked",
+   "reason": "",
+   "cands": "poc.listings.region",
+   "line": "文書: 通信 #254 の応答と同定。由来（静的解析による推定）: poc.listings.region",
+   "ms": 781,
+   "docMatches": true,
+   "sqlSpans": 1,
+   "sqlInDocTrace": true,
+   "recordedAtPick": 254,
+   "evictedAtPick": 53
+  },
+  {
+   "label": "1500 要求の後",
+   "binding": "identified",
+   "docSeq": 1505,
+   "lineage": "linked",
+   "reason": "",
+   "cands": "poc.listings.region",
+   "line": "文書: 通信 #1505 の応答と同定。由来（静的解析による推定）: poc.listings.region",
+   "ms": 778,
+   "docMatches": true,
+   "sqlSpans": 1,
+   "sqlInDocTrace": true,
+   "recordedAtPick": 1505,
+   "evictedAtPick": 1304
+  },
+  {
+   "label": "3000 要求の後",
+   "binding": "identified",
+   "docSeq": 3006,
+   "lineage": "linked",
+   "reason": "",
+   "cands": "poc.listings.region",
+   "line": "文書: 通信 #3006 の応答と同定。由来（静的解析による推定）: poc.listings.region",
+   "ms": 524,
+   "docMatches": true,
+   "sqlSpans": 1,
+   "sqlInDocTrace": true,
+   "recordedAtPick": 3006,
+   "evictedAtPick": 2805
+  },
+  {
+   "label": "最後（3000 要求の後）",
+   "binding": "identified",
+   "docSeq": 3007,
+   "lineage": "linked",
+   "reason": "",
+   "cands": "poc.listings.region",
+   "line": "文書: 通信 #3007 の応答と同定。由来（静的解析による推定）: poc.listings.region",
+   "ms": 775,
+   "docMatches": true,
+   "sqlSpans": 1,
+   "sqlInDocTrace": true,
+   "recordedAtPick": 3007,
+   "evictedAtPick": 2806
+  },
+  {
+   "label": "保持範囲から外れた文書を選ぶ",
+   "token": true,
+   "binding": "exchange-evicted",
+   "docSeq": null,
+   "lineage": "cut",
+   "reason": "document-unidentified",
+   "cands": "",
+   "line": "文書: 同定できません（この文書の通信は、観測の保持範囲から外れています（保持対象外）。古い通信の証拠（トレース・SQL）はもう持っていません。プレビューを読み込み直してから選んでください — 通信 #3008（/lin-a）は、直近 200 件の保持範囲より古くなったため外しました）。由来は結んでいません",
+   "ms": 523,
+   "inRetained": false
+  },
+  {
+   "label": "読み込み直した後",
+   "binding": "identified",
+   "docSeq": 3309,
+   "lineage": "linked",
+   "reason": "",
+   "cands": "poc.listings.region",
+   "line": "文書: 通信 #3309 の応答と同定。由来（静的解析による推定）: poc.listings.region",
+   "ms": 780,
+   "docMatches": true,
+   "sqlSpans": 1,
+   "sqlInDocTrace": true,
+   "recordedAtPick": 3309,
+   "evictedAtPick": 3108
+  },
+  {
+   "label": "再起動の後",
+   "binding": "identified",
+   "docSeq": 4,
+   "lineage": "linked",
+   "reason": "",
+   "cands": "poc.listings.region",
+   "line": "文書: 通信 #4 の応答と同定。由来（静的解析による推定）: poc.listings.region",
+   "ms": 785,
+   "docMatches": true,
+   "sqlSpans": 1,
+   "sqlInDocTrace": true,
+   "recordedAtPick": 4,
+   "evictedAtPick": 0
+  },
+  {
+   "label": "異常終了の後の起動",
+   "binding": "identified",
+   "docSeq": 3,
+   "lineage": "linked",
+   "reason": "",
+   "cands": "poc.listings.region",
+   "line": "文書: 通信 #3 の応答と同定。由来（静的解析による推定）: poc.listings.region",
+   "ms": 776,
+   "docMatches": true,
+   "sqlSpans": 1,
+   "sqlInDocTrace": true,
+   "recordedAtPick": 3,
+   "evictedAtPick": 0
+  }
+ ],
+ "checks": [
+  {
+   "name": "最初: 由来が DB カラムまで結ぶ（linked・poc.listings.region）",
+   "ok": true,
+   "got": {
+    "label": "最初",
+    "binding": "identified",
+    "docSeq": 3,
+    "lineage": "linked",
+    "reason": "",
+    "cands": "poc.listings.region",
+    "line": "文書: 通信 #3 の応答と同定。由来（静的解析による推定）: poc.listings.region",
+    "ms": 2576,
+    "docMatches": true,
+    "sqlSpans": 1,
+    "sqlInDocTrace": true,
+    "recordedAtPick": 3,
+    "evictedAtPick": 0
+   }
+  },
+  {
+   "name": "最初: 同定した通信は、いま表示中の文書の識別子を持つ /lin-a の通信",
+   "ok": true,
+   "got": {
+    "docSeq": 3
+   }
+  },
+  {
+   "name": "最初: 由来の SQL はすべて、その通信のトレースのもの（誤接続なし）",
+   "ok": true,
+   "got": {
+    "sqlSpans": 1
+   }
+  },
+  {
+   "name": "250 要求の後: 由来が DB カラムまで結ぶ（linked・poc.listings.region）",
+   "ok": true,
+   "got": {
+    "label": "250 要求の後",
+    "binding": "identified",
+    "docSeq": 254,
+    "lineage": "linked",
+    "reason": "",
+    "cands": "poc.listings.region",
+    "line": "文書: 通信 #254 の応答と同定。由来（静的解析による推定）: poc.listings.region",
+    "ms": 781,
+    "docMatches": true,
+    "sqlSpans": 1,
+    "sqlInDocTrace": true,
+    "recordedAtPick": 254,
+    "evictedAtPick": 53
+   }
+  },
+  {
+   "name": "250 要求の後: 同定した通信は、いま表示中の文書の識別子を持つ /lin-a の通信",
+   "ok": true,
+   "got": {
+    "docSeq": 254
+   }
+  },
+  {
+   "name": "250 要求の後: 由来の SQL はすべて、その通信のトレースのもの（誤接続なし）",
+   "ok": true,
+   "got": {
+    "sqlSpans": 1
+   }
+  },
+  {
+   "name": "1500 要求の後: 由来が DB カラムまで結ぶ（linked・poc.listings.region）",
+   "ok": true,
+   "got": {
+    "label": "1500 要求の後",
+    "binding": "identified",
+    "docSeq": 1505,
+    "lineage": "linked",
+    "reason": "",
+    "cands": "poc.listings.region",
+    "line": "文書: 通信 #1505 の応答と同定。由来（静的解析による推定）: poc.listings.region",
+    "ms": 778,
+    "docMatches": true,
+    "sqlSpans": 1,
+    "sqlInDocTrace": true,
+    "recordedAtPick": 1505,
+    "evictedAtPick": 1304
+   }
+  },
+  {
+   "name": "1500 要求の後: 同定した通信は、いま表示中の文書の識別子を持つ /lin-a の通信",
+   "ok": true,
+   "got": {
+    "docSeq": 1505
+   }
+  },
+  {
+   "name": "1500 要求の後: 由来の SQL はすべて、その通信のトレースのもの（誤接続なし）",
+   "ok": true,
+   "got": {
+    "sqlSpans": 1
+   }
+  },
+  {
+   "name": "3000 要求の後: 由来が DB カラムまで結ぶ（linked・poc.listings.region）",
+   "ok": true,
+   "got": {
+    "label": "3000 要求の後",
+    "binding": "identified",
+    "docSeq": 3006,
+    "lineage": "linked",
+    "reason": "",
+    "cands": "poc.listings.region",
+    "line": "文書: 通信 #3006 の応答と同定。由来（静的解析による推定）: poc.listings.region",
+    "ms": 524,
+    "docMatches": true,
+    "sqlSpans": 1,
+    "sqlInDocTrace": true,
+    "recordedAtPick": 3006,
+    "evictedAtPick": 2805
+   }
+  },
+  {
+   "name": "3000 要求の後: 同定した通信は、いま表示中の文書の識別子を持つ /lin-a の通信",
+   "ok": true,
+   "got": {
+    "docSeq": 3006
+   }
+  },
+  {
+   "name": "3000 要求の後: 由来の SQL はすべて、その通信のトレースのもの（誤接続なし）",
+   "ok": true,
+   "got": {
+    "sqlSpans": 1
+   }
+  },
+  {
+   "name": "最後（3000 要求の後）: 由来が DB カラムまで結ぶ（linked・poc.listings.region）",
+   "ok": true,
+   "got": {
+    "label": "最後（3000 要求の後）",
+    "binding": "identified",
+    "docSeq": 3007,
+    "lineage": "linked",
+    "reason": "",
+    "cands": "poc.listings.region",
+    "line": "文書: 通信 #3007 の応答と同定。由来（静的解析による推定）: poc.listings.region",
+    "ms": 775,
+    "docMatches": true,
+    "sqlSpans": 1,
+    "sqlInDocTrace": true,
+    "recordedAtPick": 3007,
+    "evictedAtPick": 2806
+   }
+  },
+  {
+   "name": "最後（3000 要求の後）: 同定した通信は、いま表示中の文書の識別子を持つ /lin-a の通信",
+   "ok": true,
+   "got": {
+    "docSeq": 3007
+   }
+  },
+  {
+   "name": "最後（3000 要求の後）: 由来の SQL はすべて、その通信のトレースのもの（誤接続なし）",
+   "ok": true,
+   "got": {
+    "sqlSpans": 1
+   }
+  },
+  {
+   "name": "観測 API（画面の取得）の大きさが件数に比例して増えない（300 要求時の 1.5 倍以内）",
+   "ok": true,
+   "got": {
+    "at300": 72697,
+    "last": 69200
+   }
+  },
+  {
+   "name": "変化が無ければ中身を返さない（unchanged）",
+   "ok": false,
+   "got": {
+    "bytes": 69200
+   }
+  },
+  {
+   "name": "持つ通信は保持範囲で頭打ち",
+   "ok": true,
+   "got": 201
+  },
+  {
+   "name": "持つスパンが上限以下",
+   "ok": true,
+   "got": {
+    "spans": 6188,
+    "truncated": false
+   }
+  },
+  {
+   "name": "保持範囲から外れた文書: exchange-evicted（保持対象外）で切れる",
+   "ok": true,
+   "got": {
+    "label": "保持範囲から外れた文書を選ぶ",
+    "token": true,
+    "binding": "exchange-evicted",
+    "docSeq": null,
+    "lineage": "cut",
+    "reason": "document-unidentified",
+    "cands": "",
+    "line": "文書: 同定できません（この文書の通信は、観測の保持範囲から外れています（保持対象外）。古い通信の証拠（トレース・SQL）はもう持っていません。プレビューを読み込み直してから選んでください — 通信 #3008（/lin-a）は、直近 200 件の保持範囲より古くなったため外しました）。由来は結んでいません",
+    "ms": 523,
+    "inRetained": false
+   }
+  },
+  {
+   "name": "保持範囲から外れた文書: 画面の理由に「保持対象外」と番号がある",
+   "ok": true,
+   "got": "文書: 同定できません（この文書の通信は、観測の保持範囲から外れています（保持対象外）。古い通信の証拠（トレース・SQL）はもう持っていません。プレビューを読み込み直してから選んでください — 通信 #3008（/lin-a）は、直近 200 件の保持範囲より古くなったため外しました）。由来は結んでいません"
+  },
+  {
+   "name": "読み込み直した後: 由来が DB カラムまで結ぶ（linked・poc.listings.region）",
+   "ok": true,
+   "got": {
+    "label": "読み込み直した後",
+    "binding": "identified",
+    "docSeq": 3309,
+    "lineage": "linked",
+    "reason": "",
+    "cands": "poc.listings.region",
+    "line": "文書: 通信 #3309 の応答と同定。由来（静的解析による推定）: poc.listings.region",
+    "ms": 780,
+    "docMatches": true,
+    "sqlSpans": 1,
+    "sqlInDocTrace": true,
+    "recordedAtPick": 3309,
+    "evictedAtPick": 3108
+   }
+  },
+  {
+   "name": "読み込み直した後: 同定した通信は、いま表示中の文書の識別子を持つ /lin-a の通信",
+   "ok": true,
+   "got": {
+    "docSeq": 3309
+   }
+  },
+  {
+   "name": "読み込み直した後: 由来の SQL はすべて、その通信のトレースのもの（誤接続なし）",
+   "ok": true,
+   "got": {
+    "sqlSpans": 1
+   }
+  },
+  {
+   "name": "停止後: 前の起動の観測は返らない",
+   "ok": true,
+   "got": {
+    "code": "stale-run",
+    "message": "開発サーバーは実行中ではありません。観測は返しません。"
+   }
+  },
+  {
+   "name": "停止後: その起動の収集ファイルを削除した",
+   "ok": true,
+   "got": {
+    "at": "2026-11-02T08:20:21.369Z",
+    "trigger": "after-stopped-retry",
+    "skipped": null,
+    "removed": [
+     {
+      "name": "fixture-app-1793606888443.jsonl",
+      "bytes": 152512111
+     }
+    ],
+    "kept": [],
+    "failed": []
+   }
+  },
+  {
+   "name": "停止後: 収集ファイルのディレクトリに IDE の起動のファイルが残っていない",
+   "ok": true,
+   "got": {
+    "files": 0,
+    "mb": 0,
+    "names": []
+   }
+  },
+  {
+   "name": "再起動後: 新しいセッション（番号は 1 から・外した数 0・前の通信なし）",
+   "ok": true,
+   "got": {
+    "startedAt": "2026-11-02T08:20:23.701Z",
+    "recorded": 3,
+    "retention": {
+     "window": 200,
+     "documentReserve": 50,
+     "pinLimit": 8,
+     "retained": 3,
+     "evicted": 0,
+     "oldestSeq": 1,
+     "newestSeq": 3,
+     "pinned": [],
+     "historyLimit": 4000,
+     "historyLostThroughSeq": 0,
+     "spanBudget": 60000,
+     "retainedSpans": 157,
+     "spanBudgetEvicted": 0
+    },
+    "excludedStatic": 16,
+    "readRequestHeaders": [
+     "sec-fetch-dest",
+     "rsc"
+    ],
+    "readResponseHeaders": [
+     "x-vcide-trace"
+    ],
+    "writtenRequestHeaders": [
+     "x-vcide-relay"
+    ]
+   }
+  },
+  {
+   "name": "再起動後: 前の起動の観測は返らない",
+   "ok": true,
+   "got": null
+  },
+  {
+   "name": "再起動の後: 由来が DB カラムまで結ぶ（linked・poc.listings.region）",
+   "ok": true,
+   "got": {
+    "label": "再起動の後",
+    "binding": "identified",
+    "docSeq": 4,
+    "lineage": "linked",
+    "reason": "",
+    "cands": "poc.listings.region",
+    "line": "文書: 通信 #4 の応答と同定。由来（静的解析による推定）: poc.listings.region",
+    "ms": 785,
+    "docMatches": true,
+    "sqlSpans": 1,
+    "sqlInDocTrace": true,
+    "recordedAtPick": 4,
+    "evictedAtPick": 0
+   }
+  },
+  {
+   "name": "再起動の後: 同定した通信は、いま表示中の文書の識別子を持つ /lin-a の通信",
+   "ok": true,
+   "got": {
+    "docSeq": 4
+   }
+  },
+  {
+   "name": "再起動の後: 由来の SQL はすべて、その通信のトレースのもの（誤接続なし）",
+   "ok": true,
+   "got": {
+    "sqlSpans": 1
+   }
+  },
+  {
+   "name": "異常終了: 状態は running ではない",
+   "ok": true,
+   "got": "error"
+  },
+  {
+   "name": "異常終了: その起動の観測は返らない",
+   "ok": true,
+   "got": null
+  },
+  {
+   "name": "異常終了: その起動の収集ファイルを削除した（書き手が死んでいる）",
+   "ok": true,
+   "got": {
+    "cleanup": {
+     "at": "2026-11-02T08:20:31.558Z",
+     "trigger": "after-error-retry",
+     "skipped": null,
+     "removed": [
+      {
+       "name": "fixture-app-1793607621698.jsonl",
+       "bytes": 255350
+      }
+     ],
+     "kept": [],
+     "failed": []
+    },
+    "exists": false
+   }
+  },
+  {
+   "name": "異常終了の後の起動: 新しいセッション",
+   "ok": true,
+   "got": {
+    "startedAt": "2026-11-02T08:20:34.736Z",
+    "recorded": 2,
+    "retention": {
+     "window": 200,
+     "documentReserve": 50,
+     "pinLimit": 8,
+     "retained": 2,
+     "evicted": 0,
+     "oldestSeq": 1,
+     "newestSeq": 2,
+     "pinned": [],
+     "historyLimit": 4000,
+     "historyLostThroughSeq": 0,
+     "spanBudget": 60000,
+     "retainedSpans": 131,
+     "spanBudgetEvicted": 0
+    },
+    "excludedStatic": 16,
+    "readRequestHeaders": [
+     "sec-fetch-dest",
+     "rsc"
+    ],
+    "readResponseHeaders": [
+     "x-vcide-trace"
+    ],
+    "writtenRequestHeaders": [
+     "x-vcide-relay"
+    ]
+   }
+  },
+  {
+   "name": "異常終了の後の起動: 由来が DB カラムまで結ぶ（linked・poc.listings.region）",
+   "ok": true,
+   "got": {
+    "label": "異常終了の後の起動",
+    "binding": "identified",
+    "docSeq": 3,
+    "lineage": "linked",
+    "reason": "",
+    "cands": "poc.listings.region",
+    "line": "文書: 通信 #3 の応答と同定。由来（静的解析による推定）: poc.listings.region",
+    "ms": 776,
+    "docMatches": true,
+    "sqlSpans": 1,
+    "sqlInDocTrace": true,
+    "recordedAtPick": 3,
+    "evictedAtPick": 0
+   }
+  },
+  {
+   "name": "異常終了の後の起動: 同定した通信は、いま表示中の文書の識別子を持つ /lin-a の通信",
+   "ok": true,
+   "got": {
+    "docSeq": 3
+   }
+  },
+  {
+   "name": "異常終了の後の起動: 由来の SQL はすべて、その通信のトレースのもの（誤接続なし）",
+   "ok": true,
+   "got": {
+    "sqlSpans": 1
+   }
+  }
+ ],
+ "lifecycle": [
+  {
+   "step": "stop-file-gone-ms",
+   "ms": 3005
+  },
+  {
+   "step": "stop",
+   "spanCleanup": {
+    "at": "2026-11-02T08:20:21.369Z",
+    "trigger": "after-stopped-retry",
+    "skipped": null,
+    "removed": [
+     {
+      "name": "fixture-app-1793606888443.jsonl",
+      "bytes": 152512111
+     }
+    ],
+    "kept": [],
+    "failed": []
+   },
+   "spanDir": {
+    "files": 0,
+    "mb": 0,
+    "names": []
+   }
+  },
+  {
+   "step": "killed-file-gone-ms",
+   "ms": 3005
+  },
+  {
+   "step": "dev-server-killed",
+   "state": "error",
+   "spanCleanup": {
+    "at": "2026-11-02T08:20:31.558Z",
+    "trigger": "after-error-retry",
+    "skipped": null,
+    "removed": [
+     {
+      "name": "fixture-app-1793607621698.jsonl",
+      "bytes": 255350
+     }
+    ],
+    "kept": [],
+    "failed": []
+   },
+   "spanDir": {
+    "files": 0,
+    "mb": 0,
+    "names": []
+   }
+  },
+  {
+   "step": "restarted",
+   "spanDir": {
+    "files": 1,
+    "mb": 0.2,
+    "names": [
+     "fixture-app-1793607632577.jsonl"
+    ]
+   }
+  },
+  {
+   "step": "left-running",
+   "run": {
+    "instance": "3aa732a8-710b-4403-af90-7c8cd7578911",
+    "pid": 5321,
+    "startedAt": "2026-11-02T08:20:32.579Z"
+   },
+   "spanFile": "<IDE>/.ide-runtime/spans/fixture-app-1793607632577.jsonl",
+   "spanDir": {
+    "files": 1,
+    "mb": 0.2,
+    "names": [
+     "fixture-app-1793607632577.jsonl"
+    ]
+   }
+  }
+ ],
+ "stopMs": 1249,
+ "stoppedPid": 5321,
+ "uiTraffic": {
+  "bytes": 31850862,
+  "responses": 480,
+  "unchanged": 1
+ },
+ "finishedAt": "2026-11-02T08:20:39.543Z",
+ "failed": 1
+}

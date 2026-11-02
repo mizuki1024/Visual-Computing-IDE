@@ -1,0 +1,86 @@
+{
+ "startedAt": "2026-11-02T08:06:24.273Z",
+ "total": 300,
+ "rps": 5,
+ "points": [
+  {
+   "sent": 0,
+   "t": 1793606788698,
+   "apiMs": 17,
+   "apiBytes": 10589,
+   "exchanges": 1,
+   "overflow": 0,
+   "spans": 24,
+   "spanFileBytes": 55227
+  },
+  {
+   "sent": 100,
+   "t": 1793606813463,
+   "apiMs": 90,
+   "apiBytes": 1342373,
+   "exchanges": 102,
+   "overflow": 0,
+   "spans": 2660,
+   "spanFileBytes": 4845678
+  },
+  {
+   "sent": 200,
+   "t": 1793606833604,
+   "apiMs": 140,
+   "apiBytes": 2628735,
+   "exchanges": 200,
+   "overflow": 2,
+   "spans": 5205,
+   "spanFileBytes": 9520961
+  },
+  {
+   "sent": 300,
+   "t": 1793606855878,
+   "apiMs": 133,
+   "apiBytes": 2628739,
+   "exchanges": 200,
+   "overflow": 103,
+   "spans": 5205,
+   "spanFileBytes": 14230868
+  },
+  {
+   "sent": 300,
+   "t": 1793606858338,
+   "apiMs": 118,
+   "apiBytes": 2628739,
+   "exchanges": 200,
+   "overflow": 104,
+   "spans": 5205,
+   "spanFileBytes": 14278860
+  }
+ ],
+ "picks": [
+  {
+   "label": "最初",
+   "binding": "identified",
+   "lineage": "linked",
+   "reason": "",
+   "cands": "poc.listings.region",
+   "line": "文書: 通信 #2 の応答と同定。由来（静的解析による推定）: poc.listings.region"
+  },
+  {
+   "label": "通信が 200 件を超えた後",
+   "binding": "token-not-in-session",
+   "lineage": "cut",
+   "reason": "document-unidentified",
+   "cands": "",
+   "line": "文書: 同定できません（この文書の識別子は、いまの起動の観測セッションの通信にありません（別の起動・停止の前の文書、またはまだ応答を送り終えていない））。由来は結んでいません"
+  },
+  {
+   "label": "最後",
+   "binding": "token-not-in-session",
+   "lineage": "cut",
+   "reason": "document-unidentified",
+   "cands": "",
+   "line": "文書: 同定できません（この文書の識別子は、いまの起動の観測セッションの通信にありません（別の起動・停止の前の文書、またはまだ応答を送り終えていない））。由来は結んでいません"
+  }
+ ],
+ "stopMs": 1555,
+ "stoppedPid": 4447,
+ "finishedAt": "2026-11-02T08:07:39.893Z"
+}

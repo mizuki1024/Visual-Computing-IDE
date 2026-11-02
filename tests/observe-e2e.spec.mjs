@@ -231,7 +231,8 @@ const status = () => page.evaluate(async () => (await fetch('/api/runtime/status
 const POSTH = { 'content-type': 'application/json', 'x-vcide-request': '1' };
 /** 観測の API を、画面と同じ入口（同一オリジン・独自ヘッダ）で呼ぶ */
 const fetchObs = (run) => page.evaluate(async ({ run, h }) => {
-  const r = await fetch('/api/runtime/observations', { method: 'POST', headers: h, body: JSON.stringify({ run }) });
+  /* 7C-1: 画面は要約＋選んだ通信の証拠だけを受け取る。試験は証拠を直接確かめるので全件（detail: 'all'）を求める */
+  const r = await fetch('/api/runtime/observations', { method: 'POST', headers: h, body: JSON.stringify({ run, detail: 'all' }) });
   return { status: r.status, text: await r.text() };
 }, { run, h: POSTH });
 const obsOf = async (run) => { const r = await fetchObs(run); return r.status === 200 ? JSON.parse(r.text).observation ?? null : null; };

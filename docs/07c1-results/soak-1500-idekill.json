@@ -1,0 +1,30 @@
+{
+ "owner": "ide-previous-session",
+ "state": "running",
+ "pid": 6366,
+ "adoptedFileKept": true,
+ "remnantRemoved": true,
+ "userFileKept": true,
+ "cleanup": {
+  "at": "2026-11-02T08:29:45.637Z",
+  "trigger": "ide-start",
+  "skipped": null,
+  "removed": [
+   {
+    "name": "fixture-app-1600000000000.jsonl",
+    "bytes": 95
+   }
+  ],
+  "kept": [
+   {
+    "name": "fixture-app-1793608176543.jsonl",
+    "why": "protected"
+   },
+   {
+    "name": "user-notes.txt",
+    "why": "not-run-file"
+   }
+  ],
+  "failed": []
+ }
+}

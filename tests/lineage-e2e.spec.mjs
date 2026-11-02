@@ -228,7 +228,8 @@ const status = () => page.evaluate(async () => (await fetch('/api/runtime/status
 const POSTH = { 'content-type': 'application/json', 'x-vcide-request': '1' };
 /** 観測の API を、画面と同じ入口（同一オリジン・独自ヘッダ）で呼ぶ */
 const fetchObs = (run) => page.evaluate(async ({ run, h }) => {
-  const r = await fetch('/api/runtime/observations', { method: 'POST', headers: h, body: JSON.stringify({ run }) });
+  /* 7C-1: 画面は要約＋選んだ通信の証拠だけを受け取る。試験は証拠を直接確かめるので全件（detail: 'all'）を求める */
+  const r = await fetch('/api/runtime/observations', { method: 'POST', headers: h, body: JSON.stringify({ run, detail: 'all' }) });
   return { status: r.status, text: await r.text() };
 }, { run, h: POSTH });
 const obsOf = async (run) => { const r = await fetchObs(run); return r.status === 200 ? JSON.parse(r.text).observation ?? null : null; };
@@ -339,11 +340,13 @@ const relOf = (ds, r) => ds.hops.filter((h) => h.relation === r);
 /** 由来の API の要求と応答（画面が呼んだもの）。Node で同じ変換にかけて確かめる */
 const linCalls = [];
 page.on('request', (r) => {
-  if (r.url().endsWith('/api/runtime/lineage') && r.method() === 'POST') linCalls.push({ body: JSON.parse(r.postData() ?? '{}'), res: null });
+  if (r.url().endsWith('/api/runtime/lineage') && r.method() === 'POST') linCalls.push({ req: r, body: JSON.parse(r.postData() ?? '{}'), res: null });
 });
+/* 7C-1: 応答は**その要求**に結ぶ（到着の順では結ばない）。全 29 本の直列実行で1回、別の選択の応答を
+ * この選択の結果として読んだ（応答が前後して届くと、順で結ぶ方式は取り違える） */
 page.on('response', async (r) => {
   if (!r.url().endsWith('/api/runtime/lineage')) return;
-  const c = linCalls.filter((x) => !x.res).at(0) ?? linCalls.at(-1);
+  const c = linCalls.find((x) => x.req === r.request());
   if (c) { try { c.res = await r.json(); } catch { /* 読めなければ null */ } }
 });
 /** 由来の API を、画面と同じ入口で呼ぶ（否定の確認用） */
@@ -502,7 +505,8 @@ try {
   /* 前の文書の通信を［表示］: 選択は並べるが、由来は結ばない（別の文書） */
   await showExchange(exA.seq);
   {
-    const ds = LIB.A.fromLiveRun(rPar.observation, exA.seq, { selection: { ...linCalls.at(-1).body, project: 'fixture', port: 0, page: { path: '/lin-a', title: '' }, resolution: rPar.resolution, selectedAt: 'T' }, binding: rPar.binding, lineage: rPar.lineage }).dataset;
+    /* 7C-1: 由来の API が返す観測は、同定した文書の通信（exA2）の証拠だけ。exA の証拠は全件の観測から取る */
+    const ds = LIB.A.fromLiveRun(await obsOf(run1), exA.seq, { selection: { ...linCalls.at(-1).body, project: 'fixture', port: 0, page: { path: '/lin-a', title: '' }, resolution: rPar.resolution, selectedAt: 'T' }, binding: rPar.binding, lineage: rPar.lineage }).dataset;
     eq('前の文書の通信を並べても supplies を作らない', relOf(ds, 'supplies').length, 0);
     ok('注記: 「この要素を描いた文書は通信 #n です」', (await pv().innerText()).includes(`この要素を描いた文書は通信 #${exA2.seq} です`), (await pv().innerText()).slice(-300));
     eq('キャンバスに由来の線を引いていない（変換と同じノード数）', (await nodeLabels()).length, ds.nodes.length);

@@ -1,0 +1,27 @@
+{
+ "state": "stopped",
+ "adoptedFileRemoved": true,
+ "devServerGone": true,
+ "userFileKept": true,
+ "cleanup": {
+  "at": "2026-11-02T08:29:51.761Z",
+  "trigger": "after-stopped",
+  "skipped": null,
+  "removed": [
+   {
+    "name": "fixture-app-1793608176543.jsonl",
+    "bytes": 244555
+   }
+  ],
+  "kept": [
+   {
+    "name": "user-notes.txt",
+    "why": "not-run-file"
+   }
+  ],
+  "failed": []
+ },
+ "spanDir": [
+  "user-notes.txt"
+ ]
+}

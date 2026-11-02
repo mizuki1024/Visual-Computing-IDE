@@ -148,6 +148,71 @@ export interface LiveExchange {
   docToken?: string;
 }
 
+/**
+ * Phase 7C-1: 観測セッションの保持の状態（P0-1）。
+ *
+ * 7B-3A〜7C-0 は 200 件に達すると**新しい**通信を捨てていた（以後の選択が文書を同定できない）。
+ * 7C-1 からは**古い**通信を外す（スライディングウィンドウ）。通し番号は起動の中で一意・単調増加で、
+ * 外した通信の番号を使い回さない。外した通信は「保持対象外」の記録（`EvictedExchange`）として
+ * サーバーの中にだけ残し、その文書を選んだときに理由を出す。
+ */
+export interface LiveRetention {
+  /** 直近の何件を必ず持つか（種類を問わない） */
+  window: number;
+  /** それに加えて、文書の識別子を持つ直近の何件の文書（HTML の応答）を持つか */
+  documentReserve: number;
+  /** 画面が表示中・同定中の通信として保持を頼める数（期限つき） */
+  pinLimit: number;
+  /** いま持っている通信の数 */
+  retained: number;
+  /** 保持範囲から外した通信の数（この起動の累計） */
+  evicted: number;
+  /** いま持っている通信の最小・最大の番号 */
+  oldestSeq: number | null;
+  newestSeq: number | null;
+  /** 保持を頼まれている（期限内の）通信の番号 */
+  pinned: number[];
+  /** 「保持対象外」の記録をいくつまで持つか。これを超えた古い記録は番号の範囲だけを残す */
+  historyLimit: number;
+  /** 「保持対象外」の記録も整理した番号の上限（0 = 整理していない）。これ以下の通信は何も確かめられない */
+  historyLostThroughSeq: number;
+  /** 持つスパンの上限と、いま持っている数。上限を超えると古い通信から外す（spanBudgetEvicted に数える） */
+  spanBudget: number;
+  retainedSpans: number;
+  spanBudgetEvicted: number;
+}
+
+/** Phase 7C-1: 一覧に出す通信ごとの要約（サーバーで判定した結果。スパン本体は返さない） */
+export interface LiveExchangeSummary {
+  seq: number;
+  /** 通信をサーバー処理（受付スパン）に結べたか */
+  server: boolean;
+  /** 結べた SQL のスパンの数 */
+  sql: number;
+  /** そのうち実行した呼び出し位置（DataAccessSite）を特定できた数。照合しない観測では null */
+  sited: number | null;
+}
+
+/**
+ * Phase 7C-1: 保持範囲から外した通信の記録（**サーバーの中だけ**。画面へは返さない）。
+ * 文書の同定で「保持対象外」と言うためと、外した RSC の再取得を見落とさないために持つ。
+ */
+export interface EvictedExchange {
+  seq: number;
+  kind: RelayKind;
+  path: string;
+  startMs: number;
+  docToken?: string;
+  /** なぜ外したか: 直近の件数の範囲の外 / スパンの上限 */
+  reason: 'window' | 'span-budget';
+}
+
+export interface ExchangeHistory {
+  evicted: readonly EvictedExchange[];
+  lostThroughSeq: number;
+  window: number;
+}
+
 export interface LiveRunObservation {
   run: LiveRunKey;
   project: string;
@@ -156,9 +221,10 @@ export interface LiveRunObservation {
   session: {
     /** このセッションを作った時刻（＝開発サーバーが running になった時刻） */
     startedAt: string;
-    /** 記録した通信の数（上限を超えた分は overflow に数える） */
+    /** この起動で記録した通信の数（保持範囲から外したものも含む累計。＝最新の通し番号） */
     recorded: number;
-    overflow: number;
+    /** 7C-1: 保持の状態（7C-0 までの `overflow` の代わり。通信を捨てずに古いものを外す） */
+    retention: LiveRetention;
     /** 静的資材（/_next/* など）。通信として数えず、件数だけ */
     excludedStatic: number;
     readRequestHeaders: readonly string[];
@@ -176,7 +242,22 @@ export interface LiveRunObservation {
     /** 読み取りの上限に当たったか */
     truncated: boolean;
   };
+  /**
+   * いま保持している通信（番号の昇順）。7C-1: `detailSeqs` がある観測では、その外の通信は
+   * 一覧に要る項目だけを持つ（中継の識別子・文書の識別子は**サーバーに残して返さない**）
+   */
   exchanges: LiveExchange[];
+  /**
+   * 7C-1: スパン・SQL の解析・呼び出し位置の照合を、どの通信の分だけ入れたか。
+   * 無ければ（7C-0 までの形）保持しているすべての通信の分が入っている。
+   * **ここに無い通信を変換（fromLiveRun）・照合（liveExchangeLinks）に使ってはいけない**
+   * （証拠を持たないので「未接続」と誤って描く）。`hasDetail` で確かめる
+   */
+  detailSeqs?: number[];
+  /** 7C-1: 一覧のための通信ごとの要約（サーバーが全件の証拠で判定したもの） */
+  summaries?: LiveExchangeSummary[];
+  /** 7C-1: この観測の中身の指紋。画面が同じ値を送れば、サーバーは中身を返さない（変化なし） */
+  etag?: string;
   /** 通信のトレースに属するスパンだけ（取得時点でマスク済みの属性） */
   spans: ObsSpan[];
   /** SQL スパンの構文解析（Phase 6F の `sqlparse.mjs` をそのまま使う） */
@@ -244,7 +325,9 @@ export interface SelectionDocumentInput { token: string | null; soft: boolean | 
 
 export type DocUnboundReason =
   | 'no-document-token' | 'client-navigation' | 'token-not-in-session' | 'token-duplicated'
-  | 'path-mismatch' | 'document-failed' | 'refetched-after-document';
+  | 'path-mismatch' | 'document-failed' | 'refetched-after-document'
+  /* 7C-1: 保持範囲（スライディングウィンドウ） */
+  | 'exchange-evicted' | 'history-evicted';
 
 export const DOC_UNBOUND_LABEL: Record<DocUnboundReason, string> = {
   'no-document-token': 'この文書から、中継が応答に付けた識別子の知らせがありません（中継が返した説明のページ・識別子を付ける前の起動・HTML 以外の応答など）',
@@ -254,7 +337,13 @@ export const DOC_UNBOUND_LABEL: Record<DocUnboundReason, string> = {
   'path-mismatch': '識別子が指す通信のパスが、選択したページのパスと違います',
   'document-failed': '識別子が指す通信は、正常な応答（2xx）を送り終えていません',
   'refetched-after-document': 'この文書の取得の後に、同じパスのページの再取得（RSC）がありました。表示中の DOM はその再取得で描き直された可能性があります',
+  'exchange-evicted': 'この文書の通信は、観測の保持範囲から外れています（保持対象外）。古い通信の証拠（トレース・SQL）はもう持っていません。プレビューを読み込み直してから選んでください',
+  'history-evicted': 'この文書の通信より後の通信の記録を整理済みのため、同じパスの再取得（RSC）が無かったことを確かめられません（保持対象外）。プレビューを読み込み直してから選んでください',
 };
+
+/** 7C-1: 一覧・変換に使ってよい（証拠を持っている）通信か */
+export const hasDetail = (obs: LiveRunObservation, seq: number): boolean =>
+  obs.exchanges.some((e) => e.seq === seq) && (!obs.detailSeqs || obs.detailSeqs.includes(seq));
 
 /**
  * 選択した要素を描いた文書の同定の結果。
@@ -280,23 +369,43 @@ const DOC_CHECKS = [
  */
 export function bindDocument(
   obs: LiveRunObservation, doc: SelectionDocumentInput | null | undefined, selPath: string,
+  /** 7C-1: 保持範囲から外した通信の記録（サーバーの中だけ）。無ければ外した通信は無いものとして扱う */
+  history?: ExchangeHistory,
 ): DocBinding {
   const no = (reason: DocUnboundReason, detail = ''): DocBinding => ({ status: 'unidentified', reason, detail });
   if (!doc || !doc.token) return no('no-document-token');
   if (doc.soft !== false) {
     return no('client-navigation', doc.soft === null ? 'スクリプトが遷移の有無を知らせていません' : '');
   }
+  if (obs.detailSeqs) throw new Error('bindDocument には要約ではない（サーバーの中の）観測を渡す');
+  const evicted = history?.evicted ?? [];
   const hits = obs.exchanges.filter((e) => e.docToken === doc.token);
-  if (!hits.length) return no('token-not-in-session');
-  if (hits.length > 1) return no('token-duplicated', `${hits.length} 件`);
+  const gone = evicted.filter((e) => e.docToken === doc.token);
+  if (hits.length + gone.length > 1) return no('token-duplicated', `${hits.length + gone.length} 件`);
+  if (gone.length) {
+    const g = gone[0];
+    return no('exchange-evicted', `通信 #${g.seq}（${g.path}）は${g.reason === 'window'
+      ? `、直近 ${history?.window ?? '—'} 件の保持範囲より古くなったため外しました`
+      : '、スパンの上限に達したため外しました'}`);
+  }
+  if (!hits.length) {
+    return no('token-not-in-session', history && history.lostThroughSeq > 0
+      ? `この起動の通信 #1〜#${history.lostThroughSeq} は保持範囲の外の記録も整理済みで、それより古い文書かどうかは確かめられません`
+      : '');
+  }
   const ex = hits[0];
   if (ex.path !== selPath) return no('path-mismatch', `通信 #${ex.seq} は ${ex.path}、選択は ${selPath}`);
   if (ex.failure || ex.status === null || ex.status < 200 || ex.status > 299) {
     return no('document-failed', `通信 #${ex.seq} の応答: ${ex.status ?? 'なし'}`);
   }
   /* 文書の後に、同じパスのページを RSC で取り直した通信があれば、DOM が描き直された可能性がある（保守的に断る） */
-  const re = obs.exchanges.find((e) => e.seq !== ex.seq && e.kind === 'rsc' && e.path === ex.path && e.startMs >= ex.startMs);
+  const re = [...obs.exchanges, ...evicted]
+    .find((e) => e.seq !== ex.seq && e.kind === 'rsc' && e.path === ex.path && e.startMs >= ex.startMs);
   if (re) return no('refetched-after-document', `通信 #${re.seq}`);
+  /* 7C-1: この文書より後の通信の記録を整理済みなら、再取得が無かったとは言えない（保守的に断る） */
+  if (history && history.lostThroughSeq > ex.seq) {
+    return no('history-evicted', `通信 #${ex.seq + 1}〜#${history.lostThroughSeq} の記録を整理済み`);
+  }
   return { status: 'identified', seq: ex.seq, checks: DOC_CHECKS };
 }
 

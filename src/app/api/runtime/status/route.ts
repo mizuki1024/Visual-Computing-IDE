@@ -11,6 +11,6 @@ export async function GET(req: Request): Promise<Response> {
     const m = devServer();
     await m.refresh();
     const preview = await previewInfo(req.headers.get('host'));
-    return json({ runtime: m.snapshot(), inspection: m.lastInspection(), preview });
+    return json({ runtime: m.snapshot(), inspection: m.lastInspection(), preview, spanCleanup: m.lastSpanCleanup() });
   });
 }

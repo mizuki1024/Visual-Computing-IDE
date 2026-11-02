@@ -7,10 +7,19 @@ import { observations } from './observations';
 import { anchorOutDir, readManifestComponents } from './anchors';
 import { pidAlive } from './net';
 import type { RunKey } from '../lib/previewProtocol';
-import { runKeyString, type LiveRunObservation } from '../lib/liveObservation';
+import { runKeyString, type ExchangeHistory, type LiveRunObservation } from '../lib/liveObservation';
 
 export type CollectResult =
-  | { ok: true; observation: LiveRunObservation; snapshot: RuntimeSnapshot }
+  | {
+    ok: true;
+    /** 保持しているすべての通信の証拠（サーバーの中で使う。画面へは observationView で絞って返す） */
+    observation: LiveRunObservation;
+    snapshot: RuntimeSnapshot;
+    /** 7C-1: 保持範囲から外した通信の記録（サーバーの中だけ） */
+    history: ExchangeHistory;
+    /** 7C-1: 通信の保持を頼む（表示中・同定した通信） */
+    pin: (seqs: readonly number[]) => void;
+  }
   | { ok: false; code: 'stale-run' | 'no-session'; message: string };
 
 export function isCurrentRun(s: RuntimeSnapshot, run: RunKey): boolean {
@@ -19,7 +28,7 @@ export function isCurrentRun(s: RuntimeSnapshot, run: RunKey): boolean {
     && pidAlive(s.pid);
 }
 
-export async function collectCurrent(run: RunKey): Promise<CollectResult> {
+export async function collectCurrent(run: RunKey, opts: { pin?: readonly number[] } = {}): Promise<CollectResult> {
   const s = devServer().snapshot();
   if (!isCurrentRun(s, run) || !s.project || !s.port) {
     return {
@@ -30,8 +39,12 @@ export async function collectCurrent(run: RunKey): Promise<CollectResult> {
     };
   }
   const ideOwned = s.instrumentation.state === 'enabled' && s.owner === 'ide';
-  const observation = await observations().collect({
-    run, runString: runKeyString(run), project: s.project.name, port: s.port,
+  const store = observations();
+  const runString = runKeyString(run);
+  /* 7C-1: 画面が表示中の通信の保持を、読み取りの整理より先に頼み直す（整理で外さないため） */
+  if (opts.pin?.length) store.pin(runString, opts.pin);
+  const observation = await store.collect({
+    run, runString, project: s.project.name, port: s.port,
     instrumentation: s.instrumentation,
     traceHeader: ideOwned,
     /* 7B-3B-1: SQL を実行した呼び出し位置の照合。対応表（コンポーネント範囲）は要素識別子の注入が有効なときだけ読む */
@@ -41,8 +54,9 @@ export async function collectCurrent(run: RunKey): Promise<CollectResult> {
       manifest: s.anchors?.state === 'enabled' ? readManifestComponents(anchorOutDir(s.project.root)) : null,
     },
   });
-  if (!observation) {
+  const history = store.history(runString);
+  if (!observation || !history) {
     return { ok: false, code: 'no-session', message: 'この起動の観測セッションがありません（IDE の外で起動されたか、セッションが閉じられました）。' };
   }
-  return { ok: true, observation, snapshot: s };
+  return { ok: true, observation, snapshot: s, history, pin: (seqs) => store.pin(runString, seqs) };
 }

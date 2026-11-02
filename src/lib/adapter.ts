@@ -1985,6 +1985,8 @@ export function docBindingText(b: DocBinding | undefined, ex: LiveExchange): str
 export function fromLiveRun(obs: LiveRunObservation, seq: number, opts: LiveRunOptions = {}): AdapterResult {
   const ex = obs.exchanges.find((e) => e.seq === seq);
   if (!ex) throw new Error(`exchange #${seq} not observed in this session`);
+  /* 7C-1: 要約の観測で、証拠（スパン・SQL）を入れていない通信を描かない（「未接続」と誤って描くため） */
+  if (obs.detailSeqs && !obs.detailSeqs.includes(seq)) throw new Error(`exchange #${seq} has no detail in this view`);
   const skipped: { what: string; why: string }[] = [];
   const nodes: ModelNode[] = [];
   const hops: ModelHop[] = [];

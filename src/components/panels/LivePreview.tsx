@@ -25,7 +25,9 @@ import {
   LIVE_UNRESOLVED_LABEL, fromLiveRun, fromLiveSelection, liveExchangeLabel, liveExchangeLinks, lineageCutText,
   type LiveResolution, type LiveSelectionInput,
 } from '@/lib/adapter';
-import { DOC_UNBOUND_LABEL, type DocBinding, type LiveLineage, type LiveRunObservation } from '@/lib/liveObservation';
+import {
+  DOC_UNBOUND_LABEL, hasDetail, type DocBinding, type LiveLineage, type LiveRunObservation,
+} from '@/lib/liveObservation';
 import { layout } from '@/lib/layout';
 
 /** 場所の知らせ（previewGateway.ts の agentJs。形は previewProtocol.ts） */
@@ -67,7 +69,10 @@ const DOC_TRANSIENT = new Set(['token-not-in-session']);
 /** 選択の行に出す、文書の同定と由来の1行 */
 function lineageLine(l: LiveLineage): string {
   const b = l.binding;
-  const doc = b.status === 'identified' ? `文書: 通信 #${b.seq} の応答と同定` : `文書: 同定できません（${DOC_UNBOUND_LABEL[b.reason]}）`;
+  /* 7C-1: 保持対象外のときは、どの通信がなぜ外れたかも出す */
+  const evictedDetail = b.status === 'unidentified' && (b.reason === 'exchange-evicted' || b.reason === 'history-evicted') && b.detail
+    ? ` — ${b.detail}` : '';
+  const doc = b.status === 'identified' ? `文書: 通信 #${b.seq} の応答と同定` : `文書: 同定できません（${DOC_UNBOUND_LABEL[b.reason]}${evictedDetail}）`;
   if (l.status === 'linked') {
     const what = l.candidates.length === 1
       ? `${l.candidates[0].schema}.${l.candidates[0].table}.${l.candidates[0].column}`
@@ -203,6 +208,13 @@ export default function LivePreview() {
   const [obsPick, setObsPick] = useState<number | null>(null);
   const [obsShown, setObsShown] = useState<{ seq: number; sig: string; withSel: boolean } | null>(null);
   const [obsNote, setObsNote] = useState<string | null>(null);
+  /** 7C-1: 証拠（詳細）がまだ届いていない通信の［表示］。届いたら描く */
+  const [pendingShow, setPendingShow] = useState<number | null>(null);
+  /** 7C-1: 取得に添えるもの（証拠を求める通信・保持を頼む通信・持っている観測の指紋） */
+  const wantRef = useRef<{ detail: number[]; pin: number[] }>({ detail: [], pin: [] });
+  const etagRef = useRef<string | null>(null);
+  /** 7C-1: 待たずに取り直す（詳細が足りないとき） */
+  const pollNowRef = useRef<() => void>(() => {});
   /** 7B-3B-1: いま選択している要素（7B-2 の解決の入力）。観測と同じキャンバスに**並べるだけ**に使う */
   const lastSelRef = useRef<LiveSelectionInput | null>(null);
   /** 7B-3B-2: いまの選択の、文書の同定と値の由来の評価 */
@@ -210,53 +222,89 @@ export default function LivePreview() {
   const linRef = useRef<LiveLineage | null>(null);
   linRef.current = lin;
   useEffect(() => {
-    setObs(null); setObsError(null); setObsPick(null); setObsShown(null);
+    setObs(null); setObsError(null); setObsPick(null); setObsShown(null); setPendingShow(null);
+    etagRef.current = null;
     if (!serverKey) return undefined;
     const key = serverKey;
     let alive = true;
     let timer = 0;
+    let inflight = false;
+    let again = false;
     const tick = async () => {
       const rt = runRef.current;
       if (!alive || !rt?.pid || !rt.startedAt) return;
+      if (inflight) { again = true; return; }
+      inflight = true;
+      window.clearTimeout(timer);
       try {
+        /* 7C-1: 一覧の要約と、表示中・選択中の通信の証拠だけを求める。指紋が同じなら中身は返らない */
         const r = await fetch('/api/runtime/observations', {
           method: 'POST', headers: POST_HEADERS,
-          body: JSON.stringify({ run: { instance: rt.instance, pid: rt.pid, startedAt: rt.startedAt } }),
+          body: JSON.stringify({
+            run: { instance: rt.instance, pid: rt.pid, startedAt: rt.startedAt },
+            detail: wantRef.current.detail, pin: wantRef.current.pin, etag: etagRef.current,
+          }),
         });
         const j = await r.json() as {
-          observation?: LiveRunObservation | null;
+          observation?: LiveRunObservation | null; unchanged?: boolean;
           stale?: { message: string }; error?: { message: string };
         };
         if (!alive || serverKeyRef.current !== key) return;
-        if (j.observation) { setObs(j.observation); setObsError(null); }
-        else { setObs(null); setObsError(j.stale?.message ?? j.error?.message ?? `HTTP ${r.status}`); }
+        if (j.unchanged) setObsError(null);
+        else if (j.observation) { etagRef.current = j.observation.etag ?? null; setObs(j.observation); setObsError(null); }
+        else { etagRef.current = null; setObs(null); setObsError(j.stale?.message ?? j.error?.message ?? `HTTP ${r.status}`); }
       } catch (e) {
         if (alive) setObsError(e instanceof Error ? e.message : String(e));
+      } finally {
+        inflight = false;
       }
-      if (alive) timer = window.setTimeout(() => { void tick(); }, OBS_POLL_MS);
+      if (!alive) return;
+      if (again) { again = false; void tick(); return; }
+      timer = window.setTimeout(() => { void tick(); }, OBS_POLL_MS);
     };
+    pollNowRef.current = () => { void tick(); };
     void tick();
-    return () => { alive = false; window.clearTimeout(timer); };
+    return () => { alive = false; window.clearTimeout(timer); pollNowRef.current = () => {}; };
   }, [serverKey]);
 
-  /** 通信ごとに、サーバー処理・SQL まで結べたか（一覧と変換が同じ判定を使う） */
-  const obsRows = useMemo(() => (obs ? [...obs.exchanges].reverse().map((e) => ({
-    e, links: liveExchangeLinks(obs, e),
-  })) : []), [obs]);
-  const obsSqlCount = obsRows.reduce((n, r) => n + r.links.sql.length, 0);
-  /** 7B-3B-1: SQL ごとの呼び出し位置の照合（通った本数を一覧に出す） */
-  const sitedOf = useCallback((sql: { spanId: string; traceId: string }[]) => (obs?.dataAccess
-    ? sql.filter((x) => obs.dataAccess!.some((d) => d.spanId === x.spanId && d.traceId === x.traceId && d.site)).length
-    : null), [obs]);
-  const obsSiteCount = obs?.dataAccess ? obsRows.reduce((n, r) => n + (sitedOf(r.links.sql) ?? 0), 0) : null;
+  /** 通信ごとに、サーバー処理・SQL まで結べたか。7C-1: サーバーが全件の証拠で判定した要約を使う
+   * （要約の無い観測では、変換と同じ判定をこの画面で行う） */
+  const obsRows = useMemo(() => {
+    if (!obs) return [];
+    const sum = new Map((obs.summaries ?? []).map((x) => [x.seq, x]));
+    return [...obs.exchanges].reverse().map((e) => {
+      const x = sum.get(e.seq);
+      if (x) return { e, links: { server: x.server, sql: x.sql, sited: x.sited } };
+      if (!hasDetail(obs, e.seq)) return { e, links: { server: false, sql: 0, sited: null } };
+      const l = liveExchangeLinks(obs, e);
+      const sited = obs.dataAccess
+        ? l.sql.filter((sp) => obs.dataAccess!.some((d) => d.spanId === sp.spanId && d.traceId === sp.traceId && d.site)).length
+        : null;
+      return { e, links: { server: !!l.server, sql: l.sql.length, sited } };
+    });
+  }, [obs]);
+  const obsSqlCount = obsRows.reduce((n, r) => n + r.links.sql, 0);
+  const obsSiteCount = obs?.dataAccess ? obsRows.reduce((n, r) => n + (r.links.sited ?? 0), 0) : null;
   /** 利用者が選ぶまでは、SQL まで結べた最新の通信（無ければ最新）を既定にする。
    * 要素を選んでいれば、そのページと同じパスの通信を優先する（**並べるだけ。結ばない**） */
   const selPath = liveSel && liveSel.status !== 'cleared' ? liveSel.path : null;
   const boundSeq = lin?.binding.status === 'identified' ? lin.binding.seq : null;
   const obsDefault = ((boundSeq !== null ? obsRows.find((r) => r.e.seq === boundSeq) : undefined)
-    ?? (selPath ? obsRows.find((r) => r.e.path === selPath && r.links.sql.length) : undefined)
-    ?? obsRows.find((r) => r.links.sql.length) ?? obsRows[0])?.e.seq ?? null;
+    ?? (selPath ? obsRows.find((r) => r.e.path === selPath && r.links.sql) : undefined)
+    ?? obsRows.find((r) => r.links.sql) ?? obsRows[0])?.e.seq ?? null;
   const obsSel = obsPick !== null && obsRows.some((r) => r.e.seq === obsPick) ? obsPick : obsDefault;
+  /* 7C-1: 次の取得で証拠を求める通信（表示中・表示待ち・同定した文書の通信・利用者が一覧で選んだもの）と、
+   * 保持を頼む通信（表示中・同定した文書の通信・表示待ち）。**既定の選択（最新）は求めない** —
+   * 通信が続く間は毎回変わり、取得が増えるため。［表示］で証拠が無ければ、そのとき待たずに取り直す（showObs） */
+  {
+    const uniq = (xs: (number | null | undefined)[]) => [...new Set(xs.filter((x): x is number => typeof x === 'number'))];
+    wantRef.current = {
+      detail: uniq([obsShown?.seq, pendingShow, boundSeq, obsPick]).slice(0, 4),
+      pin: uniq([obsShown?.seq, boundSeq, pendingShow]).slice(0, 4),
+    };
+  }
+  /** 7C-1: 表示中の通信が保持範囲から外れたか（保持を頼んでいるので通常は起きない。頼む前に外れた場合だけ） */
+  const shownEvicted = !!obs && !!obsShown && !obs.exchanges.some((e) => e.seq === obsShown.seq);
 
   /** 選択した要素を並べるか。**同じパスのページの選択のときだけ**（別のページの要素と並べない） */
   const selectionFor = (data: LiveRunObservation, seq: number): LiveSelectionInput | undefined => {
@@ -275,6 +323,9 @@ export default function LivePreview() {
   };
 
   const showObs = useCallback((seq: number, data: LiveRunObservation, key: string) => {
+    /* 7C-1: 証拠がまだ届いていなければ、届いてから描く（「未接続」と誤って描かない） */
+    if (!hasDetail(data, seq)) { setPendingShow(seq); pollNowRef.current(); return; }
+    setPendingShow(null);
     const selection = selectionFor(data, seq);
     const { dataset } = fromLiveRun(data, seq, runOpts(selection));
     const ds = layout(dataset);
@@ -289,16 +340,23 @@ export default function LivePreview() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showLive]);
 
+  /* 7C-1: 表示を待っている通信の証拠が届いたら描く */
+  useEffect(() => {
+    if (pendingShow === null || !obs || !serverKey) return;
+    if (!obs.exchanges.some((e) => e.seq === pendingShow)) { setPendingShow(null); return; }
+    if (hasDetail(obs, pendingShow)) showObs(pendingShow, obs, serverKey);
+  }, [obs, pendingShow, serverKey, showObs]);
+
   /* 表示中の通信のスパンが後から書かれたら（応答の後に閉じるスパンがある）、描き直す */
   useEffect(() => {
     if (!obsShown || !obs || !serverKey) return;
-    if (!obs.exchanges.some((e) => e.seq === obsShown.seq)) return;
+    if (!hasDetail(obs, obsShown.seq)) return;
     const { dataset } = fromLiveRun(obs, obsShown.seq, runOpts(obsShown.withSel ? selectionFor(obs, obsShown.seq) : undefined));
     if (`${dataset.nodes.length}/${dataset.hops.length}` !== obsShown.sig) showObs(obsShown.seq, obs, serverKey);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [obs, obsShown, serverKey, showObs]);
 
-  const clearObs = () => { setObsShown(null); clearLive(); };
+  const clearObs = () => { setObsShown(null); setPendingShow(null); clearLive(); };
 
   const closeAll = useCallback(() => {
     for (const c of [connRef.current, ...pendingRef.current]) { try { c?.port.close(); } catch { /* 閉じている */ } }
@@ -320,6 +378,8 @@ export default function LivePreview() {
   const evaluate = useCallback(async (input: LiveSelectionInput, key: string, mySeq: number, attempt = 0): Promise<void> => {
     const rt = runRef.current;
     if (!rt?.pid || !rt.startedAt) return;
+    /* 7C-1: 取り直しを待つ間に別の選択・停止・再起動があったら、要求そのものを出さない（結果は従来も捨てていた） */
+    if (mySeq !== selSeqRef.current || serverKeyRef.current !== key) return;
     let j: { observation?: LiveRunObservation; lineage?: LiveLineage; error?: { message: string } };
     try {
       const r = await fetch('/api/runtime/lineage', {
@@ -349,6 +409,7 @@ export default function LivePreview() {
       const { dataset } = fromLiveRun(j.observation, seq, { selection: sel, binding: l.binding, lineage: l });
       const ds = layout(dataset);
       const focus = ds.nodes.find((n) => n.kind === 'component')?.id ?? ds.nodes[0].id;
+      etagRef.current = null;          // 由来の評価の観測は、一覧の取得とは求めた詳細が違う
       setObs(j.observation);
       showLive(ds, `${key}#${mySeq}#lin${attempt}`, focus);
       setObsShown({ seq, sig: `${ds.nodes.length}/${ds.hops.length}`, withSel: true });
@@ -360,7 +421,12 @@ export default function LivePreview() {
        * 一覧の取得のほうが新しければ（件数が多ければ）そちらを残す */
       if (l.binding.status === 'identified') {
         const fresh = j.observation;
-        setObs((prev) => (!prev || fresh.exchanges.length >= prev.exchanges.length ? fresh : prev));
+        /* 7C-1: 件数は保持範囲で頭打ちになるので、新しさは記録した通しの数で比べる */
+        setObs((prev) => {
+          if (prev && fresh.session.recorded < prev.session.recorded) return prev;
+          etagRef.current = null;
+          return fresh;
+        });
       }
       const { dataset } = fromLiveSelection(withLin);
       const ds = layout(dataset);
@@ -605,12 +671,14 @@ export default function LivePreview() {
           <div className="rt-row pvobsrow" data-obs-state={obs ? (obs.exchanges.length ? 'some' : 'none') : obsError ? 'error' : 'loading'}
             data-obs-count={obs?.exchanges.length ?? ''} data-obs-sql={obs ? obsSqlCount : ''}
             data-obs-shown={obsShown?.seq ?? ''} data-obs-session={obs?.session.startedAt ?? ''}
-            data-obs-sites={obsSiteCount ?? ''} data-obs-with-sel={obsShown?.withSel ? 'on' : ''}>
+            data-obs-sites={obsSiteCount ?? ''} data-obs-with-sel={obsShown?.withSel ? 'on' : ''}
+            data-obs-recorded={obs?.session.recorded ?? ''} data-obs-evicted={obs?.session.retention.evicted ?? ''}
+            data-obs-shown-evicted={shownEvicted ? 'on' : ''} data-obs-pending={pendingShow ?? ''}>
             <p className="rt-note pvobs">
               {!obs && !obsError && <>観測（いまの起動）: 取得しています…</>}
               {!obs && obsError && <>観測（いまの起動）: 取得できません — {obsError}</>}
               {obs && !obs.exchanges.length && <>観測（いまの起動）: まだ通信はありません（未観測）。</>}
-              {obs && obs.exchanges.length > 0 && <>観測（いまの起動）: 通信 <b>{obs.exchanges.length}</b> 件・SQL <b>{obsSqlCount}</b> 本{obsSiteCount !== null && obsSqlCount > 0 ? <>（実行した呼び出し位置を特定 <b>{obsSiteCount}</b> 本）</> : ''}{obs.session.overflow ? `（上限を超えた ${obs.session.overflow} 件は記録していません）` : ''}</>}
+              {obs && obs.exchanges.length > 0 && <>観測（いまの起動）: 通信 <b>{obs.exchanges.length}</b> 件・SQL <b>{obsSqlCount}</b> 本{obsSiteCount !== null && obsSqlCount > 0 ? <>（実行した呼び出し位置を特定 <b>{obsSiteCount}</b> 本）</> : ''}{obs.session.retention.evicted ? `（直近 ${obs.session.retention.window} 件と最近の文書を保持。古い ${obs.session.retention.evicted} 件は保持対象外）` : ''}</>}
               {obs && obs.instrumentation.state !== 'enabled' && <> サーバー処理・SQL は観測していません（{obs.instrumentation.reason ?? '計装なし'}）。</>}
             </p>
             {obs && obs.exchanges.length > 0 && (
@@ -619,7 +687,7 @@ export default function LivePreview() {
                   onChange={(e) => setObsPick(Number(e.target.value))}>
                   {obsRows.map(({ e, links }) => (
                     <option key={e.seq} value={e.seq}>
-                      {liveExchangeLabel(e)}{links.server ? ` / SQL ${links.sql.length}` : ' / 処理と未接続'}{links.server && links.sql.length && sitedOf(links.sql) !== null ? ` / 位置 ${sitedOf(links.sql)}` : ''}
+                      {liveExchangeLabel(e)}{links.server ? ` / SQL ${links.sql}` : ' / 処理と未接続'}{links.server && links.sql && links.sited !== null ? ` / 位置 ${links.sited}` : ''}
                     </option>
                   ))}
                 </select>
@@ -630,6 +698,9 @@ export default function LivePreview() {
               </>
             )}
           </div>
+        )}
+        {view === 'live' && shownEvicted && obsShown && (
+          <p className="rt-note pvobs pvwarn pvobsevicted">表示中の通信 #{obsShown.seq} は、観測の保持範囲から外れました（保持対象外）。図は外れる前の証拠のままです。新しい通信を選んで［表示］し直してください。</p>
         )}
         {view === 'live' && obsShown?.withSel && (
           lin?.status === 'linked' && boundSeq === obsShown.seq

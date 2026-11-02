@@ -8,6 +8,9 @@
  *   4. 収集ファイル: 通信のトレースに属するスパンだけ・Phase 6F の解析器で SQL を解析する
  *   5. 中継（本物の PreviewGateway ＋ 代役の開発サーバー）: 記録・ヘッダを落とす・失敗
  *   6. 変換（fromLiveRun）: 観測できない関係を作らない（否定例）・validateDataset
+ *   7. 7C-1 保持の方式: 古い通信を外す・文書の保持・保持の依頼・保持対象外の理由・起動をまたがない
+ *   8. 7C-1 スパンの整理と、画面へ返す形（要約・詳細・指紋）
+ *   9. 7C-1 収集ファイルの整理（消してよいものだけを消す）
  *
  * ここで使う観測は**試験のために組んだ入力**である（画面には出ない）。実データでの確認は observe-e2e。
  * ========================================================================== */
@@ -106,7 +109,11 @@ const rec = (p, trace, extra = {}) => ({
   st.begin('run-C');
   for (let i = 0; i < 205; i++) st.record('run-C', rec(`/n${i}`, null));
   const oC = await st.collect(inp('run-C'));
-  eq('上限（200件）を超えた分は数だけ', [oC.exchanges.length, oC.session.overflow], [200, 5]);
+  /* 7C-1: 7C-0 までは「上限（200件）を超えた**新しい**通信は数だけ」だった（P0-1 の原因）。
+   * 意図（観測が際限なく増えない）は保ち、捨てる側を**古い**通信に変えた */
+  eq('7C-1: 200件を超えたら古い通信を外す（新しい通信は記録する）', [oC.exchanges.length, oC.session.retention.evicted, oC.exchanges[0].seq, oC.exchanges.at(-1).seq], [200, 5, 6, 205]);
+  eq('7C-1: 最新の通信（#205 /n204）を持っている', oC.exchanges.at(-1).path, '/n204');
+  eq('7C-1: 記録した数は外したものを含む累計（＝最新の番号）', oC.session.recorded, 205);
 }
 
 /* ========================================================================== */
@@ -291,6 +298,225 @@ console.log('\n6. 変換（fromLiveRun）: 観測できない関係を作らな�
   eq('一覧の見出し（クエリは …）', A.liveExchangeLabel({ seq: 3, method: 'GET', path: '/a', hasQuery: true, status: 200, failure: null }), '#3 GET /a?… — 200');
 }
 fs.rmSync(tmp, { recursive: true, force: true });
+
+/* ========================================================================== */
+console.log('\n7. 7C-1 保持の方式（スライディングウィンドウ・文書の保持・保持の依頼・保持対象外）');
+const OV = require_('../.libjs/server/observationView.js');
+const SF = require_('../.libjs/server/spanFiles.js');
+const RID = (n) => `a${n.toString(16).padStart(31, '0')}`;
+const DOCT = (n) => `d${n.toString(16).padStart(31, '0')}`;
+{
+  eq('定数: 直近200件・文書50件・依頼8件', [OB.WINDOW, OB.DOC_RESERVE, OB.PIN_LIMIT], [200, 50, 8]);
+  const st = new OB.ObservationStore();
+  let clock = 1_000_000;
+  st.now = () => clock;
+  const inp = (run) => ({ run: { instance: 'i', pid: 1, startedAt: 's' }, runString: run, project: 'p', port: 3000, instrumentation: { state: 'disabled', reason: 'test', spanFile: null }, traceHeader: false });
+  st.begin('R');
+  // #1: 文書（文書の識別子つき）、#2: その後の同じパスの RSC、#3..: API の連打
+  st.record('R', rec('/doc', null, { kind: 'document' }), { relayId: RID(1), docToken: DOCT(1) });
+  st.record('R', rec('/doc', null, { kind: 'rsc', startMs: 2000 }), { relayId: RID(2) });
+  st.record('R', rec('/pinned', null), { relayId: RID(3) });
+  st.pin('R', [3]);
+  for (let i = 4; i <= 260; i++) st.record('R', rec(`/api/${i}`, null), { relayId: RID(i) });
+  let o = await st.collect(inp('R'));
+  const seqs = o.exchanges.map((e) => e.seq);
+  ok('通し番号は単調増加で重複しない', seqs.every((x, i) => i === 0 || x > seqs[i - 1]), seqs.slice(0, 5));
+  ok('直近200件（#61〜#260）を持つ', seqs.includes(61) && seqs.includes(260) && !seqs.includes(60));
+  ok('文書（#1）は直近200件の外でも持つ（文書の保持）', seqs.includes(1));
+  ok('RSC（#2）は外す', !seqs.includes(2));
+  ok('保持を頼まれた通信（#3）は外さない', seqs.includes(3));
+  eq('保持の状態', [o.session.retention.retained, o.session.retention.evicted, o.session.retention.pinned], [202, 58, [3]]);
+
+  // 外した通信を参照した文書の同定（保持対象外の理由）
+  const hist = st.history('R');
+  eq('外した通信の記録はサーバーの中にある', hist.evicted.length, 58);
+  ok('外した記録に中継の識別子・トレースを持たない（必要なものだけ）', hist.evicted.every((e) => !('relayId' in e) && !('trace' in e)));
+  const b1 = LO.bindDocument(o, { token: DOCT(1), soft: false }, '/doc', hist);
+  eq('文書を持っていても、外した RSC の再取得を見落とさない', [b1.status, b1.reason], ['unidentified', 'refetched-after-document']);
+  st.record('R', rec('/old', null, { kind: 'document', startMs: 3000 }), { relayId: RID(900), docToken: DOCT(900) });
+  for (let i = 0; i < 60; i++) st.record('R', rec('/doc2', null, { kind: 'document', startMs: 4000 + i }), { relayId: RID(1000 + i), docToken: DOCT(1000 + i) });
+  for (let i = 0; i < 200; i++) st.record('R', rec(`/flood/${i}`, null), { relayId: RID(2000 + i) });
+  o = await st.collect(inp('R'));
+  const hist2 = st.history('R');
+  const b2 = LO.bindDocument(o, { token: DOCT(900), soft: false }, '/old', hist2);
+  eq('保持範囲から外れた文書 → exchange-evicted（保持対象外）', b2.reason, 'exchange-evicted');
+  ok('理由に番号と保持範囲を書く', /通信 #261（\/old）/.test(b2.detail) && b2.detail.includes('直近 200 件'), b2.detail);
+  ok('理由の文に「保持対象外」がある', LO.DOC_UNBOUND_LABEL['exchange-evicted'].includes('保持対象外'));
+  const newestDoc = o.exchanges.filter((e) => e.docToken).at(-1);
+  eq('API の連打の後も、直近の文書は持っている（文書の保持）', newestDoc?.path, '/doc2');
+  eq('直近の文書は同定できる', LO.bindDocument(o, { token: newestDoc.docToken, soft: false }, '/doc2', hist2).status, 'identified');
+  eq('いまの起動に無い識別子 → token-not-in-session（従来どおり）', LO.bindDocument(o, { token: DOCT(77777), soft: false }, '/doc2', hist2).reason, 'token-not-in-session');
+  // 期限切れの依頼は外れる
+  clock += OB.PIN_LEASE_MS + 1;
+  st.record('R', rec('/tick', null), { relayId: RID(5000) });
+  o = await st.collect(inp('R'));
+  ok('期限の切れた依頼は外れ、頼まれていた通信も外れる', !o.exchanges.some((e) => e.seq === 3) && o.session.retention.pinned.length === 0);
+  st.pin('R', [3]);
+  ok('外した通信は頼んでも生き返らない', !(await st.collect(inp('R'))).exchanges.some((e) => e.seq === 3));
+  // 依頼の上限
+  const recent = o.exchanges.slice(-12).map((e) => e.seq);
+  st.pin('R', recent);
+  eq('依頼は最大8件', (await st.collect(inp('R'))).session.retention.pinned.length, 8);
+  // 記録の上限（HISTORY_LIMIT）を超えたら、範囲だけを残し、それより後の文書は保守的に断る
+  const st2 = new OB.ObservationStore();
+  st2.begin('H');
+  st2.record('H', rec('/keep', null, { kind: 'document' }), { relayId: RID(1), docToken: DOCT(1) });
+  st2.pin('H', [1]);
+  for (let i = 0; i < OB.HISTORY_LIMIT + 300; i++) { st2.record('H', rec(`/x${i}`, null), { relayId: RID(10 + i) }); if (i % 1000 === 0) st2.pin('H', [1]); }
+  const oH = await st2.collect(inp('H'));
+  const hH = st2.history('H');
+  eq('記録の上限: 外した通信の記録は HISTORY_LIMIT 件まで', hH.evicted.length, OB.HISTORY_LIMIT);
+  ok('整理した番号の範囲を持つ', hH.lostThroughSeq > 1 && oH.session.retention.historyLostThroughSeq === hH.lostThroughSeq);
+  eq('保持中の文書でも、後の記録を整理済みなら断る（history-evicted）', LO.bindDocument(oH, { token: DOCT(1), soft: false }, '/keep', hH).reason, 'history-evicted');
+  // 起動をまたいで混ぜない
+  st.begin('R2');
+  const oN = await st.collect(inp('R2'));
+  eq('新しい起動: 通信・外した記録・依頼を持たない', [oN.exchanges.length, oN.session.retention.evicted, st.history('R2').evicted.length, oN.session.retention.pinned], [0, 0, 0, []]);
+  st.record('R2', rec('/a', null));
+  eq('新しい起動の番号は1から', (await st.collect(inp('R2'))).exchanges[0].seq, 1);
+  eq('前の起動の記録は返さない', st.history('R'), null);
+  ok('要約でない観測を bindDocument に渡す（画面の観測を誤って使わない）', (() => { try { LO.bindDocument({ ...oN, detailSeqs: [] }, { token: DOCT(1), soft: false }, '/a'); return false; } catch { return true; } })());
+}
+
+/* ========================================================================== */
+console.log('\n8. 7C-1 スパンの整理: 外した通信のトレースを消す・誤接続しない・猶予・上限');
+{
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vcide-ret-'));
+  const f = path.join(dir, 'run.jsonl');
+  fs.writeFileSync(f, '');
+  const st = new OB.ObservationStore();
+  let clock = 5_000_000;
+  st.now = () => clock;
+  const inp = { run: { instance: 'i', pid: 1, startedAt: 's' }, runString: 'S', project: 'p', port: 3000, instrumentation: { state: 'enabled', reason: null, spanFile: f }, traceHeader: true };
+  st.begin('S');
+  const httpRoot = (n, p) => span(TR(n), SP(n * 10), null, 'GET', { 'http.target': p, 'vcide.relay.id': RID(n) }, { kind: 1, scope: '@opentelemetry/instrumentation-http' });
+  const sql = (n) => span(TR(n), SP(n * 10 + 1), SP(n * 10), 'pg.query:SELECT', { 'db.statement': `SELECT c${n} FROM poc.t${n}` }, { scope: '@opentelemetry/instrumentation-pg' });
+  const add = (n, p) => {
+    fs.appendFileSync(f, `${JSON.stringify(httpRoot(n, p))}\n${JSON.stringify(sql(n))}\n`);
+    st.record('S', rec(p, { traceId: TR(n), spanId: SP(n * 10) }), { relayId: RID(n) });
+  };
+  for (let n = 1; n <= 250; n++) add(n, `/p${n}`);
+  // どの通信にも属さないトレース（IDE の生存確認など）
+  fs.appendFileSync(f, `${JSON.stringify(span(TR(9999), SP(99990), null, 'GET', { 'http.target': '/health' }, { kind: 1, scope: '@opentelemetry/instrumentation-http' }))}\n`);
+  let o = await st.collect(inp);
+  eq('持つスパン = 持っている200件 × 2本 + 属さない1本', o.session.retention.retainedSpans, 401);
+  eq('読んだスパンは全件を数える', o.instrumentation.spanRecords, 501);
+  ok('返す観測に、外した通信のトレースのスパンが無い', !o.spans.some((s) => s.traceId === TR(10)));
+  const full = o;
+  const last = full.exchanges.at(-1);
+  const links = A.liveExchangeLinks(full, last);
+  eq('最新の通信は自分のトレースの SQL に結ぶ（外した通信の SQL に誤接続しない）', links.sql.map((s) => s.spanId), [SP(2501)]);
+  eq('中継を通らない処理は数だけ', o.serverOnlyRequests, 1);
+  // 外した通信の遅れて書かれたスパン → どの通信にも属さない。猶予の後に整理
+  fs.appendFileSync(f, `${JSON.stringify(sql(5))}\n`);
+  o = await st.collect(inp);
+  eq('外した通信の遅れて書かれたスパンは、読んだ時点で整理する（持たない）', o.session.retention.retainedSpans, 401);
+  ok('……どの通信にも結ばない', !o.exchanges.some((e) => A.liveExchangeLinks(o, e).sql.some((s) => s.traceId === TR(5))));
+  eq('……中継を通らない処理には数えない', o.serverOnlyRequests, 1);
+  // 書き終わる前の通信のスパン（まだ記録が無い）は猶予の間は持つ
+  fs.appendFileSync(f, `${JSON.stringify(httpRoot(251, '/p251'))}\n`);
+  o = await st.collect(inp);
+  eq('まだ記録の無い通信のスパンは猶予の間は持つ', o.session.retention.retainedSpans, 402);
+  clock += OB.ORPHAN_GRACE_MS + 1;
+  o = await st.collect(inp);
+  eq('新しい書き込みが無くても、猶予の後に整理する（属さないトレース2つ）', o.session.retention.retainedSpans, 400);
+  eq('整理した受付スパンも「中継を通らない処理」に数える', o.serverOnlyRequests, 2);
+
+  // 7C-1 画面へ返す形: 要約＋選んだ通信の詳細＋指紋
+  const view = OV.observationView(o, [last.seq]);
+  eq('詳細は選んだ通信だけ', view.detailSeqs, [last.seq]);
+  ok('スパンは選んだ通信のトレースだけ', view.spans.length === 2 && view.spans.every((s) => s.traceId === TR(250)));
+  eq('要約は全件', view.summaries.length, o.exchanges.length);
+  ok('要約は全件の証拠での判定と一致する', o.exchanges.every((e, i) => {
+    const l = A.liveExchangeLinks(o, e);
+    const x = view.summaries[i];
+    return x.seq === e.seq && x.server === !!l.server && x.sql === l.sql.length;
+  }));
+  ok('選んでいない通信には中継の識別子・文書の識別子を返さない', view.exchanges.filter((e) => e.seq !== last.seq).every((e) => !e.relayId && !e.docToken));
+  ok('選んだ通信は変換に使える（hasDetail）', LO.hasDetail(view, last.seq) && !LO.hasDetail(view, view.exchanges[0].seq));
+  eq('選んだ通信の変換は、全件の観測での変換と同じ', A.fromLiveRun(view, last.seq).dataset.nodes.map((n) => n.identifier), A.fromLiveRun(o, last.seq).dataset.nodes.map((n) => n.identifier));
+  eq('指紋は中身が同じなら同じ', OV.observationView(o, [last.seq]).etag, view.etag);
+  ok('指紋は詳細の選び方で変わる', OV.observationView(o, [view.exchanges[0].seq]).etag !== view.etag);
+  {
+    const noisy = { ...o, serverOnlyRequests: o.serverOnlyRequests + 5, collectedAt: 'later',
+      instrumentation: { ...o.instrumentation, spanRecords: o.instrumentation.spanRecords + 9 },
+      session: { ...o.session, retention: { ...o.session.retention, retainedSpans: o.session.retention.retainedSpans + 1 } } };
+    eq('指紋は、画面が描かない累計の数（生存確認で増える）では変わらない', OV.observationView(noisy, [last.seq]).etag, view.etag);
+    const moved = { ...o, session: { ...o.session, retention: { ...o.session.retention, evicted: o.session.retention.evicted + 1 } } };
+    ok('指紋は、画面が描く数（外した通信の数）では変わる', OV.observationView(moved, [last.seq]).etag !== view.etag);
+  }
+  const allBytes = JSON.stringify(OV.observationView(o, 'all')).length;
+  ok(`要約の形は全件の形より小さい（${JSON.stringify(view).length} < ${allBytes} バイト）`, JSON.stringify(view).length < allBytes / 2);
+  eq('取得の条件の検査: 正しい形', OV.parseViewRequest({ detail: [1, 2], pin: [1], etag: 'abc_-' }), { detail: [1, 2], pin: [1], etag: 'abc_-' });
+  eq('取得の条件の検査: 省略は空', OV.parseViewRequest({}), { detail: [], pin: [], etag: null });
+  eq('取得の条件の検査: 5件以上・負の数・形の違う指紋は受けない', [OV.parseViewRequest({ detail: [1, 2, 3, 4, 5] }), OV.parseViewRequest({ pin: [-1] }), OV.parseViewRequest({ etag: '../x' })], [null, null, null]);
+
+  // スパンの上限: 1つの通信に大量のスパン → 古い通信から外す（最新と依頼中は外さない）
+  const g = path.join(dir, 'big.jsonl');
+  const st3 = new OB.ObservationStore();
+  st3.begin('B');
+  const big = (n, k) => Array.from({ length: k }, (_, i) => JSON.stringify(span(TR(n), `${n.toString(16).padStart(4, '0')}${i.toString(16).padStart(12, '0')}`, null, 'x', {}, { kind: i === 0 ? 1 : 0 }))).join('\n') + '\n';
+  fs.writeFileSync(g, big(1, 25_000) + big(2, 25_000) + big(3, 25_000));
+  for (const n of [1, 2, 3]) st3.record('B', rec(`/b${n}`, { traceId: TR(n), spanId: `${n.toString(16).padStart(4, '0')}${'0'.repeat(12)}` }));
+  st3.pin('B', [1]);
+  const oB = await st3.collect({ ...inp, runString: 'B', instrumentation: { ...inp.instrumentation, spanFile: g } });
+  eq('上限を超えたら、依頼中（#1）・最新（#3）を残して古い通信（#2）を外す', oB.exchanges.map((e) => e.seq), [1, 3]);
+  ok(`持つスパンは上限以下（${oB.session.retention.retainedSpans}）`, oB.session.retention.retainedSpans <= OB.SPAN_BUDGET);
+  eq('上限で外した数', oB.session.retention.spanBudgetEvicted, 1);
+  eq('外した理由は span-budget', st3.history('B').evicted[0].reason, 'span-budget');
+  fs.rmSync(dir, { recursive: true, force: true });
+}
+
+/* ========================================================================== */
+console.log('\n9. 7C-1 収集ファイルの整理（IDE の spans/ の直下・IDE の名前・書き手が死んでいるものだけ）');
+{
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'vcide-root-'));
+  const outside = fs.mkdtempSync(path.join(os.tmpdir(), 'vcide-outside-'));
+  const spans = path.join(root, '.ide-runtime', 'spans');
+  fs.mkdirSync(spans, { recursive: true });
+  const line = (run, pid) => `${JSON.stringify({ type: 'note', kind: 'registered', proc: { pid, run } })}\n`;
+  const DEAD = 999_999_01;
+  const LIVE = 4242;
+  const files = {
+    'app-1700000000001.jsonl': line('app-1700000000001', DEAD),            // 停止済み → 消す
+    'app-1700000000002.jsonl': line('app-1700000000002', LIVE),            // 書き手が生きている → 残す
+    'app-1700000000003.jsonl': line('app-1700000000003', DEAD),            // いまの起動として守る → 残す
+    'app-1700000000004.jsonl': line('someone-else', DEAD),                 // 名乗る起動が違う → 残す
+    'notes.txt': 'user file',                                             // IDE の名前ではない → 残す
+    'app-1700000000006.jsonl': 'not json at all\n',                       // 記録が無い → 残す
+  };
+  for (const [n, c] of Object.entries(files)) fs.writeFileSync(path.join(spans, n), c);
+  fs.writeFileSync(path.join(spans, 'app-1700000000007.jsonl'), '');      // 空・古い → 消す
+  fs.utimesSync(path.join(spans, 'app-1700000000007.jsonl'), new Date(Date.now() - SF.EMPTY_GRACE_MS - 5000), new Date(Date.now() - SF.EMPTY_GRACE_MS - 5000));
+  fs.writeFileSync(path.join(spans, 'app-1700000000008.jsonl'), '');      // 空・新しい → 残す
+  const target = path.join(outside, 'victim-1700000000009.jsonl');
+  fs.writeFileSync(target, line('app-1700000000009', DEAD));
+  fs.symlinkSync(target, path.join(spans, 'app-1700000000009.jsonl'));   // リンク → 辿らずに残す
+  fs.mkdirSync(path.join(spans, 'app-1700000000010.jsonl'));              // ディレクトリ → 残す
+  // 対象プロジェクトのソース（spans の外）: 見ない
+  const src = path.join(root, 'src.ts');
+  fs.writeFileSync(src, 'export {}');
+  const r = SF.cleanupSpanFiles({ ideRoot: root, protect: [path.join(spans, 'app-1700000000003.jsonl')], trigger: 'test', alive: (p) => p === LIVE });
+  eq('消したもの', r.removed.map((x) => x.name), ['app-1700000000001.jsonl', 'app-1700000000007.jsonl']);
+  const why = Object.fromEntries(r.kept.map((k) => [k.name, k.why]));
+  eq('残した理由', [why['app-1700000000002.jsonl'], why['app-1700000000003.jsonl'], why['app-1700000000004.jsonl'], why['notes.txt'], why['app-1700000000006.jsonl'], why['app-1700000000008.jsonl'], why['app-1700000000009.jsonl'], why['app-1700000000010.jsonl']],
+    ['writer-alive', 'protected', 'owner-mismatch', 'not-run-file', 'no-owner-record', 'recent-empty', 'not-regular-file', 'not-regular-file']);
+  ok('リンクの先（管理範囲の外）は残る', fs.existsSync(target));
+  ok('spans の外（ソース）は残る', fs.existsSync(src));
+  eq('失敗は無い', r.failed, []);
+  // spans 自体がリンク → ディレクトリごと見送る
+  const root2 = fs.mkdtempSync(path.join(os.tmpdir(), 'vcide-root2-'));
+  fs.mkdirSync(path.join(root2, '.ide-runtime'));
+  const real = path.join(outside, 'spans-real');
+  fs.mkdirSync(real);
+  fs.writeFileSync(path.join(real, 'app-1700000000011.jsonl'), line('app-1700000000011', DEAD));
+  fs.symlinkSync(real, path.join(root2, '.ide-runtime', 'spans'));
+  const r2 = SF.cleanupSpanFiles({ ideRoot: root2, protect: [], trigger: 'test', alive: () => false });
+  ok('spans がリンクならディレクトリごと見送る（リンクの先を消さない）', r2.skipped !== null && fs.existsSync(path.join(real, 'app-1700000000011.jsonl')), r2.skipped);
+  const r3 = SF.cleanupSpanFiles({ ideRoot: path.join(root2, 'none'), protect: [], trigger: 'test' });
+  ok('ディレクトリが無ければ何もしない', r3.skipped !== null && r3.removed.length === 0);
+  fs.rmSync(root, { recursive: true, force: true }); fs.rmSync(root2, { recursive: true, force: true }); fs.rmSync(outside, { recursive: true, force: true });
+}
 
 console.log(`\n${fails.length ? '✗ 失敗あり' : '✓ すべて通過'} — ${pass} 件通過 / ${fails.length} 件失敗`);
 if (fails.length) { for (const f of fails) console.log(`  ✗ ${f}`); process.exit(1); }
