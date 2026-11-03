@@ -1,0 +1,14 @@
+chunk [root-of-the-server]__1pajqo6mu0imy._.js
+regions g1: 3,55,116,144,150  g2: 3,62,123,151,157  g3: 3,62,123,151,157
+js1+map1（同じ世代）         fit=yes sections=3 regions=5 reason=-
+js2+map2（同じ世代）         fit=yes sections=3 regions=5 reason=-
+js3+map3（同じ世代）         fit=yes sections=3 regions=5 reason=-
+js2+map1（世代違い）         fit=NO  sections=3 regions=5 reason=segment-outside-line (区画 0 のセグメント（26 行目 147 列）が行の長さ（17）を超えます)
+js1+map2（世代違い）         fit=NO  sections=3 regions=5 reason=segment-outside-line (区画 0 のセグメント（33 行目 147 列）が行の長さ（53）を超えます)
+js3+map2（世代違い・区画内だけ）   fit=yes sections=3 regions=5 reason=-
+js2+map3（世代違い・区画内だけ）   fit=yes sections=3 regions=5 reason=-
+  同じ世代なのに合わない: [externals]__0nozsi_11-dii._.js not-index-map ソースマップがモジュールの区画（sections）の形ではありません
+  同じ世代なのに合わない: [externals]_next_dist_1e1zfvsur5d9m._.js not-index-map ソースマップがモジュールの区画（sections）の形ではありません
+  同じ世代なのに合わない: [externals]_next_dist_shared_lib_no-fallback-error_external_0r3u29kz7xt8e.js not-index-map ソースマップがモジュールの区画（sections）の形ではありません
+  同じ世代なのに合わない: [turbopack]_runtime.js no-module-regions 生成物にモジュールの見出しが見つかりません
+同じ世代の組（.next/dev/server/chunks/ssr の全生成物）: 23 組中 19 組が合う

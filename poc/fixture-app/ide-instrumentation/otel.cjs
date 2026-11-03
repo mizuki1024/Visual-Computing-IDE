@@ -103,6 +103,43 @@ function start() {
    * （'stack-string'。`?`・`eval at` の形で印を推すが、IDE はこの記録を根拠に使わない）。
    * ------------------------------------------------------------------- */
   const APP_DIR = process.cwd();
+
+  /* 7C（実行コードの版）: 生成物を require で読み込んだ（コンパイルした）ときの内容から、モジュールの区画の表を作って覚える。
+   * 鍵は内容の SHA-256（V8 の CallSite.getScriptHash() と同じ値になる — 実測）。古い世代のコードが動き続けても、
+   * その世代の表が残るので、フレームがどの区画（どの内容）のコードかを記録できる。内容そのものは持たない（ハッシュと行だけ）。
+   * 対象はアプリの .next の下の .js だけ。表の数には上限を置く（古いものから捨てる。捨てた世代のフレームは区画を記録しない＝IDE は未観測） */
+  const chunkRegionsLib = require('./chunkregions.cjs');
+  const loadedScripts = new Map();
+  const MAX_LOADED_SCRIPTS = 4000;
+  function patchCompileForRegions() {
+    if (!CALLSITE) return;
+    try {
+      const Module = require('node:module');
+      const proto = Module.prototype;
+      const orig = proto._compile;
+      if (typeof orig !== 'function' || orig.__vcide_regions__) return;
+      const nextDir = require('node:path').join(APP_DIR, '.next') + require('node:path').sep;
+      const wrapped = function (content, filename, ...rest) {
+        try {
+          if (typeof content === 'string' && typeof filename === 'string' && filename.startsWith(nextDir) && filename.endsWith('.js')) {
+            const h = chunkRegionsLib.sha256(content);
+            if (!loadedScripts.has(h)) {
+              loadedScripts.set(h, chunkRegionsLib.chunkRegions(content));
+              if (loadedScripts.size > MAX_LOADED_SCRIPTS) loadedScripts.delete(loadedScripts.keys().next().value);
+            }
+          }
+        } catch { /* 表が作れなければ区画を記録しない（IDE は未観測にする） */ }
+        return orig.call(this, content, filename, ...rest);
+      };
+      wrapped.__vcide_regions__ = true;
+      proto._compile = wrapped;
+      sink.note('callsite-regions-patched', 'Module.prototype._compile');
+    } catch (e) {
+      sink.note('callsite-regions-patch-failed', String(e && e.message).slice(0, 120));
+    }
+  }
+  patchCompileForRegions();
+
   /** スタック1行の解析。`at fn (file:line:col)` と `at file:line:col` の両形 */
   const FRAME_RE = /^\s*at\s+(?:(.+?)\s+\()?(.+?):(\d+):(\d+)\)?\s*$/;
 
@@ -182,6 +219,25 @@ function start() {
     if (QUERIED.test(String(raw))) return EVALUATED(fn, line, col);
     if (!(line > 0) || !(col > 0)) return { functionName: fn, file: '<unrecognized>', scope: 'unrecognized', line: 0, col: 0 };
     const c = classifyFile(raw);
+    /* 7C（実行コードの版）: ディスクの生成物から読んだコードのフレームには、**いま実行しているスクリプトの内容のハッシュ**
+     * （V8 の CallSite.getScriptHash() = コンパイルしたソースの SHA-256）を付ける。同じパスの生成物がディスクで書き直されても、
+     * 前に require した古い世代のコードはこのハッシュのまま動く（server fast refresh が変えていないモジュール）。IDE は
+     * これをディスクの生成物の内容のハッシュと比べ、一致を確かめられたときだけ位置を戻す。取れなければ付けない（IDE は未観測にする） */
+    if (c.scope === 'build-output') {
+      let scriptHash = null;
+      try {
+        const h = typeof cs.getScriptHash === 'function' ? cs.getScriptHash() : null;
+        scriptHash = typeof h === 'string' && /^[0-9a-f]{64}$/.test(h) ? h : null;
+      } catch { scriptHash = null; }
+      /* 実行しているスクリプトの、このフレームが入るモジュールの区画（読み込んだときの内容から作った表。無ければ付けない） */
+      let moduleRegion = null;
+      try {
+        const regions = scriptHash ? loadedScripts.get(scriptHash) : null;
+        const r = regions ? chunkRegionsLib.regionOfLine(regions, line) : null;
+        if (r) moduleRegion = { hash: r.hash, line: line - r.start };
+      } catch { moduleRegion = null; }
+      return { functionName: fn, file: c.file, scope: c.scope, line, col, scriptHash, moduleRegion };
+    }
     return { functionName: fn, file: c.file, scope: c.scope, line, col };
   }
 

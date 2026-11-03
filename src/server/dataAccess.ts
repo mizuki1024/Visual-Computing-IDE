@@ -27,6 +27,18 @@
  *       要素識別子のローダの変換を同じ規則で当てたもの）とバイト単位で一致する。sourcesContent が無ければ一致とは扱わない
  * A1〜A3 のどれで止めた場合も、位置（site）も参考の位置（located）も返さない。
  *
+ * 7C HMR 最終安全対策（docs/07c-hmr-final-safety-report.md）で足した照合（実行コードの版。どれか1つでも欠ければ断定しない）:
+ *   A4. 呼び出しの入口から、位置を戻すフレームまでの生成物のフレームはすべて、**実際に実行したコードと同じ内容**のコードが
+ *       いまのディスクの生成物の中にある（計装が V8 の CallSite.getScriptHash() で記録した実行中のスクリプトの内容のハッシュが、
+ *       ディスクの生成物の内容のハッシュと一致する。または、フレームが入るモジュールの区画の内容のハッシュと同じ区画がディスクの
+ *       生成物にちょうど1つあり、位置をその区画の同じ行へ移す）。確かめられないフレームより外側は照合に渡さない（A1 の印と同じ扱い）。
+ *       server fast refresh が変えていないモジュールは前に読み込んだ古い世代のコードのまま動く（同じ生成物に連結されたモジュールの
+ *       行のずれ＝第3の経路）。古い世代のコードと同じ内容のコードがディスクに無ければ未観測にする
+ *   A5. 位置を戻した後に生成物とソースマップを読み直し、版を確かめた生成物・位置を戻すのに使ったソースマップと同じ内容で、
+ *       ソースマップがその生成物の内容に合う（モジュールの区画の並び。srvmap.mjs の mapFit）。生成物とソースマップは別々に書かれる
+ *   A2 は、A4 で実行したコードとディスクの生成物の内容の一致を確かめるので、**戻した先のソース**についてだけ要求の開始から見る
+ *       （生成物・ソースマップの更新時刻は使わない。初回のコンパイルは要求の中で生成物を書くが、そのコードを実行している）
+ *
  * 根拠にしないもの: 時刻の近さ・SQL 文の一致・ページのパス・コンポーネントの名前の一致。
  * 対象プロジェクトには書き込まない（読むのは src/ のソース・.next の生成物と隣のソースマップ・IDE 側の対応表）。
  * ========================================================================== */
@@ -51,6 +63,12 @@ export interface CallsiteRecord {
 }
 export interface CallsiteFrame {
   functionName: string | null; file: string; scope: string; line: number; col: number;
+  /**
+   * 7C（A4）: 生成物のフレームだけ。scriptHash = 実行中のスクリプトの内容の SHA-256（V8 の CallSite.getScriptHash()）。
+   * moduleRegion = そのスクリプトの中で、フレームが入るモジュールの区画の内容のハッシュと、区画の先頭からの行（0 始まり）
+   */
+  scriptHash?: string | null;
+  moduleRegion?: { hash: string; line: number } | null;
 }
 
 /** 生成物の相対パスとして受ける形。`.next/` 以下の .js だけ（記録はアプリのプロセスが書くので信用しない） */
@@ -75,6 +93,7 @@ export const FRAME_SOURCE_V8 = 'v8-callsite';
  */
 export const FRESHNESS_MARGIN_MS = 2000;
 
+const HEX64 = /^[0-9a-f]{64}$/;
 const isPos = (v: unknown): v is number => typeof v === 'number' && Number.isInteger(v) && v > 0 && v < 10_000_000;
 
 /**
@@ -117,7 +136,16 @@ export function parseCallsiteRecord(o: Record<string, unknown>): CallsiteRecord 
       } else if (r.scope === 'app-source' && /^ide-instrumentation\//.test(r.file)) {
         /* 計装自身のフレーム。rscattr.mjs が飛ばす（ここでも残しておくのは数のため） */
       } else continue;
-      if (frames.length < MAX_FRAMES) frames.push({ functionName: fn, file: r.file, scope: r.scope, line: r.line, col: r.col });
+      if (frames.length >= MAX_FRAMES) continue;
+      if (r.scope === 'build-output') {
+        /* 7C（A4）: 実行したコードの版の証拠。形が合わなければ持たない（照合は版を確かめられず未観測にする） */
+        const sh = typeof r.scriptHash === 'string' && HEX64.test(r.scriptHash) ? r.scriptHash : null;
+        const mr = r.moduleRegion as { hash?: unknown; line?: unknown } | null | undefined;
+        const moduleRegion = mr && typeof mr === 'object' && typeof mr.hash === 'string' && HEX64.test(mr.hash)
+          && typeof mr.line === 'number' && Number.isInteger(mr.line) && mr.line >= 0 && mr.line < 10_000_000
+          ? { hash: mr.hash, line: mr.line } : null;
+        frames.push({ functionName: fn, file: r.file, scope: r.scope, line: r.line, col: r.col, scriptHash: sh, moduleRegion });
+      } else frames.push({ functionName: fn, file: r.file, scope: r.scope, line: r.line, col: r.col });
     }
     const src = (e as { frameSource?: unknown }).frameSource;
     entry = {
@@ -140,12 +168,18 @@ type Attribution = {
   failure: { reason: string; detail: string } | null;
 };
 /** 7C（A3）: 位置を戻すのに使ったソースマップの区画の情報（srvmap.mjs の serverFrameProvenance） */
-type Provenance = { file: string; line: number; col: number; sourceContent: string | null } | null;
+type Provenance = { file: string; line: number; col: number; sourceContent: string | null; mapSha: string | null; mapInline: boolean } | null;
+/** 7C（A4）: srvmap.mjs の verifyExecutedFrame の結果 */
+type ExecutedIdentity = { status: 'script' | 'region' | 'mismatch' | 'unverified'; line: number | null; chunkSha: string | null; detail: string };
+type BuildFrame = { file: string; scope: string; line: number; col: number; scriptHash?: string | null; moduleRegion?: { hash: string; line: number } | null };
 interface Resolver {
   resolveRscAttribution: (cs: unknown, comps: Map<string, unknown[]>, opts: { root: string }) => Attribution;
   resetSrvMaps: () => void;
   serverFrameProvenance: (frame: { file: string; scope: string; line: number; col: number }, root: string) => Provenance;
   compareMapSource: (sourceContent: string, current: string, rel: string) => 'match' | 'mismatch' | 'unverified';
+  resolveServerFrame: (frame: BuildFrame, root: string) => { file: string; line: number; col: number } | null;
+  verifyExecutedFrame: (frame: BuildFrame, root: string, memo: Map<string, unknown>) => ExecutedIdentity;
+  bindChunkAndMap: (relFile: string, root: string, expectChunkSha: string, usedMapSha: string | null) => { ok: boolean; reason: string | null; detail: string };
 }
 let resolverMod: Promise<Resolver | null> | null = null;
 let resolverError: string | null = null;
@@ -156,11 +190,13 @@ function resolver(): Promise<Resolver | null> {
     try {
       const dir = path.join(ideRoot(), 'poc', 'runner', 'lib');
       const a = await import(/* turbopackIgnore: true */ /* webpackIgnore: true */ path.join(dir, 'rscattr.mjs')) as Pick<Resolver, 'resolveRscAttribution'>;
-      const m = await import(/* turbopackIgnore: true */ /* webpackIgnore: true */ path.join(dir, 'srvmap.mjs')) as Pick<Resolver, 'resetSrvMaps' | 'serverFrameProvenance' | 'compareMapSource'>;
+      const m = await import(/* turbopackIgnore: true */ /* webpackIgnore: true */ path.join(dir, 'srvmap.mjs')) as Pick<Resolver, 'resetSrvMaps' | 'serverFrameProvenance' | 'compareMapSource' | 'resolveServerFrame' | 'verifyExecutedFrame' | 'bindChunkAndMap'>;
       if (typeof m.serverFrameProvenance !== 'function' || typeof m.compareMapSource !== 'function') throw new Error('srvmap.mjs に A3 の照合（serverFrameProvenance / compareMapSource）がありません');
+      if (typeof m.verifyExecutedFrame !== 'function' || typeof m.bindChunkAndMap !== 'function' || typeof m.resolveServerFrame !== 'function') throw new Error('srvmap.mjs に実行コードの版の照合（verifyExecutedFrame / bindChunkAndMap）がありません');
       return {
         resolveRscAttribution: a.resolveRscAttribution, resetSrvMaps: m.resetSrvMaps,
         serverFrameProvenance: m.serverFrameProvenance, compareMapSource: m.compareMapSource,
+        resolveServerFrame: m.resolveServerFrame, verifyExecutedFrame: m.verifyExecutedFrame, bindChunkAndMap: m.bindChunkAndMap,
       };
     } catch (e) {
       resolverError = e instanceof Error ? e.message.split('\n')[0].slice(0, 200) : String(e);
@@ -192,7 +228,9 @@ const CHECK_RECORD = 'この SQL のスパンに呼び出し位置の記録が�
 const CHECK_SCOPE = '戻した位置が対象プロジェクトの src/ の中（シンボリックリンクで外へ出ない）';
 const CHECK_FRESH = 'SQL の実行の後に、生成物・ソースマップ・ソースファイルのどれも書き換わっていない';
 const CHECK_A1 = '呼び出しを書いたフレームより内側に、HMR で eval されたコード（V8 の CallSite.isEval() で判定）・形を認識できないフレームが無い';
-const CHECK_A2 = `その SQL が属する要求（同じトレースの受付スパン）の開始の ${FRESHNESS_MARGIN_MS / 1000} 秒前より後に、生成物・ソースマップ・戻した先のソースのどれも書き換わっていない`;
+const CHECK_A2 = `その SQL が属する要求（同じトレースの受付スパン）の開始の ${FRESHNESS_MARGIN_MS / 1000} 秒前より後に、戻した先のソースが書き換わっていない`;
+const CHECK_A4 = '呼び出しの入口から位置を戻したフレームまでの生成物のコードが、実際に実行したコードと同じ内容（V8 の CallSite.getScriptHash() による実行中のスクリプトのハッシュ、またはそのモジュールの区画のハッシュが、ディスクの生成物と一致）';
+const CHECK_A5 = '位置を戻した後に読み直した生成物・ソースマップが、照合に使ったものと同じ内容で、ソースマップが生成物のモジュールの区画の並びに合う';
 const CHECK_A3 = '位置を戻したソースマップの区画の sourcesContent が、いまのソース（要素識別子のローダの変換を同じ規則で当てたもの）とバイト単位で一致';
 
 /**
@@ -301,6 +339,33 @@ export async function resolveDataAccess(input: DataAccessInput): Promise<LiveDat
         entry = { ...entry, frames: entry.frames.slice(0, cut) };
       }
     }
+    /* 7C（A4）: 実行したコードの版。印より内側の生成物のフレームを上から順に、実際に実行したコードと同じ内容のコードがディスクの
+     * 生成物の中にあるかで確かめる（同じ内容の区画へ移すことはあっても、確かめられないフレームを推測で通さない）。
+     * 確かめられないフレームはそこで切り、外側を照合に渡さない（A1 の印と同じ扱い）。注入範囲（src/）へ戻せる最初のフレーム
+     * （照合器が採るフレーム）まで確かめたら止める（その外側は照合器が使わない） */
+    let stale: { index: number; frame: CallsiteFrame; id: ExecutedIdentity } | null = null;
+    const chunkShaOf = new Map<string, string>();
+    const relocated: string[] = [];
+    if (entry && entry.frames.length) {
+      const memo = new Map<string, unknown>();
+      const frames: CallsiteFrame[] = [];
+      for (let i = 0; i < entry.frames.length; i++) {
+        const f = entry.frames[i];
+        if (f.scope !== 'build-output') { frames.push(f); continue; }
+        let id: ExecutedIdentity;
+        try { id = r.verifyExecutedFrame(f, input.projectRoot, memo); } catch (e) { id = { status: 'unverified', line: null, chunkSha: null, detail: e instanceof Error ? e.message.slice(0, 120) : String(e) }; }
+        if ((id.status !== 'script' && id.status !== 'region') || id.line === null || !id.chunkSha) { stale = { index: i, frame: f, id }; break; }
+        chunkShaOf.set(f.file, id.chunkSha);
+        const g = id.status === 'region' ? { ...f, line: id.line } : f;
+        if (id.status === 'region' && id.line !== f.line) relocated.push(`${f.file.split('/').pop()}:${f.line}→${id.line}`);
+        frames.push(g);
+        let pos: { file: string } | null = null;
+        try { pos = r.resolveServerFrame(g, input.projectRoot); } catch { pos = null; }
+        /* 照合器が採るフレーム。これより外側（版を確かめていない）は渡さない */
+        if (pos && pos.file.startsWith(`${ANCHOR_SCOPE}/`)) break;
+      }
+      entry = { ...entry, frames };
+    }
     /* 1〜4. PoC-02 の照合（rscattr.mjs をそのまま呼ぶ） */
     let a: Attribution;
     try {
@@ -310,6 +375,23 @@ export async function resolveDataAccess(input: DataAccessInput): Promise<LiveDat
       continue;
     }
     const at = rec.entry?.at ?? null;
+    /* A4: 版を確かめられないフレームより内側に、ソースへ戻せるフレームが無い → 呼び出しを書いたのはそのフレーム（古い世代のコード）で
+     * ありうる。位置を出さない。理由は実際に止めた条件（版の不一致・証拠の欠落）。不一致で、その生成物が要求の処理中に書き換わって
+     * いれば（拒む向きにだけ時刻を使う）、要求の処理中の変更として理由を返す（詳細に版の不一致を書く） */
+    if (stale && !a.frame) {
+      const idx = rec.entry!.frames.indexOf(stale.frame) + 1;
+      if (stale.id.status === 'mismatch') {
+        const t = mtimeOf(path.join(input.projectRoot, stale.frame.file));
+        if (request && t !== null && t >= request.startMs - FRESHNESS_MARGIN_MS) {
+          out.push(fail(span, 'changed-during-request', `呼び出しの入口から ${idx} 番目のフレームの生成物が要求の開始の ${Math.round(t - request.startMs)} ms ${t >= request.startMs ? '後' : '前'}に書き換わり、実行したコードと同じ内容のコードがディスクの生成物にありません（${stale.id.detail}）`, { at }));
+        } else {
+          out.push(fail(span, 'executed-code-mismatch', `呼び出しの入口から ${idx} 番目のフレーム: ${stale.id.detail}`, { at }));
+        }
+      } else {
+        out.push(fail(span, 'executed-code-unverified', `呼び出しの入口から ${idx} 番目のフレーム: ${stale.id.detail}`, { at }));
+      }
+      continue;
+    }
     /* A1: 印より内側に、ソースへ戻せるフレームが無い → 呼び出しを書いたのは印のフレームでありうる。位置を出さない */
     if (barrier && !a.frame) {
       out.push(barrier.scope === 'evaluated'
@@ -342,26 +424,38 @@ export async function resolveDataAccess(input: DataAccessInput): Promise<LiveDat
         out.push(fail(span, 'source-changed-after-call', `${a.frame?.file ?? 'ソース'} が SQL の実行の後に書き換わっています`, { at, located }));
         continue;
       }
-      /* 7C（A2）: 要求の開始から。D は「実行の後」だけを見ていた。要求の処理中（開始の直前の幅を含む）の書き換えも拒む */
+      /* 7C（A2）: 要求の開始から。D は「実行の後」だけを見ていた。要求の処理中（開始の直前の幅を含む）の**ソース**の書き換えも拒む。
+       * 生成物・ソースマップは、A4（実行したコードとディスクの生成物の内容の一致）と A5（読み直した組の一致）で確かめる。
+       * 時刻では「初回のコンパイル（要求の中で書いた生成物を実行した）」と「古いコードが動いている」を区別できない */
       if (!request) {
         out.push(fail(span, 'request-start-unknown', requestIssue ?? 'この SQL が属する要求の受付スパンを特定していません', { at }));
         continue;
       }
       const since = request.startMs - FRESHNESS_MARGIN_MS;
-      const changed = ([['生成物', mtimeOf(gen)], ['ソースマップ', mtimeOf(`${gen}.map`)], [a.frame?.file ?? 'ソース', tSrc]] as const)
-        .filter(([what, t]) => (t === null ? what !== 'ソースマップ' : t >= since));
-      if (changed.length) {
+      if (tSrc >= since) {
         out.push(fail(span, 'changed-during-request',
-          `${changed.map(([w, t]) => (t === null ? `${w}（読めません）` : `${w}（要求の開始の ${Math.round(t - request.startMs)} ms ${t >= request.startMs ? '後' : '前'}）`)).join('・')} が書き換わっています`,
+          `${a.frame?.file ?? 'ソース'}（要求の開始の ${Math.round(tSrc - request.startMs)} ms ${tSrc >= request.startMs ? '後' : '前'}）が書き換わっています`,
           { at }));
         continue;
       }
-      /* 7C（A3）: 位置を戻した区画の sourcesContent と、いまのソースの内容 */
+      /* 7C（A4 の残り）: 位置を戻したフレームの生成物は、版を確かめたもの（印より内側の生成物のフレームはすべて確かめてある） */
+      const verifiedSha = chunkShaOf.get(a.generated.file) ?? null;
+      if (!verifiedSha) {
+        out.push(fail(span, 'executed-code-unverified', `位置を戻したフレームの生成物 ${a.generated.file.split('/').pop()} の版を確かめていません`, { at }));
+        continue;
+      }
+      /* 7C（A3・A5）: 位置を戻した区画の sourcesContent と、いまのソースの内容。読み直した生成物・ソースマップの組 */
       if (a.frame && srcAbs) {
         let prov: Provenance = null;
         try { prov = r.serverFrameProvenance(a.generated, input.projectRoot); } catch { prov = null; }
         if (!prov || prov.file !== a.frame.file || prov.line !== a.frame.line || prov.col !== a.frame.col) {
           out.push(fail(span, 'map-source-unverified', '位置を戻したソースマップの区画を特定し直せません', { at }));
+          continue;
+        }
+        let bound: { ok: boolean; reason: string | null; detail: string };
+        try { bound = r.bindChunkAndMap(a.generated.file, input.projectRoot, verifiedSha, prov.mapSha); } catch (e) { bound = { ok: false, reason: 'error', detail: e instanceof Error ? e.message.slice(0, 120) : String(e) }; }
+        if (!bound.ok) {
+          out.push(fail(span, 'build-map-unbound', `${bound.detail}（${bound.reason}）`, { at }));
           continue;
         }
         if (typeof prov.sourceContent !== 'string') {
@@ -394,7 +488,8 @@ export async function resolveDataAccess(input: DataAccessInput): Promise<LiveDat
         component: a.component,
       },
       located, failure: null,
-      checks: [CHECK_RECORD, CHECK_A1, ...CHECKS_POC02, CHECK_SCOPE, CHECK_FRESH, CHECK_A2, CHECK_A3],
+      checks: [CHECK_RECORD, CHECK_A1, CHECK_A4, ...CHECKS_POC02, CHECK_SCOPE, CHECK_FRESH, CHECK_A2, CHECK_A5, CHECK_A3,
+        ...(relocated.length ? [`実行したコードは、同じパスの生成物の前の世代（同じ内容のモジュールの区画）。位置をいまの生成物の同じ区画へ移した（${relocated.join('・')}）`] : [])],
     });
   }
   return out;

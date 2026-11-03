@@ -389,7 +389,12 @@ try {
   ok('読み直した行に pool.query がある', /pool\.query\(/.test(d2?.site?.sourceLine ?? ''), d2?.site?.sourceLine);
   eq('照合の記録は SQL のスパンと同じトレース', d2?.traceId, sql2?.traceId);
   eq('呼び出しの入口は pg-pool の Pool.query', d2?.at, 'pg-pool.Pool.query');
-  ok('通った照合を7つ持つ（記録1件・PoC-02 の4段・注入範囲・実行後の書き換えなし）', d2?.checks.length === 7, d2?.checks);
+  /* 7C で A1（eval の印）・A2（要求の開始からのソースの鮮度）・A3（sourcesContent）、7C 最終で A4（実行コードの版）・A5（読み直した組）を足した
+   * （docs/07c-hmr-lineage-guard-report.md・docs/07c-hmr-final-safety-report.md）。数だけでなく、足した5つの中身を確かめる */
+  ok('通った照合を12持つ（記録1件・PoC-02 の4段・注入範囲・実行後の書き換えなし ＋ A1〜A5）', d2?.checks.length === 12, d2?.checks);
+  ok('足した照合: A1 eval の印・A2 要求の開始・A3 sourcesContent・A4 実行したコードの版・A5 読み直した組', [
+    'CallSite.isEval()', '受付スパン', 'sourcesContent', 'CallSite.getScriptHash()', '読み直した生成物',
+  ].every((w) => (d2?.checks ?? []).some((c) => c.includes(w))), d2?.checks);
   {
     const { dataset } = LIB.A.fromLiveRun(o2, ex2.seq);
     eq('validateDataset() を通過する（いまの起動の実データ）', JSON.stringify(LIB.M.validateDataset(dataset)), '[]');

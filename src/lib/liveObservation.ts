@@ -55,7 +55,9 @@ export type DataAccessFailureReason =
   /* A2: 要求の開始からの鮮度 */
   | 'request-start-unknown' | 'changed-during-request'
   /* A3: ソースマップの区画の sourcesContent といまのソース */
-  | 'map-source-mismatch' | 'map-source-unverified';
+  | 'map-source-mismatch' | 'map-source-unverified'
+  /* 7C HMR 最終安全対策。A4: 実行したコードとディスクの生成物の版。A5: 読み直した生成物とソースマップの組 */
+  | 'executed-code-mismatch' | 'executed-code-unverified' | 'build-map-unbound';
 
 /**
  * 7C: 「SQL は観測したが、実行したコードとソース・ソースマップの対応を確かめられない」理由（案A の A1〜A3 と、
@@ -66,6 +68,7 @@ export const CALLSITE_UNVERIFIABLE_REASONS: ReadonlySet<DataAccessFailureReason>
   'hmr-evaluated-code', 'unrecognized-frame', 'frame-origin-unverified',
   'request-start-unknown', 'changed-during-request',
   'map-source-mismatch', 'map-source-unverified',
+  'executed-code-mismatch', 'executed-code-unverified', 'build-map-unbound',
   'build-changed-after-call', 'source-changed-after-call',
 ]);
 
@@ -96,6 +99,12 @@ export const DATA_ACCESS_FAILURE_LABEL: Record<DataAccessFailureReason, string> 
   'map-source-mismatch': 'ソースマップに埋め込まれた元のソース（sourcesContent）が、いまのソースと一致しません（ソースマップが古いか別の版から作られた）。'
     + 'SQL の実行位置を確認できません。開発サーバーを再起動すると確認できる場合があります',
   'map-source-unverified': 'ソースマップに元のソースの内容（sourcesContent）が無い・読めないため、ソースマップといまのソースが同じ版かを確かめられず、SQL の実行位置を確認できません',
+  'executed-code-mismatch': 'SQL を実行したコードは、サーバー側のコードが同じ起動の中で更新される前の古い版のままで（同じ生成物の中の、変えていないモジュールなど）、'
+    + 'いまの生成物・ソースマップには同じ内容のコードが無いため、SQL の実行位置を確認できません。開発サーバーを再起動すると確認できる場合があります',
+  'executed-code-unverified': 'SQL を実行したコードの版（実行中のスクリプトの内容のハッシュ）を確かめる証拠が無い・生成物を読めないため、'
+    + 'いまの生成物・ソースマップと同じ版かを確かめられず、SQL の実行位置を確認できません',
+  'build-map-unbound': '位置を戻した後に読み直した生成物かソースマップが、照合に使ったものと違う、またはソースマップが生成物の内容に合わない（書き込みの途中など）ため、'
+    + 'SQL の実行位置を確認できません。もう一度読み込むと確認できる場合があります',
 };
 
 /**

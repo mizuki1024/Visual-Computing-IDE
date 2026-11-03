@@ -11,6 +11,8 @@
  *      プロジェクトにかける — A1・A2・A3 をそれぞれ単独で破った入力、T5 の異常系
  *      （sourcesContent が無い・ソースマップが古い・要求の開始を確かめられない・eval のフレーム・未知のフレーム）、
  *      使ったソースマップの区画の特定、比較の決定性、正規化で意味のある差を消さないこと
+ *   3b. 7C 最終（実行コードの版）: A4（実行中のスクリプト・モジュールの区画のハッシュとディスクの生成物）・A5（読み直した組・mapFit）・
+ *      区画の切り方（chunkregions.cjs）。第3の経路（同じパスの生成物が書き直され、古い世代のコードが動く）を合成で再現する
  *   4. 要求の特定（requestOfSql）と観測の台帳: 要求の開始が分からない間は結果を使い回さない
  *   5. 由来の評価（evaluateLineage）: 呼び出し位置を確かめられない SQL があるとき、「SQL を観測していない」と
  *      言わずに、確かめられないことを理由に切る。確かめられた SQL の由来は保つ
@@ -82,7 +84,8 @@ if (!havePg) {
   /* 生成物の形（Turbopack の .next/dev/server/chunks/ssr/*.js）。HmrM の pool.query は 3 行目 */
   const CHUNK_REL = '.next/dev/server/chunks/ssr/[root-of-the-server]__x._.js';
   fs.mkdirSync(path.dirname(path.join(proj, CHUNK_REL)), { recursive: true });
-  const BODY = 'module.exports = function HmrM(pool) {\n  // 生成物\n  return pool.query(\'select 1\').catch(() => {});\n};\n';
+  /* 7C（A4）: Turbopack と同じ見出しの区画を1つ持つ生成物（require で読める形）。pool.query は 3 行目（区画の先頭から 1 行目） */
+  const BODY = 'module.exports = [\n"[project]/src/app/hmr-m/page.tsx [app-rsc] (ecmascript)", ((__turbopack_context__) => {\n  return function HmrM(pool) { return pool.query(\'select 1\').catch(() => {}); };\n}),\n][1]();\n';
   fs.writeFileSync(path.join(proj, CHUNK_REL), BODY);
   const chunkUrl = pathToFileURL(path.join(proj, CHUNK_REL)).href;
   const modId = encodeURIComponent('[project]/src/app/hmr-m/page.tsx [app-rsc] (ecmascript)');
@@ -121,6 +124,14 @@ if (!havePg) {
   ok('前提: 呼び出し位置の記録がある', disk.cs.length > 0, disk.cs.length);
   eq('ディスクの生成物: 最初のフレームは build-output（ファイル・行）', disk.cs.map((c) => { const f = firstUser(c); return f && `${f.scope}:${f.file}:${f.line}`; }).slice(0, 1), [`build-output:${CHUNK_REL}:3`]);
   ok('記録の作り方を書く（frameSource = v8-callsite: V8 の呼び出し位置の API で eval を判定した）', disk.cs.length > 0 && disk.cs.every((c) => c.entry?.frameSource === 'v8-callsite'), disk.cs.map((c) => c.entry?.frameSource ?? null));
+  {
+    const f = firstUser(disk.cs[0] ?? {});
+    const want = require_('../poc/fixture-app/ide-instrumentation/chunkregions.cjs');
+    const region = want.chunkRegions(BODY)[0];
+    eq('A4（計装）: 生成物のフレームに、実行中のスクリプトの内容のハッシュ（V8 の CallSite.getScriptHash()）＝ 生成物のファイルの SHA-256', f?.scriptHash, want.sha256(BODY));
+    eq('A4（計装）: 読み込んだときの内容から作った区画の表で、フレームが入る区画のハッシュと区画の先頭からの行を書く', f?.moduleRegion, { hash: region.hash, line: 1 });
+    ok('A4（計装）: モジュールの名前（[project]/…）・絶対パスを記録しない', !JSON.stringify(disk.recs).includes('[project]') && !JSON.stringify(disk.recs).includes(TMP));
+  }
 
   for (const [mode, label] of [
     ['eval-query', 'HMR と同じ形の eval（sourceURL に ?moduleId）'],
@@ -186,6 +197,20 @@ const QCOL = PAGE_SRC.split('\n')[3].indexOf('query') + 1;
 const LOADED = XF.transform(PAGE_SRC, PAGE).code;    // ローダ（要素識別子の注入）の出力 = Turbopack の sourcesContent
 ok('前提: .tsx はローダで内容が変わる（sourcesContent はいまのソースそのものではない）', LOADED !== PAGE_SRC);
 const MANIFEST = new Map([[PAGE, XF.transform(PAGE_SRC, PAGE).components]]);
+const CR = require_('../poc/fixture-app/ide-instrumentation/chunkregions.cjs');
+const SM = await import(path.join(REPO, 'poc', 'runner', 'lib', 'srvmap.mjs'));
+const sha = (t) => CR.sha256(t);
+/**
+ * 生成物の内容（Turbopack と同じ形: 行頭のモジュールの見出しで区画に分かれる）。other.ts の区画は 1〜9 行、page.tsx の区画は 10 行目から。
+ * 7C（A4）: 実際の計装はフレームに実行中のスクリプトの内容のハッシュ（scriptHash）を書く。合成の入力も同じ契約にする
+ */
+const HEAD = (m) => `"[project]/${m} [app-rsc] (ecmascript)", ((__turbopack_context__) => {`;
+const chunkText = ({ otherExtra = 0 } = {}) => [
+  HEAD(OTHER), ...Array(8 + otherExtra).fill('/* gen */'),
+  HEAD(PAGE), '/* gen */', '/* gen */', '  return __turbopack_context__.x(pool.query("SELECT id, region FROM poc.listings"));', ...Array(7).fill('/* gen */'), '',
+].join('\n');
+const CHUNK_TEXT = chunkText();
+const CHUNK_SHA = sha(CHUNK_TEXT);
 /** 区画の中の genLine 行の先頭を、元の srcLine 行 srcCol 列へ写す（行・列は 1 始まり） */
 const inner = (absSrc, genLine, srcLine, srcCol, sourcesContent) => ({
   version: 3, sources: [`file://${absSrc}`], names: [],
@@ -198,20 +223,20 @@ const inner = (absSrc, genLine, srcLine, srcCol, sourcesContent) => ({
  */
 const PAGE_GEN_LINE = 13;
 /* pageContent: 'OMIT' = 区画に sourcesContent を持たせない（undefined は既定値になるので使わない） */
-const writeChunk = ({ pageContent = LOADED, otherContent = OTHER_SRC, srcLine = 4, srcCol = QCOL } = {}) => {
-  fs.writeFileSync(path.join(proj, CHUNK), `${'/* gen */\n'.repeat(20)}`);
+const writeChunk = ({ pageContent = LOADED, otherContent = OTHER_SRC, srcLine = 4, srcCol = QCOL, js = CHUNK_TEXT, pageOffset = 10, pageGenLine = 3 } = {}) => {
+  fs.writeFileSync(path.join(proj, CHUNK), js);
   fs.writeFileSync(path.join(proj, `${CHUNK}.map`), JSON.stringify({
     version: 3, sources: [],
     sections: [
       { offset: { line: 0, column: 0 }, map: inner(path.join(proj, OTHER), 1, 1, 1, otherContent) },
-      { offset: { line: 10, column: 0 }, map: inner(path.join(proj, PAGE), 3, srcLine, srcCol, pageContent === 'OMIT' ? undefined : pageContent) },
+      { offset: { line: pageOffset, column: 0 }, map: inner(path.join(proj, PAGE), pageGenLine, srcLine, srcCol, pageContent === 'OMIT' ? undefined : pageContent) },
     ],
   }));
 };
 const T0 = Date.now() + 60_000;            // SQL の開始（ファイルを書いた後）
 const REQ0 = T0 - 400;                      // その SQL が属する要求の開始（受付スパン）
 const sqlSpan = (id = 10) => ({ traceId: TR(1), spanId: SP(id), parentSpanId: SP(2), name: 'pg.query:SELECT', kind: 2, startMs: T0, endMs: T0 + 1, durationMs: 1, statusCode: 0, scope: '@opentelemetry/instrumentation-pg', attrs: { 'db.statement': 'SELECT $0' }, droppedAttributeKeys: [] });
-const APPF = { functionName: 'XPage', file: CHUNK, scope: 'build-output', line: PAGE_GEN_LINE, col: 20 };
+const APPF = { functionName: 'XPage', file: CHUNK, scope: 'build-output', line: PAGE_GEN_LINE, col: 20, scriptHash: CHUNK_SHA };
 const callsite = (frames = [INSTR, APPF], extra = {}) => DA.parseCallsiteRecord(recOf(frames, extra));
 const resolve1 = async ({ recs = [callsite()], request = { spanId: SP(1), startMs: REQ0 }, manifest = MANIFEST } = {}) => (await DA.resolveDataAccess({
   projectRoot: proj, sql: [{ span: sqlSpan(), pid: 42, request }], callsites: new Map([[SP(10), recs]]), manifest, enabled: true,
@@ -248,10 +273,18 @@ try {
   resetTimes(); setTime(PAGE, REQ0 + 100);
   const srcDuring = await resolve1();
   eq('A2（T2）: 要求の開始の後・SQL の前にソースが書き換わった → changed-during-request（修正前の D は通していた）', [why(srcDuring), unsafe(srcDuring)], ['changed-during-request', true]);
+  /* 7C 最終: A2 の生成物・ソースマップの更新時刻は、A4（実行したコードとディスクの生成物の内容の一致）・A5（読み直した組）に置き換えた。
+   * 「要求の処理中に生成物が書かれた」だけでは、初回のコンパイル（書いた生成物を実行した＝正しい）と古いコードの実行を区別できない。
+   * 置き換えた後も、実行したコードが違えば止まることを、同じ時刻の条件で対にして確かめる */
   resetTimes(); setTime(CHUNK, REQ0 + 100);
-  eq('A2: 要求の処理中に生成物が書き換わった → changed-during-request', why(await resolve1()), 'changed-during-request');
+  eq('A2→A4（初回のコンパイル）: 要求の処理中に生成物が書かれ、実行したコード＝その生成物 → 特定する', why(await resolve1()), null);
+  eq('A2→A4（保存から適用までの間）: 要求の処理中に生成物が書き換わり、実行したコード ≠ ディスクの生成物 → changed-during-request（位置を出さない）',
+    (await resolve1({ recs: [callsite([INSTR, { ...APPF, scriptHash: sha('old generation') }])] })).failure?.reason, 'changed-during-request');
   resetTimes(); setTime(`${CHUNK}.map`, REQ0 + 100);
-  eq('A2: 要求の処理中にソースマップだけが書き換わった → changed-during-request', why(await resolve1()), 'changed-during-request');
+  eq('A2→A5: 要求の処理中にソースマップだけが書かれ、その組が生成物に合い、実行したコード＝生成物 → 特定する', why(await resolve1()), null);
+  writeChunk({ pageOffset: 8, pageGenLine: 5 }); resetTimes(); setTime(`${CHUNK}.map`, REQ0 + 100);
+  eq('A2→A5: 要求の処理中に書かれたソースマップが生成物に合わない（別の世代の並び）→ build-map-unbound', why(await resolve1()), 'build-map-unbound');
+  writeChunk();
   resetTimes(); setTime(PAGE, REQ0);
   eq('A2: 更新時刻が要求の開始と同時刻 → 変わったとみなす（changed-during-request）', why(await resolve1()), 'changed-during-request');
   resetTimes(); setTime(PAGE, REQ0 - (DA.FRESHNESS_MARGIN_MS - 500));
@@ -302,6 +335,84 @@ try {
   eq('独立性: A1・A2 が通っても A3 だけで止まる（ソースとマップのどちらも要求の前の書き換え）', why(await resolve1()), 'map-source-mismatch');
   writeChunk(); resetTimes();
   ok('結果に絶対パスが無い', !JSON.stringify(await resolve1()).includes(TMP));
+} catch (e) { fails.push(`例外: ${e?.stack ?? e}`); console.log(`  ✗ 例外: ${e?.stack ?? e}`); }
+
+
+/* ========================================================================== */
+console.log('\n3b. 実行コードの版（A4）と、読み直した生成物・ソースマップの組（A5）— 第3の経路');
+try {
+  writeChunk(); resetTimes();
+  const at = (d) => d.site && `${d.site.file}:${d.site.line}:${d.site.col}`;
+  const PAGE_REGION = CR.chunkRegions(CHUNK_TEXT).find((r) => r.module.includes(PAGE));
+  ok('前提: 区画の切り方は計装と IDE で同じファイル（chunkregions.cjs）。page.tsx の区画は 10 行目から', PAGE_REGION?.start === 10, PAGE_REGION);
+  const noHash = await resolve1({ recs: [callsite([INSTR, { ...APPF, scriptHash: undefined }])] });
+  eq('A4（T5）: 記録に実行中のスクリプトのハッシュが無い → executed-code-unverified（位置を出さない）', [why(noHash), unsafe(noHash)], ['executed-code-unverified', true]);
+  const badHash = await resolve1({ recs: [callsite([INSTR, { ...APPF, scriptHash: 'ABC' }])] });
+  eq('A4（T5）: ハッシュの形が違う（16 進 64 桁でない）→ 読まない → executed-code-unverified', why(badHash), 'executed-code-unverified');
+  /* 第3の経路: 同じパスの生成物が書き直された（other の区画が 2 行伸び、page の区画は後ろへずれた）が、実行中のコードは古い世代 */
+  const OLD_TEXT = chunkText({ otherExtra: 2 });
+  const OLD_REGION = CR.chunkRegions(OLD_TEXT).find((r) => r.module.includes(PAGE));
+  const oldLine = PAGE_GEN_LINE + 2;
+  ok('前提: 古い世代の page の区画は内容が同じ（ハッシュが同じ）で、2 行後ろにある', OLD_REGION.hash === PAGE_REGION.hash && OLD_REGION.start === 12, OLD_REGION);
+  const OLDF = { ...APPF, line: oldLine, scriptHash: sha(OLD_TEXT) };
+  const noRegion = await resolve1({ recs: [callsite([INSTR, OLDF])] });
+  eq('A4（第3の経路）: 実行中のコードが古い世代で、区画の証拠が無い → executed-code-mismatch（古い行を新しいソースマップで戻さない）', [why(noRegion), unsafe(noRegion)], ['executed-code-mismatch', true]);
+  const moved = await resolve1({ recs: [callsite([INSTR, { ...OLDF, moduleRegion: { hash: OLD_REGION.hash, line: oldLine - OLD_REGION.start } }])] });
+  eq('A4（第3の経路）: 区画の内容が同じ → いまの生成物の同じ区画の同じ行へ移して戻す → 正しい位置（page.tsx 4 行目の query）', at(moved), `${PAGE}:4:${QCOL}`);
+  ok('A4: 位置を移したことを通った照合に書く', moved.checks.some((c) => c.includes('前の世代')), moved.checks);
+  const otherRegion = await resolve1({ recs: [callsite([INSTR, { ...OLDF, moduleRegion: { hash: sha('changed module'), line: 3 } }])] });
+  eq('A4: 実行したコードの区画と同じ内容の区画がディスクに無い（そのモジュール自身が変わった）→ executed-code-mismatch', [why(otherRegion), unsafe(otherRegion)], ['executed-code-mismatch', true]);
+  /* 同じ内容の区画が2つある生成物（見出しまで同じ）→ 1つに決まらない */
+  const DUP = [HEAD(PAGE), '/* gen */', HEAD(PAGE), '/* gen */', ''].join('\n');
+  const dupRegions = CR.chunkRegions(DUP);
+  const id = SM.verifyExecutedFrame({ file: CHUNK, scope: 'build-output', line: 2, col: 1, scriptHash: sha('x'), moduleRegion: { hash: dupRegions[0].hash, line: 1 } }, proj, new Map([[path.join(proj, CHUNK), { sha: sha(DUP), text: DUP, regions: dupRegions }]]));
+  eq('A4: 同じ内容の区画が2つ → 1つに決まらないので mismatch（推測で選ばない）', id.status, 'mismatch');
+  /* 呼び出しを書いたフレームより内側の生成物のフレームが古い世代 → そこで切る（外側の新しいフレームを採らない） */
+  const HELPER = '.next/dev/server/chunks/ssr/helper.js';
+  fs.writeFileSync(path.join(proj, HELPER), 'module.exports = 1;\n');
+  const innerStale = await resolve1({ recs: [callsite([INSTR, { functionName: 'helper', file: HELPER, scope: 'build-output', line: 1, col: 1, scriptHash: sha('older helper') }, APPF])] });
+  eq('A4: 内側の生成物のフレームの版が違う → executed-code-mismatch（それより外側のフレームを採らない）', [why(innerStale), unsafe(innerStale)], ['executed-code-mismatch', true]);
+  const outerStale = await resolve1({ recs: [callsite([INSTR, APPF, { functionName: 'outer', file: HELPER, scope: 'build-output', line: 1, col: 1, scriptHash: sha('older helper') }])] });
+  eq('A4: 呼び出しを書いたフレームより外側（呼び出し元）の版の違いは、その位置を変えない → 特定する', at(outerStale), `${PAGE}:4:${QCOL}`);
+  /* 初回のコンパイル: 生成物もソースマップも要求の処理中に書かれた。実行したコード＝その生成物 → 特定（A2 の過剰な未観測を解いた） */
+  resetTimes(); setTime(CHUNK, REQ0 + 245); setTime(`${CHUNK}.map`, REQ0 + 240);
+  const first = await resolve1();
+  eq('A2 の改善（初回のコンパイル）: 生成物・ソースマップが要求の開始の後・SQL の前に書かれ、実行したコード＝その生成物 → 特定', at(first), `${PAGE}:4:${QCOL}`);
+  const firstStale = await resolve1({ recs: [callsite([INSTR, { ...APPF, scriptHash: sha('older') }])] });
+  eq('同じ時刻の条件で、実行したコード ≠ その生成物 → 止める（changed-during-request）', [why(firstStale), unsafe(firstStale)], ['changed-during-request', true]);
+  resetTimes();
+  /* A5: 位置を戻した後の読み直し（srvmap.mjs の bindChunkAndMap） */
+  const prov = SM.serverFrameProvenance(APPF, proj);
+  eq('A5: 版を確かめた生成物と、位置を戻すのに使ったソースマップのまま → 組として通る', SM.bindChunkAndMap(CHUNK, proj, CHUNK_SHA, prov.mapSha).ok, true);
+  eq('A5: 版を確かめた後に生成物の内容が変わった → chunk-changed', SM.bindChunkAndMap(CHUNK, proj, sha('other'), prov.mapSha).reason, 'chunk-changed');
+  eq('A5: 位置を戻すのに使ったソースマップが、いまのものと違う → map-changed', SM.bindChunkAndMap(CHUNK, proj, CHUNK_SHA, sha('older map')).reason, 'map-changed');
+  eq('A5: 使ったソースマップの記録が無い → map-changed（一致とは扱わない）', SM.bindChunkAndMap(CHUNK, proj, CHUNK_SHA, null).reason, 'map-changed');
+  /* mapFit: 同じ世代の組は合う。並びのずれた別の世代の組は合わない */
+  const mapOf = (o) => ({ version: 3, sections: [
+    { offset: { line: 0, column: 0 }, map: inner(path.join(proj, OTHER), 1, 1, 1, OTHER_SRC) },
+    { offset: { line: o.pageOffset, column: 0 }, map: { ...inner(path.join(proj, PAGE), o.genLine, 4, QCOL, LOADED), mappings: `${';'.repeat(o.genLine - 1)}${vlq(o.col)}${vlq(0)}${vlq(3)}${vlq(QCOL - 1)}` } },
+  ] });
+  eq('mapFit: 同じ世代（page の区画が page のモジュールの中・列が行に収まる）→ 合う', SM.mapFit(CHUNK_TEXT, mapOf({ pageOffset: 10, genLine: 3, col: 40 })).fit, true);
+  eq('mapFit: page の区画の開始が別のモジュール（other）の中 → 合わない', SM.mapFit(CHUNK_TEXT, { version: 3, sections: [mapOf({ pageOffset: 7, genLine: 6, col: 0 }).sections[1]] }).reason, 'section-module-mismatch');
+  eq('mapFit: 2つの区画が同じモジュールの中（並びが合わない）→ 合わない', SM.mapFit(CHUNK_TEXT, mapOf({ pageOffset: 7, genLine: 6, col: 0 })).reason, 'section-order');
+  eq('mapFit: セグメントの列が行の長さを超える（並びのずれた世代の組）→ 合わない', SM.mapFit(CHUNK_TEXT, mapOf({ pageOffset: 10, genLine: 2, col: 40 })).reason, 'segment-outside-line');
+  eq('mapFit: モジュールの見出しが無い生成物 → 合わない（未観測にする側）', SM.mapFit('/* gen */\n'.repeat(20), mapOf({ pageOffset: 10, genLine: 3, col: 0 })).reason, 'no-module-regions');
+  eq('mapFit: sections の形でないソースマップ → 合わない', SM.mapFit(CHUNK_TEXT, inner(path.join(proj, PAGE), 13, 4, QCOL, LOADED)).reason, 'not-index-map');
+  /* 区画の切り方 */
+  const HEADS = [
+    '"[project]/src/a.tsx [app-rsc] (ecmascript)", ((__turbopack_context__) => {',
+    '"[project]/node_modules/x.js [app-rsc] (ecmascript)", ((__turbopack_context__, module, exports) => {',
+    '"[project]/src/app/layout.tsx [app-rsc] (ecmascript, Next.js Server Component)", (function(__turbopack_context__){',
+    '"[project]/node_modules/t.js?page=/a { MODULE_0 => \\"[project]/src/b.tsx\\" }", ((__turbopack_context__) => {',
+  ];
+  eq('区画: 見出しの4つの形（実測）を区画の先頭とみなす', CR.chunkRegions(['module.exports = [', ...HEADS.flatMap((h) => [h, '  x;']), ''].join('\n')).map((r) => r.start), [2, 4, 6, 8]);
+  eq('区画: 行の途中の見出しに似た文字列は区画の先頭にしない', CR.chunkRegions(['  "[project]/src/a.tsx", ((__turbopack_context__) => {', 'x'].join('\n')).length, 0);
+  ok('区画: 区画のハッシュは見出しを含む（同じコードでもモジュールが違えば別の区画）', CR.chunkRegions([HEADS[0], 'x', ''].join('\n'))[0].hash !== CR.chunkRegions([HEADS[1], 'x', ''].join('\n'))[0].hash);
+  ok('区画: 決定的（同じ内容から同じ表）', JSON.stringify(CR.chunkRegions(CHUNK_TEXT)) === JSON.stringify(CR.chunkRegions(CHUNK_TEXT)));
+  const ws = CR.chunkRegions(CHUNK_TEXT.replace('/* gen */\n"', '/* gen */ \n"'));
+  ok('区画: 空白1文字の違いで、その区画のハッシュだけが変わる（正規化しない・ほかの区画は同じ）', ws[0].hash !== CR.chunkRegions(CHUNK_TEXT)[0].hash && ws[1].hash === CR.chunkRegions(CHUNK_TEXT)[1].hash, ws.map((r) => r.hash.slice(0, 8)));
+  writeChunk(); resetTimes();
+  ok('結果に絶対パスが無い（A4・A5 の詳細を含む）', !JSON.stringify([noHash, noRegion, moved, innerStale]).includes(TMP));
 } catch (e) { fails.push(`例外: ${e?.stack ?? e}`); console.log(`  ✗ 例外: ${e?.stack ?? e}`); }
 
 /* ========================================================================== */

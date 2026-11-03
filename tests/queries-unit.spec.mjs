@@ -236,9 +236,13 @@ fs.writeFileSync(path.join(proj, PAGE), [
 fs.writeFileSync(path.join(outside, 'leak.tsx'), "export default async function Leak() { await pool.query('SELECT 3'); }\n");
 fs.symlinkSync(path.join(outside, 'leak.tsx'), path.join(proj, 'src', 'app', 'link.tsx'));
 const CHUNK = '.next/dev/server/chunks/ssr/x.js';
+/* 7C 最終（A4・A5）: Turbopack と同じ形の生成物（行頭のモジュールの見出しで区画に分かれる）と、区画（sections）の形のソースマップ。
+ * 計装はフレームに実行中のスクリプトの内容のハッシュ（scriptHash）を書く（ここでは生成物そのものを実行したことにする） */
+const CHUNK_TEXT = `"[project]/${PAGE} [app-rsc] (ecmascript)", ((__turbopack_context__) => {\n\nfunction XPage(){ pool.query() }\n`;
+const CHUNK_SHA = createRequire(import.meta.url)('../poc/fixture-app/ide-instrumentation/chunkregions.cjs').sha256(CHUNK_TEXT);
 const writeChunk = (srcPath, srcLine, srcCol) => {
-  fs.writeFileSync(path.join(proj, CHUNK), '/* gen */\n\nfunction XPage(){ pool.query() }\n');
-  fs.writeFileSync(path.join(proj, `${CHUNK}.map`), JSON.stringify(mapTo(srcPath, 3, srcLine, srcCol)));
+  fs.writeFileSync(path.join(proj, CHUNK), CHUNK_TEXT);
+  fs.writeFileSync(path.join(proj, `${CHUNK}.map`), JSON.stringify({ version: 3, sources: [], sections: [{ offset: { line: 0, column: 0 }, map: mapTo(srcPath, 3, srcLine, srcCol) }] }));
 };
 const MANIFEST = new Map([[PAGE, [{ name: 'XPage', file: PAGE, line: 3, endLine: 6 }]]]);
 const T0 = Date.now() + 60_000;             // SQL の開始時刻（ファイルを書いた後）
@@ -248,7 +252,7 @@ const callsite = (id, extra = {}) => DA.parseCallsiteRecord({
   /* 7C（A1）: 計装は V8 の CallSite で eval を判定した記録に frameSource: 'v8-callsite' を書く */
   entry: { at: 'pg-pool.Pool.query', frameSource: 'v8-callsite', frames: [
     { functionName: 'captureFrames', file: 'ide-instrumentation/otel.cjs', scope: 'app-source', line: 125, col: 17 },
-    { functionName: 'XPage', file: CHUNK, scope: 'build-output', line: 3, col: 20 },
+    { functionName: 'XPage', file: CHUNK, scope: 'build-output', line: 3, col: 20, scriptHash: CHUNK_SHA },
   ] },
   ...extra,
 });
@@ -262,8 +266,8 @@ const resolve1 = async ({ span = sqlSpan(10), pid = 42, recs = [callsite(10)], m
   eq('成立: ソースマップで戻した位置（行・列）', d.site && `${d.site.file}:${d.site.line}:${d.site.col}`, `${PAGE}:4:19`);
   eq('成立: 囲むコンポーネント（2つの情報源が一致）', d.site?.component, { name: 'XPage', file: PAGE, line: 3, endLine: 6 });
   eq('成立: 読み直した1行', d.site?.sourceLine, "const r = await pool.query('SELECT 1');");
-  /* 7C: 照合は 7 → 10（A1・A2・A3 を足した） */
-  eq('成立: 理由なし・照合10（7C で A1・A2・A3 を足した）', [d.failure, d.checks.length], [null, 10]);
+  /* 7C: 照合は 7 → 10（A1・A2・A3 を足した）→ 12（7C 最終で A4 実行コードの版・A5 読み直した組を足した） */
+  eq('成立: 理由なし・照合12（7C で A1・A2・A3、7C 最終で A4・A5 を足した）', [d.failure, d.checks.length], [null, 12]);
   ok('結果に絶対パスが無い', !JSON.stringify(d).includes(tmp));
 
   eq('記録が0件 → no-callsite-record', (await resolve1({ recs: [] })).failure?.reason, 'no-callsite-record');

@@ -1,0 +1,108 @@
+next dev (server fast refresh 既定) 起動
+
+## 1 初回のコンパイルの要求 /hmr-s status=200
+  SQL「SELECT id, plan FROM poc.listings ORDER BY i」 start=+353ms frameSource=v8-callsite
+    frame HmrS [root-of-the-server]__1pajqo6mu0imy._.js:26:142 scriptHash=5bf743b240e6 disk=5bf743b240e6 → SAME（実行中のコード＝ディスクの生成物）
+      moduleRegion=bd7a84292b1a+23 → ディスクの同じ内容の区画 1 個（ディスクでは 26 行目 ＝ 実行時の 26 行目）
+  SQL「SELECT id, region FROM poc.listings ORDER BY」 start=+372ms frameSource=v8-callsite
+    frame SA [root-of-the-server]__1pajqo6mu0imy._.js:72:142 scriptHash=5bf743b240e6 disk=5bf743b240e6 → SAME（実行中のコード＝ディスクの生成物）
+      moduleRegion=dcdc4a5ee821+17 → ディスクの同じ内容の区画 1 個（ディスクでは 72 行目 ＝ 実行時の 72 行目）
+  SQL「SELECT id, name AS region FROM poc.regions O」 start=+376ms frameSource=v8-callsite
+    frame SA [root-of-the-server]__1pajqo6mu0imy._.js:79:142 scriptHash=5bf743b240e6 disk=5bf743b240e6 → SAME（実行中のコード＝ディスクの生成物）
+      moduleRegion=dcdc4a5ee821+24 → ディスクの同じ内容の区画 1 個（ディスクでは 79 行目 ＝ 実行時の 79 行目）
+
+## 2 2回目の要求 /hmr-s status=200
+  SQL「SELECT id, plan FROM poc.listings ORDER BY i」 start=+63ms frameSource=v8-callsite
+    frame HmrS [root-of-the-server]__1pajqo6mu0imy._.js:26:142 scriptHash=5bf743b240e6 disk=5bf743b240e6 → SAME（実行中のコード＝ディスクの生成物）
+      moduleRegion=bd7a84292b1a+23 → ディスクの同じ内容の区画 1 個（ディスクでは 26 行目 ＝ 実行時の 26 行目）
+  SQL「SELECT id, region FROM poc.listings ORDER BY」 start=+79ms frameSource=v8-callsite
+    frame SA [root-of-the-server]__1pajqo6mu0imy._.js:72:142 scriptHash=5bf743b240e6 disk=5bf743b240e6 → SAME（実行中のコード＝ディスクの生成物）
+      moduleRegion=dcdc4a5ee821+17 → ディスクの同じ内容の区画 1 個（ディスクでは 72 行目 ＝ 実行時の 72 行目）
+  SQL「SELECT id, name AS region FROM poc.regions O」 start=+83ms frameSource=v8-callsite
+    frame SA [root-of-the-server]__1pajqo6mu0imy._.js:79:142 scriptHash=5bf743b240e6 disk=5bf743b240e6 → SAME（実行中のコード＝ディスクの生成物）
+      moduleRegion=dcdc4a5ee821+24 → ディスクの同じ内容の区画 1 個（ディスクでは 79 行目 ＝ 実行時の 79 行目）
+
+[layout before edit] [root-of-the-server]__1pajqo6mu0imy._.js lines=156 sha=5bf743b240e6 debugId(js)=none debugId(map)=none
+  module headers (1-based line): 3:[project]/src/app/hmr-s/page.tsx [app-rsc] (ecmascript) ; 55:[project]/src/components/SA.tsx [app-rsc] (ecmascript) ; 116:[project]/src/lib/db.ts [app-rsc] (ecmascript)
+  map sections (1-based line): 7:file:///home/user/Visual-Computing-IDE/poc/out/probe-identity/poc/fixt ; 59:file:///home/user/Visual-Computing-IDE/poc/out/probe-identity/poc/fixt ; 120:file:///home/user/Visual-Computing-IDE/poc/out/probe-identity/poc/fixt
+  tail:  | //# sourceMappingURL=%5Broot-of-the-server%5D__1pajqo6mu0imy._.js.map
+
+[runtime] chunk loading lines in [turbopack]_runtime.js:
+  7: var { workerData } = require('worker_threads');
+  838: /* eslint-disable @typescript-eslint/no-unused-vars */ const path = require('path');
+  884: const url = require('url');
+  906: loadRuntimeChunkPath(sourcePath, chunkData);
+  908: loadRuntimeChunkPath(sourcePath, chunkData.path);
+  919: function loadRuntimeChunkPath(sourcePath, chunkPath) {
+  930: const chunkModules = require(resolved);
+  959: const chunkModules = require(resolved);
+
+# page.tsx に 7 文を足した（SA.tsx は変えていない）。要求を送らずに 4 秒待つ
+  書き込みの順序（保存の時点からの ms）: （なし）
+
+## 3 変更の後の1回目の要求 /hmr-s status=200
+  SQL「SELECT id, plan FROM poc.listings ORDER BY i」 start=+51ms frameSource=v8-callsite
+    frame HmrS <evaluated> (A1 の印)
+  SQL「SELECT id, region FROM poc.listings ORDER BY」 start=+64ms frameSource=v8-callsite
+    frame SA [root-of-the-server]__1pajqo6mu0imy._.js:72:142 scriptHash=5bf743b240e6 disk=504ad7c17c09 → DIFFERENT（実行中のコードはディスクの生成物ではない）
+      moduleRegion=dcdc4a5ee821+17 → ディスクの同じ内容の区画 1 個（ディスクでは 79 行目 ＝ 実行時の 72 行目）
+  SQL「SELECT id, name AS region FROM poc.regions O」 start=+68ms frameSource=v8-callsite
+    frame SA [root-of-the-server]__1pajqo6mu0imy._.js:79:142 scriptHash=5bf743b240e6 disk=504ad7c17c09 → DIFFERENT（実行中のコードはディスクの生成物ではない）
+      moduleRegion=dcdc4a5ee821+24 → ディスクの同じ内容の区画 1 個（ディスクでは 86 行目 ＝ 実行時の 79 行目）
+  要求中の書き込み: change [root-of-the-server]__1pajqo6mu0imy._.js ; change [root-of-the-server]__1pajqo6mu0imy._.js ; change [root-of-the-server]__1pajqo6mu0imy._.js.map ; change [root-of-the-server]__1pajqo6mu0imy._.js.map
+
+## 4 変更の後の2回目の要求 /hmr-s status=200
+  SQL「SELECT id, plan FROM poc.listings ORDER BY i」 start=+28ms frameSource=v8-callsite
+    frame HmrS <evaluated> (A1 の印)
+  SQL「SELECT id, region FROM poc.listings ORDER BY」 start=+40ms frameSource=v8-callsite
+    frame SA [root-of-the-server]__1pajqo6mu0imy._.js:72:142 scriptHash=5bf743b240e6 disk=504ad7c17c09 → DIFFERENT（実行中のコードはディスクの生成物ではない）
+      moduleRegion=dcdc4a5ee821+17 → ディスクの同じ内容の区画 1 個（ディスクでは 79 行目 ＝ 実行時の 72 行目）
+  SQL「SELECT id, name AS region FROM poc.regions O」 start=+43ms frameSource=v8-callsite
+    frame SA [root-of-the-server]__1pajqo6mu0imy._.js:79:142 scriptHash=5bf743b240e6 disk=504ad7c17c09 → DIFFERENT（実行中のコードはディスクの生成物ではない）
+      moduleRegion=dcdc4a5ee821+24 → ディスクの同じ内容の区画 1 個（ディスクでは 86 行目 ＝ 実行時の 79 行目）
+
+[layout after edit] [root-of-the-server]__1pajqo6mu0imy._.js lines=163 sha=504ad7c17c09 debugId(js)=none debugId(map)=none
+  module headers (1-based line): 3:[project]/src/app/hmr-s/page.tsx [app-rsc] (ecmascript) ; 62:[project]/src/components/SA.tsx [app-rsc] (ecmascript) ; 123:[project]/src/lib/db.ts [app-rsc] (ecmascript)
+  map sections (1-based line): 7:file:///home/user/Visual-Computing-IDE/poc/out/probe-identity/poc/fixt ; 66:file:///home/user/Visual-Computing-IDE/poc/out/probe-identity/poc/fixt ; 127:file:///home/user/Visual-Computing-IDE/poc/out/probe-identity/poc/fixt
+  tail:  | //# sourceMappingURL=%5Broot-of-the-server%5D__1pajqo6mu0imy._.js.map
+
+# 共有の lib/db.ts の末尾にコメントを足した（同じ生成物の後ろの区画）
+
+## 4b lib/db.ts の変更の後の要求 /hmr-s status=200
+  SQL「SELECT id, plan FROM poc.listings ORDER BY i」 start=+32ms frameSource=v8-callsite
+    frame HmrS <evaluated> (A1 の印)
+  SQL「SELECT id, region FROM poc.listings ORDER BY」 start=+44ms frameSource=v8-callsite
+    frame SA [root-of-the-server]__1pajqo6mu0imy._.js:72:142 scriptHash=5bf743b240e6 disk=919878a265ad → DIFFERENT（実行中のコードはディスクの生成物ではない）
+      moduleRegion=dcdc4a5ee821+17 → ディスクの同じ内容の区画 1 個（ディスクでは 79 行目 ＝ 実行時の 72 行目）
+  SQL「SELECT id, name AS region FROM poc.regions O」 start=+47ms frameSource=v8-callsite
+    frame SA [root-of-the-server]__1pajqo6mu0imy._.js:79:142 scriptHash=5bf743b240e6 disk=919878a265ad → DIFFERENT（実行中のコードはディスクの生成物ではない）
+      moduleRegion=dcdc4a5ee821+24 → ディスクの同じ内容の区画 1 個（ディスクでは 86 行目 ＝ 実行時の 79 行目）
+
+[layout after db edit] [root-of-the-server]__1pajqo6mu0imy._.js lines=163 sha=919878a265ad debugId(js)=none debugId(map)=none
+  module headers (1-based line): 3:[project]/src/app/hmr-s/page.tsx [app-rsc] (ecmascript) ; 62:[project]/src/components/SA.tsx [app-rsc] (ecmascript) ; 123:[project]/src/lib/db.ts [app-rsc] (ecmascript)
+  map sections (1-based line): 7:file:///home/user/Visual-Computing-IDE/poc/out/probe-identity/poc/fixt ; 66:file:///home/user/Visual-Computing-IDE/poc/out/probe-identity/poc/fixt ; 127:file:///home/user/Visual-Computing-IDE/poc/out/probe-identity/poc/fixt
+  tail:  | //# sourceMappingURL=%5Broot-of-the-server%5D__1pajqo6mu0imy._.js.map
+
+# 開発サーバーを起動し直した
+
+## 5 再起動の後の1回目の要求 /hmr-s status=200
+  SQL「SELECT id, plan FROM poc.listings ORDER BY i」 start=+169ms frameSource=v8-callsite
+    frame HmrS [root-of-the-server]__1pajqo6mu0imy._.js:33:142 scriptHash=919878a265ad disk=919878a265ad → SAME（実行中のコード＝ディスクの生成物）
+      moduleRegion=6de5f0ed9802+30 → ディスクの同じ内容の区画 1 個（ディスクでは 33 行目 ＝ 実行時の 33 行目）
+  SQL「SELECT id, region FROM poc.listings ORDER BY」 start=+181ms frameSource=v8-callsite
+    frame SA [root-of-the-server]__1pajqo6mu0imy._.js:79:142 scriptHash=919878a265ad disk=919878a265ad → SAME（実行中のコード＝ディスクの生成物）
+      moduleRegion=dcdc4a5ee821+17 → ディスクの同じ内容の区画 1 個（ディスクでは 79 行目 ＝ 実行時の 79 行目）
+  SQL「SELECT id, name AS region FROM poc.regions O」 start=+185ms frameSource=v8-callsite
+    frame SA [root-of-the-server]__1pajqo6mu0imy._.js:86:142 scriptHash=919878a265ad disk=919878a265ad → SAME（実行中のコード＝ディスクの生成物）
+      moduleRegion=dcdc4a5ee821+24 → ディスクの同じ内容の区画 1 個（ディスクでは 86 行目 ＝ 実行時の 86 行目）
+
+## 6 再起動の後の2回目の要求 /hmr-s status=200
+  SQL「SELECT id, plan FROM poc.listings ORDER BY i」 start=+32ms frameSource=v8-callsite
+    frame HmrS [root-of-the-server]__1pajqo6mu0imy._.js:33:142 scriptHash=919878a265ad disk=919878a265ad → SAME（実行中のコード＝ディスクの生成物）
+      moduleRegion=6de5f0ed9802+30 → ディスクの同じ内容の区画 1 個（ディスクでは 33 行目 ＝ 実行時の 33 行目）
+  SQL「SELECT id, region FROM poc.listings ORDER BY」 start=+46ms frameSource=v8-callsite
+    frame SA [root-of-the-server]__1pajqo6mu0imy._.js:79:142 scriptHash=919878a265ad disk=919878a265ad → SAME（実行中のコード＝ディスクの生成物）
+      moduleRegion=dcdc4a5ee821+17 → ディスクの同じ内容の区画 1 個（ディスクでは 79 行目 ＝ 実行時の 79 行目）
+  SQL「SELECT id, name AS region FROM poc.regions O」 start=+49ms frameSource=v8-callsite
+    frame SA [root-of-the-server]__1pajqo6mu0imy._.js:86:142 scriptHash=919878a265ad disk=919878a265ad → SAME（実行中のコード＝ディスクの生成物）
+      moduleRegion=dcdc4a5ee821+24 → ディスクの同じ内容の区画 1 個（ディスクでは 86 行目 ＝ 実行時の 86 行目）
