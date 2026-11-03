@@ -25,7 +25,7 @@
 | 7 | `claude/lineage-e2e-recovery-m3ab86` | `f61843b` docs(lineage): 完了条件の判定と引き継ぎ… | 2026-11-03 00:48 | 探索: lineage-e2e の失敗の解消 | 完了 |
 | 8 | `claude/hmr-lineage-safety-investigation-enzr9f` | `6b73e06` docs(lineage): HMR 後のリネージ照合の安全性調査… | 2026-11-03 01:32 | 探索: HMR 後の誤対応の調査と設計 | 調査完了 |
 | 9 | `claude/hmr-lineage-safety-guard-0490hg` | `cdb9e07` docs(lineage): …案A の実装報告を確定（部分完了…） | 2026-11-03 03:41 | 探索: 案A（A1〜A3） | 部分完了（第3の経路が未解決だった） |
-| 10 | `claude/hmr-safety-branch-consolidation-qux5mr` | （第5節） | 2026-11-03 | 探索: 最終安全対策（A4・A5）とこの整理 | 今回の作業ブランチ |
+| 10 | `claude/hmr-safety-branch-consolidation-qux5mr` | 開始時 `6b73e06`（調査のブランチと同じ）。今回 `cdb9e07` へ早送りして作業し、最終は `feature/explore` と同じ（第5.1節） | 2026-11-03 | 探索: 最終安全対策（A4・A5）とこの整理 | 今回の作業ブランチ（完了。`docs/07c-hmr-final-safety-report.md`） |
 
 ## 2. 祖先関係・統合状況
 
@@ -93,7 +93,7 @@ main  b040295
 
 | ブランチ | 指すコミット | 内容 | 位置づけ |
 | --- | --- | --- | --- |
-| `feature/explore` | （第5.1節） | 探索・リネージ・観測・F-01・HMR の安全対策（A1〜A5）の最新の作業基準 | 探索トラックの開発を続ける線。**安定版ではない**（安定版は main。main へのマージはしていない） |
+| `feature/explore` | 作業ブランチの最終のコミット（第5.1節） | 探索・リネージ・観測・F-01・HMR の安全対策（A1〜A5）の最新の作業基準 | 探索トラックの開発を続ける線。**安定版ではない**（安定版は main。main へのマージはしていない） |
 | `feature/visual-editor` | `f1260e2`（edit-poc-review の HEAD） | 編集トラックの IA・UX・UI・技術 PoC・レビューの最終の状態。それより後の探索の変更を含まない | 停止中の編集トラックの保管先。再開の判断の基点 |
 
 - どちらも既存のコミットを指す新しい名前で、履歴は変えていない（通常の push。強制 push なし）。
@@ -101,7 +101,14 @@ main  b040295
 
 ### 5.1 作成の記録
 
-（push の結果を記入する）
+| 操作 | 結果 |
+| --- | --- |
+| 作成前の確認 | `git ls-remote --heads origin 'feature/*'` は空（既存の機能別ブランチは無い） |
+| `git push origin f1260e2216b87afc7b918405bfd37b8bc5f8bf18:refs/heads/feature/visual-editor` | `* [new branch]`。`origin/claude/edit-poc-review` と同じ `f1260e2` |
+| `git push origin a90e0c5:refs/heads/feature/explore` | `* [new branch]`（HMR 最終安全対策の報告書を確定したコミット。全件 37 本・失敗 0 を記録した版） |
+| この報告書のコミットの後 | `feature/explore` を作業ブランチの最終のコミットへ**早送り**で進めた（通常の push。強制なし） |
+
+Part A（HMR の安全対策）は完了の判定（`docs/07c-hmr-final-safety-report.md` 第8節）を得てから `feature/explore` を作った。未解決の安全対策を含む状態を機能別ブランチの先端にしていない。`feature/explore` は**安定版ではない**（試用の判断は条件付き。main へは入れていない）。
 
 ## 6. 削除候補と、削除しても成果物を失わない根拠
 
