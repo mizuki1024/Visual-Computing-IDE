@@ -1,0 +1,331 @@
+{
+  "startedAt": "2026-11-03T01:23:27.088Z",
+  "project": "poc/out/hmr-misattr-e2e/poc/fixture-app",
+  "truth": {
+    "el": "src/app/hmr-m/page.tsx:17:7",
+    "callA": "src/app/hmr-m/page.tsx:7:24",
+    "callB": "src/app/hmr-m/page.tsx:14:24"
+  },
+  "phases": {
+    "fresh": {
+      "selection": "resolved",
+      "at": "src/app/hmr-m/page.tsx:17:7",
+      "lineage": "linked",
+      "lineageReason": "",
+      "cands": "poc.listings.region",
+      "docBinding": "identified",
+      "dockOrigin": "この値の出所 poc.listings . region 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。 概要 根拠 ★ いちばん弱いところ",
+      "canvasColumns": [
+        "テーブル poc.listings",
+        "テーブル poc.regions",
+        "実行SQL SELECT id, region FROM poc.listings ORDER BY id DESC LIMI… — 13ms",
+        "実行SQL SELECT id, name AS region FROM poc.regions ORDER BY id LI… — 1ms",
+        "カラム poc.listings.id",
+        "カラム poc.listings.region",
+        "カラム poc.regions.id",
+        "カラム poc.regions.name"
+      ],
+      "response": {
+        "lineage": "linked",
+        "cut": null,
+        "candidates": [
+          "poc.listings.region"
+        ],
+        "fetch": "src/app/hmr-m/page.tsx:7:24",
+        "dataAccess": [
+          {
+            "spanId": "979d2637ca13af9a",
+            "site": "src/app/hmr-m/page.tsx:7:24",
+            "located": "src/app/hmr-m/page.tsx:7:24",
+            "failure": null
+          },
+          {
+            "spanId": "2cd056c5539ee773",
+            "site": "src/app/hmr-m/page.tsx:14:24",
+            "located": "src/app/hmr-m/page.tsx:14:24",
+            "failure": null
+          }
+        ]
+      }
+    },
+    "freshVerdict": "correct",
+    "afterHmr": {
+      "selection": "resolved",
+      "at": "src/app/hmr-m/page.tsx:17:7",
+      "lineage": "linked",
+      "lineageReason": "",
+      "cands": "poc.regions.name",
+      "docBinding": "identified",
+      "dockOrigin": "この値の出所 poc.regions . name 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。 概要 根拠 ★ いちばん弱いところ ②→",
+      "canvasColumns": [
+        "テーブル poc.regions",
+        "テーブル poc.listings",
+        "実行SQL SELECT id, name AS region FROM poc.regions ORDER BY id LI… — 1ms",
+        "実行SQL SELECT id, region FROM poc.listings ORDER BY id DESC LIMI… — 7ms",
+        "カラム poc.regions.id",
+        "カラム poc.regions.name",
+        "カラム poc.listings.id",
+        "カラム poc.listings.region"
+      ],
+      "response": {
+        "lineage": "linked",
+        "cut": null,
+        "candidates": [
+          "poc.regions.name"
+        ],
+        "fetch": "src/app/hmr-m/page.tsx:7:24",
+        "dataAccess": [
+          {
+            "spanId": "4cbf7295ed8fde81",
+            "site": null,
+            "located": null,
+            "failure": "no-app-frame: 注入範囲（src/）のソース位置へ戻せるフレームが無い"
+          },
+          {
+            "spanId": "62b2b2e93072ad08",
+            "site": "src/app/hmr-m/page.tsx:7:24",
+            "located": "src/app/hmr-m/page.tsx:7:24",
+            "failure": null
+          }
+        ]
+      }
+    },
+    "afterHmrVerdict": "WRONG（poc.regions.name を出した。正解 poc.listings.region）",
+    "afterRestart": {
+      "selection": "resolved",
+      "at": "src/app/hmr-m/page.tsx:17:7",
+      "lineage": "linked",
+      "lineageReason": "",
+      "cands": "poc.listings.region",
+      "docBinding": "identified",
+      "dockOrigin": "この値の出所 poc.listings . region 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。 概要 根拠 ★ いちばん弱いところ",
+      "canvasColumns": [
+        "テーブル poc.listings",
+        "テーブル poc.regions",
+        "実行SQL SELECT id, region FROM poc.listings ORDER BY id DESC LIMI… — 8ms",
+        "実行SQL SELECT id, name AS region FROM poc.regions ORDER BY id LI… — 2ms",
+        "カラム poc.listings.id",
+        "カラム poc.listings.region",
+        "カラム poc.regions.id",
+        "カラム poc.regions.name"
+      ],
+      "response": {
+        "lineage": "linked",
+        "cut": null,
+        "candidates": [
+          "poc.listings.region"
+        ],
+        "fetch": "src/app/hmr-m/page.tsx:7:24",
+        "dataAccess": [
+          {
+            "spanId": "f66e624ded0746fd",
+            "site": "src/app/hmr-m/page.tsx:7:24",
+            "located": "src/app/hmr-m/page.tsx:7:24",
+            "failure": null
+          },
+          {
+            "spanId": "3e66232a204d3b92",
+            "site": "src/app/hmr-m/page.tsx:14:24",
+            "located": "src/app/hmr-m/page.tsx:14:24",
+            "failure": null
+          }
+        ]
+      }
+    },
+    "afterRestartVerdict": "correct"
+  },
+  "finishedAt": "2026-11-03T01:23:56.477Z",
+  "lineageResponses": [
+    {
+      "t": 1793669017152,
+      "status": 200,
+      "lineage": "linked",
+      "cut": null,
+      "outcome": "confirmed",
+      "candidates": [
+        "poc.listings.region"
+      ],
+      "site": "src/app/hmr-m/page.tsx:17:31",
+      "element": "src/app/hmr-m/page.tsx:17:7",
+      "fetch": "src/app/hmr-m/page.tsx:7:24",
+      "sqlSpanIds": [
+        "979d2637ca13af9a"
+      ],
+      "exchangeSeq": 3,
+      "dataAccess": [
+        {
+          "spanId": "979d2637ca13af9a",
+          "site": "src/app/hmr-m/page.tsx:7:24",
+          "located": "src/app/hmr-m/page.tsx:7:24",
+          "failure": null
+        },
+        {
+          "spanId": "2cd056c5539ee773",
+          "site": "src/app/hmr-m/page.tsx:14:24",
+          "located": "src/app/hmr-m/page.tsx:14:24",
+          "failure": null
+        }
+      ],
+      "resolution": {
+        "status": "resolved",
+        "at": "src/app/hmr-m/page.tsx:17:7",
+        "rev": "8b516c046e60c397",
+        "reason": null
+      }
+    },
+    {
+      "t": 1793669024290,
+      "status": 200,
+      "lineage": "linked",
+      "cut": null,
+      "outcome": "confirmed",
+      "candidates": [
+        "poc.regions.name"
+      ],
+      "site": "src/app/hmr-m/page.tsx:17:31",
+      "element": "src/app/hmr-m/page.tsx:17:7",
+      "fetch": "src/app/hmr-m/page.tsx:7:24",
+      "sqlSpanIds": [
+        "62b2b2e93072ad08"
+      ],
+      "exchangeSeq": 5,
+      "dataAccess": [
+        {
+          "spanId": "4cbf7295ed8fde81",
+          "site": null,
+          "located": null,
+          "failure": "no-app-frame: 注入範囲（src/）のソース位置へ戻せるフレームが無い"
+        },
+        {
+          "spanId": "62b2b2e93072ad08",
+          "site": "src/app/hmr-m/page.tsx:7:24",
+          "located": "src/app/hmr-m/page.tsx:7:24",
+          "failure": null
+        }
+      ],
+      "resolution": {
+        "status": "resolved",
+        "at": "src/app/hmr-m/page.tsx:17:7",
+        "rev": "c4f8381051628b92",
+        "reason": null
+      }
+    },
+    {
+      "t": 1793669030619,
+      "status": 200,
+      "lineage": "linked",
+      "cut": null,
+      "outcome": "confirmed",
+      "candidates": [
+        "poc.listings.region"
+      ],
+      "site": "src/app/hmr-m/page.tsx:17:31",
+      "element": "src/app/hmr-m/page.tsx:17:7",
+      "fetch": "src/app/hmr-m/page.tsx:7:24",
+      "sqlSpanIds": [
+        "f66e624ded0746fd"
+      ],
+      "exchangeSeq": 4,
+      "dataAccess": [
+        {
+          "spanId": "f66e624ded0746fd",
+          "site": "src/app/hmr-m/page.tsx:7:24",
+          "located": "src/app/hmr-m/page.tsx:7:24",
+          "failure": null
+        },
+        {
+          "spanId": "3e66232a204d3b92",
+          "site": "src/app/hmr-m/page.tsx:14:24",
+          "located": "src/app/hmr-m/page.tsx:14:24",
+          "failure": null
+        }
+      ],
+      "resolution": {
+        "status": "resolved",
+        "at": "src/app/hmr-m/page.tsx:17:7",
+        "rev": "c4f8381051628b92",
+        "reason": null
+      }
+    }
+  ],
+  "pass": 10,
+  "fail": 0,
+  "items": [
+    {
+      "name": "前提: 題材の DB（使い捨ての PostgreSQL）に届く",
+      "pass": true
+    },
+    {
+      "name": "前提: 計装は有効",
+      "pass": true
+    },
+    {
+      "name": "前提: 要素識別子の注入は有効",
+      "pass": true
+    },
+    {
+      "name": "前提: /hmr-m は DB の値を描いている",
+      "pass": true
+    },
+    {
+      "note": "1 起動直後: 由来 linked（）候補 poc.listings.region / 応答の取得位置 src/app/hmr-m/page.tsx:7:24 / 右ドック「この値の出所 poc.listings . region 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。 概要 根拠 ★ いちばん弱いところ」"
+    },
+    {
+      "note": "  この文書の SQL 979d2637ca13af9a: 呼び出し位置 src/app/hmr-m/page.tsx:7:24"
+    },
+    {
+      "note": "  この文書の SQL 2cd056c5539ee773: 呼び出し位置 src/app/hmr-m/page.tsx:14:24"
+    },
+    {
+      "name": "1 前提: 選択の位置 = ソースの <p>",
+      "pass": true
+    },
+    {
+      "note": "1 判定: correct（正解 poc.listings.region・取得位置 src/app/hmr-m/page.tsx:7:24）"
+    },
+    {
+      "name": "2 前提: F-01 の版の確かめで、前の選択を無効にする",
+      "pass": true
+    },
+    {
+      "note": "3 HMR の後に読み込み直して選び直した: 由来 linked（）候補 poc.regions.name / 応答の取得位置 src/app/hmr-m/page.tsx:7:24 / 右ドック「この値の出所 poc.regions . name 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。 概要 根拠 ★ いちばん弱いところ ②→」"
+    },
+    {
+      "note": "  この文書の SQL 4cbf7295ed8fde81: 呼び出し位置 - / no-app-frame: 注入範囲（src/）のソース位置へ戻せるフレームが無い"
+    },
+    {
+      "note": "  この文書の SQL 62b2b2e93072ad08: 呼び出し位置 src/app/hmr-m/page.tsx:7:24"
+    },
+    {
+      "name": "3 前提: 選択はいまのソースの <p> に特定（F-01 の照合は通る＝DOM とソースは一致）",
+      "pass": true
+    },
+    {
+      "name": "3 前提: 文書は新しい要求に同定",
+      "pass": true
+    },
+    {
+      "note": "3 判定: WRONG（poc.regions.name を出した。正解 poc.listings.region）"
+    },
+    {
+      "note": "4 再起動の後: 由来 linked（）候補 poc.listings.region / 応答の取得位置 src/app/hmr-m/page.tsx:7:24 / 右ドック「この値の出所 poc.listings . region 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。 概要 根拠 ★ いちばん弱いところ」"
+    },
+    {
+      "note": "  この文書の SQL f66e624ded0746fd: 呼び出し位置 src/app/hmr-m/page.tsx:7:24"
+    },
+    {
+      "note": "  この文書の SQL 3e66232a204d3b92: 呼び出し位置 src/app/hmr-m/page.tsx:14:24"
+    },
+    {
+      "note": "4 判定: correct"
+    },
+    {
+      "name": "画面にエラーが出ていない",
+      "pass": true
+    },
+    {
+      "name": "後片付け: 使い捨ての題材で動くプロセスが残っていない",
+      "pass": true
+    }
+  ]
+}

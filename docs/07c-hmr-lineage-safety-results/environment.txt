@@ -1,0 +1,13 @@
+# 再現条件（7C HMR × 由来の安全性調査）。秘密情報は含めない
+記録日時(UTC): 2026-11-03T01:27:44Z
+作業基準: claude/lineage-e2e-recovery-m3ab86 @ f61843b8afab8908bcd518a7eeb1aca982158f4f（リモートと一致を確認）。作業ブランチ claude/hmr-lineage-safety-investigation-enzr9f は開始時点で同じコミット・作業ツリーはクリーン
+OS: Linux 6.18.44-fc-v230
+Node: v22.23.4  npm: 10.9.9
+IDE next: 16.4.3  playwright-core: 1.64.1
+ブラウザ: Chromium 153.0.8010.12（PW_CHANNEL=none。playwright-core が探す chromium(_headless_shell)-1248 に、事前に入っていた -1243 をシンボリックリンクで置いた。リポジトリの外。前回の作業と同じ）
+題材の依存（npm ci、package-lock どおり）: next 16.4.3 / pg 8.23.1 / pg-pool 3.14.0 / @opentelemetry/instrumentation-pg 0.60.0
+DB: psql (PostgreSQL) 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)（initdb の使い捨て、127.0.0.1:55432、poc/fixture-app/db/init.sql、poc.listings 12 行・poc.regions 4 行）。題材の .env は .env.example の複写（Git 管理外）
+実行: npm ci（ルート・poc/fixture-app）→ npm run build → npm run build:lib → 各診断スクリプト（直列）
+Turbopack: next dev の既定（Next 16.4.3。server fast refresh＝サーバー側 HMR は既定で有効）。--no-server-fast-refresh は比較のためだけに使った
+題材: すべて使い捨てのコピー（poc/out/<名前>/poc/fixture-app。node_modules は cp -al。Git 管理外）。一時的なページ（/hmr-m・/hmr-c・/hmr-h・/hmr-r と HmrChild.tsx・hmrFetch.ts）はコピーにだけ書いた
+製品 src/ と既存のテストは変えていない

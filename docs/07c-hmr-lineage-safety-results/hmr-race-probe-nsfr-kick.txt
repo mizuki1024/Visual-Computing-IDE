@@ -1,0 +1,21 @@
+# hmr-race-probe 2026-11-03T01:26:46.085Z mode=--no-server-fast-refresh --kick（書き換えの直後に2本目の要求）
+2本目の要求 +2003 ms → 200（+7144 ms に応答）
+要求の開始 +0 ms / ソースの書き換え +1502 ms / 応答 200
+生成物（[root-of-the-server]__1-8463o079cpx._.js）とソースマップの更新 +2007 ms（最後に書かれた時刻。応答の後にも書かれうる）/ ソース +1499 ms
+SQL a「SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $」 開始 +36 ms
+  実行したコード = 書き換え前のソース src/app/hmr-r/page.tsx:7（書き換え後のソースでは同じ呼び出しは 14 行）
+  実行時のフレーム [root-of-the-server]__1-8463o079cpx._.js:28:142
+  生の URL に ?moduleId: false / Node の findSourceMap: src/app/hmr-r/page.tsx:7:24（実行したコードの正解は書き換え前の 7 行。書き換え後のソースで同じ呼び出しは 14 行）
+  製品 resolveDataAccess: - / build-changed-after-call: 生成物が SQL の実行の 1971 ms 後に書かれています
+  判定: 未特定（安全側）
+SQL b「SELECT id, name AS region FROM poc.regions ORDER BY id DESC 」 開始 +5055 ms
+  実行したコード = 書き換え前のソース src/app/hmr-r/page.tsx:14（書き換え後のソースでは同じ呼び出しは 21 行）
+  実行時のフレーム [root-of-the-server]__1-8463o079cpx._.js:35:142
+  生の URL に ?moduleId: false / Node の findSourceMap: src/app/hmr-r/page.tsx:14:24（実行したコードの正解は書き換え前の 14 行。書き換え後のソースで同じ呼び出しは 21 行）
+  製品 resolveDataAccess: src/app/hmr-r/page.tsx:14:24
+  判定: WRONG（別の呼び出し const a = await pool.query('SELECT id, region FROM）
+由来 r-a: cut / source-changed-after-run（src/app/hmr-r/page.tsx） 
+由来 r-b: cut / source-changed-after-run（src/app/hmr-r/page.tsx） 
+（参考）変更後の新しい要求 +10842 ms:
+  SELECT id, region FROM poc.listings ORDER BY id DE フレーム 35:142 → 製品 src/app/hmr-r/page.tsx:14:24
+  SELECT id, name AS region FROM poc.regions ORDER B フレーム 42:142 → 製品 src/app/hmr-r/page.tsx:21:24

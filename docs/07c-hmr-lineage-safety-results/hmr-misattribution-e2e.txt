@@ -1,0 +1,36 @@
+ブラウザ: 同梱の chromium 153.0.8010.12 / 題材（使い捨て）: /home/user/Visual-Computing-IDE/poc/out/hmr-misattr-e2e/poc/fixture-app
+  ✓ 前提: 題材の DB（使い捨ての PostgreSQL）に届く
+
+0. 使い捨ての題材を起動する
+  ✓ 前提: 計装は有効
+  ✓ 前提: 要素識別子の注入は有効
+  ✓ 前提: /hmr-m は DB の値を描いている
+
+1. 起動直後: <p>{a.rows[0].region}</p> を選ぶ
+    · 1 起動直後: 由来 linked（）候補 poc.listings.region / 応答の取得位置 src/app/hmr-m/page.tsx:7:24 / 右ドック「この値の出所 poc.listings . region 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。 概要 根拠 ★ いちばん弱いところ」
+    ·   この文書の SQL 979d2637ca13af9a: 呼び出し位置 src/app/hmr-m/page.tsx:7:24
+    ·   この文書の SQL 2cd056c5539ee773: 呼び出し位置 src/app/hmr-m/page.tsx:14:24
+  ✓ 1 前提: 選択の位置 = ソースの <p>
+    · 1 判定: correct（正解 poc.listings.region・取得位置 src/app/hmr-m/page.tsx:7:24）
+
+2. 同じ起動のまま /hmr-m/page.tsx の末尾にコメントだけ足す（サーバー側の HMR）
+  ✓ 2 前提: F-01 の版の確かめで、前の選択を無効にする
+
+3. 読み込み直して（新しい文書の要求）、同じ要素を選び直す
+    · 3 HMR の後に読み込み直して選び直した: 由来 linked（）候補 poc.regions.name / 応答の取得位置 src/app/hmr-m/page.tsx:7:24 / 右ドック「この値の出所 poc.regions . name 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。 概要 根拠 ★ いちばん弱いところ ②→」
+    ·   この文書の SQL 4cbf7295ed8fde81: 呼び出し位置 - / no-app-frame: 注入範囲（src/）のソース位置へ戻せるフレームが無い
+    ·   この文書の SQL 62b2b2e93072ad08: 呼び出し位置 src/app/hmr-m/page.tsx:7:24
+  ✓ 3 前提: 選択はいまのソースの <p> に特定（F-01 の照合は通る＝DOM とソースは一致）
+  ✓ 3 前提: 文書は新しい要求に同定
+    · 3 判定: WRONG（poc.regions.name を出した。正解 poc.listings.region）
+
+4. 開発サーバーを起動し直して選び直す
+    · 4 再起動の後: 由来 linked（）候補 poc.listings.region / 応答の取得位置 src/app/hmr-m/page.tsx:7:24 / 右ドック「この値の出所 poc.listings . region 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。 概要 根拠 ★ いちばん弱いところ」
+    ·   この文書の SQL f66e624ded0746fd: 呼び出し位置 src/app/hmr-m/page.tsx:7:24
+    ·   この文書の SQL 3e66232a204d3b92: 呼び出し位置 src/app/hmr-m/page.tsx:14:24
+    · 4 判定: correct
+  ✓ 画面にエラーが出ていない
+  ✓ 後片付け: 使い捨ての題材で動くプロセスが残っていない
+
+判定: 起動直後 correct / HMR の後 WRONG（poc.regions.name を出した。正解 poc.listings.region） / 再起動の後 correct
+✓ 前提の確認はすべて通過 — 10 件通過 / 0 件失敗

@@ -1,0 +1,220 @@
+# hmr-lineage-probe 2026-11-03T01:27:45.219Z mode=既定（server fast refresh 有効）
+# 題材（使い捨て）: poc/out/hmr-safety-probe/poc/fixture-app  next 16.4.3
+# プロセス pid=2774 SQL を実行=false sourceMapsEnabled=false NODE_OPTIONS に --enable-source-maps=false
+# プロセス pid=2786 SQL を実行=true sourceMapsEnabled=true NODE_OPTIONS に --enable-source-maps=true
+# プロセス pid=2807 SQL を実行=false sourceMapsEnabled=true NODE_OPTIONS に --enable-source-maps=true
+
+## S0 起動直後（変更なし）
+  /hmr-m (200)
+    SQL SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $0
+      正解 src/app/hmr-m/page.tsx:7:24 | 実行時のフレーム …/[root-of-the-server]__1njhe7qp_hsou._.js:28:142 [HmrM] 生のURLに?moduleId: false
+      製品 src/app/hmr-m/page.tsx:7:24 → correct | Node の findSourceMap → src/app/hmr-m/page.tsx:7:24 (correct)
+    SQL SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT $0
+      正解 src/app/hmr-m/page.tsx:14:24 | 実行時のフレーム …/[root-of-the-server]__1njhe7qp_hsou._.js:35:142 [HmrM] 生のURLに?moduleId: false
+      製品 src/app/hmr-m/page.tsx:14:24 → correct | Node の findSourceMap → src/app/hmr-m/page.tsx:14:24 (correct)
+    由来 m-a: linked 候補 poc.listings.region 取得 src/app/hmr-m/page.tsx:7:24 → correct
+    由来 m-b: linked 候補 poc.regions.name 取得 src/app/hmr-m/page.tsx:14:24 → correct
+  /hmr-c (200)
+    SQL SELECT id, plan FROM poc.listings ORDER BY id LIMIT $0
+      正解 src/app/hmr-c/page.tsx:8:24 | 実行時のフレーム …/[root-of-the-server]__20a1r81vij1hz._.js:26:142 [HmrC] 生のURLに?moduleId: false
+      製品 src/app/hmr-c/page.tsx:8:24 → correct | Node の findSourceMap → src/app/hmr-c/page.tsx:8:24 (correct)
+    SQL SELECT id, code FROM poc.regions ORDER BY id LIMIT $0
+      正解 src/components/HmrChild.tsx:5:24 | 実行時のフレーム …/[root-of-the-server]__20a1r81vij1hz._.js:73:142 [HmrChild] 生のURLに?moduleId: false
+      製品 src/components/HmrChild.tsx:5:24 → correct | Node の findSourceMap → src/components/HmrChild.tsx:5:24 (correct)
+    由来 c-plan: linked 候補 poc.listings.plan 取得 src/app/hmr-c/page.tsx:8:24 → correct
+    由来 c-child: linked 候補 poc.regions.code 取得 src/components/HmrChild.tsx:5:24 → correct
+  /hmr-h (200)
+    SQL SELECT id, scale FROM poc.listings ORDER BY id LIMIT $0
+      正解 src/app/hmr-h/page.tsx:8:24 | 実行時のフレーム …/[root-of-the-server]__0ng8g3c10740d._.js:26:142 [HmrH] 生のURLに?moduleId: false
+      製品 src/app/hmr-h/page.tsx:8:24 → correct | Node の findSourceMap → src/app/hmr-h/page.tsx:8:24 (correct)
+    SQL SELECT id, name FROM poc.regions ORDER BY id DESC LIMIT $0
+      正解 src/lib/hmrFetch.ts:5:15 | 実行時のフレーム …/[root-of-the-server]__0ng8g3c10740d._.js:104:133 [fetchHmrRegions] 生のURLに?moduleId: false
+      製品 - / component-not-agreed (located src/lib/hmrFetch.ts:5:15) → unresolved(component-not-agreed) | Node の findSourceMap → src/lib/hmrFetch.ts:5:15 (correct)
+    由来 h-scale: linked 候補 poc.listings.scale 取得 src/app/hmr-h/page.tsx:8:24 → correct
+  /lin-a (200)
+    SQL SELECT id, region FROM poc.listings ORDER BY id LIMIT $0
+      正解 src/app/lin-a/page.tsx:12:24 | 実行時のフレーム …/[root-of-the-server]__1zojl8nvlw_s_._.js:33:142 [LinA] 生のURLに?moduleId: false
+      製品 src/app/lin-a/page.tsx:12:24 → correct | Node の findSourceMap → src/app/lin-a/page.tsx:12:24 (correct)
+    由来 a-region: linked 候補 poc.listings.region 取得 src/app/lin-a/page.tsx:12:24 → correct
+
+## S1 無関係なページを変更（listings/page.tsx の末尾にコメント）
+  /hmr-m (200)
+    SQL SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $0
+      正解 src/app/hmr-m/page.tsx:7:24 | 実行時のフレーム …/[root-of-the-server]__1njhe7qp_hsou._.js:28:142 [HmrM] 生のURLに?moduleId: false
+      製品 src/app/hmr-m/page.tsx:7:24 → correct | Node の findSourceMap → src/app/hmr-m/page.tsx:7:24 (correct)
+    SQL SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT $0
+      正解 src/app/hmr-m/page.tsx:14:24 | 実行時のフレーム …/[root-of-the-server]__1njhe7qp_hsou._.js:35:142 [HmrM] 生のURLに?moduleId: false
+      製品 src/app/hmr-m/page.tsx:14:24 → correct | Node の findSourceMap → src/app/hmr-m/page.tsx:14:24 (correct)
+    由来 m-a: linked 候補 poc.listings.region 取得 src/app/hmr-m/page.tsx:7:24 → correct
+    由来 m-b: linked 候補 poc.regions.name 取得 src/app/hmr-m/page.tsx:14:24 → correct
+  /hmr-c (200)
+    SQL SELECT id, plan FROM poc.listings ORDER BY id LIMIT $0
+      正解 src/app/hmr-c/page.tsx:8:24 | 実行時のフレーム …/[root-of-the-server]__20a1r81vij1hz._.js:26:142 [HmrC] 生のURLに?moduleId: false
+      製品 src/app/hmr-c/page.tsx:8:24 → correct | Node の findSourceMap → src/app/hmr-c/page.tsx:8:24 (correct)
+    SQL SELECT id, code FROM poc.regions ORDER BY id LIMIT $0
+      正解 src/components/HmrChild.tsx:5:24 | 実行時のフレーム …/[root-of-the-server]__20a1r81vij1hz._.js:73:142 [HmrChild] 生のURLに?moduleId: false
+      製品 src/components/HmrChild.tsx:5:24 → correct | Node の findSourceMap → src/components/HmrChild.tsx:5:24 (correct)
+    由来 c-plan: linked 候補 poc.listings.plan 取得 src/app/hmr-c/page.tsx:8:24 → correct
+    由来 c-child: linked 候補 poc.regions.code 取得 src/components/HmrChild.tsx:5:24 → correct
+  /hmr-h (200)
+    SQL SELECT id, scale FROM poc.listings ORDER BY id LIMIT $0
+      正解 src/app/hmr-h/page.tsx:8:24 | 実行時のフレーム …/[root-of-the-server]__0ng8g3c10740d._.js:26:142 [HmrH] 生のURLに?moduleId: false
+      製品 src/app/hmr-h/page.tsx:8:24 → correct | Node の findSourceMap → src/app/hmr-h/page.tsx:8:24 (correct)
+    SQL SELECT id, name FROM poc.regions ORDER BY id DESC LIMIT $0
+      正解 src/lib/hmrFetch.ts:5:15 | 実行時のフレーム …/[root-of-the-server]__0ng8g3c10740d._.js:104:133 [fetchHmrRegions] 生のURLに?moduleId: false
+      製品 - / component-not-agreed (located src/lib/hmrFetch.ts:5:15) → unresolved(component-not-agreed) | Node の findSourceMap → src/lib/hmrFetch.ts:5:15 (correct)
+    由来 h-scale: linked 候補 poc.listings.scale 取得 src/app/hmr-h/page.tsx:8:24 → correct
+  /lin-a (200)
+    SQL SELECT id, region FROM poc.listings ORDER BY id LIMIT $0
+      正解 src/app/lin-a/page.tsx:12:24 | 実行時のフレーム …/[root-of-the-server]__1zojl8nvlw_s_._.js:33:142 [LinA] 生のURLに?moduleId: false
+      製品 src/app/lin-a/page.tsx:12:24 → correct | Node の findSourceMap → src/app/lin-a/page.tsx:12:24 (correct)
+    由来 a-region: linked 候補 poc.listings.region 取得 src/app/lin-a/page.tsx:12:24 → correct
+
+## S2 共有の lib/db.ts を変更（末尾にコメント）
+  /hmr-m (200)
+    SQL SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $0
+      正解 src/app/hmr-m/page.tsx:7:24 | 実行時のフレーム …/[root-of-the-server]__1njhe7qp_hsou._.js:28:142 [HmrM] 生のURLに?moduleId: false
+      製品 src/app/hmr-m/page.tsx:7:24 → correct | Node の findSourceMap → src/app/hmr-m/page.tsx:7:24 (correct)
+    SQL SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT $0
+      正解 src/app/hmr-m/page.tsx:14:24 | 実行時のフレーム …/[root-of-the-server]__1njhe7qp_hsou._.js:35:142 [HmrM] 生のURLに?moduleId: false
+      製品 src/app/hmr-m/page.tsx:14:24 → correct | Node の findSourceMap → src/app/hmr-m/page.tsx:14:24 (correct)
+    由来 m-a: linked 候補 poc.listings.region 取得 src/app/hmr-m/page.tsx:7:24 → correct
+    由来 m-b: linked 候補 poc.regions.name 取得 src/app/hmr-m/page.tsx:14:24 → correct
+  /lin-a (200)
+    SQL SELECT id, region FROM poc.listings ORDER BY id LIMIT $0
+      正解 src/app/lin-a/page.tsx:12:24 | 実行時のフレーム …/[root-of-the-server]__1zojl8nvlw_s_._.js:33:142 [LinA] 生のURLに?moduleId: false
+      製品 src/app/lin-a/page.tsx:12:24 → correct | Node の findSourceMap → src/app/lin-a/page.tsx:12:24 (correct)
+    由来 a-region: linked 候補 poc.listings.region 取得 src/app/lin-a/page.tsx:12:24 → correct
+
+## S3 別ファイルの子コンポーネントを変更（HmrChild.tsx の末尾にコメント）
+  /hmr-c (200)
+    SQL SELECT id, plan FROM poc.listings ORDER BY id LIMIT $0
+      正解 src/app/hmr-c/page.tsx:8:24 | 実行時のフレーム …/[root-of-the-server]__20a1r81vij1hz._.js:26:142 [HmrC] 生のURLに?moduleId: false
+      製品 src/app/hmr-c/page.tsx:8:24 → correct | Node の findSourceMap → src/app/hmr-c/page.tsx:8:24 (correct)
+    SQL SELECT id, code FROM poc.regions ORDER BY id LIMIT $0
+      正解 src/components/HmrChild.tsx:5:24 | 実行時のフレーム …/[root-of-the-server]__20a1r81vij1hz._.js:18:142 [HmrChild] 生のURLに?moduleId: true (id=[project]/src/components/HmrChild.tsx+[app-rsc]+(ecmascri)
+      製品 - / no-app-frame → unresolved(no-app-frame) | Node の findSourceMap → src/components/HmrChild.tsx:5:24 (correct)
+    由来 c-plan: linked 候補 poc.listings.plan 取得 src/app/hmr-c/page.tsx:8:24 → correct
+    由来 c-child: cut / fetch-not-measured  → cut
+
+## S4 別ファイルの取得関数を変更（hmrFetch.ts の末尾にコメント）
+  /hmr-h (200)
+    SQL SELECT id, scale FROM poc.listings ORDER BY id LIMIT $0
+      正解 src/app/hmr-h/page.tsx:8:24 | 実行時のフレーム …/[root-of-the-server]__0ng8g3c10740d._.js:26:142 [HmrH] 生のURLに?moduleId: false
+      製品 src/app/hmr-h/page.tsx:8:24 → correct | Node の findSourceMap → src/app/hmr-h/page.tsx:8:24 (correct)
+    SQL SELECT id, name FROM poc.regions ORDER BY id DESC LIMIT $0
+      正解 src/lib/hmrFetch.ts:5:15 | 実行時のフレーム …/[root-of-the-server]__0ng8g3c10740d._.js:16:133 [fetchHmrRegions] 生のURLに?moduleId: true (id=[project]/src/lib/hmrFetch.ts+[app-rsc]+(ecmascript))
+      製品 - / source-line-mismatch (located src/app/hmr-h/page.tsx:9:34) → unresolved(source-line-mismatch) | Node の findSourceMap → src/lib/hmrFetch.ts:5:15 (correct)
+    由来 h-scale: linked 候補 poc.listings.scale 取得 src/app/hmr-h/page.tsx:8:24 → correct
+
+## S5 コメントだけの変更（hmr-m/page.tsx の末尾）
+  /hmr-m (200)
+    SQL SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $0
+      正解 src/app/hmr-m/page.tsx:7:24 | 実行時のフレーム …/[root-of-the-server]__1njhe7qp_hsou._.js:21:142 [HmrM] 生のURLに?moduleId: true (id=[project]/src/app/hmr-m/page.tsx+[app-rsc]+(ecmascript))
+      製品 - / no-app-frame → unresolved(no-app-frame) | Node の findSourceMap → src/app/hmr-m/page.tsx:7:24 (correct)
+    SQL SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT $0
+      正解 src/app/hmr-m/page.tsx:14:24 | 実行時のフレーム …/[root-of-the-server]__1njhe7qp_hsou._.js:28:142 [HmrM] 生のURLに?moduleId: true (id=[project]/src/app/hmr-m/page.tsx+[app-rsc]+(ecmascript))
+      製品 src/app/hmr-m/page.tsx:7:24 → WRONG | Node の findSourceMap → src/app/hmr-m/page.tsx:14:24 (correct)
+    由来 m-a: linked 候補 poc.regions.name 取得 src/app/hmr-m/page.tsx:7:24 → WRONG(正解 poc.listings.region)
+    由来 m-b: cut / fetch-not-measured  → cut
+
+## S6 変更後の再要求（ソースは S5 のまま）
+  /hmr-m (200)
+    SQL SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $0
+      正解 src/app/hmr-m/page.tsx:7:24 | 実行時のフレーム …/[root-of-the-server]__1njhe7qp_hsou._.js:21:142 [HmrM] 生のURLに?moduleId: true (id=[project]/src/app/hmr-m/page.tsx+[app-rsc]+(ecmascript))
+      製品 - / no-app-frame → unresolved(no-app-frame) | Node の findSourceMap → src/app/hmr-m/page.tsx:7:24 (correct)
+    SQL SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT $0
+      正解 src/app/hmr-m/page.tsx:14:24 | 実行時のフレーム …/[root-of-the-server]__1njhe7qp_hsou._.js:28:142 [HmrM] 生のURLに?moduleId: true (id=[project]/src/app/hmr-m/page.tsx+[app-rsc]+(ecmascript))
+      製品 src/app/hmr-m/page.tsx:7:24 → WRONG | Node の findSourceMap → src/app/hmr-m/page.tsx:14:24 (correct)
+    由来 m-a: linked 候補 poc.regions.name 取得 src/app/hmr-m/page.tsx:7:24 → WRONG(正解 poc.listings.region)
+    由来 m-b: cut / fetch-not-measured  → cut
+
+## S7 元に戻す（hmr-m/page.tsx を最初の内容へ）
+  /hmr-m (200)
+    SQL SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $0
+      正解 src/app/hmr-m/page.tsx:7:24 | 実行時のフレーム …/[root-of-the-server]__1njhe7qp_hsou._.js:21:142 [HmrM] 生のURLに?moduleId: true (id=[project]/src/app/hmr-m/page.tsx+[app-rsc]+(ecmascript))
+      製品 - / no-app-frame → unresolved(no-app-frame) | Node の findSourceMap → src/app/hmr-m/page.tsx:7:24 (correct)
+    SQL SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT $0
+      正解 src/app/hmr-m/page.tsx:14:24 | 実行時のフレーム …/[root-of-the-server]__1njhe7qp_hsou._.js:28:142 [HmrM] 生のURLに?moduleId: true (id=[project]/src/app/hmr-m/page.tsx+[app-rsc]+(ecmascript))
+      製品 src/app/hmr-m/page.tsx:7:24 → WRONG | Node の findSourceMap → src/app/hmr-m/page.tsx:14:24 (correct)
+    由来 m-a: linked 候補 poc.regions.name 取得 src/app/hmr-m/page.tsx:7:24 → WRONG(正解 poc.listings.region)
+    由来 m-b: cut / fetch-not-measured  → cut
+
+## S8 SQL 呼び出しより前へコードを追加（HmrM の先頭に1文）
+  /hmr-m (200)
+    SQL SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $0
+      正解 src/app/hmr-m/page.tsx:8:24 | 実行時のフレーム …/[root-of-the-server]__1njhe7qp_hsou._.js:22:142 [HmrM] 生のURLに?moduleId: true (id=[project]/src/app/hmr-m/page.tsx+[app-rsc]+(ecmascript))
+      製品 - / no-app-frame → unresolved(no-app-frame) | Node の findSourceMap → src/app/hmr-m/page.tsx:8:24 (correct)
+    SQL SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT $0
+      正解 src/app/hmr-m/page.tsx:15:24 | 実行時のフレーム …/[root-of-the-server]__1njhe7qp_hsou._.js:29:142 [HmrM] 生のURLに?moduleId: true (id=[project]/src/app/hmr-m/page.tsx+[app-rsc]+(ecmascript))
+      製品 src/app/hmr-m/page.tsx:8:24 → WRONG | Node の findSourceMap → src/app/hmr-m/page.tsx:15:24 (correct)
+    由来 m-a: linked 候補 poc.regions.name 取得 src/app/hmr-m/page.tsx:8:24 → WRONG(正解 poc.listings.region)
+    由来 m-b: cut / fetch-not-measured  → cut
+
+## S9 SQL 呼び出し自体を変更（a の SELECT 句に plan を足す）
+  /hmr-m (200)
+    SQL SELECT id, region, plan FROM poc.listings ORDER BY id DESC LIMIT $0
+      正解 src/app/hmr-m/page.tsx:8:24 | 実行時のフレーム …/[root-of-the-server]__1njhe7qp_hsou._.js:22:142 [HmrM] 生のURLに?moduleId: true (id=[project]/src/app/hmr-m/page.tsx+[app-rsc]+(ecmascript))
+      製品 - / no-app-frame → unresolved(no-app-frame) | Node の findSourceMap → src/app/hmr-m/page.tsx:8:24 (correct)
+    SQL SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT $0
+      正解 src/app/hmr-m/page.tsx:15:24 | 実行時のフレーム …/[root-of-the-server]__1njhe7qp_hsou._.js:29:142 [HmrM] 生のURLに?moduleId: true (id=[project]/src/app/hmr-m/page.tsx+[app-rsc]+(ecmascript))
+      製品 src/app/hmr-m/page.tsx:8:24 → WRONG | Node の findSourceMap → src/app/hmr-m/page.tsx:15:24 (correct)
+    由来 m-a: linked 候補 poc.regions.name 取得 src/app/hmr-m/page.tsx:8:24 → WRONG(正解 poc.listings.region)
+    由来 m-b: cut / fetch-not-measured  → cut
+
+## S10 lin-a（SQL 1つ）の末尾にコメント
+  /lin-a (200)
+    SQL SELECT id, region FROM poc.listings ORDER BY id LIMIT $0
+      正解 src/app/lin-a/page.tsx:12:24 | 実行時のフレーム …/[root-of-the-server]__1zojl8nvlw_s_._.js:26:142 [LinA] 生のURLに?moduleId: true (id=[project]/src/app/lin-a/page.tsx+[app-rsc]+(ecmascript))
+      製品 - / no-app-frame → unresolved(no-app-frame) | Node の findSourceMap → src/app/lin-a/page.tsx:12:24 (correct)
+    由来 a-region: cut / fetch-not-measured  → cut
+
+# 開発サーバーを停止して起動し直す（.next は消さない。ソースは S9・S10 のまま）
+
+## S11 開発サーバーの再起動後
+  /hmr-m (200)
+    SQL SELECT id, region, plan FROM poc.listings ORDER BY id DESC LIMIT $0
+      正解 src/app/hmr-m/page.tsx:8:24 | 実行時のフレーム …/[root-of-the-server]__1njhe7qp_hsou._.js:29:142 [HmrM] 生のURLに?moduleId: false
+      製品 src/app/hmr-m/page.tsx:8:24 → correct | Node の findSourceMap → src/app/hmr-m/page.tsx:8:24 (correct)
+    SQL SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT $0
+      正解 src/app/hmr-m/page.tsx:15:24 | 実行時のフレーム …/[root-of-the-server]__1njhe7qp_hsou._.js:36:142 [HmrM] 生のURLに?moduleId: false
+      製品 src/app/hmr-m/page.tsx:15:24 → correct | Node の findSourceMap → src/app/hmr-m/page.tsx:15:24 (correct)
+    由来 m-a: linked 候補 poc.listings.region 取得 src/app/hmr-m/page.tsx:8:24 → correct
+    由来 m-b: linked 候補 poc.regions.name 取得 src/app/hmr-m/page.tsx:15:24 → correct
+  /hmr-c (200)
+    SQL SELECT id, plan FROM poc.listings ORDER BY id LIMIT $0
+      正解 src/app/hmr-c/page.tsx:8:24 | 実行時のフレーム …/[root-of-the-server]__20a1r81vij1hz._.js:26:142 [HmrC] 生のURLに?moduleId: false
+      製品 src/app/hmr-c/page.tsx:8:24 → correct | Node の findSourceMap → src/app/hmr-c/page.tsx:8:24 (correct)
+    SQL SELECT id, code FROM poc.regions ORDER BY id LIMIT $0
+      正解 src/components/HmrChild.tsx:5:24 | 実行時のフレーム …/[root-of-the-server]__20a1r81vij1hz._.js:73:142 [HmrChild] 生のURLに?moduleId: false
+      製品 src/components/HmrChild.tsx:5:24 → correct | Node の findSourceMap → src/components/HmrChild.tsx:5:24 (correct)
+    由来 c-plan: linked 候補 poc.listings.plan 取得 src/app/hmr-c/page.tsx:8:24 → correct
+    由来 c-child: linked 候補 poc.regions.code 取得 src/components/HmrChild.tsx:5:24 → correct
+  /hmr-h (200)
+    SQL SELECT id, scale FROM poc.listings ORDER BY id LIMIT $0
+      正解 src/app/hmr-h/page.tsx:8:24 | 実行時のフレーム …/[root-of-the-server]__0ng8g3c10740d._.js:26:142 [HmrH] 生のURLに?moduleId: false
+      製品 src/app/hmr-h/page.tsx:8:24 → correct | Node の findSourceMap → src/app/hmr-h/page.tsx:8:24 (correct)
+    SQL SELECT id, name FROM poc.regions ORDER BY id DESC LIMIT $0
+      正解 src/lib/hmrFetch.ts:5:15 | 実行時のフレーム …/[root-of-the-server]__0ng8g3c10740d._.js:104:133 [fetchHmrRegions] 生のURLに?moduleId: false
+      製品 - / component-not-agreed (located src/lib/hmrFetch.ts:5:15) → unresolved(component-not-agreed) | Node の findSourceMap → src/lib/hmrFetch.ts:5:15 (correct)
+    由来 h-scale: linked 候補 poc.listings.scale 取得 src/app/hmr-h/page.tsx:8:24 → correct
+  /lin-a (200)
+    SQL SELECT id, region FROM poc.listings ORDER BY id LIMIT $0
+      正解 src/app/lin-a/page.tsx:12:24 | 実行時のフレーム …/[root-of-the-server]__1zojl8nvlw_s_._.js:33:142 [LinA] 生のURLに?moduleId: false
+      製品 src/app/lin-a/page.tsx:12:24 → correct | Node の findSourceMap → src/app/lin-a/page.tsx:12:24 (correct)
+    由来 a-region: linked 候補 poc.listings.region 取得 src/app/lin-a/page.tsx:12:24 → correct
+
+# 集計
+  SQL の呼び出し位置（製品）: {"correct":23,"unresolved":11,"WRONG":5}
+  SQL の呼び出し位置（Node の findSourceMap）: {"correct":39}
+  由来（製品の evaluateLineage）: {"correct":23,"cut":7,"WRONG":5}
+  WRONG 呼び出し位置: S5 コメントだけの変更（hmr-m/page.tsx の末尾） /hmr-m SQL「SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT $0」 正解 src/app/hmr-m/page.tsx:14:24 → 製品 src/app/hmr-m/page.tsx:7:24
+  WRONG 呼び出し位置: S6 変更後の再要求（ソースは S5 のまま） /hmr-m SQL「SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT $0」 正解 src/app/hmr-m/page.tsx:14:24 → 製品 src/app/hmr-m/page.tsx:7:24
+  WRONG 呼び出し位置: S7 元に戻す（hmr-m/page.tsx を最初の内容へ） /hmr-m SQL「SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT $0」 正解 src/app/hmr-m/page.tsx:14:24 → 製品 src/app/hmr-m/page.tsx:7:24
+  WRONG 呼び出し位置: S8 SQL 呼び出しより前へコードを追加（HmrM の先頭に1文） /hmr-m SQL「SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT $0」 正解 src/app/hmr-m/page.tsx:15:24 → 製品 src/app/hmr-m/page.tsx:8:24
+  WRONG 呼び出し位置: S9 SQL 呼び出し自体を変更（a の SELECT 句に plan を足す） /hmr-m SQL「SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT $0」 正解 src/app/hmr-m/page.tsx:15:24 → 製品 src/app/hmr-m/page.tsx:8:24
+  WRONG 由来: S5 コメントだけの変更（hmr-m/page.tsx の末尾） /hmr-m m-a → poc.regions.name WRONG(正解 poc.listings.region)
+  WRONG 由来: S6 変更後の再要求（ソースは S5 のまま） /hmr-m m-a → poc.regions.name WRONG(正解 poc.listings.region)
+  WRONG 由来: S7 元に戻す（hmr-m/page.tsx を最初の内容へ） /hmr-m m-a → poc.regions.name WRONG(正解 poc.listings.region)
+  WRONG 由来: S8 SQL 呼び出しより前へコードを追加（HmrM の先頭に1文） /hmr-m m-a → poc.regions.name WRONG(正解 poc.listings.region)
+  WRONG 由来: S9 SQL 呼び出し自体を変更（a の SELECT 句に plan を足す） /hmr-m m-a → poc.regions.name WRONG(正解 poc.listings.region)

@@ -1,0 +1,28 @@
+# hmr-offset-sim 2026-11-03T01:25:32.232Z（予測。実行はしていない）
+# ページ 21 枚をコンパイル: /cards=200 /cards-rsc=200 /flows=200 /flows-rsc=500 /hmr-m=200 /lin-a=200 /lin-b=200 /lin-c=200 /lin-d=200 /lin-e=200 /lin-f=200 /lin-g=200 /lin-x=200 /listings=200 /rsc-db=200 /rsc-dup=200 /rsc-fail=200 /rsc-helper=200 /rsc-parallel=200 /rsc-svc=500 /rsc-svc-fail=500
+unresolved src/app/lin-e/page.tsx:17:24               K=7    → unresolved(no-app-frame)  [[root-of-the-server]__038tbohvl7zyc._.js]
+unresolved src/app/lin-b/page.tsx:19:24               K=2    → unresolved(source-line-mismatch)（戻した位置 src/app/lin-b/page.tsx:16）  [[root-of-the-server]__042efx5u_t080._.js]
+unresolved src/app/lin-b/page.tsx:20:25               K=2    → unresolved(source-line-mismatch)（戻した位置 src/app/lin-b/page.tsx:18）  [[root-of-the-server]__042efx5u_t080._.js]
+unresolved src/app/rsc-parallel/page.tsx:13:10        K=7    → unresolved(no-app-frame)  [[root-of-the-server]__075j2sr6brrq7._.js]
+unresolved src/app/rsc-parallel/page.tsx:14:10        K=7    → unresolved(no-app-frame)  [[root-of-the-server]__075j2sr6brrq7._.js]
+unresolved src/app/rsc-parallel/page.tsx:15:10        K=7    → unresolved(no-app-frame)  [[root-of-the-server]__075j2sr6brrq7._.js]
+unresolved src/app/rsc-db/page.tsx:12:24              K=7    → unresolved(no-app-frame)  [[root-of-the-server]__0wc4lgpodzn0j._.js]
+unresolved src/app/lin-d/page.tsx:17:27               K=7    → unresolved(source-line-mismatch)（戻した位置 src/app/lin-d/page.tsx:12）  [[root-of-the-server]__0wh1r4ttc0uo-._.js]
+unresolved src/app/lin-d/page.tsx:19:24               K=7    → unresolved(source-line-mismatch)（戻した位置 src/app/lin-d/page.tsx:14）  [[root-of-the-server]__0wh1r4ttc0uo-._.js]
+unresolved src/app/lin-d/page.tsx:20:24               K=7    → unresolved(source-line-mismatch)（戻した位置 src/app/lin-d/page.tsx:14）  [[root-of-the-server]__0wh1r4ttc0uo-._.js]
+unresolved src/app/rsc-fail/page.tsx:17:16            K=7    → unresolved(no-app-frame)  [[root-of-the-server]__0zf4szpy7-wo4._.js]
+unresolved src/app/lin-g/page.tsx:19:14               K=7    → unresolved(no-app-frame)  [[root-of-the-server]__10amsw2youqdw._.js]
+unresolved src/app/lin-x/page.tsx:20:26               K=2    → unresolved(source-line-mismatch)（戻した位置 src/app/lin-x/page.tsx:17）  [[root-of-the-server]__10bywhs4-b0s1._.js]
+unresolved src/app/lin-x/page.tsx:21:27               K=2    → unresolved(source-line-mismatch)（戻した位置 src/app/lin-x/page.tsx:19）  [[root-of-the-server]__10bywhs4-b0s1._.js]
+unresolved src/app/lin-c/page.tsx:13:24               K=7    → unresolved(no-app-frame)  [[root-of-the-server]__1an4l-perr9z9._.js]
+unresolved src/app/rsc-helper/page.tsx:13:24          K=7    → unresolved(no-app-frame)  [[root-of-the-server]__1bhoksjjapxvr._.js]
+unresolved src/app/hmr-m/page.tsx:7:24                K=7    → unresolved(no-app-frame)  [[root-of-the-server]__1njhe7qp_hsou._.js]
+WRONG      src/app/hmr-m/page.tsx:14:24               K=7    → src/app/hmr-m/page.tsx:7:24  [[root-of-the-server]__1njhe7qp_hsou._.js]
+unresolved src/app/rsc-dup/page.tsx:13:24             K=2    → unresolved(source-line-mismatch)（戻した位置 src/app/rsc-dup/page.tsx:10）  [[root-of-the-server]__1xd3s_hrwju7m._.js]
+unresolved src/components/ListingCount.tsx:6:24       K=69   → unresolved(source-line-mismatch)（戻した位置 src/app/rsc-dup/page.tsx:7）  [[root-of-the-server]__1xd3s_hrwju7m._.js]
+unresolved src/app/lin-f/page.tsx:15:24               K=2    → unresolved(source-line-mismatch)（戻した位置 src/app/lin-f/page.tsx:12）  [[root-of-the-server]__1yx9w0j39gcr6._.js]
+unresolved src/components/lin/LinFChild.tsx:9:24      K=72   → unresolved(source-line-mismatch)（戻した位置 src/app/lin-f/page.tsx:10）  [[root-of-the-server]__1yx9w0j39gcr6._.js]
+unresolved src/app/lin-a/page.tsx:12:24               K=7    → unresolved(no-app-frame)  [[root-of-the-server]__1zojl8nvlw_s_._.js]
+
+# 集計（既存の題材の呼び出し 21 件。/hmr-m は除く）: {"unresolved":21}
+# unresolved の内訳: {"unresolved(no-app-frame)":10,"unresolved(source-line-mismatch)":11}

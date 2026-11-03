@@ -1,0 +1,1233 @@
+{
+  "mode": "no-server-fast-refresh",
+  "steps": [
+    {
+      "label": "S0 起動直後（変更なし）",
+      "results": [
+        {
+          "path": "/hmr-m",
+          "status": 200,
+          "rootFound": true,
+          "rows": [
+            {
+              "sql": "SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $0",
+              "truth": "src/app/hmr-m/page.tsx:7:24",
+              "frame": "…/[root-of-the-server]__1njhe7qp_hsou._.js:28:142",
+              "fn": "HmrM",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/app/hmr-m/page.tsx:7:24",
+              "nodeFound": true,
+              "product": "src/app/hmr-m/page.tsx:7:24",
+              "failure": null,
+              "located": "src/app/hmr-m/page.tsx:7:24",
+              "verdict": "correct",
+              "nodeVerdict": "correct"
+            },
+            {
+              "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT $0",
+              "truth": "src/app/hmr-m/page.tsx:14:24",
+              "frame": "…/[root-of-the-server]__1njhe7qp_hsou._.js:35:142",
+              "fn": "HmrM",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/app/hmr-m/page.tsx:14:24",
+              "nodeFound": true,
+              "product": "src/app/hmr-m/page.tsx:14:24",
+              "failure": null,
+              "located": "src/app/hmr-m/page.tsx:14:24",
+              "verdict": "correct",
+              "nodeVerdict": "correct"
+            }
+          ],
+          "lineage": [
+            {
+              "field": "m-a",
+              "status": "linked",
+              "cut": null,
+              "cutDetail": null,
+              "candidates": [
+                "poc.listings.region"
+              ],
+              "fetch": "src/app/hmr-m/page.tsx:7:24",
+              "verdict": "correct"
+            },
+            {
+              "field": "m-b",
+              "status": "linked",
+              "cut": null,
+              "cutDetail": null,
+              "candidates": [
+                "poc.regions.name"
+              ],
+              "fetch": "src/app/hmr-m/page.tsx:14:24",
+              "verdict": "correct"
+            }
+          ]
+        },
+        {
+          "path": "/hmr-c",
+          "status": 200,
+          "rootFound": true,
+          "rows": [
+            {
+              "sql": "SELECT id, plan FROM poc.listings ORDER BY id LIMIT $0",
+              "truth": "src/app/hmr-c/page.tsx:8:24",
+              "frame": "…/[root-of-the-server]__20a1r81vij1hz._.js:26:142",
+              "fn": "HmrC",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/app/hmr-c/page.tsx:8:24",
+              "nodeFound": true,
+              "product": "src/app/hmr-c/page.tsx:8:24",
+              "failure": null,
+              "located": "src/app/hmr-c/page.tsx:8:24",
+              "verdict": "correct",
+              "nodeVerdict": "correct"
+            },
+            {
+              "sql": "SELECT id, code FROM poc.regions ORDER BY id LIMIT $0",
+              "truth": "src/components/HmrChild.tsx:5:24",
+              "frame": "…/[root-of-the-server]__20a1r81vij1hz._.js:73:142",
+              "fn": "HmrChild",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/components/HmrChild.tsx:5:24",
+              "nodeFound": true,
+              "product": "src/components/HmrChild.tsx:5:24",
+              "failure": null,
+              "located": "src/components/HmrChild.tsx:5:24",
+              "verdict": "correct",
+              "nodeVerdict": "correct"
+            }
+          ],
+          "lineage": [
+            {
+              "field": "c-plan",
+              "status": "linked",
+              "cut": null,
+              "cutDetail": null,
+              "candidates": [
+                "poc.listings.plan"
+              ],
+              "fetch": "src/app/hmr-c/page.tsx:8:24",
+              "verdict": "correct"
+            },
+            {
+              "field": "c-child",
+              "status": "linked",
+              "cut": null,
+              "cutDetail": null,
+              "candidates": [
+                "poc.regions.code"
+              ],
+              "fetch": "src/components/HmrChild.tsx:5:24",
+              "verdict": "correct"
+            }
+          ]
+        },
+        {
+          "path": "/hmr-h",
+          "status": 200,
+          "rootFound": true,
+          "rows": [
+            {
+              "sql": "SELECT id, scale FROM poc.listings ORDER BY id LIMIT $0",
+              "truth": "src/app/hmr-h/page.tsx:8:24",
+              "frame": "…/[root-of-the-server]__0ng8g3c10740d._.js:26:142",
+              "fn": "HmrH",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/app/hmr-h/page.tsx:8:24",
+              "nodeFound": true,
+              "product": "src/app/hmr-h/page.tsx:8:24",
+              "failure": null,
+              "located": "src/app/hmr-h/page.tsx:8:24",
+              "verdict": "correct",
+              "nodeVerdict": "correct"
+            },
+            {
+              "sql": "SELECT id, name FROM poc.regions ORDER BY id DESC LIMIT $0",
+              "truth": "src/lib/hmrFetch.ts:5:15",
+              "frame": "…/[root-of-the-server]__0ng8g3c10740d._.js:104:133",
+              "fn": "fetchHmrRegions",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/lib/hmrFetch.ts:5:15",
+              "nodeFound": true,
+              "product": null,
+              "failure": "component-not-agreed",
+              "located": "src/lib/hmrFetch.ts:5:15",
+              "verdict": "unresolved(component-not-agreed)",
+              "nodeVerdict": "correct"
+            }
+          ],
+          "lineage": [
+            {
+              "field": "h-scale",
+              "status": "linked",
+              "cut": null,
+              "cutDetail": null,
+              "candidates": [
+                "poc.listings.scale"
+              ],
+              "fetch": "src/app/hmr-h/page.tsx:8:24",
+              "verdict": "correct"
+            }
+          ]
+        },
+        {
+          "path": "/lin-a",
+          "status": 200,
+          "rootFound": true,
+          "rows": [
+            {
+              "sql": "SELECT id, region FROM poc.listings ORDER BY id LIMIT $0",
+              "truth": "src/app/lin-a/page.tsx:12:24",
+              "frame": "…/[root-of-the-server]__1zojl8nvlw_s_._.js:33:142",
+              "fn": "LinA",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/app/lin-a/page.tsx:12:24",
+              "nodeFound": true,
+              "product": "src/app/lin-a/page.tsx:12:24",
+              "failure": null,
+              "located": "src/app/lin-a/page.tsx:12:24",
+              "verdict": "correct",
+              "nodeVerdict": "correct"
+            }
+          ],
+          "lineage": [
+            {
+              "field": "a-region",
+              "status": "linked",
+              "cut": null,
+              "cutDetail": null,
+              "candidates": [
+                "poc.listings.region"
+              ],
+              "fetch": "src/app/lin-a/page.tsx:12:24",
+              "verdict": "correct"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "S1 無関係なページを変更（listings/page.tsx の末尾にコメント）",
+      "results": [
+        {
+          "path": "/hmr-m",
+          "status": 200,
+          "rootFound": true,
+          "rows": [
+            {
+              "sql": "SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $0",
+              "truth": "src/app/hmr-m/page.tsx:7:24",
+              "frame": "…/[root-of-the-server]__1njhe7qp_hsou._.js:28:142",
+              "fn": "HmrM",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/app/hmr-m/page.tsx:7:24",
+              "nodeFound": true,
+              "product": "src/app/hmr-m/page.tsx:7:24",
+              "failure": null,
+              "located": "src/app/hmr-m/page.tsx:7:24",
+              "verdict": "correct",
+              "nodeVerdict": "correct"
+            },
+            {
+              "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT $0",
+              "truth": "src/app/hmr-m/page.tsx:14:24",
+              "frame": "…/[root-of-the-server]__1njhe7qp_hsou._.js:35:142",
+              "fn": "HmrM",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/app/hmr-m/page.tsx:14:24",
+              "nodeFound": true,
+              "product": "src/app/hmr-m/page.tsx:14:24",
+              "failure": null,
+              "located": "src/app/hmr-m/page.tsx:14:24",
+              "verdict": "correct",
+              "nodeVerdict": "correct"
+            }
+          ],
+          "lineage": [
+            {
+              "field": "m-a",
+              "status": "linked",
+              "cut": null,
+              "cutDetail": null,
+              "candidates": [
+                "poc.listings.region"
+              ],
+              "fetch": "src/app/hmr-m/page.tsx:7:24",
+              "verdict": "correct"
+            },
+            {
+              "field": "m-b",
+              "status": "linked",
+              "cut": null,
+              "cutDetail": null,
+              "candidates": [
+                "poc.regions.name"
+              ],
+              "fetch": "src/app/hmr-m/page.tsx:14:24",
+              "verdict": "correct"
+            }
+          ]
+        },
+        {
+          "path": "/hmr-c",
+          "status": 200,
+          "rootFound": true,
+          "rows": [
+            {
+              "sql": "SELECT id, plan FROM poc.listings ORDER BY id LIMIT $0",
+              "truth": "src/app/hmr-c/page.tsx:8:24",
+              "frame": "…/[root-of-the-server]__20a1r81vij1hz._.js:26:142",
+              "fn": "HmrC",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/app/hmr-c/page.tsx:8:24",
+              "nodeFound": true,
+              "product": "src/app/hmr-c/page.tsx:8:24",
+              "failure": null,
+              "located": "src/app/hmr-c/page.tsx:8:24",
+              "verdict": "correct",
+              "nodeVerdict": "correct"
+            },
+            {
+              "sql": "SELECT id, code FROM poc.regions ORDER BY id LIMIT $0",
+              "truth": "src/components/HmrChild.tsx:5:24",
+              "frame": "…/[root-of-the-server]__20a1r81vij1hz._.js:73:142",
+              "fn": "HmrChild",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/components/HmrChild.tsx:5:24",
+              "nodeFound": true,
+              "product": "src/components/HmrChild.tsx:5:24",
+              "failure": null,
+              "located": "src/components/HmrChild.tsx:5:24",
+              "verdict": "correct",
+              "nodeVerdict": "correct"
+            }
+          ],
+          "lineage": [
+            {
+              "field": "c-plan",
+              "status": "linked",
+              "cut": null,
+              "cutDetail": null,
+              "candidates": [
+                "poc.listings.plan"
+              ],
+              "fetch": "src/app/hmr-c/page.tsx:8:24",
+              "verdict": "correct"
+            },
+            {
+              "field": "c-child",
+              "status": "linked",
+              "cut": null,
+              "cutDetail": null,
+              "candidates": [
+                "poc.regions.code"
+              ],
+              "fetch": "src/components/HmrChild.tsx:5:24",
+              "verdict": "correct"
+            }
+          ]
+        },
+        {
+          "path": "/hmr-h",
+          "status": 200,
+          "rootFound": true,
+          "rows": [
+            {
+              "sql": "SELECT id, scale FROM poc.listings ORDER BY id LIMIT $0",
+              "truth": "src/app/hmr-h/page.tsx:8:24",
+              "frame": "…/[root-of-the-server]__0ng8g3c10740d._.js:26:142",
+              "fn": "HmrH",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/app/hmr-h/page.tsx:8:24",
+              "nodeFound": true,
+              "product": "src/app/hmr-h/page.tsx:8:24",
+              "failure": null,
+              "located": "src/app/hmr-h/page.tsx:8:24",
+              "verdict": "correct",
+              "nodeVerdict": "correct"
+            },
+            {
+              "sql": "SELECT id, name FROM poc.regions ORDER BY id DESC LIMIT $0",
+              "truth": "src/lib/hmrFetch.ts:5:15",
+              "frame": "…/[root-of-the-server]__0ng8g3c10740d._.js:104:133",
+              "fn": "fetchHmrRegions",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/lib/hmrFetch.ts:5:15",
+              "nodeFound": true,
+              "product": null,
+              "failure": "component-not-agreed",
+              "located": "src/lib/hmrFetch.ts:5:15",
+              "verdict": "unresolved(component-not-agreed)",
+              "nodeVerdict": "correct"
+            }
+          ],
+          "lineage": [
+            {
+              "field": "h-scale",
+              "status": "linked",
+              "cut": null,
+              "cutDetail": null,
+              "candidates": [
+                "poc.listings.scale"
+              ],
+              "fetch": "src/app/hmr-h/page.tsx:8:24",
+              "verdict": "correct"
+            }
+          ]
+        },
+        {
+          "path": "/lin-a",
+          "status": 200,
+          "rootFound": true,
+          "rows": [
+            {
+              "sql": "SELECT id, region FROM poc.listings ORDER BY id LIMIT $0",
+              "truth": "src/app/lin-a/page.tsx:12:24",
+              "frame": "…/[root-of-the-server]__1zojl8nvlw_s_._.js:33:142",
+              "fn": "LinA",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/app/lin-a/page.tsx:12:24",
+              "nodeFound": true,
+              "product": "src/app/lin-a/page.tsx:12:24",
+              "failure": null,
+              "located": "src/app/lin-a/page.tsx:12:24",
+              "verdict": "correct",
+              "nodeVerdict": "correct"
+            }
+          ],
+          "lineage": [
+            {
+              "field": "a-region",
+              "status": "linked",
+              "cut": null,
+              "cutDetail": null,
+              "candidates": [
+                "poc.listings.region"
+              ],
+              "fetch": "src/app/lin-a/page.tsx:12:24",
+              "verdict": "correct"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "S2 共有の lib/db.ts を変更（末尾にコメント）",
+      "results": [
+        {
+          "path": "/hmr-m",
+          "status": 200,
+          "rootFound": true,
+          "rows": [
+            {
+              "sql": "SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $0",
+              "truth": "src/app/hmr-m/page.tsx:7:24",
+              "frame": "…/[root-of-the-server]__1njhe7qp_hsou._.js:28:142",
+              "fn": "HmrM",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/app/hmr-m/page.tsx:7:24",
+              "nodeFound": true,
+              "product": "src/app/hmr-m/page.tsx:7:24",
+              "failure": null,
+              "located": "src/app/hmr-m/page.tsx:7:24",
+              "verdict": "correct",
+              "nodeVerdict": "correct"
+            },
+            {
+              "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT $0",
+              "truth": "src/app/hmr-m/page.tsx:14:24",
+              "frame": "…/[root-of-the-server]__1njhe7qp_hsou._.js:35:142",
+              "fn": "HmrM",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/app/hmr-m/page.tsx:14:24",
+              "nodeFound": true,
+              "product": "src/app/hmr-m/page.tsx:14:24",
+              "failure": null,
+              "located": "src/app/hmr-m/page.tsx:14:24",
+              "verdict": "correct",
+              "nodeVerdict": "correct"
+            }
+          ],
+          "lineage": [
+            {
+              "field": "m-a",
+              "status": "linked",
+              "cut": null,
+              "cutDetail": null,
+              "candidates": [
+                "poc.listings.region"
+              ],
+              "fetch": "src/app/hmr-m/page.tsx:7:24",
+              "verdict": "correct"
+            },
+            {
+              "field": "m-b",
+              "status": "linked",
+              "cut": null,
+              "cutDetail": null,
+              "candidates": [
+                "poc.regions.name"
+              ],
+              "fetch": "src/app/hmr-m/page.tsx:14:24",
+              "verdict": "correct"
+            }
+          ]
+        },
+        {
+          "path": "/lin-a",
+          "status": 200,
+          "rootFound": true,
+          "rows": [
+            {
+              "sql": "SELECT id, region FROM poc.listings ORDER BY id LIMIT $0",
+              "truth": "src/app/lin-a/page.tsx:12:24",
+              "frame": "…/[root-of-the-server]__1zojl8nvlw_s_._.js:33:142",
+              "fn": "LinA",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/app/lin-a/page.tsx:12:24",
+              "nodeFound": true,
+              "product": "src/app/lin-a/page.tsx:12:24",
+              "failure": null,
+              "located": "src/app/lin-a/page.tsx:12:24",
+              "verdict": "correct",
+              "nodeVerdict": "correct"
+            }
+          ],
+          "lineage": [
+            {
+              "field": "a-region",
+              "status": "linked",
+              "cut": null,
+              "cutDetail": null,
+              "candidates": [
+                "poc.listings.region"
+              ],
+              "fetch": "src/app/lin-a/page.tsx:12:24",
+              "verdict": "correct"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "S3 別ファイルの子コンポーネントを変更（HmrChild.tsx の末尾にコメント）",
+      "results": [
+        {
+          "path": "/hmr-c",
+          "status": 200,
+          "rootFound": true,
+          "rows": [
+            {
+              "sql": "SELECT id, plan FROM poc.listings ORDER BY id LIMIT $0",
+              "truth": "src/app/hmr-c/page.tsx:8:24",
+              "frame": "…/[root-of-the-server]__20a1r81vij1hz._.js:26:142",
+              "fn": "HmrC",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/app/hmr-c/page.tsx:8:24",
+              "nodeFound": true,
+              "product": "src/app/hmr-c/page.tsx:8:24",
+              "failure": null,
+              "located": "src/app/hmr-c/page.tsx:8:24",
+              "verdict": "correct",
+              "nodeVerdict": "correct"
+            },
+            {
+              "sql": "SELECT id, code FROM poc.regions ORDER BY id LIMIT $0",
+              "truth": "src/components/HmrChild.tsx:5:24",
+              "frame": "…/[root-of-the-server]__20a1r81vij1hz._.js:73:142",
+              "fn": "HmrChild",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/components/HmrChild.tsx:5:24",
+              "nodeFound": true,
+              "product": "src/components/HmrChild.tsx:5:24",
+              "failure": null,
+              "located": "src/components/HmrChild.tsx:5:24",
+              "verdict": "correct",
+              "nodeVerdict": "correct"
+            }
+          ],
+          "lineage": [
+            {
+              "field": "c-plan",
+              "status": "linked",
+              "cut": null,
+              "cutDetail": null,
+              "candidates": [
+                "poc.listings.plan"
+              ],
+              "fetch": "src/app/hmr-c/page.tsx:8:24",
+              "verdict": "correct"
+            },
+            {
+              "field": "c-child",
+              "status": "linked",
+              "cut": null,
+              "cutDetail": null,
+              "candidates": [
+                "poc.regions.code"
+              ],
+              "fetch": "src/components/HmrChild.tsx:5:24",
+              "verdict": "correct"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "S4 別ファイルの取得関数を変更（hmrFetch.ts の末尾にコメント）",
+      "results": [
+        {
+          "path": "/hmr-h",
+          "status": 200,
+          "rootFound": true,
+          "rows": [
+            {
+              "sql": "SELECT id, scale FROM poc.listings ORDER BY id LIMIT $0",
+              "truth": "src/app/hmr-h/page.tsx:8:24",
+              "frame": "…/[root-of-the-server]__0ng8g3c10740d._.js:26:142",
+              "fn": "HmrH",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/app/hmr-h/page.tsx:8:24",
+              "nodeFound": true,
+              "product": "src/app/hmr-h/page.tsx:8:24",
+              "failure": null,
+              "located": "src/app/hmr-h/page.tsx:8:24",
+              "verdict": "correct",
+              "nodeVerdict": "correct"
+            },
+            {
+              "sql": "SELECT id, name FROM poc.regions ORDER BY id DESC LIMIT $0",
+              "truth": "src/lib/hmrFetch.ts:5:15",
+              "frame": "…/[root-of-the-server]__0ng8g3c10740d._.js:104:133",
+              "fn": "fetchHmrRegions",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/lib/hmrFetch.ts:5:15",
+              "nodeFound": true,
+              "product": null,
+              "failure": "component-not-agreed",
+              "located": "src/lib/hmrFetch.ts:5:15",
+              "verdict": "unresolved(component-not-agreed)",
+              "nodeVerdict": "correct"
+            }
+          ],
+          "lineage": [
+            {
+              "field": "h-scale",
+              "status": "linked",
+              "cut": null,
+              "cutDetail": null,
+              "candidates": [
+                "poc.listings.scale"
+              ],
+              "fetch": "src/app/hmr-h/page.tsx:8:24",
+              "verdict": "correct"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "S5 コメントだけの変更（hmr-m/page.tsx の末尾）",
+      "results": [
+        {
+          "path": "/hmr-m",
+          "status": 200,
+          "rootFound": true,
+          "rows": [
+            {
+              "sql": "SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $0",
+              "truth": "src/app/hmr-m/page.tsx:7:24",
+              "frame": "…/[root-of-the-server]__1njhe7qp_hsou._.js:28:142",
+              "fn": "HmrM",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/app/hmr-m/page.tsx:7:24",
+              "nodeFound": true,
+              "product": "src/app/hmr-m/page.tsx:7:24",
+              "failure": null,
+              "located": "src/app/hmr-m/page.tsx:7:24",
+              "verdict": "correct",
+              "nodeVerdict": "correct"
+            },
+            {
+              "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT $0",
+              "truth": "src/app/hmr-m/page.tsx:14:24",
+              "frame": "…/[root-of-the-server]__1njhe7qp_hsou._.js:35:142",
+              "fn": "HmrM",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/app/hmr-m/page.tsx:14:24",
+              "nodeFound": true,
+              "product": "src/app/hmr-m/page.tsx:14:24",
+              "failure": null,
+              "located": "src/app/hmr-m/page.tsx:14:24",
+              "verdict": "correct",
+              "nodeVerdict": "correct"
+            }
+          ],
+          "lineage": [
+            {
+              "field": "m-a",
+              "status": "linked",
+              "cut": null,
+              "cutDetail": null,
+              "candidates": [
+                "poc.listings.region"
+              ],
+              "fetch": "src/app/hmr-m/page.tsx:7:24",
+              "verdict": "correct"
+            },
+            {
+              "field": "m-b",
+              "status": "linked",
+              "cut": null,
+              "cutDetail": null,
+              "candidates": [
+                "poc.regions.name"
+              ],
+              "fetch": "src/app/hmr-m/page.tsx:14:24",
+              "verdict": "correct"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "S6 変更後の再要求（ソースは S5 のまま）",
+      "results": [
+        {
+          "path": "/hmr-m",
+          "status": 200,
+          "rootFound": true,
+          "rows": [
+            {
+              "sql": "SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $0",
+              "truth": "src/app/hmr-m/page.tsx:7:24",
+              "frame": "…/[root-of-the-server]__1njhe7qp_hsou._.js:28:142",
+              "fn": "HmrM",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/app/hmr-m/page.tsx:7:24",
+              "nodeFound": true,
+              "product": "src/app/hmr-m/page.tsx:7:24",
+              "failure": null,
+              "located": "src/app/hmr-m/page.tsx:7:24",
+              "verdict": "correct",
+              "nodeVerdict": "correct"
+            },
+            {
+              "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT $0",
+              "truth": "src/app/hmr-m/page.tsx:14:24",
+              "frame": "…/[root-of-the-server]__1njhe7qp_hsou._.js:35:142",
+              "fn": "HmrM",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/app/hmr-m/page.tsx:14:24",
+              "nodeFound": true,
+              "product": "src/app/hmr-m/page.tsx:14:24",
+              "failure": null,
+              "located": "src/app/hmr-m/page.tsx:14:24",
+              "verdict": "correct",
+              "nodeVerdict": "correct"
+            }
+          ],
+          "lineage": [
+            {
+              "field": "m-a",
+              "status": "linked",
+              "cut": null,
+              "cutDetail": null,
+              "candidates": [
+                "poc.listings.region"
+              ],
+              "fetch": "src/app/hmr-m/page.tsx:7:24",
+              "verdict": "correct"
+            },
+            {
+              "field": "m-b",
+              "status": "linked",
+              "cut": null,
+              "cutDetail": null,
+              "candidates": [
+                "poc.regions.name"
+              ],
+              "fetch": "src/app/hmr-m/page.tsx:14:24",
+              "verdict": "correct"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "S7 元に戻す（hmr-m/page.tsx を最初の内容へ）",
+      "results": [
+        {
+          "path": "/hmr-m",
+          "status": 200,
+          "rootFound": true,
+          "rows": [
+            {
+              "sql": "SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $0",
+              "truth": "src/app/hmr-m/page.tsx:7:24",
+              "frame": "…/[root-of-the-server]__1njhe7qp_hsou._.js:28:142",
+              "fn": "HmrM",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/app/hmr-m/page.tsx:7:24",
+              "nodeFound": true,
+              "product": "src/app/hmr-m/page.tsx:7:24",
+              "failure": null,
+              "located": "src/app/hmr-m/page.tsx:7:24",
+              "verdict": "correct",
+              "nodeVerdict": "correct"
+            },
+            {
+              "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT $0",
+              "truth": "src/app/hmr-m/page.tsx:14:24",
+              "frame": "…/[root-of-the-server]__1njhe7qp_hsou._.js:35:142",
+              "fn": "HmrM",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/app/hmr-m/page.tsx:14:24",
+              "nodeFound": true,
+              "product": "src/app/hmr-m/page.tsx:14:24",
+              "failure": null,
+              "located": "src/app/hmr-m/page.tsx:14:24",
+              "verdict": "correct",
+              "nodeVerdict": "correct"
+            }
+          ],
+          "lineage": [
+            {
+              "field": "m-a",
+              "status": "linked",
+              "cut": null,
+              "cutDetail": null,
+              "candidates": [
+                "poc.listings.region"
+              ],
+              "fetch": "src/app/hmr-m/page.tsx:7:24",
+              "verdict": "correct"
+            },
+            {
+              "field": "m-b",
+              "status": "linked",
+              "cut": null,
+              "cutDetail": null,
+              "candidates": [
+                "poc.regions.name"
+              ],
+              "fetch": "src/app/hmr-m/page.tsx:14:24",
+              "verdict": "correct"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "S8 SQL 呼び出しより前へコードを追加（HmrM の先頭に1文）",
+      "results": [
+        {
+          "path": "/hmr-m",
+          "status": 200,
+          "rootFound": true,
+          "rows": [
+            {
+              "sql": "SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $0",
+              "truth": "src/app/hmr-m/page.tsx:8:24",
+              "frame": "…/[root-of-the-server]__1njhe7qp_hsou._.js:29:142",
+              "fn": "HmrM",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/app/hmr-m/page.tsx:8:24",
+              "nodeFound": true,
+              "product": "src/app/hmr-m/page.tsx:8:24",
+              "failure": null,
+              "located": "src/app/hmr-m/page.tsx:8:24",
+              "verdict": "correct",
+              "nodeVerdict": "correct"
+            },
+            {
+              "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT $0",
+              "truth": "src/app/hmr-m/page.tsx:15:24",
+              "frame": "…/[root-of-the-server]__1njhe7qp_hsou._.js:36:142",
+              "fn": "HmrM",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/app/hmr-m/page.tsx:15:24",
+              "nodeFound": true,
+              "product": "src/app/hmr-m/page.tsx:15:24",
+              "failure": null,
+              "located": "src/app/hmr-m/page.tsx:15:24",
+              "verdict": "correct",
+              "nodeVerdict": "correct"
+            }
+          ],
+          "lineage": [
+            {
+              "field": "m-a",
+              "status": "linked",
+              "cut": null,
+              "cutDetail": null,
+              "candidates": [
+                "poc.listings.region"
+              ],
+              "fetch": "src/app/hmr-m/page.tsx:8:24",
+              "verdict": "correct"
+            },
+            {
+              "field": "m-b",
+              "status": "linked",
+              "cut": null,
+              "cutDetail": null,
+              "candidates": [
+                "poc.regions.name"
+              ],
+              "fetch": "src/app/hmr-m/page.tsx:15:24",
+              "verdict": "correct"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "S9 SQL 呼び出し自体を変更（a の SELECT 句に plan を足す）",
+      "results": [
+        {
+          "path": "/hmr-m",
+          "status": 200,
+          "rootFound": true,
+          "rows": [
+            {
+              "sql": "SELECT id, region, plan FROM poc.listings ORDER BY id DESC LIMIT $0",
+              "truth": "src/app/hmr-m/page.tsx:8:24",
+              "frame": "…/[root-of-the-server]__1njhe7qp_hsou._.js:29:142",
+              "fn": "HmrM",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/app/hmr-m/page.tsx:8:24",
+              "nodeFound": true,
+              "product": "src/app/hmr-m/page.tsx:8:24",
+              "failure": null,
+              "located": "src/app/hmr-m/page.tsx:8:24",
+              "verdict": "correct",
+              "nodeVerdict": "correct"
+            },
+            {
+              "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT $0",
+              "truth": "src/app/hmr-m/page.tsx:15:24",
+              "frame": "…/[root-of-the-server]__1njhe7qp_hsou._.js:36:142",
+              "fn": "HmrM",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/app/hmr-m/page.tsx:15:24",
+              "nodeFound": true,
+              "product": "src/app/hmr-m/page.tsx:15:24",
+              "failure": null,
+              "located": "src/app/hmr-m/page.tsx:15:24",
+              "verdict": "correct",
+              "nodeVerdict": "correct"
+            }
+          ],
+          "lineage": [
+            {
+              "field": "m-a",
+              "status": "linked",
+              "cut": null,
+              "cutDetail": null,
+              "candidates": [
+                "poc.listings.region"
+              ],
+              "fetch": "src/app/hmr-m/page.tsx:8:24",
+              "verdict": "correct"
+            },
+            {
+              "field": "m-b",
+              "status": "linked",
+              "cut": null,
+              "cutDetail": null,
+              "candidates": [
+                "poc.regions.name"
+              ],
+              "fetch": "src/app/hmr-m/page.tsx:15:24",
+              "verdict": "correct"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "S10 lin-a（SQL 1つ）の末尾にコメント",
+      "results": [
+        {
+          "path": "/lin-a",
+          "status": 200,
+          "rootFound": true,
+          "rows": [
+            {
+              "sql": "SELECT id, region FROM poc.listings ORDER BY id LIMIT $0",
+              "truth": "src/app/lin-a/page.tsx:12:24",
+              "frame": "…/[root-of-the-server]__1zojl8nvlw_s_._.js:33:142",
+              "fn": "LinA",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/app/lin-a/page.tsx:12:24",
+              "nodeFound": true,
+              "product": "src/app/lin-a/page.tsx:12:24",
+              "failure": null,
+              "located": "src/app/lin-a/page.tsx:12:24",
+              "verdict": "correct",
+              "nodeVerdict": "correct"
+            }
+          ],
+          "lineage": [
+            {
+              "field": "a-region",
+              "status": "linked",
+              "cut": null,
+              "cutDetail": null,
+              "candidates": [
+                "poc.listings.region"
+              ],
+              "fetch": "src/app/lin-a/page.tsx:12:24",
+              "verdict": "correct"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "S11 開発サーバーの再起動後",
+      "results": [
+        {
+          "path": "/hmr-m",
+          "status": 200,
+          "rootFound": true,
+          "rows": [
+            {
+              "sql": "SELECT id, region, plan FROM poc.listings ORDER BY id DESC LIMIT $0",
+              "truth": "src/app/hmr-m/page.tsx:8:24",
+              "frame": "…/[root-of-the-server]__1njhe7qp_hsou._.js:29:142",
+              "fn": "HmrM",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/app/hmr-m/page.tsx:8:24",
+              "nodeFound": true,
+              "product": "src/app/hmr-m/page.tsx:8:24",
+              "failure": null,
+              "located": "src/app/hmr-m/page.tsx:8:24",
+              "verdict": "correct",
+              "nodeVerdict": "correct"
+            },
+            {
+              "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT $0",
+              "truth": "src/app/hmr-m/page.tsx:15:24",
+              "frame": "…/[root-of-the-server]__1njhe7qp_hsou._.js:36:142",
+              "fn": "HmrM",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/app/hmr-m/page.tsx:15:24",
+              "nodeFound": true,
+              "product": "src/app/hmr-m/page.tsx:15:24",
+              "failure": null,
+              "located": "src/app/hmr-m/page.tsx:15:24",
+              "verdict": "correct",
+              "nodeVerdict": "correct"
+            }
+          ],
+          "lineage": [
+            {
+              "field": "m-a",
+              "status": "linked",
+              "cut": null,
+              "cutDetail": null,
+              "candidates": [
+                "poc.listings.region"
+              ],
+              "fetch": "src/app/hmr-m/page.tsx:8:24",
+              "verdict": "correct"
+            },
+            {
+              "field": "m-b",
+              "status": "linked",
+              "cut": null,
+              "cutDetail": null,
+              "candidates": [
+                "poc.regions.name"
+              ],
+              "fetch": "src/app/hmr-m/page.tsx:15:24",
+              "verdict": "correct"
+            }
+          ]
+        },
+        {
+          "path": "/hmr-c",
+          "status": 200,
+          "rootFound": true,
+          "rows": [
+            {
+              "sql": "SELECT id, plan FROM poc.listings ORDER BY id LIMIT $0",
+              "truth": "src/app/hmr-c/page.tsx:8:24",
+              "frame": "…/[root-of-the-server]__20a1r81vij1hz._.js:26:142",
+              "fn": "HmrC",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/app/hmr-c/page.tsx:8:24",
+              "nodeFound": true,
+              "product": "src/app/hmr-c/page.tsx:8:24",
+              "failure": null,
+              "located": "src/app/hmr-c/page.tsx:8:24",
+              "verdict": "correct",
+              "nodeVerdict": "correct"
+            },
+            {
+              "sql": "SELECT id, code FROM poc.regions ORDER BY id LIMIT $0",
+              "truth": "src/components/HmrChild.tsx:5:24",
+              "frame": "…/[root-of-the-server]__20a1r81vij1hz._.js:73:142",
+              "fn": "HmrChild",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/components/HmrChild.tsx:5:24",
+              "nodeFound": true,
+              "product": "src/components/HmrChild.tsx:5:24",
+              "failure": null,
+              "located": "src/components/HmrChild.tsx:5:24",
+              "verdict": "correct",
+              "nodeVerdict": "correct"
+            }
+          ],
+          "lineage": [
+            {
+              "field": "c-plan",
+              "status": "linked",
+              "cut": null,
+              "cutDetail": null,
+              "candidates": [
+                "poc.listings.plan"
+              ],
+              "fetch": "src/app/hmr-c/page.tsx:8:24",
+              "verdict": "correct"
+            },
+            {
+              "field": "c-child",
+              "status": "linked",
+              "cut": null,
+              "cutDetail": null,
+              "candidates": [
+                "poc.regions.code"
+              ],
+              "fetch": "src/components/HmrChild.tsx:5:24",
+              "verdict": "correct"
+            }
+          ]
+        },
+        {
+          "path": "/hmr-h",
+          "status": 200,
+          "rootFound": true,
+          "rows": [
+            {
+              "sql": "SELECT id, scale FROM poc.listings ORDER BY id LIMIT $0",
+              "truth": "src/app/hmr-h/page.tsx:8:24",
+              "frame": "…/[root-of-the-server]__0ng8g3c10740d._.js:26:142",
+              "fn": "HmrH",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/app/hmr-h/page.tsx:8:24",
+              "nodeFound": true,
+              "product": "src/app/hmr-h/page.tsx:8:24",
+              "failure": null,
+              "located": "src/app/hmr-h/page.tsx:8:24",
+              "verdict": "correct",
+              "nodeVerdict": "correct"
+            },
+            {
+              "sql": "SELECT id, name FROM poc.regions ORDER BY id DESC LIMIT $0",
+              "truth": "src/lib/hmrFetch.ts:5:15",
+              "frame": "…/[root-of-the-server]__0ng8g3c10740d._.js:104:133",
+              "fn": "fetchHmrRegions",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/lib/hmrFetch.ts:5:15",
+              "nodeFound": true,
+              "product": null,
+              "failure": "component-not-agreed",
+              "located": "src/lib/hmrFetch.ts:5:15",
+              "verdict": "unresolved(component-not-agreed)",
+              "nodeVerdict": "correct"
+            }
+          ],
+          "lineage": [
+            {
+              "field": "h-scale",
+              "status": "linked",
+              "cut": null,
+              "cutDetail": null,
+              "candidates": [
+                "poc.listings.scale"
+              ],
+              "fetch": "src/app/hmr-h/page.tsx:8:24",
+              "verdict": "correct"
+            }
+          ]
+        },
+        {
+          "path": "/lin-a",
+          "status": 200,
+          "rootFound": true,
+          "rows": [
+            {
+              "sql": "SELECT id, region FROM poc.listings ORDER BY id LIMIT $0",
+              "truth": "src/app/lin-a/page.tsx:12:24",
+              "frame": "…/[root-of-the-server]__1zojl8nvlw_s_._.js:33:142",
+              "fn": "LinA",
+              "rawHasQuery": false,
+              "moduleId": null,
+              "node": "src/app/lin-a/page.tsx:12:24",
+              "nodeFound": true,
+              "product": "src/app/lin-a/page.tsx:12:24",
+              "failure": null,
+              "located": "src/app/lin-a/page.tsx:12:24",
+              "verdict": "correct",
+              "nodeVerdict": "correct"
+            }
+          ],
+          "lineage": [
+            {
+              "field": "a-region",
+              "status": "linked",
+              "cut": null,
+              "cutDetail": null,
+              "candidates": [
+                "poc.listings.region"
+              ],
+              "fetch": "src/app/lin-a/page.tsx:12:24",
+              "verdict": "correct"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
