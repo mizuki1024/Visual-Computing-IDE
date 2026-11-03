@@ -1,0 +1,12 @@
+# 実行: node hmr-frame-probe.mjs <poc/out/hmr-probe/poc/fixture-app> <収集ファイル> <IDE>/poc/fixture-app/ide-instrumentation/boot.cjs <IDE>  (2026-11-03T00:44:34Z)
+first GET [ 200, 10089 ]
+BEFORE .next/dev/server/chunks/ssr/[root-of-the-server]__1zojl8nvlw_s_._.js:33:142 → {"file":"src/app/lin-a/page.tsx","line":12,"col":24} | chunk mtime 00:44:40.559 map mtime 00:44:40.559 | disk line at frame: "$rsc$5d$__$28$ecmascript$29$__[\"pool\"].query('SELECT id, region FROM poc.listing"
+after-change GET [ 200, 10089 ]
+AFTER-CHANGE .next/dev/server/chunks/ssr/[root-of-the-server]__1zojl8nvlw_s_._.js:26:142 → null | chunk mtime 00:44:45.267 map mtime 00:44:45.267 | disk line at frame: "mascript$29$__"
+after-restore GET [ 200, 10089 ]
+AFTER-RESTORE .next/dev/server/chunks/ssr/[root-of-the-server]__1zojl8nvlw_s_._.js:26:142 → null | chunk mtime 00:44:49.907 map mtime 00:44:49.907 | disk line at frame: "mascript$29$__"
+chunk files: [
+  '[root-of-the-server]__1zojl8nvlw_s_._.js',
+  '[root-of-the-server]__1zojl8nvlw_s_._.js.map'
+]
+exit 0

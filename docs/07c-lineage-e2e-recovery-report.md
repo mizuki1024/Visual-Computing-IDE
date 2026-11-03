@@ -157,7 +157,13 @@ F-01 の時点では由来を結べなかったため確かめていなかった
 
 診断スクリプト `docs/07c-lineage-recovery-results/hmr-frame-probe.mjs`（結果 `hmr-frame-probe.txt`）で、IDE と同じ計装の環境変数で `next dev` を起動し、/lin-a を要求 → ソースの末尾にコメント → 再要求 → 戻す → 再要求した【実測】。
 
-HMR_PROBE_PLACEHOLDER
+| 回 | 実行時のスタックが指す位置（LinA の `pool.query`） | IDE の照合器で戻した結果 | ディスクの生成物のその位置 |
+| --- | --- | --- | --- |
+| 変更の前 | `.next/dev/server/chunks/ssr/[root-of-the-server]__1zojl8nvlw_s_._.js:33:142` | `src/app/lin-a/page.tsx:12:24` | `…["pool"].query('SELECT id, region FROM poc.listing…` |
+| 末尾にコメントを足した後 | 同じファイル名の `:26:142` | `null` | `mascript$29$__`（`pool.query` ではない）。生成物とソースマップは書き直し済み（時刻が新しい） |
+| 元に戻した後 | 同じファイル名の `:26:142` | `null` | 同上 |
+
+同じ結果を2回得た（調査中の1回と、記録用に取り直した1回 `hmr-frame-probe.txt`）。
 
 - 変更の前は `chunks/ssr/[root-of-the-server]__1zojl8nvlw_s_._.js:33:142` で、IDE の照合器（`poc/runner/lib/srvmap.mjs`）がソースマップで `src/app/lin-a/page.tsx:12:24`（`pool.query`）へ戻せる。
 - 変更の後は、**同じファイル名**の `:26:142` を指す。ディスク上の同名の生成物は書き直されている（時刻が新しい）が、その位置には `pool.query` が無い。Turbopack はサーバー側の更新を、ディスクの生成物とは別の配置のコードとして同じファイル名で実行していると考えられる【推定。Turbopack の内部は読んでいない】。
@@ -175,7 +181,25 @@ HMR_PROBE_PLACEHOLDER
 
 ## 7. テスト結果
 
-REGRESSION_PLACEHOLDER
+実行条件: 第2節と同じ（DB 稼働、`PW_CHANNEL=none`、直列）。スキップ（⊘）は全試験で 0 件。記録は `docs/07c-lineage-recovery-results/<名前>.txt`。
+
+| 試験 | 題材 | 成功 | 失敗 | スキップ | 備考 |
+| --- | --- | --- | --- | --- | --- |
+| `lineage-e2e`（元の題材） | `poc/fixture-app` | 93 | 0 | 0 | 修正前も 93/0（R1）。修正後 R5 |
+| `lineage-e2e`（コピー） | `poc/out/select-e2e/…` | 93 | 0 | 0 | 修正前 10/16（F-01 と同じ 16 件）→ 修正後 R4。**失敗していた 16 件はすべて通過** |
+| `lineage-revision-e2e`（新規） | `poc/out/lin-rev-e2e/…` | 77 | 0 | 0 | 第5節。1 回目 76/1 は試験の誤り（第5節 補足） |
+| `callsite-entry-unit`（新規） | 一時ディレクトリ | 23 | 0 | 0 | 修正前 15/8 |
+| `select-revision-e2e`（F-01） | `poc/out/f01-e2e/…`（試験が作る。DB なし） | 104 | 0 | 0 | F-01 の記録と同じ項目数 |
+| `select-revision-unit`（F-01） | — | 50 | 0 | 0 | |
+| `select-e2e` | コピー（DB あり） | 86 | 0 | 0 | F-01 の記録と同じ |
+| `preview-e2e` | コピー（DB あり） | 78 | 0 | 0 | F-01 の記録と同じ |
+| `select-unit` | — | 101 | 0 | 0 | |
+| `lineage-live-unit` | — | 157 | 0 | 0 | |
+| `observe-unit`・`queries-unit`・`preview-gateway` | — | 153・126・132 | 0 | 0 | |
+| `poc02`（rscattr・srvmap の照合器）・`poc03` | — | 129・95 | 0 | 0 | |
+| `npm run typecheck` | — | エラーなし | | | |
+
+実行していないもの: `scripts/test-all-29.sh` の残り（`poc01`・`explore`・`measured`・`elements`・`poc05`・`flows`・`rsc`・`poc04`・`lineage`・`sqlparse`・`sqlimpact`・`model`・`project-inspect`・`devserver`・`devserver-stub`・`runtime-e2e`・`childenv-origin`・`observe-e2e`・`queries-e2e`）。今回の変更（計装の pg の解決）が直接かかわるのは `observe-e2e`・`queries-e2e`・`runtime-e2e` で、これらは**未実行**（成功扱いにしない）。時間の制約による。
 
 ---
 
