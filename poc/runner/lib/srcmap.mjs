@@ -95,3 +95,46 @@ export function originalPositionFor(map, line1, col0) {
   const root = map.sourceRoot ? `${String(map.sourceRoot).replace(/\/$/, '')}/` : '';
   return { source: `${root}${src}`, line: found.srcLine + 1, column: found.srcCol + 1 };
 }
+
+/**
+ * 7C（A3）: originalPositionFor と**同じ規則**で元の位置へ戻し、そのとき使った（最も内側の）区画の
+ * 元のソースの内容（`sourcesContent` の該当の要素）も返す。無ければ sourceContent は null（一致とは扱わない側の判断は呼び出し側）。
+ * 既存の originalPositionFor の戻り値・振る舞いは変えない（PoC の照合器が共有しているため、別の関数にした）。
+ * @returns {{source:string, line:number, column:number, sourceContent:string|null, section:number[]}|null}
+ */
+export function originalPositionDetail(map, line1, col0) {
+  if (!map || typeof map !== 'object') return null;
+  if (Array.isArray(map.sections)) {
+    let pick = null;
+    let idx = -1;
+    /* originalPositionFor と同じ「offset が位置以下の最後の区画（並びの途中で超えたら打ち切る）」 */
+    for (let i = 0; i < map.sections.length; i++) {
+      const o = map.sections[i].offset ?? { line: 0, column: 0 };
+      if (o.line < line1 - 1 || (o.line === line1 - 1 && o.column <= col0)) { pick = map.sections[i]; idx = i; } else break;
+    }
+    if (!pick || !pick.map) return null;
+    const o = pick.offset ?? { line: 0, column: 0 };
+    const innerLine = line1 - o.line;
+    const innerCol = o.line === line1 - 1 ? col0 - o.column : col0;
+    const r = originalPositionDetail(pick.map, innerLine, innerCol);
+    return r ? { ...r, section: [idx, ...r.section] } : null;
+  }
+  if (typeof map.mappings !== 'string' || !Array.isArray(map.sources)) return null;
+  const lines = map.__parsed ?? (map.__parsed = parseMappings(map.mappings));
+  const segs = lines[line1 - 1];
+  if (!segs || !segs.length) return null;
+  let found = null;
+  for (const s of segs) {
+    if (s.genCol > col0) break;
+    if (s.srcIdx !== null) found = s;
+  }
+  if (!found) return null;
+  const src = map.sources[found.srcIdx];
+  if (src == null) return null;
+  const root = map.sourceRoot ? `${String(map.sourceRoot).replace(/\/$/, '')}/` : '';
+  const sc = Array.isArray(map.sourcesContent) ? map.sourcesContent[found.srcIdx] : undefined;
+  return {
+    source: `${root}${src}`, line: found.srcLine + 1, column: found.srcCol + 1,
+    sourceContent: typeof sc === 'string' ? sc : null, section: [],
+  };
+}

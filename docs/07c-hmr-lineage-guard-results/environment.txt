@@ -1,0 +1,12 @@
+# 実行条件（7C HMR 後のリネージ誤対応の安全対策 案A）。秘密情報は含めない
+記録日時(UTC): 2026-11-03T02:15:58Z
+作業基準: claude/hmr-lineage-safety-investigation-enzr9f @ 6b73e069f1695659bef71631554847f08bd51713（作業ブランチ claude/hmr-lineage-safety-guard-0490hg は開始時点で同じコミット・作業ツリーはクリーン・リモートと一致）
+OS: Linux 6.18.44-fc-v230
+Node: v22.23.4  npm: 10.9.9
+IDE next: 16.4.3  playwright-core: 1.64.1  typescript: 5.7.3
+題材の依存（npm ci）: next 16.4.3 / pg 8.23.1 / @opentelemetry/instrumentation-pg 0.60.0
+ブラウザ: 同梱の Chromium（PW_CHANNEL=none。playwright-core が探す chromium(_headless_shell)-1248 に、事前に入っていた -1243 をシンボリックリンクで置いた。リポジトリの外。前回の作業と同じ）
+DB: psql (PostgreSQL) 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)（initdb の使い捨て・127.0.0.1:55432・trust 認証・poc/fixture-app/db/init.sql、poc.listings 12 行・poc.regions 4 行）。題材の .env は .env.example の複写（Git 管理外）
+開発サーバー: next dev（Turbopack・server fast refresh は既定のまま有効）。--no-server-fast-refresh は製品では使っていない（診断の chunk-layout-probe-nsfr.txt だけ）
+題材: 新しい試験はすべて使い捨てのコピー（poc/out/<名前>/poc/fixture-app。node_modules は cp -al。Git 管理外）に一時的なページを足す。IDE の中の poc/fixture-app には題材を足していない
+修正前の記録（before/）: 単体は基準コミットの別の作業ツリー（git worktree）で最終版の試験を実行。e2e は製品の src・poc を変える前の .next・.libjs・計装で実行

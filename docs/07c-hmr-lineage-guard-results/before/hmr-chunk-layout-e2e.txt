@@ -1,0 +1,47 @@
+ブラウザ: 同梱の chromium 153.0.8010.12 / 題材（使い捨てのコピー）: poc/out/hmr-chunk-layout-e2e/poc/fixture-app
+  ✓ 前提: 題材の DB（使い捨ての PostgreSQL）に届く
+
+0. 使い捨ての題材を起動する
+
+1. 基準: 読み込み直した文書で SA の値 a を選ぶ
+    · 1-baseline: correct / 右ドック「この値の出所 poc.listings . region 推定 24 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になりま」
+    ·   SQL「SELECT id, plan FROM poc.listings ORDER BY i」 呼び出し位置 src/app/hmr-s/page.tsx:8:24
+    ·   SQL「SELECT id, region FROM poc.listings ORDER BY」 呼び出し位置 src/components/SA.tsx:5:24
+    ·   SQL「SELECT id, name AS region FROM poc.regions O」 呼び出し位置 src/components/SA.tsx:12:24
+  ✓ 1 基準: 正しく結ぶ（poc.listings.region・取得位置は SA の SQL a）
+
+2. page.tsx だけを変える（SQL より前へ 7 文）。SA.tsx は変えない → 読み込み直して SA の値 a を選び直す
+    · 2a 変更の後の1回目の読み込み: WRONG（poc.regions.name） / 右ドック「この値の出所 poc.regions . name 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 」
+    ·   SQL「SELECT id, plan FROM poc.listings ORDER BY i」 呼び出し位置 - / source-line-mismatch
+    ·   SQL「SELECT id, region FROM poc.listings ORDER BY」 呼び出し位置 - / no-app-frame
+    ·   SQL「SELECT id, name AS region FROM poc.regions O」 呼び出し位置 src/components/SA.tsx:5:24
+  ✓ 2a 変更の後の1回目の読み込み 前提: 選択は SA.tsx の <p>（SA.tsx は変えていないので F-01 は通る）
+  ✗ 2a 変更の後の1回目の読み込み: 【第3の経路】SA の SQL b を SA の SQL a の位置に対応させない — got: [{"spanId":"6cc67a5ecb51b518","sql":"SELECT id, plan FROM poc.listings ORDER BY id LIMIT $0","site":null,"located":"src/app/hmr-s/page.tsx:13:14","failure":"source-line-mismatch"},{"spanId":"99de864c197986e3","sql":"SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $","site":null,"located":null,"failure":"no-app-frame"},{"spanId":"268a742a53f001b2","sql":"SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT","site":"src/components/SA.tsx:5:24","located":"src/components/SA.tsx:5:24","failure":null}]
+  ✗ 2a 変更の後の1回目の読み込み: 【第3の経路】poc.regions.name を値 a の由来として出さない — got: "WRONG（poc.regions.name）"
+  ✗ 2a 変更の後の1回目の読み込み: 【第3の経路】右ドックに「この値の出所 poc.regions.name」を出さない — got: "この値の出所 poc.regions . name 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 "
+    · 2b 変更の後の2回目の読み込み: WRONG（poc.regions.name） / 右ドック「この値の出所 poc.regions . name 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 」
+    ·   SQL「SELECT id, plan FROM poc.listings ORDER BY i」 呼び出し位置 - / source-line-mismatch
+    ·   SQL「SELECT id, region FROM poc.listings ORDER BY」 呼び出し位置 - / no-app-frame
+    ·   SQL「SELECT id, name AS region FROM poc.regions O」 呼び出し位置 src/components/SA.tsx:5:24
+  ✓ 2b 変更の後の2回目の読み込み 前提: 選択は SA.tsx の <p>（SA.tsx は変えていないので F-01 は通る）
+  ✗ 2b 変更の後の2回目の読み込み: 【第3の経路】SA の SQL b を SA の SQL a の位置に対応させない — got: [{"spanId":"7fc6a5975950b075","sql":"SELECT id, plan FROM poc.listings ORDER BY id LIMIT $0","site":null,"located":"src/app/hmr-s/page.tsx:13:14","failure":"source-line-mismatch"},{"spanId":"0131364d5392515e","sql":"SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $","site":null,"located":null,"failure":"no-app-frame"},{"spanId":"f13fa6f66950d90d","sql":"SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT","site":"src/components/SA.tsx:5:24","located":"src/components/SA.tsx:5:24","failure":null}]
+  ✗ 2b 変更の後の2回目の読み込み: 【第3の経路】poc.regions.name を値 a の由来として出さない — got: "WRONG（poc.regions.name）"
+  ✗ 2b 変更の後の2回目の読み込み: 【第3の経路】右ドックに「この値の出所 poc.regions.name」を出さない — got: "この値の出所 poc.regions . name 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 "
+
+3. 開発サーバーを起動し直す
+    · 3-after-restart: correct / 右ドック「この値の出所 poc.listings . region 推定 24 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になりま」
+    ·   SQL「SELECT id, plan FROM poc.listings ORDER BY i」 呼び出し位置 src/app/hmr-s/page.tsx:15:24
+    ·   SQL「SELECT id, region FROM poc.listings ORDER BY」 呼び出し位置 src/components/SA.tsx:5:24
+    ·   SQL「SELECT id, name AS region FROM poc.regions O」 呼び出し位置 src/components/SA.tsx:12:24
+  ✓ 3: 再起動の後は正しい由来に戻る
+  ✓ 画面にエラーが出ていない
+  ✓ 後片付け: 使い捨ての題材で動くプロセスが残っていない
+
+判定: 1-baseline=correct / 2a 変更の後の1回目の読み込み=WRONG（poc.regions.name） / 2b 変更の後の2回目の読み込み=WRONG（poc.regions.name） / 3-after-restart=correct
+✗ 失敗あり — 7 件通過 / 6 件失敗
+  ✗ 2a 変更の後の1回目の読み込み: 【第3の経路】SA の SQL b を SA の SQL a の位置に対応させない — got: [{"spanId":"6cc67a5ecb51b518","sql":"SELECT id, plan FROM poc.listings ORDER BY id LIMIT $0","site":null,"located":"src/app/hmr-s/page.tsx:13:14","failure":"source-line-mismatch"},{"spanId":"99de864c197986e3","sql":"SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $","site":null,"located":null,"failure":"no-app-frame"},{"spanId":"268a742a53f001b2","sql":"SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT","site":"src/components/SA.tsx:5:24","located":"src/components/SA.tsx:5:24","failure":null}]
+  ✗ 2a 変更の後の1回目の読み込み: 【第3の経路】poc.regions.name を値 a の由来として出さない — got: "WRONG（poc.regions.name）"
+  ✗ 2a 変更の後の1回目の読み込み: 【第3の経路】右ドックに「この値の出所 poc.regions.name」を出さない — got: "この値の出所 poc.regions . name 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 "
+  ✗ 2b 変更の後の2回目の読み込み: 【第3の経路】SA の SQL b を SA の SQL a の位置に対応させない — got: [{"spanId":"7fc6a5975950b075","sql":"SELECT id, plan FROM poc.listings ORDER BY id LIMIT $0","site":null,"located":"src/app/hmr-s/page.tsx:13:14","failure":"source-line-mismatch"},{"spanId":"0131364d5392515e","sql":"SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $","site":null,"located":null,"failure":"no-app-frame"},{"spanId":"f13fa6f66950d90d","sql":"SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT","site":"src/components/SA.tsx:5:24","located":"src/components/SA.tsx:5:24","failure":null}]
+  ✗ 2b 変更の後の2回目の読み込み: 【第3の経路】poc.regions.name を値 a の由来として出さない — got: "WRONG（poc.regions.name）"
+  ✗ 2b 変更の後の2回目の読み込み: 【第3の経路】右ドックに「この値の出所 poc.regions.name」を出さない — got: "この値の出所 poc.regions . name 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 "

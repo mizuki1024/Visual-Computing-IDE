@@ -38,7 +38,7 @@ import {
 import type { ObsSpan, ObsSqlAnalysis } from '../lib/observation';
 import { DOC_TOKEN_RE } from '../lib/previewProtocol';
 import {
-  parseCallsiteRecord, resetDataAccess, resolveDataAccess, resolverStatus, type CallsiteRecord,
+  parseCallsiteRecord, requestOfSql, resetDataAccess, resolveDataAccess, resolverStatus, type CallsiteRecord,
 } from './dataAccess';
 
 /* -----------------------------------------------------------------------------
@@ -517,15 +517,20 @@ export class ObservationStore implements RelayObserver {
       const pending = sqlSpans.filter((x) => !this.#dataAccess.has(x.spanId));
       const fresh = await resolveDataAccess({
         projectRoot: input.dataAccess.projectRoot,
-        sql: pending.map((x) => ({ span: x, pid: st!.pidOf.get(x.spanId) ?? null })),
+        /* 7C（A2）: その SQL が属する要求 = 同じトレースの受付スパン（ちょうど1本）。無ければ照合は断定しない */
+        sql: pending.map((x) => {
+          const q = requestOfSql(st!.traces.get(x.traceId)?.spans ?? [], x);
+          return { span: x, pid: st!.pidOf.get(x.spanId) ?? null, request: q.request, requestIssue: q.issue };
+        }),
         callsites: st.callsites,
         manifest: input.dataAccess.manifest,
         enabled: input.dataAccess.enabled,
       });
       if (this.#session !== s) return null;                 // 照合の間に停止・再起動した
       for (const d of fresh) {
-        // 照合器を読めなかった結果は使い回さない（次の取得でもう一度試す）。照合の間に整理したスパンの分も持たない
-        if (d.failure?.reason !== 'resolver-unavailable'
+        // 照合器を読めなかった結果は使い回さない（次の取得でもう一度試す）。照合の間に整理したスパンの分も持たない。
+        // 7C: 要求の開始（受付スパン）がまだ書かれていない結果も使い回さない（書かれた後に照合し直す）
+        if (d.failure?.reason !== 'resolver-unavailable' && d.failure?.reason !== 'request-start-unknown'
           && st.traces.get(d.traceId)?.spans.some((x) => x.spanId === d.spanId)) this.#dataAccess.set(d.spanId, d);
       }
       const now = new Map(fresh.map((d) => [d.spanId, d]));

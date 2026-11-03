@@ -486,8 +486,12 @@ try {
     const own = lr?.dataAccess ?? [];
     note(`同じ起動のまま読み込み直した: 文書 ${await sel('data-doc-binding')}・由来 ${r2.lineage}（${r2.lineageReason}）・呼び出し位置の特定 ${[...new Set(own.map((d) => d.failure ?? d.site))].join(' / ')}`);
     eq('4 同じ起動でコードを変えた後: 文書は同定する', await sel('data-doc-binding'), 'identified');
-    eq('4 同じ起動でコードを変えた後: 実測との照合で切れる（fetch-not-measured）。推測で結ばない', [r2.lineage, r2.lineageReason, r2.cands ?? ''], ['cut', 'fetch-not-measured', '']);
-    ok('4 その理由は「呼び出し位置をソースへ戻せない」（no-app-frame。実行中のコードとディスクの生成物が一致しない）', own.length > 0 && own.every((d) => (d.failure ?? '').startsWith('no-app-frame')), own);
+    /* 7C（HMR 安全対策・案A）で期待値を変えた（承認済み。docs/07c-hmr-lineage-guard-report.md 第5節）。
+     * 変更前: 由来の理由 fetch-not-measured・呼び出し位置の理由 no-app-frame（ずれた先がたまたまデータ取得の行ではなかった＝偶然の未観測）。
+     * 変更後: 呼び出し位置の理由は hmr-evaluated-code（HMR で eval されたコードのフレームを計装が印付けし、照合が拒む）、
+     *         由来の理由は fetch-callsite-unverifiable（SQL は観測したが呼び出し位置を確かめられない）。結ばない・候補なしは同じ */
+    eq('4 同じ起動でコードを変えた後: 実測との照合で切れる（fetch-callsite-unverifiable）。推測で結ばない', [r2.lineage, r2.lineageReason, r2.cands ?? ''], ['cut', 'fetch-callsite-unverifiable', '']);
+    ok('4 その理由は「HMR で eval されたコードが SQL を実行した」（hmr-evaluated-code。ディスクの生成物・ソースマップとの対応を確かめられない）', own.length > 0 && own.every((d) => (d.failure ?? '').startsWith('hmr-evaluated-code')), own);
     ok('4 右ドックに「この値の出所」を出さない（前の由来も出さない）', !(await dockText()).includes('この値の出所'));
     results.sameRunAfterChange = lr;
     await restartDev('4 の後');

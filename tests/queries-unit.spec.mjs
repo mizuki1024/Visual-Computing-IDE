@@ -210,8 +210,10 @@ console.log('\n5. 照合（本物の dataAccess.ts ＋ PoC-02 の照合器）を
 const B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 const vlq = (n) => { let v = n < 0 ? ((-n) << 1) | 1 : n << 1; let out = ''; do { let d = v & 31; v >>>= 5; if (v) d |= 32; out += B64[d]; } while (v); return out; };
 /** 生成物の genLine 行の先頭を、元のソース srcLine 行 srcCol 列へ写すマップ（行・列は 1 始まり） */
+/* 7C（A3）: Turbopack と同じく、元のソースの内容（sourcesContent）を持たせる（いまのソースそのもの） */
+const contentOf = (srcPath) => { try { return fs.readFileSync(path.join(proj, srcPath), 'utf8'); } catch { return null; } };
 const mapTo = (srcPath, genLine, srcLine, srcCol) => ({
-  version: 3, sources: [`turbopack:///[project]/${srcPath}`], names: [],
+  version: 3, sources: [`turbopack:///[project]/${srcPath}`], names: [], sourcesContent: [contentOf(srcPath)],
   mappings: `${';'.repeat(genLine - 1)}${vlq(0)}${vlq(0)}${vlq(srcLine - 1)}${vlq(srcCol - 1)}`,
 });
 const proj = path.join(tmp, 'proj');
@@ -243,14 +245,16 @@ const T0 = Date.now() + 60_000;             // SQL の開始時刻（ファイ�
 const sqlSpan = (id, trace = TR(1)) => ({ traceId: trace, spanId: SP(id), parentSpanId: SP(2), name: 'pg.query:SELECT', kind: 2, startMs: T0, endMs: T0 + 1, durationMs: 1, statusCode: 0, scope: '@opentelemetry/instrumentation-pg', attrs: { 'db.statement': 'SELECT $0' }, droppedAttributeKeys: [] });
 const callsite = (id, extra = {}) => DA.parseCallsiteRecord({
   type: 'callsite', spanId: SP(id), traceId: TR(1), target: 'sql', proc: { pid: 42 },
-  entry: { at: 'pg-pool.Pool.query', frames: [
+  /* 7C（A1）: 計装は V8 の CallSite で eval を判定した記録に frameSource: 'v8-callsite' を書く */
+  entry: { at: 'pg-pool.Pool.query', frameSource: 'v8-callsite', frames: [
     { functionName: 'captureFrames', file: 'ide-instrumentation/otel.cjs', scope: 'app-source', line: 125, col: 17 },
     { functionName: 'XPage', file: CHUNK, scope: 'build-output', line: 3, col: 20 },
   ] },
   ...extra,
 });
 const resolve1 = async ({ span = sqlSpan(10), pid = 42, recs = [callsite(10)], manifest = MANIFEST, enabled = true } = {}) => (await DA.resolveDataAccess({
-  projectRoot: proj, sql: [{ span, pid }], callsites: new Map(recs.length ? [[span.spanId, recs]] : []), manifest, enabled,
+  /* 7C（A2）: その SQL が属する要求の開始（受付スパン）。ファイルを書いた後・SQL の前 */
+  projectRoot: proj, sql: [{ span, pid, request: { spanId: SP(1), startMs: T0 - 5000 } }], callsites: new Map(recs.length ? [[span.spanId, recs]] : []), manifest, enabled,
 }))[0];
 {
   writeChunk(PAGE, 4, 19);
@@ -258,7 +262,8 @@ const resolve1 = async ({ span = sqlSpan(10), pid = 42, recs = [callsite(10)], m
   eq('成立: ソースマップで戻した位置（行・列）', d.site && `${d.site.file}:${d.site.line}:${d.site.col}`, `${PAGE}:4:19`);
   eq('成立: 囲むコンポーネント（2つの情報源が一致）', d.site?.component, { name: 'XPage', file: PAGE, line: 3, endLine: 6 });
   eq('成立: 読み直した1行', d.site?.sourceLine, "const r = await pool.query('SELECT 1');");
-  eq('成立: 理由なし・照合7つ', [d.failure, d.checks.length], [null, 7]);
+  /* 7C: 照合は 7 → 10（A1・A2・A3 を足した） */
+  eq('成立: 理由なし・照合10（7C で A1・A2・A3 を足した）', [d.failure, d.checks.length], [null, 10]);
   ok('結果に絶対パスが無い', !JSON.stringify(d).includes(tmp));
 
   eq('記録が0件 → no-callsite-record', (await resolve1({ recs: [] })).failure?.reason, 'no-callsite-record');
@@ -308,7 +313,7 @@ const resolve1 = async ({ span = sqlSpan(10), pid = 42, recs = [callsite(10)], m
   /* webpack の仮想モジュール（eval に包まれたモジュール）: 戻せても、実行の後に書き換わっていないかを確かめられない */
   const code = `function XPage(){}\n\nfoo()\n//# sourceURL=webpack-internal:///(rsc)/./${PAGE}\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,${Buffer.from(JSON.stringify(mapTo(PAGE, 3, 4, 19))).toString('base64')}`;
   fs.writeFileSync(path.join(proj, '.next', 'dev', 'server', 'w.js'), `eval(${JSON.stringify(code)});\n`);
-  const virt = await resolve1({ recs: [callsite(10, { entry: { at: 'pg-pool.Pool.query', frames: [{ functionName: 'XPage', file: `webpack-internal:///(rsc)/./${PAGE}`, scope: 'bundler-virtual', line: 3, col: 1 }] } })] });
+  const virt = await resolve1({ recs: [callsite(10, { entry: { at: 'pg-pool.Pool.query', frameSource: 'v8-callsite', frames: [{ functionName: 'XPage', file: `webpack-internal:///(rsc)/./${PAGE}`, scope: 'bundler-virtual', line: 3, col: 1 }] } })] });
   eq('webpack の仮想モジュール → build-freshness-unverified（戻せても断定しない）', [virt.failure?.reason, virt.located?.line], ['build-freshness-unverified', 4]);
 }
 
@@ -334,7 +339,7 @@ let liveObs;
     { ...callsite(20), traceId: TR(2) },
     span(TR(2), SP(30), null, 'GET', { 'http.target': '/y' }, { kind: 1, scope: '@opentelemetry/instrumentation-http' }),
     span(TR(2), SP(20), SP(30), 'pg.query:SELECT', { 'db.statement': 'SELECT code FROM poc.listings' }, { scope: '@opentelemetry/instrumentation-pg' }),
-  ].map((x) => JSON.stringify(x.type ? x : { type: 'callsite', ...x, proc: { pid: 42 }, entry: { at: x.entry.at, frames: x.entry.frames } }));
+  ].map((x) => JSON.stringify(x.type ? x : { type: 'callsite', ...x, proc: { pid: 42 }, entry: { at: x.entry.at, frameSource: x.entry.frameSource, frames: x.entry.frames } }));
   fs.writeFileSync(f, `${lines.join('\n')}\n`);
   const st = new OB.ObservationStore();
   st.begin('r1');

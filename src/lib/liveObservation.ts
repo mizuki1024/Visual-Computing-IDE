@@ -49,7 +49,25 @@ export type DataAccessFailureReason =
   | 'callsite-pid-missing'
   | 'no-entry-callsite' | 'no-app-frame' | 'source-line-mismatch' | 'component-not-agreed'
   | 'outside-scope' | 'build-changed-after-call' | 'source-changed-after-call' | 'build-freshness-unverified'
-  | 'manifest-unavailable' | 'resolver-unavailable';
+  | 'manifest-unavailable' | 'resolver-unavailable'
+  /* 7C HMR 安全対策（案A）。A1: 実行したコードのフレーム */
+  | 'hmr-evaluated-code' | 'unrecognized-frame' | 'frame-origin-unverified'
+  /* A2: 要求の開始からの鮮度 */
+  | 'request-start-unknown' | 'changed-during-request'
+  /* A3: ソースマップの区画の sourcesContent といまのソース */
+  | 'map-source-mismatch' | 'map-source-unverified';
+
+/**
+ * 7C: 「SQL は観測したが、実行したコードとソース・ソースマップの対応を確かめられない」理由（案A の A1〜A3 と、
+ * 7B-3B-1 の実行の後の書き換え）。由来の評価はこれらを「SQL を観測していない」と区別する
+ * （`fetch-callsite-unverifiable`）。どれも位置を推測で埋めない
+ */
+export const CALLSITE_UNVERIFIABLE_REASONS: ReadonlySet<DataAccessFailureReason> = new Set<DataAccessFailureReason>([
+  'hmr-evaluated-code', 'unrecognized-frame', 'frame-origin-unverified',
+  'request-start-unknown', 'changed-during-request',
+  'map-source-mismatch', 'map-source-unverified',
+  'build-changed-after-call', 'source-changed-after-call',
+]);
 
 export const DATA_ACCESS_FAILURE_LABEL: Record<DataAccessFailureReason, string> = {
   'callsite-disabled': 'この起動では、呼び出し位置の記録（計装の POC02_CALLSITE）を有効にしていません',
@@ -67,6 +85,17 @@ export const DATA_ACCESS_FAILURE_LABEL: Record<DataAccessFailureReason, string> 
   'build-freshness-unverified': '生成物がバンドラの仮想モジュールで、実行の後に書き換わっていないかを確かめられません',
   'manifest-unavailable': 'ビルド時の対応表（要素識別子の注入）が無いため、囲むコンポーネントを2つの情報源で照合できません',
   'resolver-unavailable': '呼び出し位置の照合器（PoC-02 の rscattr.mjs）を読み込めません',
+  'hmr-evaluated-code': 'サーバー側のコードが同じ起動の中で更新された（HMR でプロセスの中で差し替えられた）コードが SQL を実行したため、'
+    + 'ディスク上の生成物・ソースマップとの対応を確かめられず、SQL の実行位置を確認できません。開発サーバーを再起動すると確認できる場合があります',
+  'unrecognized-frame': '呼び出しのスタックに形を認識できないフレームがあり、それより外側のフレームを採ると別の呼び出し位置を指しうるため、SQL の実行位置を確認できません',
+  'frame-origin-unverified': '呼び出し位置の記録に、HMR で差し替えられたコードかどうかの判定（V8 の呼び出し位置の API による）が無いため、SQL の実行位置を確認できません',
+  'request-start-unknown': 'この SQL が属する要求の開始（受付スパン）を確かめられないため（応答を送り終える前・受付スパンが1つに決まらない）、'
+    + '要求の処理中にコードが更新されていないかを確かめられず、SQL の実行位置を確認できません',
+  'changed-during-request': 'この SQL が属する要求の処理中（開始の直前を含む）に、ソース・生成物・ソースマップのどれかが更新されたため、'
+    + '実行したコードといまのソース・ソースマップが同じとは限らず、SQL の実行位置を確認できません。もう一度読み込むと確認できる場合があります',
+  'map-source-mismatch': 'ソースマップに埋め込まれた元のソース（sourcesContent）が、いまのソースと一致しません（ソースマップが古いか別の版から作られた）。'
+    + 'SQL の実行位置を確認できません。開発サーバーを再起動すると確認できる場合があります',
+  'map-source-unverified': 'ソースマップに元のソースの内容（sourcesContent）が無い・読めないため、ソースマップといまのソースが同じ版かを確かめられず、SQL の実行位置を確認できません',
 };
 
 /**
@@ -424,7 +453,7 @@ export type LineageCutReason =
   | 'no-value-site' | 'mixed-text-children' | 'multiple-value-sites'
   | 'no-reference' | 'multiple-fetch-sites'
   /* 実測との照合 */
-  | 'no-server-link' | 'fetch-not-measured' | 'fetch-site-unverified' | 'select-list-differs'
+  | 'no-server-link' | 'fetch-not-measured' | 'fetch-site-unverified' | 'fetch-callsite-unverifiable' | 'select-list-differs'
   /* SELECT 句 */
   | 'no-column';
 
@@ -450,6 +479,8 @@ export const LINEAGE_CUT_LABEL: Record<LineageCutReason, { stage: LineageStage; 
   'no-server-link': { stage: 'measured', text: '同定した文書の通信を、サーバー処理・SQL に結べていません' },
   'fetch-not-measured': { stage: 'measured', text: '静的解析が見たデータ取得の呼び出しで実行された SQL を、この文書の通信で観測していません（走っていない SQL の列は由来にしない）' },
   'fetch-site-unverified': { stage: 'measured', text: '静的解析が見た呼び出し位置で SQL が実行されたことを、実測の呼び出し位置（server-call-stack）で確かめられません' },
+  'fetch-callsite-unverifiable': { stage: 'measured', text: 'この文書の通信で SQL は観測しましたが、その呼び出し位置を確かめられません（サーバー側のコードの更新・要求の処理中の変更・ソースマップとソースの食い違いなど）。'
+    + '静的解析が見た取得の呼び出しで実行された SQL かどうかを決めないため、列を由来にしません。開発サーバーを再起動すると確かめられる場合があります' },
   'select-list-differs': { stage: 'measured', text: '同じ呼び出し位置から SELECT 句の構成が違う SQL が複数走っており、どれの列かを決めません' },
   'no-column': { stage: 'select-list', text: '参照している項目が、実行された SQL の SELECT 句にありません（テーブルも主張しない）' },
 };

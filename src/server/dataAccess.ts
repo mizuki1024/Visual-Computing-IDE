@@ -16,6 +16,17 @@
  *   D. SQL の実行の**後に**、生成物（とソースマップ）も、ソースファイルも書き換わっていない
  *      （書き換わっていれば、戻した位置・読み直した行が、実行したコードのものとは限らない）
  *
+ * 7C HMR 後の誤対応の安全対策（案A。docs/07c-hmr-lineage-guard-report.md）で足した照合（独立した3つの条件。どれか1つでも欠ければ断定しない）:
+ *   A1. 呼び出しを書いたフレームより内側に、HMR で eval されたコードのフレーム（計装が V8 の CallSite.isEval() で印を付けた
+ *       `evaluated`）・形を認識できないフレームが無い。印のフレームを飛ばして外側の生成物のフレームを採ることはしない。
+ *       記録が V8 の判定で作られていなければ（frameSource ≠ v8-callsite）、印の有無を確かめられないので断定しない
+ *   A2. その SQL が属する要求（同じトレースの受付スパン。ちょうど1本）の開始の FRESHNESS_MARGIN_MS 前より後に、
+ *       生成物・ソースマップ・戻した先のソースのどれも書き換わっていない（同時刻は「書き換わった」とみなす）。
+ *       要求の開始を確かめられなければ断定しない。**時刻の比較は同一性の証明ではない**（A1・A3 と併せて使う）
+ *   A3. 位置を戻すのに使ったソースマップの**区画**の sourcesContent が、いまのソース（そのもの、または IDE が持つ
+ *       要素識別子のローダの変換を同じ規則で当てたもの）とバイト単位で一致する。sourcesContent が無ければ一致とは扱わない
+ * A1〜A3 のどれで止めた場合も、位置（site）も参考の位置（located）も返さない。
+ *
  * 根拠にしないもの: 時刻の近さ・SQL 文の一致・ページのパス・コンポーネントの名前の一致。
  * 対象プロジェクトには書き込まない（読むのは src/ のソース・.next の生成物と隣のソースマップ・IDE 側の対応表）。
  * ========================================================================== */
@@ -31,7 +42,11 @@ export interface CallsiteRecord {
   spanId: string;
   traceId: string;
   target: string;
-  entry: { at: string; frames: CallsiteFrame[]; frameCount: number } | null;
+  /**
+   * frameSource: 計装がフレームを何から作ったか（7C）。`v8-callsite` = V8 の呼び出し位置の API（CallSite）で、
+   * eval されたコードを `isEval()` で判定した。それ以外・無しは、eval の印の有無を確かめられない
+   */
+  entry: { at: string; frames: CallsiteFrame[]; frameCount: number; frameSource: string | null } | null;
   pid: number | null;
 }
 export interface CallsiteFrame {
@@ -43,6 +58,22 @@ const BUILD_FILE = /^\.next\/[^\0\\]+\.js$/;
 const VIRTUAL_FILE = /^(webpack-internal:|turbopack:|rsc:|\[turbopack\])/;
 /** 根拠に使いうるフレームの数の上限。PoC-02 の計装は最大 60 フレームを取る */
 const MAX_FRAMES = 24;
+/** 根拠にしないと分かっているフレームの種別（ユーザーのコードではない）。読み飛ばす */
+const NON_USER_SCOPES = new Set(['node_modules', 'node-builtin', 'outside', 'native']);
+/**
+ * 7C（A1）: その位置より外側のフレームを根拠にしてはいけない印。
+ *   evaluated     HMR などで eval されたコード（計装が CallSite.isEval() で判定）。行・列がディスクの生成物の座標ではない
+ *   unrecognized  種別を認識できないフレーム（計装・記録の形が変わった）。捨てると外側のフレームを誤って採りうる
+ */
+export const BARRIER_SCOPES = new Set(['evaluated', 'unrecognized']);
+/** A1 で受け入れる記録の作り方 */
+export const FRAME_SOURCE_V8 = 'v8-callsite';
+/**
+ * A2: 更新時刻の比較の幅（ミリ秒）。要求の開始のこの幅だけ前より後の書き換えも「処理中の変更」とみなす。
+ * ファイルシステムの更新時刻の分解能（粗い時計で数 ms 古く付く・1〜2 秒単位のファイルシステム）と、
+ * スパンの時刻（Date.now() に基づく）との差を吸収するため。安全側（未観測が増える側）にだけ倒れる
+ */
+export const FRESHNESS_MARGIN_MS = 2000;
 
 const isPos = (v: unknown): v is number => typeof v === 'number' && Number.isInteger(v) && v > 0 && v < 10_000_000;
 
@@ -61,9 +92,24 @@ export function parseCallsiteRecord(o: Record<string, unknown>): CallsiteRecord 
   if (e && typeof e === 'object' && Array.isArray(e.frames)) {
     const frames: CallsiteFrame[] = [];
     for (const f of e.frames) {
-      const r = f as Record<string, unknown>;
-      if (!r || typeof r.file !== 'string' || typeof r.scope !== 'string' || !isPos(r.line) || !isPos(r.col)) continue;
+      const r = (f && typeof f === 'object' ? f : {}) as Record<string, unknown>;
       const fn = typeof r.functionName === 'string' ? r.functionName.slice(0, 80) : null;
+      const scope = typeof r.scope === 'string' ? r.scope : null;
+      /* 7C（A1）: 根拠にしないと分かっている種別だけを読み飛ばす。eval の印・未知の種別は**黙って捨てずに**、
+       * 印のフレームとして順序どおりに残す（ファイル名は読まない。照合はこの位置より外側を使わない） */
+      if (scope !== null && NON_USER_SCOPES.has(scope)) continue;
+      if (scope === null || (!BARRIER_SCOPES.has(scope) && !['build-output', 'bundler-virtual', 'app-source'].includes(scope))
+        || scope === 'unrecognized') {
+        if (frames.length < MAX_FRAMES) frames.push({ functionName: fn, file: '<unrecognized>', scope: 'unrecognized', line: 0, col: 0 });
+        continue;
+      }
+      if (scope === 'evaluated') {
+        if (frames.length < MAX_FRAMES) {
+          frames.push({ functionName: fn, file: '<evaluated>', scope: 'evaluated', line: isPos(r.line) ? r.line : 0, col: isPos(r.col) ? r.col : 0 });
+        }
+        continue;
+      }
+      if (typeof r.file !== 'string' || !isPos(r.line) || !isPos(r.col)) continue;
       if (r.scope === 'build-output') {
         if (!BUILD_FILE.test(r.file) || r.file.split('/').includes('..')) continue;
       } else if (r.scope === 'bundler-virtual') {
@@ -73,7 +119,11 @@ export function parseCallsiteRecord(o: Record<string, unknown>): CallsiteRecord 
       } else continue;
       if (frames.length < MAX_FRAMES) frames.push({ functionName: fn, file: r.file, scope: r.scope, line: r.line, col: r.col });
     }
-    entry = { at: typeof e.at === 'string' ? e.at.slice(0, 60) : 'unknown', frames, frameCount: e.frames.length };
+    const src = (e as { frameSource?: unknown }).frameSource;
+    entry = {
+      at: typeof e.at === 'string' ? e.at.slice(0, 60) : 'unknown', frames, frameCount: e.frames.length,
+      frameSource: typeof src === 'string' && src.length <= 40 ? src : null,
+    };
   }
   return { spanId: o.spanId, traceId: o.traceId, target: String(o.target ?? ''), entry, pid };
 }
@@ -89,9 +139,13 @@ type Attribution = {
   at: string | null;
   failure: { reason: string; detail: string } | null;
 };
+/** 7C（A3）: 位置を戻すのに使ったソースマップの区画の情報（srvmap.mjs の serverFrameProvenance） */
+type Provenance = { file: string; line: number; col: number; sourceContent: string | null } | null;
 interface Resolver {
   resolveRscAttribution: (cs: unknown, comps: Map<string, unknown[]>, opts: { root: string }) => Attribution;
   resetSrvMaps: () => void;
+  serverFrameProvenance: (frame: { file: string; scope: string; line: number; col: number }, root: string) => Provenance;
+  compareMapSource: (sourceContent: string, current: string, rel: string) => 'match' | 'mismatch' | 'unverified';
 }
 let resolverMod: Promise<Resolver | null> | null = null;
 let resolverError: string | null = null;
@@ -102,8 +156,12 @@ function resolver(): Promise<Resolver | null> {
     try {
       const dir = path.join(ideRoot(), 'poc', 'runner', 'lib');
       const a = await import(/* turbopackIgnore: true */ /* webpackIgnore: true */ path.join(dir, 'rscattr.mjs')) as Pick<Resolver, 'resolveRscAttribution'>;
-      const m = await import(/* turbopackIgnore: true */ /* webpackIgnore: true */ path.join(dir, 'srvmap.mjs')) as Pick<Resolver, 'resetSrvMaps'>;
-      return { resolveRscAttribution: a.resolveRscAttribution, resetSrvMaps: m.resetSrvMaps };
+      const m = await import(/* turbopackIgnore: true */ /* webpackIgnore: true */ path.join(dir, 'srvmap.mjs')) as Pick<Resolver, 'resetSrvMaps' | 'serverFrameProvenance' | 'compareMapSource'>;
+      if (typeof m.serverFrameProvenance !== 'function' || typeof m.compareMapSource !== 'function') throw new Error('srvmap.mjs に A3 の照合（serverFrameProvenance / compareMapSource）がありません');
+      return {
+        resolveRscAttribution: a.resolveRscAttribution, resetSrvMaps: m.resetSrvMaps,
+        serverFrameProvenance: m.serverFrameProvenance, compareMapSource: m.compareMapSource,
+      };
     } catch (e) {
       resolverError = e instanceof Error ? e.message.split('\n')[0].slice(0, 200) : String(e);
       return null;
@@ -133,6 +191,24 @@ const CHECKS_POC02 = [
 const CHECK_RECORD = 'この SQL のスパンに呼び出し位置の記録がちょうど1件あり、同じトレースのもの。書いたプロセスの PID が記録とスパンの両方にあり一致する';
 const CHECK_SCOPE = '戻した位置が対象プロジェクトの src/ の中（シンボリックリンクで外へ出ない）';
 const CHECK_FRESH = 'SQL の実行の後に、生成物・ソースマップ・ソースファイルのどれも書き換わっていない';
+const CHECK_A1 = '呼び出しを書いたフレームより内側に、HMR で eval されたコード（V8 の CallSite.isEval() で判定）・形を認識できないフレームが無い';
+const CHECK_A2 = `その SQL が属する要求（同じトレースの受付スパン）の開始の ${FRESHNESS_MARGIN_MS / 1000} 秒前より後に、生成物・ソースマップ・戻した先のソースのどれも書き換わっていない`;
+const CHECK_A3 = '位置を戻したソースマップの区画の sourcesContent が、いまのソース（要素識別子のローダの変換を同じ規則で当てたもの）とバイト単位で一致';
+
+/**
+ * 7C（A2）: その SQL が属する要求を、**同じトレースの受付スパン**（HTTP の受付・親なし）で特定する。
+ * ちょうど1本で、SQL より前に始まっていること。まだ書かれていない（応答を送り終える前）・2本以上・時刻の向きが
+ * 合わなければ特定しない（推測で補わない）。時刻の近さ・パスでは探さない
+ */
+export function requestOfSql(traceSpans: readonly ObsSpan[], sql: ObsSpan): { request: { spanId: string; startMs: number } | null; issue: string | null } {
+  const roots = traceSpans.filter((s) => s.traceId === sql.traceId && s.kind === 1 && s.parentSpanId === null
+    && s.scope.includes('instrumentation-http'));
+  if (!roots.length) return { request: null, issue: '同じトレースの受付スパンがまだ収集ファイルにありません（応答を送り終える前など）' };
+  if (roots.length > 1) return { request: null, issue: `同じトレースの受付スパンが ${roots.length} 本あり、1つに決まりません` };
+  const r = roots[0];
+  if (!Number.isFinite(r.startMs) || !(r.startMs <= sql.startMs)) return { request: null, issue: '受付スパンの開始が SQL の開始より後です（時刻の向きが合いません）' };
+  return { request: { spanId: r.spanId, startMs: r.startMs }, issue: null };
+}
 
 const mtimeOf = (abs: string): number | null => { try { return fs.statSync(abs).mtimeMs; } catch { return null; } };
 
@@ -149,8 +225,11 @@ function insideScope(projectRoot: string, rel: string): string | null {
 
 export interface DataAccessInput {
   projectRoot: string;
-  /** その SQL のスパンと、それを書いたプロセス（収集ファイルの proc.pid） */
-  sql: { span: ObsSpan; pid: number | null }[];
+  /**
+   * その SQL のスパンと、それを書いたプロセス（収集ファイルの proc.pid）。
+   * 7C（A2）: request = その SQL が属する要求（requestOfSql で特定した受付スパン）。無ければ断定しない
+   */
+  sql: { span: ObsSpan; pid: number | null; request?: { spanId: string; startMs: number } | null; requestIssue?: string | null }[];
   callsites: Map<string, CallsiteRecord[]>;
   /** ビルド時の対応表のコンポーネント範囲（要素識別子の注入が有効なときだけ） */
   manifest: Map<string, unknown[]> | null;
@@ -176,7 +255,7 @@ export async function resolveDataAccess(input: DataAccessInput): Promise<LiveDat
   if (!r) return input.sql.map(({ span }) => fail(span, 'resolver-unavailable', resolverError ?? '理由不明'));
 
   const out: LiveDataAccess[] = [];
-  for (const { span, pid } of input.sql) {
+  for (const { span, pid, request = null, requestIssue = null } of input.sql) {
     /* A. 記録がちょうど1件 */
     const recs = input.callsites.get(span.spanId) ?? [];
     if (!recs.length) { out.push(fail(span, 'no-callsite-record', 'この SQL のスパン ID の記録が収集ファイルにありません')); continue; }
@@ -205,15 +284,39 @@ export async function resolveDataAccess(input: DataAccessInput): Promise<LiveDat
         { at: rec.entry?.at ?? null }));
       continue;
     }
+    /* 7C（A1）: 実行したコードのフレーム。eval の印（または形を認識できないフレーム）より外側は照合に渡さない
+     * （印のフレームを飛ばして呼び出し元の生成物のフレームを採らない）。印の有無を確かめられない記録は使わない */
+    let entry = rec.entry;
+    let barrier: CallsiteFrame | null = null;
+    if (entry) {
+      if (entry.frameSource !== FRAME_SOURCE_V8) {
+        out.push(fail(span, 'frame-origin-unverified',
+          entry.frameSource ? `記録の作り方が ${entry.frameSource.slice(0, 40)} です（V8 の CallSite.isEval() による判定ではない）` : '記録に作り方（frameSource）がありません',
+          { at: entry.at }));
+        continue;
+      }
+      const cut = entry.frames.findIndex((f) => BARRIER_SCOPES.has(f.scope));
+      if (cut >= 0) {
+        barrier = entry.frames[cut];
+        entry = { ...entry, frames: entry.frames.slice(0, cut) };
+      }
+    }
     /* 1〜4. PoC-02 の照合（rscattr.mjs をそのまま呼ぶ） */
     let a: Attribution;
     try {
-      a = r.resolveRscAttribution({ target: 'sql', entry: rec.entry, atSpanStart: [] }, input.manifest ?? new Map(), { root: input.projectRoot });
+      a = r.resolveRscAttribution({ target: 'sql', entry, atSpanStart: [] }, input.manifest ?? new Map(), { root: input.projectRoot });
     } catch (e) {
       out.push(fail(span, 'resolver-unavailable', e instanceof Error ? e.message.slice(0, 160) : String(e), { at: rec.entry?.at ?? null }));
       continue;
     }
     const at = rec.entry?.at ?? null;
+    /* A1: 印より内側に、ソースへ戻せるフレームが無い → 呼び出しを書いたのは印のフレームでありうる。位置を出さない */
+    if (barrier && !a.frame) {
+      out.push(barrier.scope === 'evaluated'
+        ? fail(span, 'hmr-evaluated-code', `呼び出しの入口から ${rec.entry!.frames.indexOf(barrier) + 1} 番目のフレームが eval されたコード${barrier.functionName ? `（${barrier.functionName}）` : ''}です`, { at })
+        : fail(span, 'unrecognized-frame', `呼び出しの入口から ${rec.entry!.frames.indexOf(barrier) + 1} 番目のフレームの形を認識できません`, { at }));
+      continue;
+    }
     const located = a.frame ? { file: a.frame.file, line: a.frame.line, col: a.frame.col } : null;
 
     /* C. 注入範囲の中 */
@@ -239,6 +342,42 @@ export async function resolveDataAccess(input: DataAccessInput): Promise<LiveDat
         out.push(fail(span, 'source-changed-after-call', `${a.frame?.file ?? 'ソース'} が SQL の実行の後に書き換わっています`, { at, located }));
         continue;
       }
+      /* 7C（A2）: 要求の開始から。D は「実行の後」だけを見ていた。要求の処理中（開始の直前の幅を含む）の書き換えも拒む */
+      if (!request) {
+        out.push(fail(span, 'request-start-unknown', requestIssue ?? 'この SQL が属する要求の受付スパンを特定していません', { at }));
+        continue;
+      }
+      const since = request.startMs - FRESHNESS_MARGIN_MS;
+      const changed = ([['生成物', mtimeOf(gen)], ['ソースマップ', mtimeOf(`${gen}.map`)], [a.frame?.file ?? 'ソース', tSrc]] as const)
+        .filter(([what, t]) => (t === null ? what !== 'ソースマップ' : t >= since));
+      if (changed.length) {
+        out.push(fail(span, 'changed-during-request',
+          `${changed.map(([w, t]) => (t === null ? `${w}（読めません）` : `${w}（要求の開始の ${Math.round(t - request.startMs)} ms ${t >= request.startMs ? '後' : '前'}）`)).join('・')} が書き換わっています`,
+          { at }));
+        continue;
+      }
+      /* 7C（A3）: 位置を戻した区画の sourcesContent と、いまのソースの内容 */
+      if (a.frame && srcAbs) {
+        let prov: Provenance = null;
+        try { prov = r.serverFrameProvenance(a.generated, input.projectRoot); } catch { prov = null; }
+        if (!prov || prov.file !== a.frame.file || prov.line !== a.frame.line || prov.col !== a.frame.col) {
+          out.push(fail(span, 'map-source-unverified', '位置を戻したソースマップの区画を特定し直せません', { at }));
+          continue;
+        }
+        if (typeof prov.sourceContent !== 'string') {
+          out.push(fail(span, 'map-source-unverified', `${a.frame.file} の区画に sourcesContent がありません`, { at }));
+          continue;
+        }
+        let current: string | null = null;
+        try { current = fs.readFileSync(srcAbs, 'utf8'); } catch { current = null; }
+        const cmp = current === null ? 'unverified' : r.compareMapSource(prov.sourceContent, current, a.frame.file);
+        if (cmp !== 'match') {
+          out.push(cmp === 'mismatch'
+            ? fail(span, 'map-source-mismatch', `${a.frame.file} の区画の sourcesContent が、いまのソース（とそのローダの変換結果）のどちらとも一致しません`, { at })
+            : fail(span, 'map-source-unverified', `${a.frame.file} の内容を比べられません（ソースを読めない・ローダの変換器を読み込めない）`, { at }));
+          continue;
+        }
+      }
     }
     if (a.failure || !a.frame || !a.verified || !a.component || !a.sourceLine) {
       const reason = (a.failure?.reason ?? 'component-not-agreed') as DataAccessFailureReason;
@@ -255,7 +394,7 @@ export async function resolveDataAccess(input: DataAccessInput): Promise<LiveDat
         component: a.component,
       },
       located, failure: null,
-      checks: [CHECK_RECORD, ...CHECKS_POC02, CHECK_SCOPE, CHECK_FRESH],
+      checks: [CHECK_RECORD, CHECK_A1, ...CHECKS_POC02, CHECK_SCOPE, CHECK_FRESH, CHECK_A2, CHECK_A3],
     });
   }
   return out;

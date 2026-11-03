@@ -1,0 +1,52 @@
+
+## first /hmr-s status=200 roots=1 rootStart=+1.0 rootPid=4108
+  SQL SELECT id, plan FROM poc.listings ORDER  start=+372.0 pid=4108
+    frame HmrS [root-of-the-server]__1pajqo6mu0imy._.js:26:142 chunk mtime=+243.8 map mtime=+243.8
+  SQL SELECT id, region FROM poc.listings ORDE start=+385.0 pid=4108
+    frame SA [root-of-the-server]__1pajqo6mu0imy._.js:72:142 chunk mtime=+243.8 map mtime=+243.8
+  SQL SELECT id, name AS region FROM poc.regio start=+389.0 pid=4108
+    frame SA [root-of-the-server]__1pajqo6mu0imy._.js:79:142 chunk mtime=+243.8 map mtime=+243.8
+  PRODUCT SELECT id, plan FROM poc.listings ORDER BY id frame 26:142 -> - changed-during-request
+  PRODUCT SELECT id, region FROM poc.listings ORDER BY  frame 72:142 -> - changed-during-request
+  PRODUCT SELECT id, name AS region FROM poc.regions OR frame 79:142 -> - changed-during-request
+  truth SA.tsx:4 SA.tsx:11
+
+## second /hmr-s status=200 roots=1 rootStart=+1.0 rootPid=4108
+  SQL SELECT id, plan FROM poc.listings ORDER  start=+71.0 pid=4108
+    frame HmrS [root-of-the-server]__1pajqo6mu0imy._.js:26:142 chunk mtime=+-3881.2 map mtime=+-3881.2
+  SQL SELECT id, region FROM poc.listings ORDE start=+92.0 pid=4108
+    frame SA [root-of-the-server]__1pajqo6mu0imy._.js:72:142 chunk mtime=+-3881.2 map mtime=+-3881.2
+  SQL SELECT id, name AS region FROM poc.regio start=+95.0 pid=4108
+    frame SA [root-of-the-server]__1pajqo6mu0imy._.js:79:142 chunk mtime=+-3881.2 map mtime=+-3881.2
+  PRODUCT SELECT id, plan FROM poc.listings ORDER BY id frame 26:142 -> src/app/hmr-s/page.tsx:7:24 
+  PRODUCT SELECT id, region FROM poc.listings ORDER BY  frame 72:142 -> src/components/SA.tsx:4:24 
+  PRODUCT SELECT id, name AS region FROM poc.regions OR frame 79:142 -> src/components/SA.tsx:11:24 
+
+# page.tsx に 7 文を足した（SA.tsx は変えていない）
+
+## after page edit /hmr-s status=200 roots=1 rootStart=+3.0 rootPid=4108
+  SQL SELECT id, plan FROM poc.listings ORDER  start=+46.0 pid=4108
+  SQL SELECT id, region FROM poc.listings ORDE start=+60.0 pid=4108
+    frame SA [root-of-the-server]__1pajqo6mu0imy._.js:72:142 chunk mtime=+4.2 map mtime=+4.2
+  SQL SELECT id, name AS region FROM poc.regio start=+65.0 pid=4108
+    frame SA [root-of-the-server]__1pajqo6mu0imy._.js:79:142 chunk mtime=+4.2 map mtime=+4.2
+  PRODUCT SELECT id, plan FROM poc.listings ORDER BY id frame undefined:undefined -> - hmr-evaluated-code
+  PRODUCT SELECT id, region FROM poc.listings ORDER BY  frame 72:142 -> - no-app-frame
+  PRODUCT SELECT id, name AS region FROM poc.regions OR frame 79:142 -> - changed-during-request
+  truth SA.tsx:4 SA.tsx:11
+
+## after page edit 2 /hmr-s status=200 roots=1 rootStart=+1.0 rootPid=4108
+  SQL SELECT id, plan FROM poc.listings ORDER  start=+30.0 pid=4108
+  SQL SELECT id, region FROM poc.listings ORDE start=+44.0 pid=4108
+    frame SA [root-of-the-server]__1pajqo6mu0imy._.js:72:142 chunk mtime=+-3583.8 map mtime=+-3583.8
+  SQL SELECT id, name AS region FROM poc.regio start=+47.0 pid=4108
+    frame SA [root-of-the-server]__1pajqo6mu0imy._.js:79:142 chunk mtime=+-3583.8 map mtime=+-3583.8
+  PRODUCT SELECT id, plan FROM poc.listings ORDER BY id frame undefined:undefined -> - hmr-evaluated-code
+  PRODUCT SELECT id, region FROM poc.listings ORDER BY  frame 72:142 -> - no-app-frame
+  PRODUCT SELECT id, name AS region FROM poc.regions OR frame 79:142 -> src/components/SA.tsx:4:24 
+
+chunk [root-of-the-server]__1pajqo6mu0imy._.js [
+  '3:[project]/src/app/hmr-s/page.tsx [app-rsc] (ecmascript)',
+  '62:[project]/src/components/SA.tsx [app-rsc] (ecmascript)',
+  '123:[project]/src/lib/db.ts [app-rsc] (ecmascript)'
+]

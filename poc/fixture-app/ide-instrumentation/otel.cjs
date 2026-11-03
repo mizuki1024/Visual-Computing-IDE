@@ -93,6 +93,14 @@ function start() {
    *
    * 収集するのは「ファイル・行・列・関数名」だけである。引数も変数も読まない。
    * 絶対パスは出さない（アプリ以下は相対パス、外は分類名に置き換える）。
+   *
+   * 7C（HMR 安全対策 A1）: フレームは V8 の呼び出し位置の API（CallSite）から作り、**eval されたコード**
+   * （Next.js 16 の server fast refresh は、変更したモジュールを Turbopack の実行時が `(0, eval)(code + sourceURL)` で
+   * 作り直す）を `CallSite.isEval()` で判定して `scope: 'evaluated'` の印を付ける。そのフレームの行・列は
+   * ディスクの生成物の座標ではないので、IDE はその位置より外側のフレームを根拠にしない。
+   * sourceURL に付く `?<moduleId>` も、eval のコードの位置も記録しない（file は '<evaluated>'）。
+   * 記録には作り方（frameSource: 'v8-callsite'）を書く。CallSite を取れなかったときだけスタックの文字列から作り
+   * （'stack-string'。`?`・`eval at` の形で印を推すが、IDE はこの記録を根拠に使わない）。
    * ------------------------------------------------------------------- */
   const APP_DIR = process.cwd();
   /** スタック1行の解析。`at fn (file:line:col)` と `at file:line:col` の両形 */
@@ -112,14 +120,73 @@ function start() {
     if (f.startsWith(APP_DIR)) {
       const rel = f.slice(APP_DIR.length).replace(/^[/\\]/, '').split('\\').join('/');
       if (rel.startsWith('node_modules/')) return { file: '<node_modules>', scope: 'node_modules' };
-      if (rel.startsWith('.next/')) return { file: rel, scope: 'build-output' };
+      /* 7C: 生成物として受けるのは .js だけ。形の違う生成物（拡張子が変わった等）は、黙って捨てられて外側のフレームが
+       * 採られないよう「認識できない」印にする */
+      if (rel.startsWith('.next/')) return /\.js$/.test(rel) ? { file: rel, scope: 'build-output' } : { file: '<unrecognized>', scope: 'unrecognized' };
       return { file: rel, scope: 'app-source' };
     }
     if (f.includes('node_modules')) return { file: '<node_modules>', scope: 'node_modules' };
     return { file: '<outside-app>', scope: 'outside' };
   }
 
-  function captureFrames(limit) {
+  /** sourceURL・ファイルの URL に ? / # が付いている（eval されたモジュールの sourceURL の形） */
+  const QUERIED = /^(?:file:\/\/)?[^?#]*[?#]/;
+  const EVALUATED = (fn, line, col) => ({ functionName: fn, file: '<evaluated>', scope: 'evaluated', line: line > 0 ? line : 0, col: col > 0 ? col : 0 });
+
+  /** V8 の既定の書式に近い関数名（表示にだけ使う。照合には使わない） */
+  function siteName(cs) {
+    try {
+      const f = cs.getFunctionName();
+      let n = f;
+      if (!cs.isToplevel() && !cs.isConstructor()) {
+        const t = cs.getTypeName();
+        if (t && t !== 'global' && (!f || !f.startsWith(`${t}.`))) n = `${t}.${f ?? '<anonymous>'}`;
+      }
+      if (!n) return null;
+      return `${typeof cs.isAsync === 'function' && cs.isAsync() ? 'async ' : ''}${cs.isConstructor() ? 'new ' : ''}${n}`.slice(0, 80);
+    } catch { return null; }
+  }
+
+  /** V8 の CallSite を取る。Error.prepareStackTrace をその場だけ差し替える（Next.js の差し替えはすぐ戻す） */
+  function callSites(limit) {
+    const prevLimit = Error.stackTraceLimit;
+    const prevPrep = Error.prepareStackTrace;
+    const mine = (_e, cs) => cs;
+    let sites = null;
+    try {
+      Error.stackTraceLimit = limit;
+      Error.prepareStackTrace = mine;
+      if (Error.prepareStackTrace === mine) {
+        const holder = {};
+        Error.captureStackTrace(holder, captureStack);
+        sites = holder.stack;   // 差し替えている間に読む（書式化はこの読み取りで起きる）
+      }
+    } catch { sites = null; } finally {
+      try { Error.prepareStackTrace = prevPrep; } catch { /* 戻せない形はそもそも差し替えられていない */ }
+      Error.stackTraceLimit = prevLimit;
+    }
+    return Array.isArray(sites) && sites.every((s) => s && typeof s.isEval === 'function') ? sites : null;
+  }
+
+  function frameOfSite(cs) {
+    const fn = siteName(cs);
+    const line = Number(cs.getLineNumber() ?? 0);
+    const col = Number(cs.getColumnNumber() ?? 0);
+    if (cs.isEval()) return EVALUATED(fn, line, col);
+    const raw = cs.getFileName() ?? (typeof cs.getScriptNameOrSourceURL === 'function' ? cs.getScriptNameOrSourceURL() : null);
+    if (!raw) {
+      /* 位置の無いフレーム（Array.map・new Promise など組み込みの関数）はユーザーのコードではない。位置があるのに名前が無いものは認識できない */
+      return line > 0 ? { functionName: fn, file: '<unrecognized>', scope: 'unrecognized', line: 0, col: 0 }
+        : { functionName: fn, file: '<native>', scope: 'native', line: 0, col: 0 };
+    }
+    if (QUERIED.test(String(raw))) return EVALUATED(fn, line, col);
+    if (!(line > 0) || !(col > 0)) return { functionName: fn, file: '<unrecognized>', scope: 'unrecognized', line: 0, col: 0 };
+    const c = classifyFile(raw);
+    return { functionName: fn, file: c.file, scope: c.scope, line, col };
+  }
+
+  /** スタックの文字列から作る（CallSite を取れなかったときだけ）。印は形から推す（`?`・`eval at`）。IDE は根拠に使わない */
+  function framesFromString(limit) {
     const prev = Error.stackTraceLimit;
     Error.stackTraceLimit = limit;
     const raw = new Error().stack || '';
@@ -127,15 +194,26 @@ function start() {
     const out = [];
     for (const line of raw.split('\n').slice(1)) {
       const m = FRAME_RE.exec(line);
-      if (!m) continue;
+      if (!m) {
+        if (/\((?:<anonymous>|native|index \d+)\)\s*$/.test(line)) out.push({ functionName: null, file: '<native>', scope: 'native', line: 0, col: 0 });
+        else if (line.trim()) out.push({ functionName: null, file: '<unrecognized>', scope: 'unrecognized', line: 0, col: 0 });
+        continue;
+      }
+      const fn = m[1] ? String(m[1]).slice(0, 80) : null;
+      if (/^eval at /.test(m[2]) || /<anonymous>/.test(m[2]) || QUERIED.test(m[2])) { out.push(EVALUATED(fn, Number(m[3]), Number(m[4]))); continue; }
       const c = classifyFile(m[2]);
-      out.push({
-        functionName: m[1] ? String(m[1]).slice(0, 80) : null,
-        file: c.file, scope: c.scope,
-        line: Number(m[3]), col: Number(m[4]),
-      });
+      out.push({ functionName: fn, file: c.file, scope: c.scope, line: Number(m[3]), col: Number(m[4]) });
     }
     return out;
+  }
+
+  /** 呼び出しのスタック。frameSource はフレームの作り方（IDE が A1 の照合に使う） */
+  function captureStack(limit) {
+    const sites = callSites(limit);
+    if (sites) {
+      try { return { frameSource: 'v8-callsite', frames: sites.map(frameOfSite) }; } catch { /* 文字列へ */ }
+    }
+    return { frameSource: 'stack-string', frames: framesFromString(limit) };
   }
 
   /**
@@ -225,7 +303,7 @@ function start() {
           try {
             if (context.active().getValue(CALLSITE_KEY)) return fn.apply(this, args);
             ctx = context.active().setValue(CALLSITE_KEY, {
-              at: 'globalThis.fetch', frames: captureFrames(60),
+              at: 'globalThis.fetch', ...captureStack(60),
             });
           } catch { return fn.apply(this, args); }
           return context.with(ctx, () => fn.apply(this, args));
@@ -254,7 +332,7 @@ function start() {
           // Client.query を呼ぶので、内側で上書きすると呼び出し元が消える
           if (context.active().getValue(CALLSITE_KEY)) return orig.apply(this, args);
           ctx = context.active().setValue(CALLSITE_KEY, {
-            at: label, frames: captureFrames(60),
+            at: label, ...captureStack(60),
           });
         } catch { return orig.apply(this, args); }
         return context.with(ctx, () => orig.apply(this, args));
@@ -281,9 +359,9 @@ function start() {
           traceId: span.spanContext().traceId,
           target: kind,
           /** 呼び出しの入口で取れたスタック（これが根拠になる） */
-          entry: carried ? { at: carried.at, frames: carried.frames } : null,
+          entry: carried ? { at: carried.at, frameSource: carried.frameSource ?? null, frames: carried.frames } : null,
           /** スパン開始時のスタック。**比較のためだけに持つ**（根拠にしない） */
-          atSpanStart: captureFrames(60),
+          atSpanStart: captureStack(60).frames,
         });
       } catch (e) {
         sink.note('callsite-failed', String(e && e.message).slice(0, 200));

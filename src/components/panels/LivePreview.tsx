@@ -70,7 +70,7 @@ const AGENT_WAIT_MS = 2500;
 const LINEAGE_RETRIES = 6;
 const LINEAGE_RETRY_MS = 1000;
 /** 一時的でありうる理由（時間が経てば観測に入る）。それ以外は取り直さない */
-const LINEAGE_TRANSIENT = new Set(['no-server-link', 'fetch-not-measured', 'fetch-site-unverified']);
+const LINEAGE_TRANSIENT = new Set(['no-server-link', 'fetch-not-measured', 'fetch-site-unverified', 'fetch-callsite-unverifiable']);
 const DOC_TRANSIENT = new Set(['token-not-in-session']);
 /** F-01: 解決済みの選択が依存するソースの版を確かめ直す間隔 */
 const REVISION_POLL_MS = 1500;

@@ -17,9 +17,10 @@
  * ただし開発ビルドの生成物に依存する（01b Q-03 C-5 と同じ制約）。
  * ========================================================================== */
 import fs from 'node:fs';
+import { createRequire } from 'node:module';
 import path from 'node:path';
 import { APP } from './util.mjs';
-import { originalPositionFor } from './srcmap.mjs';
+import { originalPositionDetail, originalPositionFor } from './srcmap.mjs';
 
 const NEXT_DIRS = ['.next/dev/server', '.next/server'];
 
@@ -158,6 +159,47 @@ export function resolveServerFrame(frame, root = APP) {
   }
 
   return null;
+}
+
+/* ------------------------------------------------------------ 7C（A3） */
+
+/**
+ * 7C（A3）: Turbopack のディスクの生成物のフレームを、resolveServerFrame と**同じソースマップ（同じ読み込み）・同じ区画の選び方**で
+ * 元の位置へ戻し、そのとき使った区画の `sourcesContent`（元のソースの内容）を返す。
+ * 呼び出し側は、戻した位置が resolveServerFrame の結果と一致することを確かめてから、内容を比べる。
+ * 仮想モジュール（webpack の eval）は対象にしない（呼び出し側が先に拒む）。既存の resolveServerFrame の振る舞いは変えない。
+ * @returns {{file:string, line:number, col:number, sourceContent:string|null}|null}
+ */
+export function serverFrameProvenance(frame, root = APP) {
+  if (!frame || !frame.line || frame.scope !== 'build-output') return null;
+  const map = diskMap(frame.file, root);
+  if (!map) return null;
+  const pos = originalPositionDetail(map, frame.line, (frame.col ?? 1) - 1);
+  const file = normalizeSource(pos?.source);
+  return file ? { file, line: pos.line, col: pos.column, sourceContent: pos.sourceContent } : null;
+}
+
+let anchorTransform;
+/**
+ * 7C（A3）: ソースマップの区画の sourcesContent と、いまのソースの内容を比べる。**正規化はしない**（空白・改行コードの差も不一致）。
+ * 一致とみなすのは次のどちらかとバイト単位で等しいときだけ:
+ *   1. いまのソースそのもの（ローダを通らないファイル — .ts・要素識別子の注入を無効にした起動）
+ *   2. いまのソースに、IDE が持つ要素識別子のローダ（poc/anchor/transform.cjs）の変換を同じ規則で当てた結果
+ *      （ローダは挿入だけを行い行を変えない。Turbopack の sourcesContent はローダの出力である — 実測）
+ * ローダの変換器を読み込めず 1 でも一致しなければ 'unverified'（比べられない）。それ以外の不一致は 'mismatch'。
+ * @returns {'match'|'mismatch'|'unverified'}
+ */
+export function compareMapSource(sourceContent, current, rel) {
+  if (typeof sourceContent !== 'string' || typeof current !== 'string') return 'unverified';
+  if (sourceContent === current) return 'match';
+  if (anchorTransform === undefined) {
+    try { anchorTransform = createRequire(import.meta.url)('../../anchor/transform.cjs').transform; } catch { anchorTransform = null; }
+  }
+  if (typeof anchorTransform !== 'function') return 'unverified';
+  let out;
+  /* ローダは変換に失敗すると元のソースをそのまま返す（loader.cjs）。そのソースは 1 で比べ済み */
+  try { out = anchorTransform(current, rel).code; } catch { return 'mismatch'; }
+  return out === sourceContent ? 'match' : 'mismatch';
 }
 
 /** 索引の件数（報告に出す。解決できなかった理由の切り分けに使う） */

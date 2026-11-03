@@ -1,0 +1,1075 @@
+{
+  "startedAt": "2026-11-03T02:06:38.113Z",
+  "phases": {
+    "T0-first-compile": {
+      "verdict": "correct",
+      "lineage": "linked",
+      "reason": "",
+      "cands": "poc.listings.region",
+      "docBinding": "identified",
+      "dockOrigin": "この値の出所 poc.listings . region 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になりま",
+      "dataAccess": [
+        {
+          "spanId": "f85e3b32efeb0094",
+          "sql": "SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $",
+          "site": "src/app/hmr-m/page.tsx:7:24",
+          "located": "src/app/hmr-m/page.tsx:7:24",
+          "failure": null
+        },
+        {
+          "spanId": "3fb289437666f0d8",
+          "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT",
+          "site": "src/app/hmr-m/page.tsx:14:24",
+          "located": "src/app/hmr-m/page.tsx:14:24",
+          "failure": null
+        }
+      ],
+      "fetch": "src/app/hmr-m/page.tsx:7:24"
+    },
+    "T0-baseline": {
+      "verdict": "correct",
+      "lineage": "linked",
+      "reason": "",
+      "cands": "poc.listings.region",
+      "docBinding": "identified",
+      "dockOrigin": "この値の出所 poc.listings . region 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になりま",
+      "dataAccess": [
+        {
+          "spanId": "5821579f94ea7e89",
+          "sql": "SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $",
+          "site": "src/app/hmr-m/page.tsx:7:24",
+          "located": "src/app/hmr-m/page.tsx:7:24",
+          "failure": null
+        },
+        {
+          "spanId": "9213cb9272fc8f48",
+          "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT",
+          "site": "src/app/hmr-m/page.tsx:14:24",
+          "located": "src/app/hmr-m/page.tsx:14:24",
+          "failure": null
+        }
+      ],
+      "fetch": "src/app/hmr-m/page.tsx:7:24"
+    },
+    "T3a 無関係なページ（listings/page.tsx）": {
+      "verdict": "correct",
+      "lineage": "linked",
+      "reason": "",
+      "cands": "poc.listings.region",
+      "docBinding": "identified",
+      "dockOrigin": "この値の出所 poc.listings . region 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になりま",
+      "dataAccess": [
+        {
+          "spanId": "7c563f3a7dc5c3e3",
+          "sql": "SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $",
+          "site": "src/app/hmr-m/page.tsx:7:24",
+          "located": "src/app/hmr-m/page.tsx:7:24",
+          "failure": null
+        },
+        {
+          "spanId": "e267069a45b978ef",
+          "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT",
+          "site": "src/app/hmr-m/page.tsx:14:24",
+          "located": "src/app/hmr-m/page.tsx:14:24",
+          "failure": null
+        }
+      ],
+      "fetch": "src/app/hmr-m/page.tsx:7:24"
+    },
+    "T3b 共有の lib/db.ts": {
+      "verdict": "correct",
+      "lineage": "linked",
+      "reason": "",
+      "cands": "poc.listings.region",
+      "docBinding": "identified",
+      "dockOrigin": "この値の出所 poc.listings . region 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になりま",
+      "dataAccess": [
+        {
+          "spanId": "b7c1087983eb1c21",
+          "sql": "SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $",
+          "site": "src/app/hmr-m/page.tsx:7:24",
+          "located": "src/app/hmr-m/page.tsx:7:24",
+          "failure": null
+        },
+        {
+          "spanId": "8d029cadf7ce0f9d",
+          "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT",
+          "site": "src/app/hmr-m/page.tsx:14:24",
+          "located": "src/app/hmr-m/page.tsx:14:24",
+          "failure": null
+        }
+      ],
+      "fetch": "src/app/hmr-m/page.tsx:7:24"
+    },
+    "T1": {
+      "verdict": "WRONG（poc.regions.name）",
+      "lineage": "linked",
+      "reason": "",
+      "cands": "poc.regions.name",
+      "docBinding": "identified",
+      "dockOrigin": "この値の出所 poc.regions . name 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 ",
+      "dataAccess": [
+        {
+          "spanId": "d3a2d6cafcab6949",
+          "sql": "SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $",
+          "site": null,
+          "located": null,
+          "failure": "no-app-frame"
+        },
+        {
+          "spanId": "c3b2f02333bc8635",
+          "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT",
+          "site": "src/app/hmr-m/page.tsx:7:24",
+          "located": "src/app/hmr-m/page.tsx:7:24",
+          "failure": null
+        }
+      ],
+      "fetch": "src/app/hmr-m/page.tsx:7:24",
+      "canvas": {
+        "labels": [
+          "表示された値 <p> のテキスト #0",
+          "サーバー処理 render route (app) /hmr-m — 26ms",
+          "テーブル poc.listings",
+          "テーブル poc.regions",
+          "コンポーネント src/app/hmr-m/page.tsx:18",
+          "通信 GET /hmr-m — 200 — 44ms",
+          "実行SQL SELECT id, region FROM poc.listings ORDER BY id DESC LIMI… — 7ms",
+          "コンポーネント src/app/hmr-m/page.tsx:7",
+          "実行SQL SELECT id, name AS region FROM poc.regions ORDER BY id LI… — 1ms",
+          "カラム poc.listings.id",
+          "カラム poc.listings.region",
+          "カラム poc.regions.id",
+          "カラム poc.regions.name"
+        ],
+        "rows": [
+          {
+            "sql": "SELECT id, region FROM poc.listings ORDER BY id DESC LIMI…",
+            "row": "特定していません — スタックに、注入範囲（src/）のソースへ戻せるフレームがありません"
+          },
+          {
+            "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id LI…",
+            "row": "src/app/hmr-m/page.tsx:7:24（HmrM の中）"
+          }
+        ]
+      }
+    },
+    "T4a SQL より前に1文": {
+      "verdict": "WRONG（poc.regions.name）",
+      "lineage": "linked",
+      "reason": "",
+      "cands": "poc.regions.name",
+      "docBinding": "identified",
+      "dockOrigin": "この値の出所 poc.regions . name 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 ",
+      "dataAccess": [
+        {
+          "spanId": "847b3a1b35c2703c",
+          "sql": "SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $",
+          "site": null,
+          "located": null,
+          "failure": "no-app-frame"
+        },
+        {
+          "spanId": "7ecef8fa2afe2558",
+          "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT",
+          "site": "src/app/hmr-m/page.tsx:8:24",
+          "located": "src/app/hmr-m/page.tsx:8:24",
+          "failure": null
+        }
+      ],
+      "fetch": "src/app/hmr-m/page.tsx:8:24"
+    },
+    "T4b SQL a の SELECT 句に plan を足す": {
+      "verdict": "WRONG（poc.regions.name）",
+      "lineage": "linked",
+      "reason": "",
+      "cands": "poc.regions.name",
+      "docBinding": "identified",
+      "dockOrigin": "この値の出所 poc.regions . name 推定 27 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 ",
+      "dataAccess": [
+        {
+          "spanId": "f7c8c495e93f50ec",
+          "sql": "SELECT id, region, plan FROM poc.listings ORDER BY id DESC L",
+          "site": null,
+          "located": null,
+          "failure": "no-app-frame"
+        },
+        {
+          "spanId": "cad1b51e29b122b3",
+          "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT",
+          "site": "src/app/hmr-m/page.tsx:8:24",
+          "located": "src/app/hmr-m/page.tsx:8:24",
+          "failure": null
+        }
+      ],
+      "fetch": "src/app/hmr-m/page.tsx:8:24"
+    },
+    "T4c 元に戻す": {
+      "verdict": "WRONG（poc.regions.name）",
+      "lineage": "linked",
+      "reason": "",
+      "cands": "poc.regions.name",
+      "docBinding": "identified",
+      "dockOrigin": "この値の出所 poc.regions . name 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 ",
+      "dataAccess": [
+        {
+          "spanId": "7b38ef2acbb2a531",
+          "sql": "SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $",
+          "site": null,
+          "located": null,
+          "failure": "no-app-frame"
+        },
+        {
+          "spanId": "7feda614065bbc33",
+          "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT",
+          "site": "src/app/hmr-m/page.tsx:7:24",
+          "located": "src/app/hmr-m/page.tsx:7:24",
+          "failure": null
+        }
+      ],
+      "fetch": "src/app/hmr-m/page.tsx:7:24"
+    },
+    "T4 再起動の後": {
+      "verdict": "correct",
+      "lineage": "linked",
+      "reason": "",
+      "cands": "poc.listings.region",
+      "docBinding": "identified",
+      "dockOrigin": "この値の出所 poc.listings . region 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になりま",
+      "dataAccess": [
+        {
+          "spanId": "5b446636641646de",
+          "sql": "SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $",
+          "site": "src/app/hmr-m/page.tsx:7:24",
+          "located": "src/app/hmr-m/page.tsx:7:24",
+          "failure": null
+        },
+        {
+          "spanId": "33aa4476cca498d9",
+          "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT",
+          "site": "src/app/hmr-m/page.tsx:14:24",
+          "located": "src/app/hmr-m/page.tsx:14:24",
+          "failure": null
+        }
+      ],
+      "fetch": "src/app/hmr-m/page.tsx:7:24"
+    },
+    "T2": {
+      "truthAfterEdit": "src/app/hmr-r/page.tsx:14:24",
+      "dataAccess": [
+        {
+          "sql": "SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $",
+          "site": null,
+          "located": "src/app/hmr-r/page.tsx:7:14",
+          "failure": "build-changed-after-call"
+        },
+        {
+          "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id DESC ",
+          "site": "src/app/hmr-r/page.tsx:14:24",
+          "located": "src/app/hmr-r/page.tsx:14:24",
+          "failure": null
+        }
+      ]
+    }
+  },
+  "truth": {
+    "el": "src/app/hmr-m/page.tsx:17:7",
+    "callA": "src/app/hmr-m/page.tsx:7:24",
+    "callB": "src/app/hmr-m/page.tsx:14:24"
+  },
+  "finishedAt": "2026-11-03T02:08:12.021Z",
+  "lineageResponses": [
+    {
+      "t": 1793671607833,
+      "status": 200,
+      "lineage": "linked",
+      "cut": null,
+      "cutDetail": null,
+      "candidates": [
+        "poc.listings.region"
+      ],
+      "fetch": "src/app/hmr-m/page.tsx:7:24",
+      "exchangeSeq": 2,
+      "binding": "identified",
+      "dataAccess": [
+        {
+          "spanId": "f85e3b32efeb0094",
+          "sql": "SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $",
+          "site": "src/app/hmr-m/page.tsx:7:24",
+          "located": "src/app/hmr-m/page.tsx:7:24",
+          "failure": null
+        },
+        {
+          "spanId": "3fb289437666f0d8",
+          "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT",
+          "site": "src/app/hmr-m/page.tsx:14:24",
+          "located": "src/app/hmr-m/page.tsx:14:24",
+          "failure": null
+        }
+      ]
+    },
+    {
+      "t": 1793671609800,
+      "status": 200,
+      "lineage": "linked",
+      "cut": null,
+      "cutDetail": null,
+      "candidates": [
+        "poc.listings.region"
+      ],
+      "fetch": "src/app/hmr-m/page.tsx:7:24",
+      "exchangeSeq": 4,
+      "binding": "identified",
+      "dataAccess": [
+        {
+          "spanId": "5821579f94ea7e89",
+          "sql": "SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $",
+          "site": "src/app/hmr-m/page.tsx:7:24",
+          "located": "src/app/hmr-m/page.tsx:7:24",
+          "failure": null
+        },
+        {
+          "spanId": "9213cb9272fc8f48",
+          "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT",
+          "site": "src/app/hmr-m/page.tsx:14:24",
+          "located": "src/app/hmr-m/page.tsx:14:24",
+          "failure": null
+        }
+      ]
+    },
+    {
+      "t": 1793671616936,
+      "status": 200,
+      "lineage": "linked",
+      "cut": null,
+      "cutDetail": null,
+      "candidates": [
+        "poc.listings.region"
+      ],
+      "fetch": "src/app/hmr-m/page.tsx:7:24",
+      "exchangeSeq": 5,
+      "binding": "identified",
+      "dataAccess": [
+        {
+          "spanId": "7c563f3a7dc5c3e3",
+          "sql": "SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $",
+          "site": "src/app/hmr-m/page.tsx:7:24",
+          "located": "src/app/hmr-m/page.tsx:7:24",
+          "failure": null
+        },
+        {
+          "spanId": "e267069a45b978ef",
+          "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT",
+          "site": "src/app/hmr-m/page.tsx:14:24",
+          "located": "src/app/hmr-m/page.tsx:14:24",
+          "failure": null
+        }
+      ]
+    },
+    {
+      "t": 1793671623680,
+      "status": 200,
+      "lineage": "linked",
+      "cut": null,
+      "cutDetail": null,
+      "candidates": [
+        "poc.listings.region"
+      ],
+      "fetch": "src/app/hmr-m/page.tsx:7:24",
+      "exchangeSeq": 7,
+      "binding": "identified",
+      "dataAccess": [
+        {
+          "spanId": "b7c1087983eb1c21",
+          "sql": "SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $",
+          "site": "src/app/hmr-m/page.tsx:7:24",
+          "located": "src/app/hmr-m/page.tsx:7:24",
+          "failure": null
+        },
+        {
+          "spanId": "8d029cadf7ce0f9d",
+          "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT",
+          "site": "src/app/hmr-m/page.tsx:14:24",
+          "located": "src/app/hmr-m/page.tsx:14:24",
+          "failure": null
+        }
+      ]
+    },
+    {
+      "t": 1793671629632,
+      "status": 200,
+      "lineage": "linked",
+      "cut": null,
+      "cutDetail": null,
+      "candidates": [
+        "poc.regions.name"
+      ],
+      "fetch": "src/app/hmr-m/page.tsx:7:24",
+      "exchangeSeq": 9,
+      "binding": "identified",
+      "dataAccess": [
+        {
+          "spanId": "d3a2d6cafcab6949",
+          "sql": "SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $",
+          "site": null,
+          "located": null,
+          "failure": "no-app-frame"
+        },
+        {
+          "spanId": "c3b2f02333bc8635",
+          "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT",
+          "site": "src/app/hmr-m/page.tsx:7:24",
+          "located": "src/app/hmr-m/page.tsx:7:24",
+          "failure": null
+        }
+      ]
+    },
+    {
+      "t": 1793671631302,
+      "status": 200,
+      "lineage": "cut",
+      "cut": "fetch-not-measured",
+      "cutDetail": "src/app/hmr-m/page.tsx:14:24。この文書の通信で実行位置を特定した SQL: src/app/hmr-m/page.tsx:7:24",
+      "candidates": [],
+      "fetch": null,
+      "exchangeSeq": 9,
+      "binding": "identified",
+      "dataAccess": [
+        {
+          "spanId": "d3a2d6cafcab6949",
+          "sql": "SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $",
+          "site": null,
+          "located": null,
+          "failure": "no-app-frame"
+        },
+        {
+          "spanId": "c3b2f02333bc8635",
+          "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT",
+          "site": "src/app/hmr-m/page.tsx:7:24",
+          "located": "src/app/hmr-m/page.tsx:7:24",
+          "failure": null
+        }
+      ]
+    },
+    {
+      "t": 1793671632342,
+      "status": 200,
+      "lineage": "cut",
+      "cut": "fetch-not-measured",
+      "cutDetail": "src/app/hmr-m/page.tsx:14:24。この文書の通信で実行位置を特定した SQL: src/app/hmr-m/page.tsx:7:24",
+      "candidates": [],
+      "fetch": null,
+      "exchangeSeq": 9,
+      "binding": "identified",
+      "dataAccess": [
+        {
+          "spanId": "d3a2d6cafcab6949",
+          "sql": "SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $",
+          "site": null,
+          "located": null,
+          "failure": "no-app-frame"
+        },
+        {
+          "spanId": "c3b2f02333bc8635",
+          "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT",
+          "site": "src/app/hmr-m/page.tsx:7:24",
+          "located": "src/app/hmr-m/page.tsx:7:24",
+          "failure": null
+        }
+      ]
+    },
+    {
+      "t": 1793671638567,
+      "status": 200,
+      "lineage": "linked",
+      "cut": null,
+      "cutDetail": null,
+      "candidates": [
+        "poc.regions.name"
+      ],
+      "fetch": "src/app/hmr-m/page.tsx:8:24",
+      "exchangeSeq": 11,
+      "binding": "identified",
+      "dataAccess": [
+        {
+          "spanId": "847b3a1b35c2703c",
+          "sql": "SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $",
+          "site": null,
+          "located": null,
+          "failure": "no-app-frame"
+        },
+        {
+          "spanId": "7ecef8fa2afe2558",
+          "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT",
+          "site": "src/app/hmr-m/page.tsx:8:24",
+          "located": "src/app/hmr-m/page.tsx:8:24",
+          "failure": null
+        }
+      ]
+    },
+    {
+      "t": 1793671644728,
+      "status": 200,
+      "lineage": "linked",
+      "cut": null,
+      "cutDetail": null,
+      "candidates": [
+        "poc.regions.name"
+      ],
+      "fetch": "src/app/hmr-m/page.tsx:8:24",
+      "exchangeSeq": 13,
+      "binding": "identified",
+      "dataAccess": [
+        {
+          "spanId": "f7c8c495e93f50ec",
+          "sql": "SELECT id, region, plan FROM poc.listings ORDER BY id DESC L",
+          "site": null,
+          "located": null,
+          "failure": "no-app-frame"
+        },
+        {
+          "spanId": "cad1b51e29b122b3",
+          "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT",
+          "site": "src/app/hmr-m/page.tsx:8:24",
+          "located": "src/app/hmr-m/page.tsx:8:24",
+          "failure": null
+        }
+      ]
+    },
+    {
+      "t": 1793671650445,
+      "status": 200,
+      "lineage": "linked",
+      "cut": null,
+      "cutDetail": null,
+      "candidates": [
+        "poc.regions.name"
+      ],
+      "fetch": "src/app/hmr-m/page.tsx:7:24",
+      "exchangeSeq": 15,
+      "binding": "identified",
+      "dataAccess": [
+        {
+          "spanId": "7b38ef2acbb2a531",
+          "sql": "SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $",
+          "site": null,
+          "located": null,
+          "failure": "no-app-frame"
+        },
+        {
+          "spanId": "7feda614065bbc33",
+          "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT",
+          "site": "src/app/hmr-m/page.tsx:7:24",
+          "located": "src/app/hmr-m/page.tsx:7:24",
+          "failure": null
+        }
+      ]
+    },
+    {
+      "t": 1793671656539,
+      "status": 200,
+      "lineage": "linked",
+      "cut": null,
+      "cutDetail": null,
+      "candidates": [
+        "poc.listings.region"
+      ],
+      "fetch": "src/app/hmr-m/page.tsx:7:24",
+      "exchangeSeq": 5,
+      "binding": "identified",
+      "dataAccess": [
+        {
+          "spanId": "5b446636641646de",
+          "sql": "SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $",
+          "site": "src/app/hmr-m/page.tsx:7:24",
+          "located": "src/app/hmr-m/page.tsx:7:24",
+          "failure": null
+        },
+        {
+          "spanId": "33aa4476cca498d9",
+          "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT",
+          "site": "src/app/hmr-m/page.tsx:14:24",
+          "located": "src/app/hmr-m/page.tsx:14:24",
+          "failure": null
+        }
+      ]
+    }
+  ],
+  "pass": 21,
+  "fail": 26,
+  "items": [
+    {
+      "name": "前提: 題材の DB（使い捨ての PostgreSQL）に届く",
+      "pass": true
+    },
+    {
+      "name": "前提: 計装は有効",
+      "pass": true
+    },
+    {
+      "name": "前提: 要素識別子の注入は有効",
+      "pass": true
+    },
+    {
+      "note": "T0-first-compile: correct / 右ドック「この値の出所 poc.listings . region 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になりま」"
+    },
+    {
+      "note": "  SQL「SELECT id, region FROM poc.listings ORDER BY」 呼び出し位置 src/app/hmr-m/page.tsx:7:24"
+    },
+    {
+      "note": "  SQL「SELECT id, name AS region FROM poc.regions O」 呼び出し位置 src/app/hmr-m/page.tsx:14:24"
+    },
+    {
+      "name": "T0 初回のコンパイル: poc.regions.name を値 a の由来として出さない（パネル）",
+      "pass": true
+    },
+    {
+      "name": "T0 初回のコンパイル: 右ドックに「この値の出所 poc.regions.name」を出さない",
+      "pass": true
+    },
+    {
+      "name": "T0 初回のコンパイル: 由来の評価の応答に poc.regions.name を候補として返さない",
+      "pass": true
+    },
+    {
+      "note": "T0-baseline: correct / 右ドック「この値の出所 poc.listings . region 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になりま」"
+    },
+    {
+      "note": "  SQL「SELECT id, region FROM poc.listings ORDER BY」 呼び出し位置 src/app/hmr-m/page.tsx:7:24"
+    },
+    {
+      "note": "  SQL「SELECT id, name AS region FROM poc.regions O」 呼び出し位置 src/app/hmr-m/page.tsx:14:24"
+    },
+    {
+      "name": "T0 前提: 選択の位置 = ソースの <p>",
+      "pass": true
+    },
+    {
+      "name": "T0 基準: 正しく結ぶ（poc.listings.region・取得位置は SQL a）",
+      "pass": true
+    },
+    {
+      "name": "T0 基準: この文書の SQL a・b の呼び出し位置はどちらも正しい",
+      "pass": true
+    },
+    {
+      "note": "T3a 無関係なページ（listings/page.tsx）: correct / 右ドック「この値の出所 poc.listings . region 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になりま」"
+    },
+    {
+      "note": "  SQL「SELECT id, region FROM poc.listings ORDER BY」 呼び出し位置 src/app/hmr-m/page.tsx:7:24"
+    },
+    {
+      "note": "  SQL「SELECT id, name AS region FROM poc.regions O」 呼び出し位置 src/app/hmr-m/page.tsx:14:24"
+    },
+    {
+      "name": "T3a 無関係なページ（listings/page.tsx）: 由来を保つ（poc.listings.region・取得位置は SQL a）",
+      "pass": true
+    },
+    {
+      "name": "T3a 無関係なページ（listings/page.tsx）: SQL a・b の呼び出し位置を保つ",
+      "pass": true
+    },
+    {
+      "note": "T3b 共有の lib/db.ts: correct / 右ドック「この値の出所 poc.listings . region 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になりま」"
+    },
+    {
+      "note": "  SQL「SELECT id, region FROM poc.listings ORDER BY」 呼び出し位置 src/app/hmr-m/page.tsx:7:24"
+    },
+    {
+      "note": "  SQL「SELECT id, name AS region FROM poc.regions O」 呼び出し位置 src/app/hmr-m/page.tsx:14:24"
+    },
+    {
+      "name": "T3b 共有の lib/db.ts: 由来を保つ（poc.listings.region・取得位置は SQL a）",
+      "pass": true
+    },
+    {
+      "name": "T3b 共有の lib/db.ts: SQL a・b の呼び出し位置を保つ",
+      "pass": true
+    },
+    {
+      "note": "T1: WRONG（poc.regions.name） / 右ドック「この値の出所 poc.regions . name 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 」"
+    },
+    {
+      "note": "  SQL「SELECT id, region FROM poc.listings ORDER BY」 呼び出し位置 - / no-app-frame"
+    },
+    {
+      "note": "  SQL「SELECT id, name AS region FROM poc.regions O」 呼び出し位置 src/app/hmr-m/page.tsx:7:24"
+    },
+    {
+      "name": "T1 前提: 選択はいまのソースの <p> に特定（F-01 は通る）",
+      "pass": true
+    },
+    {
+      "name": "T1 前提: 文書は新しい要求に同定",
+      "pass": true
+    },
+    {
+      "name": "T1: poc.regions.name を値 a の由来として出さない（パネル）",
+      "pass": false,
+      "got": {
+        "lineage": "linked",
+        "cands": "poc.regions.name"
+      }
+    },
+    {
+      "name": "T1: 右ドックに「この値の出所 poc.regions.name」を出さない",
+      "pass": false,
+      "got": "この値の出所 poc.regions . name 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 "
+    },
+    {
+      "name": "T1: 由来の評価の応答に poc.regions.name を候補として返さない",
+      "pass": false,
+      "got": [
+        "poc.regions.name"
+      ]
+    },
+    {
+      "name": "T1: 由来は結ばず、呼び出し位置を確かめられないことを理由にする（fetch-callsite-unverifiable）",
+      "pass": false,
+      "got": [
+        "linked",
+        ""
+      ]
+    },
+    {
+      "name": "T1: この文書の SQL を観測している（SQL そのものは観測できている）",
+      "pass": true
+    },
+    {
+      "name": "T1: SQL b を SQL a の位置（誤った呼び出し位置）に対応させない",
+      "pass": false,
+      "got": [
+        {
+          "spanId": "d3a2d6cafcab6949",
+          "sql": "SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $",
+          "site": null,
+          "located": null,
+          "failure": "no-app-frame"
+        },
+        {
+          "spanId": "c3b2f02333bc8635",
+          "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT",
+          "site": "src/app/hmr-m/page.tsx:7:24",
+          "located": "src/app/hmr-m/page.tsx:7:24",
+          "failure": null
+        }
+      ]
+    },
+    {
+      "name": "T1: どの SQL も呼び出し位置を作らず、理由は hmr-evaluated-code（HMR で eval されたコード）",
+      "pass": false,
+      "got": [
+        {
+          "spanId": "d3a2d6cafcab6949",
+          "sql": "SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $",
+          "site": null,
+          "located": null,
+          "failure": "no-app-frame"
+        },
+        {
+          "spanId": "c3b2f02333bc8635",
+          "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT",
+          "site": "src/app/hmr-m/page.tsx:7:24",
+          "located": "src/app/hmr-m/page.tsx:7:24",
+          "failure": null
+        }
+      ]
+    },
+    {
+      "name": "T1: 「参考の位置」も出さない（located なし）",
+      "pass": false,
+      "got": [
+        {
+          "spanId": "d3a2d6cafcab6949",
+          "sql": "SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $",
+          "site": null,
+          "located": null,
+          "failure": "no-app-frame"
+        },
+        {
+          "spanId": "c3b2f02333bc8635",
+          "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT",
+          "site": "src/app/hmr-m/page.tsx:7:24",
+          "located": "src/app/hmr-m/page.tsx:7:24",
+          "failure": null
+        }
+      ]
+    },
+    {
+      "name": "T1: 右ドックに、コードの更新で確かめられないことと再起動の案内を出す",
+      "pass": false,
+      "got": "詳細\n経路\n固定\nこの値の出所\npoc.regions . name\n推定\n\n25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。\n\n実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。\n\n概要\n根拠\n★\nいちばん弱いところ\n②→⑤この表示値の由来（取得結果のどの項目か）\n\n取得結果のどの項目がこの表示値になったかは、ソースの静的解析による推定です。実行時に観測したものではありません（表示された値も、取得した行も読んでいません）。文書・呼び出し位置・SQL は実測ですが、それで推定が実測に変わることはありません。推定の状態: 参照の連鎖が1列に決まり、加工も分岐も無い。参照の連鎖: pool.query(…) の結果（src/app/hmr-m/page.tsx:7） ← .rows を参照 ← [0] を参照 ← .re"
+    },
+    {
+      "name": "T1: 値 b も誤って結ばない（poc.listings.region を出さない）",
+      "pass": true
+    },
+    {
+      "name": "T1 観測画面: SQL a の位置のコンポーネントのノード（誤った呼び出し位置）を描かない",
+      "pass": false,
+      "got": [
+        "表示された値 <p> のテキスト #0",
+        "サーバー処理 render route (app) /hmr-m — 26ms",
+        "テーブル poc.listings",
+        "テーブル poc.regions",
+        "コンポーネント src/app/hmr-m/page.tsx:18",
+        "通信 GET /hmr-m — 200 — 44ms",
+        "実行SQL SELECT id, region FROM poc.listings ORDER BY id DESC LIMI… — 7ms",
+        "コンポーネント src/app/hmr-m/page.tsx:7",
+        "実行SQL SELECT id, name AS region FROM poc.regions ORDER BY id LI… — 1ms",
+        "カラム poc.listings.id",
+        "カラム poc.listings.region",
+        "カラム poc.regions.id",
+        "カラム poc.regions.name"
+      ]
+    },
+    {
+      "name": "T1 観測画面: SQL の詳細の「実行した呼び出し位置」は「特定していません」とその理由",
+      "pass": false,
+      "got": [
+        {
+          "sql": "SELECT id, region FROM poc.listings ORDER BY id DESC LIMI…",
+          "row": "特定していません — スタックに、注入範囲（src/）のソースへ戻せるフレームがありません"
+        },
+        {
+          "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id LI…",
+          "row": "src/app/hmr-m/page.tsx:7:24（HmrM の中）"
+        }
+      ]
+    },
+    {
+      "note": "T4a SQL より前に1文: WRONG（poc.regions.name） / 右ドック「この値の出所 poc.regions . name 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 」"
+    },
+    {
+      "note": "  SQL「SELECT id, region FROM poc.listings ORDER BY」 呼び出し位置 - / no-app-frame"
+    },
+    {
+      "note": "  SQL「SELECT id, name AS region FROM poc.regions O」 呼び出し位置 src/app/hmr-m/page.tsx:8:24"
+    },
+    {
+      "name": "T4a SQL より前に1文: poc.regions.name を値 a の由来として出さない（パネル）",
+      "pass": false,
+      "got": {
+        "lineage": "linked",
+        "cands": "poc.regions.name"
+      }
+    },
+    {
+      "name": "T4a SQL より前に1文: 右ドックに「この値の出所 poc.regions.name」を出さない",
+      "pass": false,
+      "got": "この値の出所 poc.regions . name 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 "
+    },
+    {
+      "name": "T4a SQL より前に1文: 由来の評価の応答に poc.regions.name を候補として返さない",
+      "pass": false,
+      "got": [
+        "poc.regions.name"
+      ]
+    },
+    {
+      "name": "T4a SQL より前に1文: どの SQL にも呼び出し位置を作らない（HMR で eval されたコード）",
+      "pass": false,
+      "got": [
+        {
+          "spanId": "847b3a1b35c2703c",
+          "sql": "SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $",
+          "site": null,
+          "located": null,
+          "failure": "no-app-frame"
+        },
+        {
+          "spanId": "7ecef8fa2afe2558",
+          "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT",
+          "site": "src/app/hmr-m/page.tsx:8:24",
+          "located": "src/app/hmr-m/page.tsx:8:24",
+          "failure": null
+        }
+      ]
+    },
+    {
+      "note": "T4b SQL a の SELECT 句に plan を足す: WRONG（poc.regions.name） / 右ドック「この値の出所 poc.regions . name 推定 27 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 」"
+    },
+    {
+      "note": "  SQL「SELECT id, region, plan FROM poc.listings OR」 呼び出し位置 - / no-app-frame"
+    },
+    {
+      "note": "  SQL「SELECT id, name AS region FROM poc.regions O」 呼び出し位置 src/app/hmr-m/page.tsx:8:24"
+    },
+    {
+      "name": "T4b SQL a の SELECT 句に plan を足す: poc.regions.name を値 a の由来として出さない（パネル）",
+      "pass": false,
+      "got": {
+        "lineage": "linked",
+        "cands": "poc.regions.name"
+      }
+    },
+    {
+      "name": "T4b SQL a の SELECT 句に plan を足す: 右ドックに「この値の出所 poc.regions.name」を出さない",
+      "pass": false,
+      "got": "この値の出所 poc.regions . name 推定 27 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 "
+    },
+    {
+      "name": "T4b SQL a の SELECT 句に plan を足す: 由来の評価の応答に poc.regions.name を候補として返さない",
+      "pass": false,
+      "got": [
+        "poc.regions.name"
+      ]
+    },
+    {
+      "name": "T4b SQL a の SELECT 句に plan を足す: どの SQL にも呼び出し位置を作らない（HMR で eval されたコード）",
+      "pass": false,
+      "got": [
+        {
+          "spanId": "f7c8c495e93f50ec",
+          "sql": "SELECT id, region, plan FROM poc.listings ORDER BY id DESC L",
+          "site": null,
+          "located": null,
+          "failure": "no-app-frame"
+        },
+        {
+          "spanId": "cad1b51e29b122b3",
+          "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT",
+          "site": "src/app/hmr-m/page.tsx:8:24",
+          "located": "src/app/hmr-m/page.tsx:8:24",
+          "failure": null
+        }
+      ]
+    },
+    {
+      "note": "T4c 元に戻す: WRONG（poc.regions.name） / 右ドック「この値の出所 poc.regions . name 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 」"
+    },
+    {
+      "note": "  SQL「SELECT id, region FROM poc.listings ORDER BY」 呼び出し位置 - / no-app-frame"
+    },
+    {
+      "note": "  SQL「SELECT id, name AS region FROM poc.regions O」 呼び出し位置 src/app/hmr-m/page.tsx:7:24"
+    },
+    {
+      "name": "T4c 元に戻す: poc.regions.name を値 a の由来として出さない（パネル）",
+      "pass": false,
+      "got": {
+        "lineage": "linked",
+        "cands": "poc.regions.name"
+      }
+    },
+    {
+      "name": "T4c 元に戻す: 右ドックに「この値の出所 poc.regions.name」を出さない",
+      "pass": false,
+      "got": "この値の出所 poc.regions . name 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 "
+    },
+    {
+      "name": "T4c 元に戻す: 由来の評価の応答に poc.regions.name を候補として返さない",
+      "pass": false,
+      "got": [
+        "poc.regions.name"
+      ]
+    },
+    {
+      "name": "T4c 元に戻す: どの SQL にも呼び出し位置を作らない（HMR で eval されたコード）",
+      "pass": false,
+      "got": [
+        {
+          "spanId": "7b38ef2acbb2a531",
+          "sql": "SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $",
+          "site": null,
+          "located": null,
+          "failure": "no-app-frame"
+        },
+        {
+          "spanId": "7feda614065bbc33",
+          "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT",
+          "site": "src/app/hmr-m/page.tsx:7:24",
+          "located": "src/app/hmr-m/page.tsx:7:24",
+          "failure": null
+        }
+      ]
+    },
+    {
+      "note": "T4 再起動の後: correct / 右ドック「この値の出所 poc.listings . region 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になりま」"
+    },
+    {
+      "note": "  SQL「SELECT id, region FROM poc.listings ORDER BY」 呼び出し位置 src/app/hmr-m/page.tsx:7:24"
+    },
+    {
+      "note": "  SQL「SELECT id, name AS region FROM poc.regions O」 呼び出し位置 src/app/hmr-m/page.tsx:14:24"
+    },
+    {
+      "name": "T4: 再起動の後は正しい由来に戻る",
+      "pass": true
+    },
+    {
+      "note": "要求の開始の約 1.5 秒後に、SQL a より前へ 7 文を足した"
+    },
+    {
+      "name": "T2 前提: 書き換えの前に始まった文書の要求を観測した",
+      "pass": true
+    },
+    {
+      "note": "  SQL「SELECT id, region FROM poc.listings ORDER BY」 呼び出し位置 - / build-changed-after-call"
+    },
+    {
+      "note": "  SQL「SELECT id, name AS region FROM poc.regions O」 呼び出し位置 src/app/hmr-r/page.tsx:14:24"
+    },
+    {
+      "name": "T2 前提: この要求の SQL a・b を観測した",
+      "pass": true
+    },
+    {
+      "name": "T2: SQL b を、書き換え後のソースの a の行（誤った呼び出し位置）に対応させない",
+      "pass": false,
+      "got": [
+        {
+          "sql": "SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $",
+          "site": null,
+          "located": "src/app/hmr-r/page.tsx:7:14",
+          "failure": "build-changed-after-call"
+        },
+        {
+          "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id DESC ",
+          "site": "src/app/hmr-r/page.tsx:14:24",
+          "located": "src/app/hmr-r/page.tsx:14:24",
+          "failure": null
+        }
+      ]
+    },
+    {
+      "name": "T2: 取得位置を証明できない SQL は呼び出し位置を作らない（a・b とも）",
+      "pass": false,
+      "got": [
+        {
+          "sql": "SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $",
+          "site": null,
+          "located": "src/app/hmr-r/page.tsx:7:14",
+          "failure": "build-changed-after-call"
+        },
+        {
+          "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id DESC ",
+          "site": "src/app/hmr-r/page.tsx:14:24",
+          "located": "src/app/hmr-r/page.tsx:14:24",
+          "failure": null
+        }
+      ]
+    },
+    {
+      "name": "T2: SQL b の理由は changed-during-request（要求の処理中の変更）",
+      "pass": false,
+      "got": [
+        {
+          "sql": "SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $",
+          "site": null,
+          "located": "src/app/hmr-r/page.tsx:7:14",
+          "failure": "build-changed-after-call"
+        },
+        {
+          "sql": "SELECT id, name AS region FROM poc.regions ORDER BY id DESC ",
+          "site": "src/app/hmr-r/page.tsx:14:24",
+          "located": "src/app/hmr-r/page.tsx:14:24",
+          "failure": null
+        }
+      ]
+    },
+    {
+      "name": "後片付け: 使い捨ての題材で動くプロセスが残っていない",
+      "pass": true
+    }
+  ]
+}

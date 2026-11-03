@@ -1,0 +1,124 @@
+ブラウザ: 同梱の chromium 153.0.8010.12 / 題材（使い捨てのコピー）: poc/out/hmr-guard-e2e/poc/fixture-app
+  ✓ 前提: 題材の DB（使い捨ての PostgreSQL）に届く
+
+0. 使い捨ての題材を起動する
+  ✓ 前提: 計装は有効
+  ✓ 前提: 要素識別子の注入は有効
+
+T0. 初回のコンパイルの文書（記録）→ 読み込み直した文書（基準）
+    · T0-first-compile: correct / 右ドック「この値の出所 poc.listings . region 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になりま」
+    ·   SQL「SELECT id, region FROM poc.listings ORDER BY」 呼び出し位置 src/app/hmr-m/page.tsx:7:24
+    ·   SQL「SELECT id, name AS region FROM poc.regions O」 呼び出し位置 src/app/hmr-m/page.tsx:14:24
+  ✓ T0 初回のコンパイル: poc.regions.name を値 a の由来として出さない（パネル）
+  ✓ T0 初回のコンパイル: 右ドックに「この値の出所 poc.regions.name」を出さない
+  ✓ T0 初回のコンパイル: 由来の評価の応答に poc.regions.name を候補として返さない
+    · T0-baseline: correct / 右ドック「この値の出所 poc.listings . region 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になりま」
+    ·   SQL「SELECT id, region FROM poc.listings ORDER BY」 呼び出し位置 src/app/hmr-m/page.tsx:7:24
+    ·   SQL「SELECT id, name AS region FROM poc.regions O」 呼び出し位置 src/app/hmr-m/page.tsx:14:24
+  ✓ T0 前提: 選択の位置 = ソースの <p>
+  ✓ T0 基準: 正しく結ぶ（poc.listings.region・取得位置は SQL a）
+  ✓ T0 基準: この文書の SQL a・b の呼び出し位置はどちらも正しい
+
+T3. 無関係なファイル・共有の lib/db.ts を変更しても、正しく確かめられる由来を保つ
+    · T3a 無関係なページ（listings/page.tsx）: correct / 右ドック「この値の出所 poc.listings . region 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になりま」
+    ·   SQL「SELECT id, region FROM poc.listings ORDER BY」 呼び出し位置 src/app/hmr-m/page.tsx:7:24
+    ·   SQL「SELECT id, name AS region FROM poc.regions O」 呼び出し位置 src/app/hmr-m/page.tsx:14:24
+  ✓ T3a 無関係なページ（listings/page.tsx）: 由来を保つ（poc.listings.region・取得位置は SQL a）
+  ✓ T3a 無関係なページ（listings/page.tsx）: SQL a・b の呼び出し位置を保つ
+    · T3b 共有の lib/db.ts: correct / 右ドック「この値の出所 poc.listings . region 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になりま」
+    ·   SQL「SELECT id, region FROM poc.listings ORDER BY」 呼び出し位置 src/app/hmr-m/page.tsx:7:24
+    ·   SQL「SELECT id, name AS region FROM poc.regions O」 呼び出し位置 src/app/hmr-m/page.tsx:14:24
+  ✓ T3b 共有の lib/db.ts: 由来を保つ（poc.listings.region・取得位置は SQL a）
+  ✓ T3b 共有の lib/db.ts: SQL a・b の呼び出し位置を保つ
+
+T1. 同じ起動のまま hmr-m/page.tsx の末尾にコメントだけ足す（サーバー側の HMR）→ 読み込み直して選び直す
+    · T1: WRONG（poc.regions.name） / 右ドック「この値の出所 poc.regions . name 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 」
+    ·   SQL「SELECT id, region FROM poc.listings ORDER BY」 呼び出し位置 - / no-app-frame
+    ·   SQL「SELECT id, name AS region FROM poc.regions O」 呼び出し位置 src/app/hmr-m/page.tsx:7:24
+  ✓ T1 前提: 選択はいまのソースの <p> に特定（F-01 は通る）
+  ✓ T1 前提: 文書は新しい要求に同定
+  ✗ T1: poc.regions.name を値 a の由来として出さない（パネル） — got: {"lineage":"linked","cands":"poc.regions.name"}
+  ✗ T1: 右ドックに「この値の出所 poc.regions.name」を出さない — got: "この値の出所 poc.regions . name 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 "
+  ✗ T1: 由来の評価の応答に poc.regions.name を候補として返さない — got: ["poc.regions.name"]
+  ✗ T1: 由来は結ばず、呼び出し位置を確かめられないことを理由にする（fetch-callsite-unverifiable） — got: ["linked",""]
+  ✓ T1: この文書の SQL を観測している（SQL そのものは観測できている）
+  ✗ T1: SQL b を SQL a の位置（誤った呼び出し位置）に対応させない — got: [{"spanId":"d3a2d6cafcab6949","sql":"SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $","site":null,"located":null,"failure":"no-app-frame"},{"spanId":"c3b2f02333bc8635","sql":"SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT","site":"src/app/hmr-m/page.tsx:7:24","located":"src/app/hmr-m/page.tsx:7:24","failure":null}]
+  ✗ T1: どの SQL も呼び出し位置を作らず、理由は hmr-evaluated-code（HMR で eval されたコード） — got: [{"spanId":"d3a2d6cafcab6949","sql":"SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $","site":null,"located":null,"failure":"no-app-frame"},{"spanId":"c3b2f02333bc8635","sql":"SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT","site":"src/app/hmr-m/page.tsx:7:24","located":"src/app/hmr-m/page.tsx:7:24","failure":null}]
+  ✗ T1: 「参考の位置」も出さない（located なし） — got: [{"spanId":"d3a2d6cafcab6949","sql":"SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $","site":null,"located":null,"failure":"no-app-frame"},{"spanId":"c3b2f02333bc8635","sql":"SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT","site":"src/app/hmr-m/page.tsx:7:24","located":"src/app/hmr-m/page.tsx:7:24","failure":null}]
+  ✗ T1: 右ドックに、コードの更新で確かめられないことと再起動の案内を出す — got: "詳細\n経路\n固定\nこの値の出所\npoc.regions . name\n推定\n\n25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。\n\n実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。\n\n概要\n根拠\n★\nいちばん弱いところ\n②→⑤この表示値の由来（取得結果のどの項目か）\n\n取得結果のどの項目がこの表示値になったかは、ソースの静的解析による推定です。実行時に観測したものではありません（表示された値も、取得した行も読んでいません）。文書・呼び出し位置・SQL は実測ですが、それで推定が実測に変わることはありません。推定の状態: 参照の連鎖が1列に決まり、加工も分岐も無い。参照の連鎖: pool.query(…) の結果（src/app/hmr-m/page.tsx:7） ← .rows を参照 ← [0] を参照 ← .re"
+  ✓ T1: 値 b も誤って結ばない（poc.listings.region を出さない）
+  ✗ T1 観測画面: SQL a の位置のコンポーネントのノード（誤った呼び出し位置）を描かない — got: ["表示された値 <p> のテキスト #0","サーバー処理 render route (app) /hmr-m — 26ms","テーブル poc.listings","テーブル poc.regions","コンポーネント src/app/hmr-m/page.tsx:18","通信 GET /hmr-m — 200 — 44ms","実行SQL SELECT id, region FROM poc.listings ORDER BY id DESC LIMI… — 7ms","コンポーネント src/app/hmr-m/page.tsx:7","実行SQL SELECT id, name AS region FROM poc.regions ORDER BY id LI… — 1ms","カラム poc.listings.id","カラム poc.listings.region","カラム poc.regions.id","カラム poc.regions.name"]
+  ✗ T1 観測画面: SQL の詳細の「実行した呼び出し位置」は「特定していません」とその理由 — got: [{"sql":"SELECT id, region FROM poc.listings ORDER BY id DESC LIMI…","row":"特定していません — スタックに、注入範囲（src/）のソースへ戻せるフレームがありません"},{"sql":"SELECT id, name AS region FROM poc.regions ORDER BY id LI…","row":"src/app/hmr-m/page.tsx:7:24（HmrM の中）"}]
+
+T4. 同じモジュールを続けて変更する（SQL の前に1文 → SQL の SELECT 句を変える → 元に戻す）
+    · T4a SQL より前に1文: WRONG（poc.regions.name） / 右ドック「この値の出所 poc.regions . name 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 」
+    ·   SQL「SELECT id, region FROM poc.listings ORDER BY」 呼び出し位置 - / no-app-frame
+    ·   SQL「SELECT id, name AS region FROM poc.regions O」 呼び出し位置 src/app/hmr-m/page.tsx:8:24
+  ✗ T4a SQL より前に1文: poc.regions.name を値 a の由来として出さない（パネル） — got: {"lineage":"linked","cands":"poc.regions.name"}
+  ✗ T4a SQL より前に1文: 右ドックに「この値の出所 poc.regions.name」を出さない — got: "この値の出所 poc.regions . name 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 "
+  ✗ T4a SQL より前に1文: 由来の評価の応答に poc.regions.name を候補として返さない — got: ["poc.regions.name"]
+  ✗ T4a SQL より前に1文: どの SQL にも呼び出し位置を作らない（HMR で eval されたコード） — got: [{"spanId":"847b3a1b35c2703c","sql":"SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $","site":null,"located":null,"failure":"no-app-frame"},{"spanId":"7ecef8fa2afe2558","sql":"SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT","site":"src/app/hmr-m/page.tsx:8:24","located":"src/app/hmr-m/page.tsx:8:24","failure":null}]
+    · T4b SQL a の SELECT 句に plan を足す: WRONG（poc.regions.name） / 右ドック「この値の出所 poc.regions . name 推定 27 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 」
+    ·   SQL「SELECT id, region, plan FROM poc.listings OR」 呼び出し位置 - / no-app-frame
+    ·   SQL「SELECT id, name AS region FROM poc.regions O」 呼び出し位置 src/app/hmr-m/page.tsx:8:24
+  ✗ T4b SQL a の SELECT 句に plan を足す: poc.regions.name を値 a の由来として出さない（パネル） — got: {"lineage":"linked","cands":"poc.regions.name"}
+  ✗ T4b SQL a の SELECT 句に plan を足す: 右ドックに「この値の出所 poc.regions.name」を出さない — got: "この値の出所 poc.regions . name 推定 27 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 "
+  ✗ T4b SQL a の SELECT 句に plan を足す: 由来の評価の応答に poc.regions.name を候補として返さない — got: ["poc.regions.name"]
+  ✗ T4b SQL a の SELECT 句に plan を足す: どの SQL にも呼び出し位置を作らない（HMR で eval されたコード） — got: [{"spanId":"f7c8c495e93f50ec","sql":"SELECT id, region, plan FROM poc.listings ORDER BY id DESC L","site":null,"located":null,"failure":"no-app-frame"},{"spanId":"cad1b51e29b122b3","sql":"SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT","site":"src/app/hmr-m/page.tsx:8:24","located":"src/app/hmr-m/page.tsx:8:24","failure":null}]
+    · T4c 元に戻す: WRONG（poc.regions.name） / 右ドック「この値の出所 poc.regions . name 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 」
+    ·   SQL「SELECT id, region FROM poc.listings ORDER BY」 呼び出し位置 - / no-app-frame
+    ·   SQL「SELECT id, name AS region FROM poc.regions O」 呼び出し位置 src/app/hmr-m/page.tsx:7:24
+  ✗ T4c 元に戻す: poc.regions.name を値 a の由来として出さない（パネル） — got: {"lineage":"linked","cands":"poc.regions.name"}
+  ✗ T4c 元に戻す: 右ドックに「この値の出所 poc.regions.name」を出さない — got: "この値の出所 poc.regions . name 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 "
+  ✗ T4c 元に戻す: 由来の評価の応答に poc.regions.name を候補として返さない — got: ["poc.regions.name"]
+  ✗ T4c 元に戻す: どの SQL にも呼び出し位置を作らない（HMR で eval されたコード） — got: [{"spanId":"7b38ef2acbb2a531","sql":"SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $","site":null,"located":null,"failure":"no-app-frame"},{"spanId":"7feda614065bbc33","sql":"SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT","site":"src/app/hmr-m/page.tsx:7:24","located":"src/app/hmr-m/page.tsx:7:24","failure":null}]
+  開発サーバーを起動し直す
+    · T4 再起動の後: correct / 右ドック「この値の出所 poc.listings . region 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になりま」
+    ·   SQL「SELECT id, region FROM poc.listings ORDER BY」 呼び出し位置 src/app/hmr-m/page.tsx:7:24
+    ·   SQL「SELECT id, name AS region FROM poc.regions O」 呼び出し位置 src/app/hmr-m/page.tsx:14:24
+  ✓ T4: 再起動の後は正しい由来に戻る
+
+T2. 要求の処理中にソースを書き換える（SQL a → 5 秒待つ → SQL b）
+    · 要求の開始の約 1.5 秒後に、SQL a より前へ 7 文を足した
+  ✓ T2 前提: 書き換えの前に始まった文書の要求を観測した
+    ·   SQL「SELECT id, region FROM poc.listings ORDER BY」 呼び出し位置 - / build-changed-after-call
+    ·   SQL「SELECT id, name AS region FROM poc.regions O」 呼び出し位置 src/app/hmr-r/page.tsx:14:24
+  ✓ T2 前提: この要求の SQL a・b を観測した
+  ✗ T2: SQL b を、書き換え後のソースの a の行（誤った呼び出し位置）に対応させない — got: [{"sql":"SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $","site":null,"located":"src/app/hmr-r/page.tsx:7:14","failure":"build-changed-after-call"},{"sql":"SELECT id, name AS region FROM poc.regions ORDER BY id DESC ","site":"src/app/hmr-r/page.tsx:14:24","located":"src/app/hmr-r/page.tsx:14:24","failure":null}]
+  ✗ T2: 取得位置を証明できない SQL は呼び出し位置を作らない（a・b とも） — got: [{"sql":"SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $","site":null,"located":"src/app/hmr-r/page.tsx:7:14","failure":"build-changed-after-call"},{"sql":"SELECT id, name AS region FROM poc.regions ORDER BY id DESC ","site":"src/app/hmr-r/page.tsx:14:24","located":"src/app/hmr-r/page.tsx:14:24","failure":null}]
+  ✗ T2: SQL b の理由は changed-during-request（要求の処理中の変更） — got: [{"sql":"SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $","site":null,"located":"src/app/hmr-r/page.tsx:7:14","failure":"build-changed-after-call"},{"sql":"SELECT id, name AS region FROM poc.regions ORDER BY id DESC ","site":"src/app/hmr-r/page.tsx:14:24","located":"src/app/hmr-r/page.tsx:14:24","failure":null}]
+  ✗ 例外: page.waitForFunction: Timeout 10000ms exceeded.
+    at Object.showExchange (<REPO>/tests/hmr-e2e-harness.mjs:305:16)
+    at async file://<REPO>/tests/hmr-lineage-guard-e2e.spec.mjs:230:5
+  ✓ 後片付け: 使い捨ての題材で動くプロセスが残っていない
+
+判定: T0-first-compile=correct / T0-baseline=correct / T3a 無関係なページ（listings/page.tsx）=correct / T3b 共有の lib/db.ts=correct / T1=WRONG（poc.regions.name） / T4a SQL より前に1文=WRONG（poc.regions.name） / T4b SQL a の SELECT 句に plan を足す=WRONG（poc.regions.name） / T4c 元に戻す=WRONG（poc.regions.name） / T4 再起動の後=correct / T2=-
+✗ 失敗あり — 21 件通過 / 26 件失敗
+  ✗ T1: poc.regions.name を値 a の由来として出さない（パネル） — got: {"lineage":"linked","cands":"poc.regions.name"}
+  ✗ T1: 右ドックに「この値の出所 poc.regions.name」を出さない — got: "この値の出所 poc.regions . name 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 "
+  ✗ T1: 由来の評価の応答に poc.regions.name を候補として返さない — got: ["poc.regions.name"]
+  ✗ T1: 由来は結ばず、呼び出し位置を確かめられないことを理由にする（fetch-callsite-unverifiable） — got: ["linked",""]
+  ✗ T1: SQL b を SQL a の位置（誤った呼び出し位置）に対応させない — got: [{"spanId":"d3a2d6cafcab6949","sql":"SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $","site":null,"located":null,"failure":"no-app-frame"},{"spanId":"c3b2f02333bc8635","sql":"SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT","site":"src/app/hmr-m/page.tsx:7:24","located":"src/app/hmr-m/page.tsx:7:24","failure":null}]
+  ✗ T1: どの SQL も呼び出し位置を作らず、理由は hmr-evaluated-code（HMR で eval されたコード） — got: [{"spanId":"d3a2d6cafcab6949","sql":"SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $","site":null,"located":null,"failure":"no-app-frame"},{"spanId":"c3b2f02333bc8635","sql":"SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT","site":"src/app/hmr-m/page.tsx:7:24","located":"src/app/hmr-m/page.tsx:7:24","failure":null}]
+  ✗ T1: 「参考の位置」も出さない（located なし） — got: [{"spanId":"d3a2d6cafcab6949","sql":"SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $","site":null,"located":null,"failure":"no-app-frame"},{"spanId":"c3b2f02333bc8635","sql":"SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT","site":"src/app/hmr-m/page.tsx:7:24","located":"src/app/hmr-m/page.tsx:7:24","failure":null}]
+  ✗ T1: 右ドックに、コードの更新で確かめられないことと再起動の案内を出す — got: "詳細\n経路\n固定\nこの値の出所\npoc.regions . name\n推定\n\n25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。\n\n実測＝実際に起きたことを観測できた箇所。推定＝コードの形から推測した箇所。\n\n概要\n根拠\n★\nいちばん弱いところ\n②→⑤この表示値の由来（取得結果のどの項目か）\n\n取得結果のどの項目がこの表示値になったかは、ソースの静的解析による推定です。実行時に観測したものではありません（表示された値も、取得した行も読んでいません）。文書・呼び出し位置・SQL は実測ですが、それで推定が実測に変わることはありません。推定の状態: 参照の連鎖が1列に決まり、加工も分岐も無い。参照の連鎖: pool.query(…) の結果（src/app/hmr-m/page.tsx:7） ← .rows を参照 ← [0] を参照 ← .re"
+  ✗ T1 観測画面: SQL a の位置のコンポーネントのノード（誤った呼び出し位置）を描かない — got: ["表示された値 <p> のテキスト #0","サーバー処理 render route (app) /hmr-m — 26ms","テーブル poc.listings","テーブル poc.regions","コンポーネント src/app/hmr-m/page.tsx:18","通信 GET /hmr-m — 200 — 44ms","実行SQL SELECT id, region FROM poc.listings ORDER BY id DESC LIMI… — 7ms","コンポーネント src/app/hmr-m/page.tsx:7","実行SQL SELECT id, name AS region FROM poc.regions ORDER BY id LI… — 1ms","カラム poc.listings.id","カラム poc.listings.region","カラム poc.regions.id","カラム poc.regions.name"]
+  ✗ T1 観測画面: SQL の詳細の「実行した呼び出し位置」は「特定していません」とその理由 — got: [{"sql":"SELECT id, region FROM poc.listings ORDER BY id DESC LIMI…","row":"特定していません — スタックに、注入範囲（src/）のソースへ戻せるフレームがありません"},{"sql":"SELECT id, name AS region FROM poc.regions ORDER BY id LI…","row":"src/app/hmr-m/page.tsx:7:24（HmrM の中）"}]
+  ✗ T4a SQL より前に1文: poc.regions.name を値 a の由来として出さない（パネル） — got: {"lineage":"linked","cands":"poc.regions.name"}
+  ✗ T4a SQL より前に1文: 右ドックに「この値の出所 poc.regions.name」を出さない — got: "この値の出所 poc.regions . name 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 "
+  ✗ T4a SQL より前に1文: 由来の評価の応答に poc.regions.name を候補として返さない — got: ["poc.regions.name"]
+  ✗ T4a SQL より前に1文: どの SQL にも呼び出し位置を作らない（HMR で eval されたコード） — got: [{"spanId":"847b3a1b35c2703c","sql":"SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $","site":null,"located":null,"failure":"no-app-frame"},{"spanId":"7ecef8fa2afe2558","sql":"SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT","site":"src/app/hmr-m/page.tsx:8:24","located":"src/app/hmr-m/page.tsx:8:24","failure":null}]
+  ✗ T4b SQL a の SELECT 句に plan を足す: poc.regions.name を値 a の由来として出さない（パネル） — got: {"lineage":"linked","cands":"poc.regions.name"}
+  ✗ T4b SQL a の SELECT 句に plan を足す: 右ドックに「この値の出所 poc.regions.name」を出さない — got: "この値の出所 poc.regions . name 推定 27 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 "
+  ✗ T4b SQL a の SELECT 句に plan を足す: 由来の評価の応答に poc.regions.name を候補として返さない — got: ["poc.regions.name"]
+  ✗ T4b SQL a の SELECT 句に plan を足す: どの SQL にも呼び出し位置を作らない（HMR で eval されたコード） — got: [{"spanId":"f7c8c495e93f50ec","sql":"SELECT id, region, plan FROM poc.listings ORDER BY id DESC L","site":null,"located":null,"failure":"no-app-frame"},{"spanId":"cad1b51e29b122b3","sql":"SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT","site":"src/app/hmr-m/page.tsx:8:24","located":"src/app/hmr-m/page.tsx:8:24","failure":null}]
+  ✗ T4c 元に戻す: poc.regions.name を値 a の由来として出さない（パネル） — got: {"lineage":"linked","cands":"poc.regions.name"}
+  ✗ T4c 元に戻す: 右ドックに「この値の出所 poc.regions.name」を出さない — got: "この値の出所 poc.regions . name 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になります。 "
+  ✗ T4c 元に戻す: 由来の評価の応答に poc.regions.name を候補として返さない — got: ["poc.regions.name"]
+  ✗ T4c 元に戻す: どの SQL にも呼び出し位置を作らない（HMR で eval されたコード） — got: [{"spanId":"7b38ef2acbb2a531","sql":"SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $","site":null,"located":null,"failure":"no-app-frame"},{"spanId":"7feda614065bbc33","sql":"SELECT id, name AS region FROM poc.regions ORDER BY id LIMIT","site":"src/app/hmr-m/page.tsx:7:24","located":"src/app/hmr-m/page.tsx:7:24","failure":null}]
+  ✗ T2: SQL b を、書き換え後のソースの a の行（誤った呼び出し位置）に対応させない — got: [{"sql":"SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $","site":null,"located":"src/app/hmr-r/page.tsx:7:14","failure":"build-changed-after-call"},{"sql":"SELECT id, name AS region FROM poc.regions ORDER BY id DESC ","site":"src/app/hmr-r/page.tsx:14:24","located":"src/app/hmr-r/page.tsx:14:24","failure":null}]
+  ✗ T2: 取得位置を証明できない SQL は呼び出し位置を作らない（a・b とも） — got: [{"sql":"SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $","site":null,"located":"src/app/hmr-r/page.tsx:7:14","failure":"build-changed-after-call"},{"sql":"SELECT id, name AS region FROM poc.regions ORDER BY id DESC ","site":"src/app/hmr-r/page.tsx:14:24","located":"src/app/hmr-r/page.tsx:14:24","failure":null}]
+  ✗ T2: SQL b の理由は changed-during-request（要求の処理中の変更） — got: [{"sql":"SELECT id, region FROM poc.listings ORDER BY id DESC LIMIT $","site":null,"located":"src/app/hmr-r/page.tsx:7:14","failure":"build-changed-after-call"},{"sql":"SELECT id, name AS region FROM poc.regions ORDER BY id DESC ","site":"src/app/hmr-r/page.tsx:14:24","located":"src/app/hmr-r/page.tsx:14:24","failure":null}]
+  ✗ 例外: page.waitForFunction: Timeout 10000ms exceeded.
+    at Object.showExchange (<REPO>/tests/hmr-e2e-harness.mjs:305:16)
+    at async file://<REPO>/tests/hmr-lineage-guard-e2e.spec.mjs:230:5

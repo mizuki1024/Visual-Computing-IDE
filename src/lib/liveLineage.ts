@@ -21,7 +21,7 @@
  * 結論はつねに L2（推定）。実測との照合を通っても昇格しない。
  * ========================================================================== */
 import {
-  LINEAGE_CUT_LABEL, DOC_UNBOUND_LABEL,
+  LINEAGE_CUT_LABEL, DOC_UNBOUND_LABEL, CALLSITE_UNVERIFIABLE_REASONS,
   type DocBinding, type LineageCutReason, type LiveLineage, type LiveLineageCandidate, type LiveRunObservation,
 } from './liveObservation';
 import { liveExchangeLinks } from './adapter';
@@ -150,6 +150,14 @@ export function evaluateLineage(input: EvaluateLineageInput): LiveLineage {
     const located = das.find(({ d }) => d && !d.site && d.located && samePos(d.located, at));
     if (located) {
       return cut('fetch-site-unverified', `${q.file}:${q.nameLine}:${q.nameCol} — ${located.d!.failure?.reason ?? '理由不明'}`);
+    }
+    /* 7C（案A）: SQL は観測したが、実行したコードとソース・ソースマップの対応を確かめられない SQL がある。
+     * その SQL が静的解析の取得の呼び出しで実行されたかは「分からない」のであって「観測していない」ではない（区別して返す）。
+     * どの SQL がどこで実行されたかは推測しない（位置も列も出さない） */
+    const unverifiable = das.filter(({ d }) => d && !d.site && d.failure && CALLSITE_UNVERIFIABLE_REASONS.has(d.failure.reason));
+    if (unverifiable.length) {
+      const reasons = [...new Set(unverifiable.map(({ d }) => d!.failure!.reason))];
+      return cut('fetch-callsite-unverifiable', `${q.file}:${q.nameLine}:${q.nameCol}。この文書の通信の SQL ${das.length} 本のうち ${unverifiable.length} 本の呼び出し位置を確かめられません — ${reasons.join(' / ')}`);
     }
     return cut('fetch-not-measured',
       `${q.file}:${q.nameLine}:${q.nameCol}。この文書の通信で実行位置を特定した SQL: ${
