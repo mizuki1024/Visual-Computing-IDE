@@ -1,0 +1,70 @@
+{
+ "summary": {
+  "cmd": "node tests/runtime-e2e.spec.mjs",
+  "seconds": 9,
+  "exit": 0,
+  "signal": null,
+  "stoppedBy": null,
+  "maxPssMB": 404,
+  "maxAt": 8,
+  "maxProcs": 7,
+  "minAvailMB": 14785,
+  "leftover": 0
+ },
+ "limits": {
+  "seconds": 1500,
+  "pssMB": 6144,
+  "procs": 150,
+  "minAvailMB": 2048
+ },
+ "samples": [
+  {
+   "t": 2,
+   "procs": 7,
+   "pssMB": 330,
+   "availMB": 15199,
+   "byMB": {
+    "ide": 0,
+    "dev-server": 0,
+    "browser": 226,
+    "other": 104
+   }
+  },
+  {
+   "t": 4,
+   "procs": 7,
+   "pssMB": 366,
+   "availMB": 15086,
+   "byMB": {
+    "ide": 0,
+    "dev-server": 0,
+    "browser": 260,
+    "other": 107
+   }
+  },
+  {
+   "t": 6,
+   "procs": 7,
+   "pssMB": 399,
+   "availMB": 14785,
+   "byMB": {
+    "ide": 0,
+    "dev-server": 0,
+    "browser": 287,
+    "other": 112
+   }
+  },
+  {
+   "t": 8,
+   "procs": 7,
+   "pssMB": 404,
+   "availMB": 14856,
+   "byMB": {
+    "ide": 0,
+    "dev-server": 0,
+    "browser": 292,
+    "other": 112
+   }
+  }
+ ]
+}
