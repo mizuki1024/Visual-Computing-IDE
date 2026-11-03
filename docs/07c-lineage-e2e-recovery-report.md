@@ -198,8 +198,11 @@ F-01 の時点では由来を結べなかったため確かめていなかった
 | `observe-unit`・`queries-unit`・`preview-gateway` | — | 153・126・132 | 0 | 0 | |
 | `poc02`（rscattr・srvmap の照合器）・`poc03` | — | 129・95 | 0 | 0 | |
 | `npm run typecheck` | — | エラーなし | | | |
+| `observe-e2e` | `poc/fixture-app` | 86 | 0 | 0 | 7C-3 と同じ |
+| `queries-e2e` | `poc/fixture-app` | 121 | 0 | 0 | **2回目**。1回目は 120/1（`queries-e2e-run1.txt`）: 「IDE の画面にエラーが出ていない」が、試験の転送役の 502（上流への接続の失敗。`tests/queries-e2e.spec.mjs:122`）1件で不成立。直前は第9節の停止・再起動。どの要求かは記録が無く、原因は特定していない。2回目（`queries-e2e-run2.txt`）では出なかった。計装の変更は開発サーバー側だけで、IDE の API・中継の応答には関係しないと考えるが【推定】、断定はしない |
+| `runtime-e2e` | `poc/fixture-app` | 56 | 0 | 0 | `localhost:3100` で IDE を起動して実行（`test-all-29.sh` と同じ前提。最初は IDE を起動せずに回して失敗＝試験の前提の不足で、記録は置き換えた） |
 
-実行していないもの: `scripts/test-all-29.sh` の残り（`poc01`・`explore`・`measured`・`elements`・`poc05`・`flows`・`rsc`・`poc04`・`lineage`・`sqlparse`・`sqlimpact`・`model`・`project-inspect`・`devserver`・`devserver-stub`・`runtime-e2e`・`childenv-origin`・`observe-e2e`・`queries-e2e`）。今回の変更（計装の pg の解決）が直接かかわるのは `observe-e2e`・`queries-e2e`・`runtime-e2e` で、これらは**未実行**（成功扱いにしない）。時間の制約による。
+実行していないもの: `scripts/test-all-29.sh` の残り（`poc01`・`explore`・`measured`・`elements`・`poc05`・`flows`・`rsc`・`poc04`・`lineage`・`sqlparse`・`sqlimpact`・`model`・`project-inspect`・`devserver`・`devserver-stub`・`childenv-origin`）。今回の変更（計装の pg の解決）にかかわる実ブラウザの試験（`observe-e2e`・`queries-e2e`・`runtime-e2e`・`lineage-e2e`）は回した。残りは成功扱いにしない（時間の制約）。
 
 ---
 
@@ -222,7 +225,7 @@ F-01 の時点では由来を結べなかったため確かめていなかった
 | 実物の環境 | 利用者の実在プロジェクト・実物の Codespaces では確かめていない。再現テストは IDE のリポジトリの外のプロジェクトで計装の振る舞いを確かめたが、Next.js の実物のプロジェクトでの由来の表示は未確認【未観測】 |
 | webpack | 今回は Turbopack だけ。webpack（`bundler-virtual` の経路）では回していない【未観測】 |
 | pg 以外 | Prisma は従来どおり入口を包まない（`no-entry-callsite`）。今回の修正は pg だけ |
-| 全 29 本 | `test-all-29.sh` の全件は回していない。回したものは第7節 |
+| 全 29 本 | `test-all-29.sh` の全件は回していない。回したものは第7節（29 本のうち 15 本＋新規 2 本） |
 
 次に行うべき作業（推奨順）:
 
