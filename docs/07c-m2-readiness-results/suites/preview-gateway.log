@@ -1,0 +1,145 @@
+
+1. 接続を許可するホストは、IDE の起動時に明示したものだけ
+  ✓ 既定ではループバック以外を許可しない
+  ✓ 既定では公開 URL を持たない
+  ✓ 既定の中継のポートは 3150
+  ✓ 既定ではポートを探してよい
+  ✓ 明示したホストは許可する
+  ✓ ワイルドカードは受け付けない
+  ✓ ワイルドカードを黙って捨てず、問題として出す
+  ✓ 解釈できないホスト名も問題として出す
+  ✓ 公開 URL は origin の形で持つ
+  ✓ パスつきの公開 URL は使わない
+  ✓ 資格情報つきの公開 URL は使わない
+  ✓ codespaces: IDE のポートの転送ホストを1つだけ組み立てる
+  ✓ codespaces: 中継の公開 URL も組み立てる
+  ✓ codespaces: 公開 URL がポートに依存するので、ポートを探さない
+  ✓ codespaces の変数が無ければ何も許可せず、問題として出す
+  ✓ Host の判定: ループバック
+  ✓ Host の判定: 許可していない名前
+  ✓ Host の判定: 明示した名前（ポート無しの指定はポートを問わない）
+  ✓ Host の判定: 前方一致では通さない
+  ✓ Host の判定: 大文字小文字は問わない
+  ✓ 中継の Host: 公開 URL のホストは通す
+  ✓ 中継の Host: IDE のホストは中継には通さない
+
+2. IDE の API の入口（Host・Origin の検査は撤廃していない）
+  ✓ 転送ホスト: 設定していなければ拒否する（従来どおり）
+  ✓ 転送ホスト: 明示していれば通す
+  ✓ 転送ホスト: Origin が Host と違えば拒否する
+  ✓ プレビュー（中継の origin）から IDE の API は呼べない
+  ✓ 同じサイトの別 origin（sec-fetch-site: same-site）も拒否する
+  ✓ ループバックのプレビュー（別ポート）からも呼べない
+  ✓ 転送ホストでも独自ヘッダは要る
+  ✓ 許可していない名前（DNS リバインディング）
+
+3. 起動先に渡す環境変数は許可したものだけ（ダミーの秘密情報で確かめる）
+  ✓ GITHUB_TOKEN は渡さない
+  ✓ GH_TOKEN は渡さない
+  ✓ AWS_ACCESS_KEY_ID は渡さない
+  ✓ AWS_SECRET_ACCESS_KEY は渡さない
+  ✓ ANTHROPIC_API_KEY は渡さない
+  ✓ ANTHROPIC_BASE_URL は渡さない
+  ✓ CLAUDE_CODE_OAUTH_TOKEN は渡さない
+  ✓ CLAUDE_CODE_SESSION_ID は渡さない
+  ✓ OPENAI_API_KEY は渡さない
+  ✓ CLOUDSDK_AUTH_ACCESS_TOKEN は渡さない
+  ✓ DATABASE_URL は渡さない
+  ✓ SESSION_INGRESS_URL は渡さない
+  ✓ npm_config__authToken は渡さない
+  ✓ npm_config_//registry.npmjs.org/:_authToken は渡さない
+  ✓ npm_config_password は渡さない
+  ✓ HTTPS_PROXY は渡さない
+  ✓ VCIDE_PREVIEW_ORIGIN は渡さない
+  ✓ 渡す環境のどの値にも、ダミーの秘密情報が含まれない
+  ✓ PATH は渡す
+  ✓ HOME は渡す
+  ✓ LANG は渡す
+  ✓ LC_ALL は渡す
+  ✓ TZ は渡す
+  ✓ NODE_OPTIONS は渡す
+  ✓ NODE_EXTRA_CA_CERTS は渡す
+  ✓ HTTP_PROXY は渡す
+  ✓ NO_PROXY は渡す
+  ✓ npm_config_https_proxy は渡す
+  ✓ 資格情報つきのプロキシは渡さない（HTTPS_PROXY）
+  ✓ IDE 自身の NODE_ENV は渡さない
+  ✓ IDE 自身の PORT は渡さない
+  ✓ IDE 自身の __NEXT_PRIVATE_ORIGIN は渡さない
+  ✓ IDE 自身の npm_package_name は渡さない
+  ✓ 名前を許可していない変数は渡さない
+  ✓ テレメトリは切る
+  ✓ 渡した名前の一覧に値は含まない
+  ✓ 渡さなかった数を数える
+  ✓ VCIDE_CHILD_ENV_PASS で明示した名前は渡す
+  ✓ 明示した名前は一覧に出す
+  ✓ VCIDE_CHILD_ENV_PASS 自体は渡さない
+
+4. プレビューの中継（転送先は1つだけ）
+  ✓ 中継は待ち受けを始める
+  ✓ 指定したポートで待ち受ける
+  ✓ 何度呼んでも同じ（二重に待ち受けない）
+  ✓ 外向きのアドレス（192.0.2.2）からは届かない
+  ✓ 実行中でなければ転送しない（503）
+  ✓ IDE が作った説明のページを返す
+  ✓ 説明のページにも埋め込みの制限を付ける
+  ✓ 実行中なら転送する
+  ✓ <head> の直後に場所を知らせるスクリプトを差し込む
+  ✓ 差し込みは日本語のバイト列を壊さない
+  ✓ 長さが変わるので content-length は付けない
+  ✓ IDE の画面からだけ埋め込めるよう frame-ancestors を足す
+  ✓ frame-ancestors に任意の相手（*）を含めない
+  ✓ frame-ancestors に CSP が受け付けない書き方（IPv6 の [::1]）を含めない
+  ✓ 転送先の X-Frame-Options は書き換えない
+  ✓ 存在しないページは転送先の 404 をそのまま返す
+  ✓ 404 を知らせる
+  ✓ HTML 以外には差し込まない
+  ✓ 転送先の絶対 URL へのリダイレクトはパスだけにする
+  ✓ 公開ホストからの要求も転送する
+  ✓ 転送先の Host は 127.0.0.1:<転送先のポート>
+  ✓ 中継自身の origin から来た Origin は転送先のものにする（Next の dev の検査に合わせる）
+  ✓ Referer も同じ
+  ✓ x-forwarded-host は渡さない
+  ✓ x-forwarded-for は渡さない
+  ✓ forwarded は渡さない
+  ✓ proxy-authorization は渡さない
+  ✓ アプリの Cookie は渡す（アプリ自身のもの）
+  ✓ 差し込みのため圧縮を求めない
+  ✓ パスと問い合わせはそのまま
+  ✓ メソッドはそのまま
+  ✓ 別の origin から来た Origin は書き換えない（転送先の CSRF の検査を効かせる）
+  ✓ // で始まるパスも、宛先ではなくパスとして転送先へ送る
+  ✓ 宛先は変わらない
+  ✓ 絶対形式の要求（任意の宛先への転送の依頼）は 400
+  ✓ CONNECT（任意のポートへのトンネル）は 405
+  ✓ 許可していない Host は 421
+  ✓ 421 では転送先に届けない
+  ✓ IDE の転送ホストで中継に来ても通さない
+  ✓ WebSocket（HMR）は転送先へつなぐ
+  ✓ WebSocket でも Host と Origin を転送先のものにする
+  ✓ 許可していない Host の WebSocket は 421
+  ✓ 実行中でなければ WebSocket もつながない
+  ✓ ping: IDE の画面（ループバック）には CORS で答える
+  ✓ ping: 転送しているかを返す
+  ✓ ping: 明示した IDE のホストにも答える
+  ✓ ping: 他の origin には CORS を許さない
+  ✓ スクリプトは中継の origin から配る
+  ✓ スクリプトは DOM の中身を送らない（パス・タイトル・状態だけ）
+  ✓ 転送先に接続できなければ 502
+  ✓ 通信の失敗を説明するページを返す（中継が作ったと明示）
+  ✓ ポートが使われていて、ポートを探せないときは「使えない」
+  ✓ 理由を持つ
+  ✓ 探してよいときは次の空きポートで待ち受ける
+
+5. ブラウザから見た中継の URL（ブラウザの localhost はサーバーの localhost ではない）
+  ✓ ループバックの IDE には、同じホスト名で中継のポート
+  ✓ localhost で開いたなら localhost
+  ✓ 転送された IDE には、明示した公開 URL
+  ✓ 公開 URL を明示していなければ、推測しない（null）
+  ✓ 理由を出す
+  ✓ 「ブラウザの localhost はサーバーの localhost ではない」ことを書く
+  ✓ 許可していないホストには URL を返さない
+  ✓ 中継が使えなければ理由を出す
+
+✓ すべて通過 — 132 件通過 / 0 件失敗
+[guard] {"cmd":"node tests/preview-gateway.spec.mjs","seconds":0,"exit":0,"signal":null,"stoppedBy":null,"maxPssMB":0,"maxAt":null,"maxProcs":0,"minAvailMB":null,"leftover":0}

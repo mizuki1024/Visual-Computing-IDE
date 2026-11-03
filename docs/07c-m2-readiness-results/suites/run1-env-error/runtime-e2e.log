@@ -1,0 +1,20 @@
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+browserType.launch: Executable doesn't exist at /opt/pw-browsers/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+╔════════════════════════════════════════════════════════════╗
+║ Looks like Playwright was just installed or updated.       ║
+║ Please run the following command to download new browsers: ║
+║                                                            ║
+║     npx playwright install                                 ║
+║                                                            ║
+║ <3 Playwright Team                                         ║
+╚════════════════════════════════════════════════════════════╝
+    at /home/user/Visual-Computing-IDE/tests/runtime-e2e.spec.mjs:46:32 {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v22.23.4
+[guard] {"cmd":"node tests/runtime-e2e.spec.mjs","seconds":0,"exit":1,"signal":null,"stoppedBy":null,"maxPssMB":0,"maxAt":null,"maxProcs":0,"minAvailMB":null,"leftover":0}

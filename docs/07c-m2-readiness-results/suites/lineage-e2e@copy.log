@@ -1,0 +1,37 @@
+ブラウザ: 同梱の chromium 153.0.8010.12 / 題材: /home/user/Visual-Computing-IDE/poc/out/lineage-copy/poc/fixture-app
+IDE: 127.0.0.1:4100（ブラウザからは http://ide.cloud.test）/ 中継: 127.0.0.1:4160（http://preview.cloud.test）
+
+1. fixture-app を起動する（計装・呼び出し位置の記録・要素識別子の注入）
+  ✓ 計装は有効
+  ✓ 要素識別子の注入は有効
+
+2. /lin-a（PoC-04 ケースA）: <li> を選ぶ → 文書を同定 → 静的解析と実測が一致 → poc.listings.region
+  ✓ iframe の文書に、中継が付けた文書の識別子がある（16進32桁）
+  ✓ その識別子は、いまの起動の /lin-a の通信の記録と一致する
+  ✓ 文書の識別子は中継の識別子（relayId）と別
+  ✓ 選択した要素の位置 = ソースの <li>（7B-2）
+  ✓ 文書を同定: いま表示している /lin-a の文書の通信
+  ✓ 由来を結んだ（linked）・1列に確定
+  ✓ 由来の候補 = poc.listings.region
+  ✓ 値を描く式の位置（PropBindingSite）= ソースの {row.region}
+  ✓ 取得位置（DataAccessSite）= ソースの pool.query（実測と静的解析が列まで一致）
+  ✓ 結びついた SQL は、その文書の通信のトレースの中で実行されたもの
+  ✓ 実測した SQL の SELECT 結果列に region がある（照合した相手）
+  ✓ パネルの行: 「由来（静的解析による推定）: poc.listings.region」
+  ✓ validateDataset() を通過する（実データ）
+  ✓ キャンバスのノード数 = 変換のノード数（画面と同じ変換）
+  ✓ supplies を1本
+  ✓ supplies: L2・static-analysis（推定）・向き against-data
+  ✓ supplies の端点 from = PropBindingSite（式の位置）
+  ✓ supplies の端点 to = DataAccessSite（実測の呼び出し位置）
+  ✓ supplies の終点のノードから queries（server-call-stack）が SQL へ
+  ✓ 経路: 値 → コンポーネント（描いた）→ コンポーネント（取得）→ SQL → テーブル → カラム region
+  ✓ キャンバスに「由来は静的解析による推定」の語
+  ✓ 右ドック: この値の出所は poc.listings . region・語は「推定」（最弱環が supplies）
+  ✓ 右ドック: いちばん弱いところ = 由来のホップ（静的解析による推定。実行時に観測したものではない）
+  ✓ 右ドック（描いた位置）: 「…から来ていると推定」「supplies・L2」と、取得位置
+  ✓ 7C-2: 選択モードを抜けると、プレビューのページ表示を畳む
+  ✓ 7C-2: 経路のノードが浮かぶパネルに覆われていない（パネルを隠さずに DOM の矩形で測る）
+  ✓ 7C-2: 接続線（推定の線を含む）が浮かぶパネルに覆われていない
+
+3. 同じパスの別の文書: 再読み込み・並行する同じパスの取得・前の文書の通信

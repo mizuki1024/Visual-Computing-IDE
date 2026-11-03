@@ -1,0 +1,46 @@
+{
+ "summary": {
+  "cmd": "node tests/measured.spec.mjs",
+  "seconds": 5,
+  "exit": 0,
+  "signal": null,
+  "stoppedBy": null,
+  "maxPssMB": 532,
+  "maxAt": 4,
+  "maxProcs": 10,
+  "minAvailMB": 15026,
+  "leftover": 0
+ },
+ "limits": {
+  "seconds": 1500,
+  "pssMB": 6144,
+  "procs": 150,
+  "minAvailMB": 2048
+ },
+ "samples": [
+  {
+   "t": 2,
+   "procs": 10,
+   "pssMB": 489,
+   "availMB": 15065,
+   "byMB": {
+    "ide": 0,
+    "dev-server": 0,
+    "browser": 380,
+    "other": 109
+   }
+  },
+  {
+   "t": 4,
+   "procs": 10,
+   "pssMB": 532,
+   "availMB": 15026,
+   "byMB": {
+    "ide": 0,
+    "dev-server": 0,
+    "browser": 419,
+    "other": 114
+   }
+  }
+ ]
+}

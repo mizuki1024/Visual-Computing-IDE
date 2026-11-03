@@ -1,0 +1,21 @@
+{
+ "summary": {
+  "cmd": "node tests/hmr-lineage-guard-e2e.spec.mjs",
+  "seconds": 1,
+  "exit": 1,
+  "signal": null,
+  "stoppedBy": null,
+  "maxPssMB": 0,
+  "maxAt": null,
+  "maxProcs": 0,
+  "minAvailMB": null,
+  "leftover": 0
+ },
+ "limits": {
+  "seconds": 1500,
+  "pssMB": 6144,
+  "procs": 150,
+  "minAvailMB": 2048
+ },
+ "samples": []
+}
