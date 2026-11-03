@@ -33,3 +33,4 @@ select-revision-unit	50	0	0
 select-revision-e2e	-	-	1			
 lineage-revision-e2e	66	11	1			
 hmr-guard-unit	78	0	0			
+hmr-lineage-guard-e2e	52	0	0			
