@@ -1,0 +1,9 @@
+▲ Next.js 16.4.3
+- Local:         http://127.0.0.1:3100
+- Network:       http://127.0.0.1:3100
+✓ Ready in 164ms
+✓ Running next.config.mjs took 21ms
+[vcide] 収集ファイルの整理（ide-start）: 削除 1 件・1247 バイト／残す 0 件／失敗 0 件
+[vcide] 収集ファイルの整理（after-stopped）: 削除 1 件・375030 バイト／残す 0 件／失敗 0 件
+[vcide] 収集ファイルの整理（after-stopped-retry）: 削除 1 件・1247 バイト／残す 1 件／失敗 0 件
+[vcide] 収集ファイルの整理（after-stopped）: 削除 1 件・244218 バイト／残す 0 件／失敗 0 件

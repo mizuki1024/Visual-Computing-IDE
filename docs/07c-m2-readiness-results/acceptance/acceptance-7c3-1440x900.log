@@ -1,0 +1,104 @@
+
+## C1 IDE を開く（プロジェクト未指定）— 合成デモは従来どおり
+  - state: {"marks":["千葉県","Sample Property App","合成シナリオ","シナリオは合成データ","エリアから","No.900001"],"nodes":7,"notice":"synthetic","noticeText":"Phase 5A 探索画面／シナリオは合成データ（実測ではありません）","phase":null,"dockPhase":null,"cardHead":null,"dockHead":null,"banner":false}
+  ✓ [open.demo] プロジェクト未指定では合成デモを描く（Phase 5 の基準のまま）
+  - screenshot: 01-open-no-project.png
+
+## C2 プロジェクトを開く（起動前）
+  - verdict: supported
+  - synth.opened: {"marks":[],"nodes":0,"notice":"project-empty","noticeText":"poc01-fixture-app — 経路なし（合成デモは非表示）","phase":"opened","dockPhase":"opened","cardHead":"プロジェクトを開きました（まだ起動していません）","dockHead":"プロジェクトを開きました（まだ起動していません）","banner":false}
+  ✓ [opened.noSynth] 起動前: 合成デモの文字（千葉県・Sample Property App・合成シナリオ 等）が画面に無い
+  ✓ [opened.noNodes] 起動前: キャンバスに経路のノードを描いていない
+  ✓ [opened.phase] 起動前: キャンバスと右ドックが「opened」の空の状態を出す
+  ✓ [opened.card] キャンバスに「まだ起動していません」と［起動］の案内
+  ✓ [opened.preview] プレビューは合成の見本サイトではなく、起動の案内
+  ✓ [opened.bar] 上の帯は「開発サーバー 未起動」（合成デモの記録の実行環境を出さない）
+  - screenshot: 02a-opened.png
+  - demo: {"marks":["千葉県","Sample Property App","合成シナリオ","シナリオは合成データ","エリアから","No.900001"],"nodes":7,"notice":"synthetic","noticeText":"Phase 5A 探索画面／シナリオは合成データ（実測ではありません）","phase":null,"dockPhase":null,"cardHead":null,"dockHead":null,"banner":true}
+  ✓ [demo.shown] ［合成デモを見る］で合成デモを描ける（明示的に選んだとき）
+  ✓ [demo.banner] 合成デモの間は「別のアプリの見本」「あなたのプロジェクトのデータではありません」と［デモを閉じる］
+  ✓ [demo.dockBanner] 右ドックにも合成デモであることを出す
+  - screenshot: 02b-demo-chosen.png
+  - synth.demoClosed: {"marks":[],"nodes":0,"notice":"project-empty","noticeText":"poc01-fixture-app — 経路なし（合成デモは非表示）","phase":"opened","dockPhase":"opened","cardHead":"プロジェクトを開きました（まだ起動していません）","dockHead":"プロジェクトを開きました（まだ起動していません）","banner":false}
+  ✓ [demoClosed.noSynth] ［デモを閉じる］の後: 合成デモの文字（千葉県・Sample Property App・合成シナリオ 等）が画面に無い
+  ✓ [demoClosed.noNodes] ［デモを閉じる］の後: キャンバスに経路のノードを描いていない
+  ✓ [demoClosed.phase] ［デモを閉じる］の後: キャンバスと右ドックが「opened」の空の状態を出す
+
+## C3 起動する（起動中 → 実行中・観測前）
+  - start: {"preview":"live","ms":2134,"samples":["opened|0|0","starting|0|0","running|0|0"]}
+  ✓ [starting.noSynth] 起動中の全標本で合成デモの文字・ノードが無い
+  ✓ [starting.phase] 起動中は「開発サーバーを起動しています」を出した
+  - synth.running: {"marks":[],"nodes":0,"notice":"project-empty","noticeText":"poc01-fixture-app — 経路なし（合成デモは非表示）","phase":"running","dockPhase":"running","cardHead":"まだ経路がありません","dockHead":"まだ経路がありません","banner":false}
+  ✓ [running.noSynth] 実行中・選択前: 合成デモの文字（千葉県・Sample Property App・合成シナリオ 等）が画面に無い
+  ✓ [running.noNodes] 実行中・選択前: キャンバスに経路のノードを描いていない
+  ✓ [running.phase] 実行中・選択前: キャンバスと右ドックが「running」の空の状態を出す
+  ✓ [running.head] 実行中・選択前は「まだ経路がありません」
+  ✓ [running.guide] ページを開いて［選択］で値を選ぶ操作を案内する
+  - measure.running.empty: {"k":0.534,"chipFontPx":6.4,"nodes":0,"nodesHidden":0,"chips":0,"chipsHidden":0,"tags":0,"tagsHidden":0,"cuts":0,"cutsHidden":0,"hops":0,"hopsHidden":0,"estimatedHops":[],"hiddenList":[],"panels":["ページ 16,64 200×162","プレビュー 232,64 336×434 畳み:off","表示設定 16,521 236×209","全体 16,822 236×62","キャンバス操作 573
+  - screenshot: 03-running-no-path.png
+
+## C4 /lin-a の値を選ぶ（推定経路は従来どおり）
+  - pick: {"selection":"resolved","at":"src/app/lin-a/page.tsx:18:11","lineage":"linked","lineageReason":"","lineageStage":"","cands":"poc.listings.region"}
+  ✓ [lina.linked] /lin-a の値が DB カラム（poc.listings.region）まで結ばれる
+  ✓ [lina.dock] 右ドックは従来の「この値の出所 … 推定」（P1-10 の分けた表示にならない）
+  ✓ [lina.weakest] ★ いちばん弱いところ（由来は静的解析による推定）が出る
+  - measure.lina: {"k":0.716,"chipFontPx":8.6,"nodes":9,"nodesHidden":0,"chips":9,"chipsHidden":0,"tags":1,"tagsHidden":0,"cuts":1,"cutsHidden":0,"hops":8,"hopsHidden":0,"estimatedHops":["この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"],"hiddenList":[],"panels":["ページ 16,64 200×166","プレビュー 232,64 336×229 畳み:on","表示設定 16,521 2
+  ✓ [lina.nodes] lina: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）
+  ✓ [lina.all] lina: 札・推定の印・切断の印・接続線も隠れていない
+  - screenshot: 04-lin-a-linked.png
+
+## C5 /lin-g の値を選ぶ（由来が切れる）— 描画位置と値の由来を分ける
+  - pick: {"selection":"resolved","at":"src/app/lin-g/page.tsx:28:7","lineage":"cut","lineageReason":"no-reference","lineageStage":"static","cands":""}
+  ✓ [ling.cut] 由来が切れる（理由つき）
+  - dock.vo: {"head":"選んだ値 — 描画位置と値の由来","render":"特定済み実測src/app/lin-g/page.tsx:28LinG","lineage":"未確認DB のどのテーブル・カラムから来たかは、まだ分かっていません","stage":"静的解析","reason":"静的解析で、この値からデータ取得の結果への参照の連鎖を解けません（定数・追えない関数・条件の判定など）（固定値の経路 1 本）"}
+  ✓ [ling.render] 右ドック: 描画位置は「特定済み」（実測）とソース位置
+  ✓ [ling.lineage] 右ドック: 値の由来は「未確認」
+  ✓ [ling.stage] 右ドック: 切れた段階（静的解析）
+  ✓ [ling.reason] 右ドック: 理由（参照の連鎖を解けない）
+  ✓ [ling.noClaim] 右ドックに「この値の出所 <描画位置> 実測」の見出しを出さない
+  - measure.ling: {"k":1.104,"chipFontPx":13.3,"nodes":2,"nodesHidden":0,"chips":2,"chipsHidden":0,"tags":0,"tagsHidden":0,"cuts":1,"cutsHidden":0,"hops":1,"hopsHidden":0,"estimatedHops":[],"hiddenList":[],"panels":["ページ 16,64 200×166","プレビュー 232,64 336×207 畳み:on","表示設定 16,521 236×209","全体 16,760 236×124","キャンバス操作 57
+  ✓ [ling.nodes] ling: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）
+  ✓ [ling.all] ling: 札・推定の印・切断の印・接続線も隠れていない
+  - screenshot: 05a-lin-g-cut-dock.png
+  - showBound: {"shown":"4","withSel":"on"}
+  ✓ [ling.withObs] 同じ文書の通信（SQL）を並べても、値の由来は「未確認」のまま・段と理由も同じ
+  - measure.ling.withObs: {"k":0.716,"chipFontPx":8.6,"nodes":9,"nodesHidden":0,"chips":9,"chipsHidden":0,"tags":0,"tagsHidden":0,"cuts":2,"cutsHidden":0,"hops":7,"hopsHidden":0,"estimatedHops":[],"hiddenList":[],"panels":["ページ 16,64 200×166","プレビュー 232,64 336×229 畳み:on","表示設定 16,521 236×209","全体 16,760 236×124","キャンバス操作 573
+  ✓ [ling.withObs.nodes] ling.withObs: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）
+  ✓ [ling.withObs.all] ling.withObs: 札・推定の印・切断の印・接続線も隠れていない
+  - screenshot: 05b-lin-g-cut-with-observation.png
+
+## C6 特定できない要素を選ぶ（描画位置も分からない）
+  - pick: {"selection":"unresolved","at":"","lineage":"","lineageReason":"","lineageStage":"","cands":""}
+  - dock.vo: {"head":"選んだ値 — 描画位置と値の由来","render":"特定できません","lineage":"未確認DB のどのテーブル・カラムから来たかは、まだ分かっていません","stage":"描画位置の特定","reason":"この要素自身に要素識別子がありません"}
+  ✓ [unres.render] 右ドック: 描画位置「特定できません」・値の由来「未確認」・段「描画位置の特定」
+  - measure.unresolved: {"k":1.25,"chipFontPx":15,"nodes":1,"nodesHidden":0,"chips":1,"chipsHidden":0,"tags":0,"tagsHidden":0,"cuts":1,"cutsHidden":0,"hops":0,"hopsHidden":0,"estimatedHops":[],"hiddenList":[],"panels":["ページ 16,64 200×166","プレビュー 232,64 336×188 畳み:on","表示設定 16,521 236×209","全体 16,760 236×124","キャンバス操作 573,6
+  ✓ [unresolved.nodes] unresolved: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）
+  ✓ [unresolved.all] unresolved: 札・推定の印・切断の印・接続線も隠れていない
+  - screenshot: 06-unresolved.png
+
+## C7 停止する（以前の実測も合成デモも出さない）
+  - stop: {"ms":626}
+  - synth.stopped: {"marks":[],"nodes":0,"notice":"project-empty","noticeText":"poc01-fixture-app — 経路なし（合成デモは非表示）","phase":"stopped","dockPhase":"stopped","cardHead":"開発サーバーは停止しています","dockHead":"開発サーバーは停止しています","banner":false}
+  ✓ [stopped.noSynth] 停止後: 合成デモの文字（千葉県・Sample Property App・合成シナリオ 等）が画面に無い
+  ✓ [stopped.noNodes] 停止後: キャンバスに経路のノードを描いていない
+  ✓ [stopped.phase] 停止後: キャンバスと右ドックが「stopped」の空の状態を出す
+  ✓ [stopped.noPrev] 停止後は以前の実測（/lin-g・/cards の選択や通信）をキャンバスに描かない
+  - screenshot: 07-stopped.png
+
+## C8 再起動する（新しい観測を待つ）
+  - restart: {"preview":"live","ms":2119,"samples":["stopped|0|0","starting|0|0","running|0|0"]}
+  ✓ [restart.noSynth] 再起動中の全標本で合成デモの文字・ノードが無い
+  ✓ [restart.newPid] 再起動で別のプロセスになる
+  - synth.restarted: {"marks":[],"nodes":0,"notice":"project-empty","noticeText":"poc01-fixture-app — 経路なし（合成デモは非表示）","phase":"running","dockPhase":"running","cardHead":"まだ経路がありません","dockHead":"まだ経路がありません","banner":false}
+  ✓ [restarted.noSynth] 再起動後・選択前: 合成デモの文字（千葉県・Sample Property App・合成シナリオ 等）が画面に無い
+  ✓ [restarted.noNodes] 再起動後・選択前: キャンバスに経路のノードを描いていない
+  ✓ [restarted.phase] 再起動後・選択前: キャンバスと右ドックが「running」の空の状態を出す
+  ✓ [restart.wait] 再起動後は「前の起動で観測した経路は表示しません（新しい観測を待っています）」
+  - screenshot: 08a-restarted-waiting.png
+  ✓ [restart.linked] 再起動後も /lin-a は DB カラムまで結ばれる
+  - measure.restart.lina: {"k":0.716,"chipFontPx":8.6,"nodes":9,"nodesHidden":0,"chips":9,"chipsHidden":0,"tags":1,"tagsHidden":0,"cuts":1,"cutsHidden":0,"hops":8,"hopsHidden":0,"estimatedHops":["この表示値の由来（取得結果のどの項目か）（推定） 隠れ0%・外0%・破線あり"],"hiddenList":[],"panels":["ページ 16,64 200×166","プレビュー 232,64 336×229 畳み:on","表示設定 16,521 2
+  ✓ [restart.lina.nodes] restart.lina: 経路のノードが隠れていない（7C-0 の計測 / 7C-2 の計測）
+  ✓ [restart.lina.all] restart.lina: 札・推定の印・切断の印・接続線も隠れていない
+  - screenshot: 08b-restarted-lin-a.png
+
+判定の材料: 52 件中 0 件が不成立 []
