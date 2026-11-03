@@ -242,6 +242,24 @@ function exchangeSqlIds(obs, seq) {
 const linResponses = [];
 const anchorCalls = [];
 page.on('request', (r) => { if (r.url().includes('/api/runtime/anchor')) anchorCalls.push(Date.now()); });
+/* 7C 最終（4 番の切り分けの診断。期待値には使わない）: プレビューの iframe が送った要求（RSC の再取得か）と、受け取った HMR の通知 */
+const pvRequests = [];
+const hmrMessages = [];
+page.on('request', (r) => {
+  try {
+    const u = new URL(r.url());
+    if (u.hostname !== PV_HOST || u.pathname.startsWith('/_next/static') || u.pathname.startsWith('/__nextjs')) return;
+    const h = r.headers();
+    pvRequests.push({ t: Date.now(), method: r.method(), path: u.pathname, rsc: h.rsc ?? null, rscQuery: u.searchParams.has('_rsc'), dest: h['sec-fetch-dest'] ?? null });
+  } catch { /* 記録だけ */ }
+});
+page.on('websocket', (ws) => {
+  ws.on('framereceived', (f) => {
+    const t = typeof f.payload === 'string' ? f.payload : '';
+    const m = /"(?:action|type)"\s*:\s*"([^"]+)"/.exec(t);
+    if (m && !/^(?:ping|pong)$/i.test(m[1])) hmrMessages.push({ t: Date.now(), kind: m[1], head: t.slice(0, 100) });
+  });
+});
 page.on('response', async (r) => {
   if (!r.url().includes('/api/runtime/lineage')) return;
   const rec = { t: Date.now(), status: r.status() };
@@ -469,15 +487,35 @@ try {
   console.log('\n4. 由来を表示している状態で、選んだ要素のファイル（取得の呼び出しも同じファイル）を変える');
   {
     eq('前提: 由来を表示している', (await lineageShown(COL)).attr, true);
-    put(LIN_A, `${srcOf(LIN_A)}\n// comment only ${Date.now()}\n`);
-    note(`${LIN_A} の末尾にコメントだけを足した（要素の位置も値の式も変えない）`);
+    const tEdit4 = Date.now();
+    /* 7C 最終: 変更をコメントだけ（＋すぐ元に戻す）にすると、生成されるコードが変わらず、サーバー側の HMR（eval）も RSC の再取得も
+     * 起きないことがある（docs/07c-hmr-final-safety-report.md 第5節。基準のコミットでも 4 番の前半が失敗した原因）。
+     * 生成されるコードが変わる文を末尾に足し（要素・取得の位置も値の式も変えない）、4 番が終わるまで元に戻さない。
+     * そのうえで「HMR が実際に起きた」ことを、ブラウザの RSC の再取得とサーバーの eval の印で前提として確かめる */
+    put(LIN_A, `${srcOf(LIN_A)}\nconst __hmrProbe = ${Date.now()};\nvoid __hmrProbe;\n`);
+    note(`${LIN_A} の末尾に、生成されるコードが変わる文を足した（要素の位置も値の式も取得の位置も変えない）`);
     await expectInvalidated('4 結んだ由来', T0.li, COL);
     await shot('lin-rev-4-invalidated');
-    restore(LIN_A);
+    const refetched = await until(() => pvRequests.some((q) => q.t >= tEdit4 && q.path === '/lin-a' && (q.rsc || q.rscQuery)), 30000);
+    ok('4 前提: HMR が実際に起きた（変更の後に、プレビューが /lin-a の RSC の再取得を送った）', refetched,
+      { hmr: hmrMessages.filter((m) => m.t >= tEdit4).map((m) => m.kind), requests: pvRequests.filter((q) => q.t >= tEdit4) });
     await sleep(2500);
     /* HMR で描き直された DOM は、記録した文書の取得が描いたものとは限らない（同じパスの RSC の再取得がある）。
      * そのため前の文書の通信の SQL を結ばない（7B-3B-2 の規則 refetched-after-document） */
     const r = await pick(LI(), { want: 'cut' });
+    {
+      /* 診断（期待値には使わない）: 変更の後に、ブラウザが HMR の通知を受けたか・RSC の再取得を送ったか・IDE がそれを観測したか */
+      const st = await status();
+      const ob = await page.evaluate(async ({ run }) => {
+        const x = await fetch('/api/runtime/observations', { method: 'POST', headers: { 'content-type': 'application/json', 'x-vcide-request': '1' }, body: JSON.stringify({ run, detail: 'all' }) });
+        return x.status === 200 ? (await x.json()).observation : null;
+      }, { run: { instance: st.runtime.instance, pid: st.runtime.pid, startedAt: st.runtime.startedAt } }).catch(() => null);
+      const after = (xs) => xs.filter((x) => x.t >= tEdit4).map((x) => ({ ...x, t: `+${x.t - tEdit4}ms` }));
+      note(`4 診断: 変更の後に受けた HMR の通知 ${JSON.stringify(after(hmrMessages).map((m) => `${m.t} ${m.kind}`))}`);
+      note(`4 診断: 変更の後にプレビューが送った要求 ${JSON.stringify(after(pvRequests).map((q) => `${q.t} ${q.method} ${q.path}${q.rsc ? ' RSC' : ''}${q.rscQuery ? ' ?_rsc' : ''}`))}`);
+      note(`4 診断: IDE が観測した通信（変更の後） ${JSON.stringify((ob?.exchanges ?? []).filter((e) => e.startMs >= tEdit4 - 200).map((e) => `#${e.seq} ${e.kind} ${e.path} +${Math.round(e.startMs - tEdit4)}ms`))}・文書の同定 ${await sel('data-doc-binding')}`);
+      results.step4Diagnosis = { hmr: after(hmrMessages), requests: after(pvRequests), exchanges: (ob?.exchanges ?? []).filter((e) => e.startMs >= tEdit4 - 200).map((e) => ({ seq: e.seq, kind: e.kind, path: e.path, dt: Math.round(e.startMs - tEdit4) })) };
+    }
     eq('4 HMR の後の DOM を選ぶ: 前の文書の通信には同定しない（refetched-after-document）・由来を結ばない', [r.selection, await sel('data-doc-binding'), r.lineage], ['resolved', 'refetched-after-document', 'cut']);
     /* 同じ起動のまま読み込み直す: 文書は同定できるが、HMR の後の SQL の呼び出し位置は戻せない（既知の制約・未観測として扱う） */
     await gotoPath('/lin-a');
@@ -494,6 +532,8 @@ try {
     ok('4 その理由は「HMR で eval されたコードが SQL を実行した」（hmr-evaluated-code。ディスクの生成物・ソースマップとの対応を確かめられない）', own.length > 0 && own.every((d) => (d.failure ?? '').startsWith('hmr-evaluated-code')), own);
     ok('4 右ドックに「この値の出所」を出さない（前の由来も出さない）', !(await dockText()).includes('この値の出所'));
     results.sameRunAfterChange = lr;
+    restore(LIN_A);
+    await sleep(1500);
     await restartDev('4 の後');
   }
 
