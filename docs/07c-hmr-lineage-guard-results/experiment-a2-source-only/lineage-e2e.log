@@ -1,0 +1,11 @@
+ブラウザ: 同梱の chromium 153.0.8010.12 / 題材: /home/user/Visual-Computing-IDE/poc/fixture-app
+IDE: 127.0.0.1:4100（ブラウザからは http://ide.cloud.test）/ 中継: 127.0.0.1:4160（http://preview.cloud.test）
+
+1. fixture-app を起動する（計装・呼び出し位置の記録・要素識別子の注入）
+  ✓ 計装は有効
+  ✓ 要素識別子の注入は有効
+
+2. /lin-a（PoC-04 ケースA）: <li> を選ぶ → 文書を同定 → 静的解析と実測が一致 → poc.listings.region
+  ✓ iframe の文書に、中継が付けた文書の識別子がある（16進32桁）
+  ✓ その識別子は、いまの起動の /lin-a の通信の記録と一致する
+  ✓ 文書の識別子は中継の識別子（relayId）と別

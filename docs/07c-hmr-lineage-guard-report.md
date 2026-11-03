@@ -127,11 +127,53 @@
 
 ## 6. テスト別の結果
 
-（第6.1節の表は回帰の実行の後に記入）
-
 ### 6.1 回帰（`docs/07c-hmr-lineage-guard-results/suites/`）
 
-REGRESSION_TABLE
+| 本 | 通過 | 失敗 | 終了 | 備考 |
+| --- | --- | --- | --- | --- |
+| `poc01` | 56 | 0 | 0 |  |
+| `explore` | 69 | 0 | 0 |  |
+| `measured` | 48 | 0 | 0 |  |
+| `poc03` | 95 | 0 | 0 |  |
+| `elements` | 49 | 0 | 0 |  |
+| `poc05` | 137 | 0 | 0 |  |
+| `flows` | 44 | 0 | 0 |  |
+| `poc02` | 129 | 0 | 0 |  |
+| `rsc` | 61 | 0 | 0 |  |
+| `poc04` | 143 | 0 | 0 |  |
+| `lineage` | 76 | 0 | 0 |  |
+| `sqlparse` | 77 | 0 | 0 |  |
+| `sqlimpact` | 64 | 0 | 0 |  |
+| `model` | 85 | 0 | 0 |  |
+| `project-inspect` | 126 | 0 | 0 |  |
+| `devserver` | 108 | 0 | 0 |  |
+| `devserver-stub` | 71 | 0 | 0 |  |
+| `runtime-e2e` | 56 | 0 | 0 |  |
+| `childenv-origin` | 22 | 0 | 0 |  |
+| `preview-gateway` | 132 | 0 | 0 |  |
+| `select-unit` | 101 | 0 | 0 |  |
+| `preview-e2e` | 78 | 0 | 0 |  |
+| `select-e2e` | 86 | 0 | 0 |  |
+| `observe-unit` | 153 | 0 | 0 |  |
+| `observe-e2e` | 86 | 0 | 0 |  |
+| `queries-unit` | 126 | 0 | 0 |  |
+| `lineage-live-unit` | 157 | 0 | 0 |  |
+| `queries-e2e` | 24 | 16 | 1 | **失敗** — 各ページの最初の文書の SQL が `changed-during-request`（初回のコンパイル。第10.2節）。その後の項目が例外で走っていない |
+| `lineage-e2e` | 71 | 22 | 1 | **失敗** — 同上（最初の文書の由来が `fetch-callsite-unverifiable`）。誤ったカラムの表示は無い |
+| `callsite-entry-unit` | 23 | 0 | 0 | 計装の入口（CallSite に変えた後も通る） |
+| `select-revision-unit` | 50 | 0 | 0 |  |
+| `select-revision-e2e` | - | - | 1 | この実行ではログを失った（記録の作業ミス。第6.1節の注）。**単独で再実行して 104／0**（`suites-rerun/`） |
+| `lineage-revision-e2e` | 66 | 11 | 1 | **失敗** — 1・2 番の前提が初回のコンパイルで未観測。4 番は HMR の再取得が起きず、正しい位置（`lin-a/page.tsx:12:24`）で結んだ（第6.3節） |
+| `hmr-guard-unit` | 78 | 0 | 0 | 新規 |
+| `hmr-lineage-guard-e2e` | 52 | 0 | 0 | 新規（T0〜T4・T2） |
+| `hmr-chunk-layout-e2e` | 7 | 6 | 1 | **失敗（意図して残した）** — 第3の機構（第10.1節） |
+| `lineage-e2e`（題材のコピー `poc/out/lineage-copy`） | 68 | 25 | 1 | **失敗** — 原因は元の題材と同じ（`suites-copy/`） |
+| typecheck（`tsc --noEmit`） | — | — | 0 | 型の誤りなし |
+
+- 実行: `docs/07c-hmr-lineage-guard-results/run-suites.sh`（`scripts/test-all-29.sh` と同じ手順。全 29 本＋追加の 7 本を直列）。スキップ・環境上の未実行は無い（DB・ブラウザとも有り）。
+- 元の 29 本のうち 27 本は通過、2 本（`queries-e2e`・`lineage-e2e`）は失敗。追加の 7 本では `lineage-revision-e2e` と `hmr-chunk-layout-e2e`（意図して残した）が失敗、`select-revision-e2e` は再実行で通過。`queries-e2e`・`lineage-e2e`・`lineage-revision-e2e` の失敗の原因は、記録を読んだ範囲ではすべて「各ページの最初の文書（初回のコンパイル）の SQL が A2 で止まる」こと（ログの `changed-during-request`）。**誤ったカラム・誤った呼び出し位置の表示ではない。** ただし `queries-e2e` は途中で例外になり、後半の項目は走っていない＝**この3本については、A2 以外の退行が無いことを確かめられていない**。切り分けは第6.3節の実験で行った。
+- 注（作業ミスの記録）: 1回目の実行の途中で、記録の絶対パスを置き換える処理を実行中のログにも当ててしまい、`select-revision-e2e` のログと集計の行が失われた（終了コード 1 の原因は記録に残っていない）。同じ製品で単独で再実行し 104／0 だった。
+
 
 ### 6.2 修正前／修正後
 

@@ -1,0 +1,13 @@
+diff --git a/src/server/dataAccess.ts b/src/server/dataAccess.ts
+index 56093ae..aa08f4a 100644
+--- a/src/server/dataAccess.ts
++++ b/src/server/dataAccess.ts
+@@ -348,7 +348,7 @@ export async function resolveDataAccess(input: DataAccessInput): Promise<LiveDat
+         continue;
+       }
+       const since = request.startMs - FRESHNESS_MARGIN_MS;
+-      const changed = ([['生成物', mtimeOf(gen)], ['ソースマップ', mtimeOf(`${gen}.map`)], [a.frame?.file ?? 'ソース', tSrc]] as const)
++      const changed = ([[a.frame?.file ?? 'ソース', tSrc]] as const)
+         .filter(([what, t]) => (t === null ? what !== 'ソースマップ' : t >= since));
+       if (changed.length) {
+         out.push(fail(span, 'changed-during-request',
