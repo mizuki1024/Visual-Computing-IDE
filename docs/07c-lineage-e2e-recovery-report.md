@@ -225,7 +225,7 @@ F-01 の時点では由来を結べなかったため確かめていなかった
 | 実物の環境 | 利用者の実在プロジェクト・実物の Codespaces では確かめていない。再現テストは IDE のリポジトリの外のプロジェクトで計装の振る舞いを確かめたが、Next.js の実物のプロジェクトでの由来の表示は未確認【未観測】 |
 | webpack | 今回は Turbopack だけ。webpack（`bundler-virtual` の経路）では回していない【未観測】 |
 | pg 以外 | Prisma は従来どおり入口を包まない（`no-entry-callsite`）。今回の修正は pg だけ |
-| 全 29 本 | `test-all-29.sh` の全件は回していない。回したものは第7節（29 本のうち 15 本＋新規 2 本） |
+| 全 29 本 | `test-all-29.sh` の全件は回していない。回したものは第7節（29 本のうち 13 本、F-01 の 2 本、新規 2 本） |
 
 次に行うべき作業（推奨順）:
 
@@ -246,3 +246,25 @@ F-01 の時点では由来を結べなかったため確かめていなかった
 | `tests/lineage-revision-e2e.spec.mjs` | 新規。由来を結んだ状態 × F-01（第5節） |
 | `docs/07c-lineage-e2e-recovery-report.md` | 本書 |
 | `docs/07c-lineage-recovery-results/` | 実行記録・環境・診断スクリプト・画面 |
+
+---
+
+## 11. 完了条件の判定と引き継ぎ
+
+| 完了条件 | 判定 | 根拠 |
+| --- | --- | --- |
+| 1. 16 件の失敗原因を証拠で説明できる | 満たす | 第2・3節（R1/R2 の比較、収集ファイルの `entry: null`、最小の再現、再現テストの修正前 15/8） |
+| 2. 必要な修正と再現テスト | 満たす | 第4節（`otel.cjs`、`callsite-entry-unit`） |
+| 3. lineage-e2e が全件成功 | 満たす | 元の題材・コピーとも 93/0（第7節） |
+| 4. F-01 の既存の回帰が成功 | 満たす | `select-revision-e2e` 104/0、`select-revision-unit` 50/0、`select-e2e` 86/0、`preview-e2e` 78/0、`select-unit` 101/0、typecheck |
+| 5. 由来の表示 × 版の無効化を実ブラウザで確認 | 満たす | `lineage-revision-e2e` 77/0、画面 4 枚（第5節） |
+| 6. 実測・静的・推定・未観測の区別 | 満たす | 本文の【】の印。製品も、呼び出し位置を戻せないときは推測で補わず未観測として出す |
+| 7. 未検証事項と既知の制約 | 明記 | 第6・9節 |
+
+判定: **解消**。ただし第6節の制約（同じ起動の中の HMR の後は呼び出し位置を戻せない）は別の原因として残り、未対処。
+
+引き継ぎ:
+
+- ブランチ `claude/lineage-e2e-recovery-m3ab86`（基準 `09c3dee` の上に、本作業のコミットだけを積んだ。main へのマージ・強制 push はしていない）。
+- 再現に要るもの: `npm ci`（ルート・`poc/fixture-app`）、`npm run build`・`npm run build:lib`、`poc/fixture-app/.env`（`.env.example` の複写。Git 管理外）、127.0.0.1:55432 の使い捨て PostgreSQL（`poc/README.md`）、Chromium（`environment.txt`）。
+- `poc/out/`（使い捨てのコピー）と `.ide-runtime/` は Git 管理外。試験が作り直す。
