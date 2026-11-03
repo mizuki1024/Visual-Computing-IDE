@@ -1,4 +1,4 @@
-ブラウザ: 同梱の chromium 153.0.8010.12 / 題材: /home/user/Visual-Computing-IDE/poc/fixture-app
+ブラウザ: 同梱の chromium 153.0.8010.12 / 題材: <REPO>/poc/fixture-app
 IDE: 127.0.0.1:3800（ブラウザからは http://ide.cloud.test）/ 中継: 127.0.0.1:3860（http://preview.cloud.test）
 
 1. fixture-app を起動する（計装つき）。呼び出し位置の記録（POC02_CALLSITE）と中継の識別子が有効

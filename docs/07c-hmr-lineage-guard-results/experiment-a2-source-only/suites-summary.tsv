@@ -1,2 +1,6 @@
 suite	pass	fail	exit	sec	peak_tree_pss_mb	stopped_by
 queries-e2e	120	1	1			
+lineage-e2e	93	0	0			
+lineage-revision-e2e	73	4	1			
+hmr-lineage-guard-e2e	52	0	0			
+hmr-chunk-layout-e2e	7	6	1			
