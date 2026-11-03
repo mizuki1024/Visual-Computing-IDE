@@ -7,7 +7,7 @@
 | 実施日 | 2026-11-03 |
 | 環境 | クラウドのコンテナ（Linux）。Node 22.23.4、IDE・題材とも Next 16.4.3（Turbopack・server fast refresh は既定のまま）、同梱の Chromium 153（`PW_CHANNEL=none`。playwright-core 1.64 が探す 1248 に、入っている 1243 をリポジトリの外でシンボリックリンク — 前回と同じ）、使い捨ての PostgreSQL 16（127.0.0.1:55432・trust・`poc/fixture-app/db/init.sql`） |
 | 実行記録 | `docs/07c-hmr-final-safety-results/`（診断 `identity-probe*`・`map-fit-probe*`、e2e `e2e/`・`lineage-revision/`・画面 `shots/`、回帰 `suites/`） |
-| **結論** | **（回帰の結果で確定。第8節）** |
+| **結論** | **完了（実装範囲の安全対策として）。** 第3の経路を閉じた: 変えていないモジュールの古い世代のコードは、実行したコードと同じ内容の区画がいまの生成物にあれば正しい位置へ戻し、無ければ未観測にする。実ブラウザで誤ったカラム（`poc.regions.name`）も誤った呼び出し位置も出さない（`hmr-chunk-layout-e2e` 7/6 → **25/0**）。A2 の初回のコンパイルの未観測を、安全側を保ったまま解いた。`lineage-revision-e2e` 4 番の原因を特定した（試験の前提の不成立）。**全件 37 本 3,187 件通過・0 件失敗・skip 0・未実行 0**、typecheck エラー 0。未保証の競合条件は第8.2節（理論上の狭い窓が残る）。ユーザーテストへは**条件付きで進めてよい**（第8.3節） |
 
 記号: 【実測】この作業で動かして確かめた／【静的】コードを読んで確かめた／【推定】根拠からの推論／【未観測】確かめていない。
 
@@ -89,7 +89,46 @@ A1（eval ではない）・A2（2回目以降の要求では生成物の更新�
 
 ## 6. 全テスト結果
 
-（回帰の結果を記入する）
+`bash scripts/test-all.sh docs/07c-hmr-final-safety-results/suites`（新設。`tests/*.spec.mjs` の 36 本を一覧と両向きに照合して直列に回し、題材のコピーでの `lineage-e2e@copy` を足した 37 本）。DB・ブラウザとも有り。**失敗 0・skip 0・未実行 0**（ログに skip の印なし。`lineage-live-unit` の「未実行の SQL」は試験項目の名前）。typecheck（`tsc --noEmit`）エラー 0（`suites/typecheck.log`）。
+
+| 本 | 通過／失敗 | 前回（`cdb9e07`） | 本 | 通過／失敗 | 前回 |
+| --- | --- | --- | --- | --- | --- |
+| poc01 | 56/0 | 56/0 | observe-unit | 153/0 | 153/0 |
+| explore | 69/0 | 69/0 | observe-e2e | 86/0 | 86/0 |
+| measured | 48/0 | 48/0 | queries-unit | 126/0 | 126/0 |
+| poc03 | 95/0 | 95/0 | lineage-live-unit | 157/0 | 157/0 |
+| elements | 49/0 | 49/0 | **queries-e2e** | **122/0** | 24/16（途中で例外） |
+| poc05 | 137/0 | 137/0 | **lineage-e2e** | **93/0** | 71/22 |
+| flows | 44/0 | 44/0 | callsite-entry-unit | 23/0 | 23/0 |
+| poc02 | 129/0 | 129/0 | select-revision-unit | 50/0 | 50/0 |
+| rsc | 61/0 | 61/0 | select-revision-e2e | 104/0 | ログ消失・再実行 104/0 |
+| poc04 | 143/0 | 143/0 | **lineage-revision-e2e** | **78/0** | 66/11 |
+| lineage | 76/0 | 76/0 | hmr-guard-unit | 112/0 | 78/0（項目を足した） |
+| sqlparse | 77/0 | 77/0 | hmr-lineage-guard-e2e | 52/0 | 52/0 |
+| sqlimpact | 64/0 | 64/0 | **hmr-chunk-layout-e2e** | **25/0** | 7/6 |
+| model | 85/0 | 85/0 | **lineage-e2e@copy**（題材のコピー） | **93/0** | 68/25 |
+| project-inspect | 126/0 | 126/0 | | | |
+| devserver | 108/0 | 108/0 | | | |
+| devserver-stub | 71/0 | 71/0 | | | |
+| runtime-e2e | 56/0 | 56/0 | | | |
+| childenv-origin | 22/0 | 22/0 | | | |
+| preview-gateway | 132/0 | 132/0 | | | |
+| select-unit | 101/0 | 101/0 | | | |
+| preview-e2e | 78/0 | 78/0 | | | |
+| select-e2e | 86/0 | 86/0 | | | |
+
+要求された確認項目の対応:
+
+| 項目 | 結果（実ブラウザ） |
+| --- | --- |
+| 第3の経路（`hmr-chunk-layout-e2e`） | 変えていない SA の SQL a・b は正しい位置（`SA.tsx:5:24`・`:12:24`。再起動の後と同じ）、照合の記録に「前の世代の同じ内容の区画へ移した」。page の SQL は `hmr-evaluated-code`（HMR が起きた前提の確認）。`poc.regions.name` をパネル・右ドック・応答の候補に出さない。観測画面の描いた SQL の「実行した呼び出し位置」は正しい行か「特定していません」だけ（キャンバスは通信あたり 2 本まで描く — `LIVE_MAX_SQL`） |
+| 複数回の HMR（T4a〜c） | どの SQL も呼び出し位置を作らない（`fetch-callsite-unverifiable`） |
+| 要求の途中でのソース変更（T2） | SQL a・b とも `changed-during-request`、観測画面に呼び出し位置のノードを描かない |
+| 無関係なファイル・共有の lib の変更（T3a・T3b） | 正しい由来を保つ（T3b の `lib/db.ts` は同じ生成物に入るが、page の区画が同じ内容なので A4 を通る） |
+| 変更後の再要求（T1・2b） | T1 は未観測（eval）。2b は区画の一致で正しい位置 |
+| 開発サーバー再起動後（T4・3） | 正しい由来に戻る |
+| 初回のコンパイル（T0） | **正しく結ぶ**（前回は未観測） |
+| F-01（select-revision-unit/e2e・select-unit/e2e・preview-e2e） | すべて通過。F-01 の照合（`src/server/anchors.ts`）は変えていない |
 
 ## 7. 試験の期待値・入力の変更
 
@@ -104,4 +143,54 @@ A1（eval ではない）・A2（2回目以降の要求では生成物の更新�
 
 ## 8. 結論・未保証の競合条件・ユーザーテストへの移行判断
 
-（回帰の結果で確定する）
+### 8.1 完了条件
+
+| # | 条件 | 判定 |
+| --- | --- | --- |
+| 1 | 第3の経路で誤ったカラム・誤った呼び出し位置を出さない（由来・観測画面） | 満たす（`hmr-chunk-layout-e2e` 25/0） |
+| 2 | 実行したコードの版を確かめ、照合に使った生成物・ソースマップの版と比べ、一致を示せたときだけ位置を確定 | 満たす（A4・A5。不一致・証拠不足は未観測） |
+| 3 | 時刻・ファイル名だけで同一と推測しない | 満たす（同一性はハッシュだけ。時刻は拒む側の判定と理由の分類にだけ使う） |
+| 4 | A1・A2（ソース）・A3・F-01 を維持 | 満たす |
+| 5 | 初回のコンパイルの正常な取得を維持しつつ、実行コードと生成物が異なるケースを拒む | 満たす（第4節の対の単体・T0・T2・第3の経路） |
+| 6 | 未解明の試験の原因 | 特定（第5節） |
+| 7 | 全件の回帰 | 37 本・失敗 0 |
+
+### 8.2 未保証の競合条件・前提
+
+| 項目 | 内容 | 扱い |
+| --- | --- | --- |
+| 書き込みの途中の窓（同じ並びの組） | Turbopack は生成物とソースマップを別々に、順不同で書く。A5 の `mapFit` は「モジュールの並びがずれた組」を拒むが、**並びが同じで区画の中だけが違う組**（例: 1文字の変更）は区別できない（`map-fit-probe.txt` の js2+map3）。誤対応に至るには、ソースマップだけが新しく書かれた後、SQL がその前の世代のコードで実行され、IDE がその照合を**生成物が書かれる前に**終える必要がある。ソースマップが SQL の後に書かれれば D（`build-changed-after-call`）、変えたモジュールのソースが要求の 2 秒前より後に変われば A2、ソースマップが古ければ A3 で止まる | 【未観測】再現していない。2つの書き込みの間（実測で数 ms）に要求の処理と IDE の照合が収まる必要があり、起きにくいが、**証明はしていない** |
+| V8 の `CallSite.getScriptHash()` | Node 22（V8）で利用可能・ファイルの UTF-8 の内容の SHA-256 と一致（実測）。無い・形が違う → `executed-code-unverified`（安全側） | 別の Node・別の読み込み方（`vm` など）では未観測になりうる（過剰側） |
+| 区画の見出しの形 | Next 16.4.3 の Turbopack の4形を実測。形が変われば区画が取れず、生成物が書き直された後は `executed-code-mismatch`（安全側・過剰側） | Next の更新で見直す |
+| 区画の表の上限 | 計装は 4000 世代まで覚える。超えた古い世代は区画を記録しない → 未観測（安全側） | |
+| node_modules の区画 | A5 の 2・3 は src/ のモジュールの区画だけに当てる（同じ世代の組でも node_modules の区画は合わない — 実測）。位置を戻す先は src/ だけ | |
+| webpack・Next 15・Prisma・サーバー内部の fetch | 前回と同じ（webpack は `build-freshness-unverified`、Prisma は `no-entry-callsite`、fetch は対象外） | 【静的】 |
+| A2 の時刻の幅 | ソースについて 2 秒（前回と同じ） | |
+
+### 8.3 ユーザーテストへの移行判断
+
+**条件付きで進めてよい。** 第3の経路を含む既知の3つの誤対応の経路は、実ブラウザで止まる（または正しく戻る）ことを確かめ、全件の回帰も通った。主な使い方（サーバー側のコードを変えて読み込み直す・開発サーバーを再起動する）で、誤ったカラムを確かめた根拠として出す経路は、今回の試験の範囲では見つかっていない。
+
+条件:
+1. 第8.2節の「書き込みの途中の窓」は証明していない残余のリスクとして試用の手引きに書く（「コードを保存した直後に由来が出たら、もう一度読み込んで同じ結果になることを確かめる」）。
+2. 試用は Next 16.4（Turbopack）・Node 22 の環境に限る（それ以外は未観測が増える・未検証）。
+3. 試用で「由来が未確認」が多すぎるという声が出たら、理由（`executed-code-mismatch` など）の内訳を集める（過剰な未観測の量は実プロジェクトで未測定）。
+
+## 9. 変更したファイル
+
+| ファイル | 変更 |
+| --- | --- |
+| `poc/fixture-app/ide-instrumentation/otel.cjs` | フレームに `scriptHash`・`moduleRegion`。`Module.prototype._compile` で区画の表 |
+| `poc/fixture-app/ide-instrumentation/chunkregions.cjs`（新規） | 区画の切り方（計装と IDE で共有） |
+| `poc/runner/lib/srvmap.mjs` | `verifyExecutedFrame`・`mapFit`・`bindChunkAndMap`・`diskMapEntry`（使ったソースマップの内容のハッシュ）。既存の `resolveServerFrame` の振る舞いは変えていない |
+| `src/server/dataAccess.ts` | A4・A5、A2 をソースだけに |
+| `src/lib/liveObservation.ts` | 理由 `executed-code-mismatch`・`executed-code-unverified`・`build-map-unbound` と文言 |
+| `scripts/test-all.sh`（新規） | 全件の実行（一覧の照合・題材のコピー）。`scripts/test-all-29.sh` は変えていない |
+| 試験 | 第7節 |
+| 診断 | `docs/07c-hmr-final-safety-results/identity-probe.mjs`・`map-fit-probe.mjs` と記録 |
+
+## 10. 次の推奨作業
+
+1. 探索機能の残条件の確認（試用の手引きに第8.3節の注意を足す）。
+2. 実在のプロジェクト（子コンポーネントに取得が複数ある構成）で、未観測の量と理由の内訳を測る。
+3. 視覚編集の再開の判断（`docs/git-branch-consolidation-report.md`。編集 PoC の F-01〜F-05 は未解決のまま）。

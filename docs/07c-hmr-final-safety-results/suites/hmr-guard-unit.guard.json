@@ -1,0 +1,34 @@
+{
+ "summary": {
+  "cmd": "node tests/hmr-guard-unit.spec.mjs",
+  "seconds": 3,
+  "exit": 0,
+  "signal": null,
+  "stoppedBy": null,
+  "maxPssMB": 190,
+  "maxAt": 2,
+  "maxProcs": 1,
+  "minAvailMB": 15171,
+  "leftover": 0
+ },
+ "limits": {
+  "seconds": 1500,
+  "pssMB": 6144,
+  "procs": 150,
+  "minAvailMB": 2048
+ },
+ "samples": [
+  {
+   "t": 2,
+   "procs": 1,
+   "pssMB": 190,
+   "availMB": 15171,
+   "byMB": {
+    "ide": 0,
+    "dev-server": 0,
+    "browser": 0,
+    "other": 190
+   }
+  }
+ ]
+}
