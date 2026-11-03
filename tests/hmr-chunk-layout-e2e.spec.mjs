@@ -13,7 +13,8 @@
  *   A2: 2回目以降の要求では、生成物の更新は要求の開始より前 → 通る
  *   A3: SA.tsx は変えていない → 区画の sourcesContent はいまのソースと一致 → 通る
  * この試験は「誤ったカラム（poc.regions.name）を値 a の由来として出さない」を確かめる。
- * **案A の実装の後も失敗する（未解決）**ことを、隠さずに記録するための試験である。
+ * 案A の実装の後も失敗した（未解決だった）。7C 最終（実行コードの版の照合 A4・A5）で、変えていない SA の SQL を正しい位置に戻し、
+ * 変えた page の SQL を未観測にすることを、パネル・右ドック・観測画面（キャンバスの SQL の詳細）で確かめる。
  * ========================================================================== */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -113,6 +114,31 @@ try {
     ok(`${k}: 【第3の経路】SA の SQL b を SA の SQL a の位置に対応させない`, !da.some((d) => d.sql.startsWith(NEEDLE_B.slice(1)) && d.site === T.callA), da);
     ok(`${k}: 【第3の経路】${WRONG_COL} を値 a の由来として出さない`, !isWrong(s), v);
     ok(`${k}: 【第3の経路】右ドックに「この値の出所 ${WRONG_COL}」を出さない`, !(s.dockOrigin ?? '').includes('poc.regions'), s.dockOrigin);
+    /* 7C 最終: 試験の前提（HMR が実際に起きた）を証拠で確かめる — 変えた page.tsx の SQL は eval されたコード（A1）が実行した */
+    const pageSql = da.find((d) => d.sql.startsWith('SELECT id, plan'));
+    eq(`${k} 前提: HMR が実際に起きた（page.tsx の SQL は eval されたコードが実行 → hmr-evaluated-code）`, [pageSql?.site ?? null, pageSql?.failure ?? null], [null, 'hmr-evaluated-code']);
+    /* 変えていない SA は古い世代の生成物のコードのまま動く。その区画と同じ内容の区画がいまの生成物にあるので、同じ区画の同じ行へ移して戻す（A4）。
+     * 未観測ではなく、正しい位置になることまで確かめる */
+    eq(`${k}: SA の SQL a・b は正しい位置（再起動の後と同じ）`, [da.find((d) => d.sql.startsWith(NEEDLE_A.slice(1)))?.site, da.find((d) => d.sql.startsWith(NEEDLE_B.slice(1)))?.site], [T.callA, T.callB]);
+    const obs = await H.obsOf();
+    const seq = s.response?.exchangeSeq;
+    /* この文書の SQL（由来の評価の応答の spanId）のうち、SA の中に位置を特定したもの */
+    const ids = new Set(da.filter((d) => (d.site ?? '').startsWith(`${SA}:`)).map((d) => d.spanId));
+    const saChecks = (obs?.dataAccess ?? []).filter((d) => ids.has(d.spanId));
+    ok(`${k}: SA の位置は「実行したコード＝前の世代の生成物の同じ内容の区画」を確かめて移したもの（A4。偶然の一致ではない）`, saChecks.length === 2 && saChecks.every((d) => d.checks.some((c) => c.includes('前の世代'))), saChecks.map((d) => d.checks.at(-1)));
+    /* 観測画面: その文書の通信をキャンバスに描き、SQL の「実行した呼び出し位置」を確かめる（誤った位置を出さない） */
+    await H.showExchange(seq);
+    const rows = H.sqlRows(obs, seq);
+    const rowOf = (needle) => rows.find((r) => String(r.sql ?? '').includes(needle))?.row ?? '';
+    ok(`${k} 観測画面: SQL b の「実行した呼び出し位置」に SQL a の位置（${T.callA}）を出さない`, !rowOf('name AS region').includes(`SA.tsx:${T.callA.split(':')[1]}:`), rows);
+    /* キャンバスに描く SQL は通信ごとに 2 本まで（adapter.ts の LIVE_MAX_SQL。配置の上限で、3 本目は「描いていない SQL」として数だけ出す）。
+     * 描いた SQL の行がすべて正しい位置か「特定していません」であることを確かめる */
+    const want = { 'id, region FROM': `SA.tsx:${T.callA.split(':')[1]}:`, 'name AS region': `SA.tsx:${T.callB.split(':')[1]}:` };
+    ok(`${k} 観測画面: 描いた SQL の「実行した呼び出し位置」は、正しい行か「特定していません」だけ（誤った位置を出さない）`, rows.length >= 2 && rows.every((r) => {
+      const key = Object.keys(want).find((n) => String(r.sql ?? '').includes(n));
+      return key ? String(r.row ?? '').includes(want[key]) : String(r.row ?? '').startsWith('特定していません');
+    }), rows);
+    ok(`${k} 観測画面: page.tsx の SQL は「特定していません」`, rowOf('id, plan').startsWith('特定していません'), rows);
     await H.shot(`chunk-layout-${k.slice(0, 2)}`);
   }
 
