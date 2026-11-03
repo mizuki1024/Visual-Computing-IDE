@@ -1,0 +1,20 @@
+# 再現条件（7C lineage-e2e の復旧）。秘密情報は含めない
+記録日時(UTC): 2026-11-03T00:39:05Z
+作業基準: claude/explore-f01-selection-revision @ 09c3dee8c090097837b120aa241bfa228d1c5130（作業ブランチ claude/lineage-e2e-recovery-m3ab86 は同じコミットから開始・開始時の作業ツリーはクリーン）
+OS: Linux 6.18.44-fc-v185
+Node: v22.23.4  npm: 10.9.9
+IDE next: 16.4.3  playwright-core: 1.64.1
+ブラウザ: Google Chrome for Testing 153.0.8010.12（PW_CHANNEL=none。playwright-core 1.64.1 が探す chromium_headless_shell-1248 に、事前に入っていた -1243 をシンボリックリンクで置いた。リポジトリの外）
+題材の依存（npm ci、package-lock どおり）:
+  next 16.4.3
+  pg 8.23.1
+  pg-pool 3.14.0
+  @opentelemetry/instrumentation-pg 0.60.0
+  @opentelemetry/sdk-trace-node 2.12.0
+  @opentelemetry/instrumentation 0.207.0
+  @prisma/instrumentation 6.19.3
+DB: PostgreSQL 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)（initdb の使い捨て、127.0.0.1:55432、poc/fixture-app/db/init.sql、poc.listings 12 行）。題材の .env は .env.example の複写
+  途中でセッションの作業プロセスが再起動し DB も止まった（00:36 UTC）。再起動後に pg_ctl で起こし直し、データが残っていることを確かめてから以降を実行した。DB が止まっていた間の結果は使っていない
+実行: npm ci（ルート・poc/fixture-app）→ npm run build → npm run build:lib → PW_CHANNEL=none node tests/<名前>.spec.mjs（直列）
+題材の置き場所: 元の題材 = poc/fixture-app（VCIDE_E2E_PROJECT なし。7C-3 の test-all-29.sh と同じ）／コピー = poc/out/select-e2e/poc/fixture-app（F-01 の記録と同じ。node_modules は cp -al、poc/anchor を隣に複写）
+Turbopack: next dev の既定（Next 16.4.3）。IDE は next start（本番ビルド）

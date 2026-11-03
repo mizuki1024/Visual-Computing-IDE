@@ -1,0 +1,716 @@
+{
+  "startedAt": "2026-11-03T00:39:54.443Z",
+  "project": "poc/out/lin-rev-e2e/poc/fixture-app",
+  "linked": {
+    "t": 1793666407259,
+    "status": 200,
+    "lineage": "linked",
+    "cut": null,
+    "outcome": "confirmed",
+    "candidates": [
+      "poc.listings.region"
+    ],
+    "site": "src/app/lin-a/page.tsx:18:54",
+    "element": "src/app/lin-a/page.tsx:18:11",
+    "fetch": "src/app/lin-a/page.tsx:12:24",
+    "sqlSpanIds": [
+      "ef1ba72a34abc183"
+    ],
+    "exchangeSeq": 3,
+    "dataAccess": [
+      {
+        "spanId": "ef1ba72a34abc183",
+        "site": "src/app/lin-a/page.tsx:12:24",
+        "located": "src/app/lin-a/page.tsx:12:24",
+        "failure": null
+      }
+    ],
+    "resolution": {
+      "status": "resolved",
+      "at": "src/app/lin-a/page.tsx:18:11",
+      "rev": "0c4369974dbfd5af",
+      "reason": null
+    }
+  },
+  "sameRunAfterChange": {
+    "t": 1793666437613,
+    "status": 200,
+    "lineage": "cut",
+    "cut": "fetch-not-measured",
+    "outcome": "none",
+    "candidates": [],
+    "site": "src/app/lin-a/page.tsx:18:54",
+    "element": "src/app/lin-a/page.tsx:18:11",
+    "fetch": null,
+    "sqlSpanIds": [],
+    "exchangeSeq": 7,
+    "dataAccess": [
+      {
+        "spanId": "cd0a42c1b64c9e92",
+        "site": null,
+        "located": null,
+        "failure": "no-app-frame: 注入範囲（src/）のソース位置へ戻せるフレームが無い"
+      }
+    ],
+    "resolution": {
+      "status": "resolved",
+      "at": "src/app/lin-a/page.tsx:18:11",
+      "rev": "0c4369974dbfd5af",
+      "reason": null
+    }
+  },
+  "linkedAfterChange": {
+    "t": 1793666452981,
+    "status": 200,
+    "lineage": "linked",
+    "cut": null,
+    "outcome": "confirmed",
+    "candidates": [
+      "poc.listings.id"
+    ],
+    "site": "src/app/lin-a/page.tsx:18:54",
+    "element": "src/app/lin-a/page.tsx:18:11",
+    "fetch": "src/app/lin-a/page.tsx:12:24",
+    "sqlSpanIds": [
+      "700724e05d00da2e"
+    ],
+    "exchangeSeq": 3,
+    "dataAccess": [
+      {
+        "spanId": "700724e05d00da2e",
+        "site": "src/app/lin-a/page.tsx:12:24",
+        "located": "src/app/lin-a/page.tsx:12:24",
+        "failure": null
+      }
+    ],
+    "resolution": {
+      "status": "resolved",
+      "at": "src/app/lin-a/page.tsx:18:11",
+      "rev": "da219af065c0524f",
+      "reason": null
+    }
+  },
+  "finishedAt": "2026-11-03T00:41:18.045Z",
+  "lineageResponses": [
+    {
+      "t": 1793666407259,
+      "status": 200,
+      "lineage": "linked",
+      "cut": null,
+      "outcome": "confirmed",
+      "candidates": [
+        "poc.listings.region"
+      ],
+      "site": "src/app/lin-a/page.tsx:18:54",
+      "element": "src/app/lin-a/page.tsx:18:11",
+      "fetch": "src/app/lin-a/page.tsx:12:24",
+      "sqlSpanIds": [
+        "ef1ba72a34abc183"
+      ],
+      "exchangeSeq": 3,
+      "dataAccess": [
+        {
+          "spanId": "ef1ba72a34abc183",
+          "site": "src/app/lin-a/page.tsx:12:24",
+          "located": "src/app/lin-a/page.tsx:12:24",
+          "failure": null
+        }
+      ],
+      "resolution": {
+        "status": "resolved",
+        "at": "src/app/lin-a/page.tsx:18:11",
+        "rev": "0c4369974dbfd5af",
+        "reason": null
+      }
+    },
+    {
+      "t": 1793666410936,
+      "status": 200,
+      "lineage": "linked",
+      "cut": null,
+      "outcome": "confirmed",
+      "candidates": [
+        "poc.listings.region"
+      ],
+      "site": "src/app/lin-a/page.tsx:18:54",
+      "element": "src/app/lin-a/page.tsx:18:11",
+      "fetch": "src/app/lin-a/page.tsx:12:24",
+      "sqlSpanIds": [
+        "ef1ba72a34abc183"
+      ],
+      "exchangeSeq": 3,
+      "dataAccess": [
+        {
+          "spanId": "ef1ba72a34abc183",
+          "site": "src/app/lin-a/page.tsx:12:24",
+          "located": "src/app/lin-a/page.tsx:12:24",
+          "failure": null
+        }
+      ],
+      "resolution": {
+        "status": "resolved",
+        "at": "src/app/lin-a/page.tsx:18:11",
+        "rev": "0c4369974dbfd5af",
+        "reason": null
+      }
+    },
+    {
+      "t": 1793666422453,
+      "status": 200,
+      "lineage": "linked",
+      "cut": null,
+      "outcome": "confirmed",
+      "candidates": [
+        "poc.listings.region"
+      ],
+      "site": "src/app/lin-a/page.tsx:18:54",
+      "element": "src/app/lin-a/page.tsx:18:11",
+      "fetch": "src/app/lin-a/page.tsx:12:24",
+      "sqlSpanIds": [
+        "e91fccdbacf04b30"
+      ],
+      "exchangeSeq": 3,
+      "dataAccess": [
+        {
+          "spanId": "e91fccdbacf04b30",
+          "site": "src/app/lin-a/page.tsx:12:24",
+          "located": "src/app/lin-a/page.tsx:12:24",
+          "failure": null
+        }
+      ],
+      "resolution": {
+        "status": "resolved",
+        "at": "src/app/lin-a/page.tsx:18:11",
+        "rev": "0c4369974dbfd5af",
+        "reason": null
+      }
+    },
+    {
+      "t": 1793666436794,
+      "status": 200,
+      "lineage": "cut",
+      "cut": "document-unidentified",
+      "outcome": "none",
+      "candidates": [],
+      "site": null,
+      "element": null,
+      "fetch": null,
+      "sqlSpanIds": [],
+      "exchangeSeq": null,
+      "dataAccess": [],
+      "resolution": {
+        "status": "resolved",
+        "at": "src/app/lin-a/page.tsx:18:11",
+        "rev": "0c4369974dbfd5af",
+        "reason": null
+      }
+    },
+    {
+      "t": 1793666437613,
+      "status": 200,
+      "lineage": "cut",
+      "cut": "fetch-not-measured",
+      "outcome": "none",
+      "candidates": [],
+      "site": "src/app/lin-a/page.tsx:18:54",
+      "element": "src/app/lin-a/page.tsx:18:11",
+      "fetch": null,
+      "sqlSpanIds": [],
+      "exchangeSeq": 7,
+      "dataAccess": [
+        {
+          "spanId": "cd0a42c1b64c9e92",
+          "site": null,
+          "located": null,
+          "failure": "no-app-frame: 注入範囲（src/）のソース位置へ戻せるフレームが無い"
+        }
+      ],
+      "resolution": {
+        "status": "resolved",
+        "at": "src/app/lin-a/page.tsx:18:11",
+        "rev": "0c4369974dbfd5af",
+        "reason": null
+      }
+    },
+    {
+      "t": 1793666442855,
+      "status": 200,
+      "lineage": "linked",
+      "cut": null,
+      "outcome": "confirmed",
+      "candidates": [
+        "poc.listings.region"
+      ],
+      "site": "src/app/lin-a/page.tsx:18:54",
+      "element": "src/app/lin-a/page.tsx:18:11",
+      "fetch": "src/app/lin-a/page.tsx:12:24",
+      "sqlSpanIds": [
+        "3dc04a31b37a010b"
+      ],
+      "exchangeSeq": 3,
+      "dataAccess": [
+        {
+          "spanId": "3dc04a31b37a010b",
+          "site": "src/app/lin-a/page.tsx:12:24",
+          "located": "src/app/lin-a/page.tsx:12:24",
+          "failure": null
+        }
+      ],
+      "resolution": {
+        "status": "resolved",
+        "at": "src/app/lin-a/page.tsx:18:11",
+        "rev": "0c4369974dbfd5af",
+        "reason": null
+      }
+    },
+    {
+      "t": 1793666447373,
+      "status": 200,
+      "lineage": "cut",
+      "cut": "document-unidentified",
+      "outcome": "none",
+      "candidates": [],
+      "site": null,
+      "element": null,
+      "fetch": null,
+      "sqlSpanIds": [],
+      "exchangeSeq": null,
+      "dataAccess": [],
+      "resolution": {
+        "status": "resolved",
+        "at": "src/app/lin-a/page.tsx:18:11",
+        "rev": "da219af065c0524f",
+        "reason": null
+      }
+    },
+    {
+      "t": 1793666452981,
+      "status": 200,
+      "lineage": "linked",
+      "cut": null,
+      "outcome": "confirmed",
+      "candidates": [
+        "poc.listings.id"
+      ],
+      "site": "src/app/lin-a/page.tsx:18:54",
+      "element": "src/app/lin-a/page.tsx:18:11",
+      "fetch": "src/app/lin-a/page.tsx:12:24",
+      "sqlSpanIds": [
+        "700724e05d00da2e"
+      ],
+      "exchangeSeq": 3,
+      "dataAccess": [
+        {
+          "spanId": "700724e05d00da2e",
+          "site": "src/app/lin-a/page.tsx:12:24",
+          "located": "src/app/lin-a/page.tsx:12:24",
+          "failure": null
+        }
+      ],
+      "resolution": {
+        "status": "resolved",
+        "at": "src/app/lin-a/page.tsx:18:11",
+        "rev": "da219af065c0524f",
+        "reason": null
+      }
+    },
+    {
+      "t": 1793666464511,
+      "status": 200,
+      "lineage": "cut",
+      "cut": "document-unidentified",
+      "outcome": "none",
+      "candidates": [],
+      "site": null,
+      "element": null,
+      "fetch": null,
+      "sqlSpanIds": [],
+      "exchangeSeq": null,
+      "dataAccess": [],
+      "resolution": {
+        "status": "unresolved",
+        "at": null,
+        "rev": null,
+        "reason": "source-changed"
+      }
+    },
+    {
+      "t": 1793666472650,
+      "status": 200,
+      "lineage": "cut",
+      "cut": "no-reference",
+      "outcome": "none",
+      "candidates": [],
+      "site": "src/app/lin-g/page.tsx:28:36",
+      "element": "src/app/lin-g/page.tsx:28:7",
+      "fetch": null,
+      "sqlSpanIds": [],
+      "exchangeSeq": 7,
+      "dataAccess": [
+        {
+          "spanId": "5aa81830bffd4ef1",
+          "site": "src/app/lin-g/page.tsx:19:14",
+          "located": "src/app/lin-g/page.tsx:19:14",
+          "failure": null
+        }
+      ],
+      "resolution": {
+        "status": "resolved",
+        "at": "src/app/lin-g/page.tsx:28:7",
+        "rev": "179e2751ffdce72d",
+        "reason": null
+      }
+    }
+  ],
+  "pass": 77,
+  "fail": 0,
+  "items": [
+    {
+      "name": "前提: 題材の DB（使い捨ての PostgreSQL）に届く",
+      "pass": true
+    },
+    {
+      "name": "前提: コピーの pg は IDE 側の pg と別の実体（実在のプロジェクトと同じ条件）",
+      "pass": true
+    },
+    {
+      "name": "前提: 計装は有効",
+      "pass": true
+    },
+    {
+      "name": "前提: 要素識別子の注入は有効",
+      "pass": true
+    },
+    {
+      "name": "前提: HMR の WebSocket を転送役で中継できている",
+      "pass": true
+    },
+    {
+      "name": "前提: /lin-a は DB の値（region）を描いている",
+      "pass": true
+    },
+    {
+      "name": "1 選択の位置 = ソースの <li>",
+      "pass": true
+    },
+    {
+      "name": "1 由来を結んだ（linked）・候補 = poc.listings.region",
+      "pass": true
+    },
+    {
+      "name": "1 由来の評価の応答: 取得位置（DataAccessSite）= ソースの pool.query（server-call-stack）",
+      "pass": true
+    },
+    {
+      "name": "1 由来の評価の応答: 結びついた SQL のスパンがある（この文書の通信で観測）",
+      "pass": true
+    },
+    {
+      "name": "1 由来の評価の応答: 照合した要素はいまの選択と同じ",
+      "pass": true
+    },
+    {
+      "name": "1 右ドック: 「この値の出所」と poc.listings . region",
+      "pass": true
+    },
+    {
+      "name": "1 キャンバス: 「由来は静的解析による推定」",
+      "pass": true
+    },
+    {
+      "name": "1 キャンバス: カラム poc.listings.region のノード",
+      "pass": true
+    },
+    {
+      "name": "前提: 止めた応答は「結べた」（linked。サーバーは変更の前に評価した）",
+      "pass": true
+    },
+    {
+      "name": "前提: 選択は解決済み（版の確かめが動く）",
+      "pass": true
+    },
+    {
+      "note": "由来の評価の応答を止めている間に src/app/lin-a/page.tsx にコメントを足した"
+    },
+    {
+      "name": "2 版の確かめで選択を無効にする",
+      "pass": true
+    },
+    {
+      "name": "2 遅れて届いた古い「結べた」応答で、選択も由来も復活させない",
+      "pass": true
+    },
+    {
+      "name": "2 遅れて届いた応答の後: パネルの由来の状態を消す（data-lineage が linked でない）",
+      "pass": true
+    },
+    {
+      "name": "2 遅れて届いた応答の後: 右ドックに「この値の出所」を出さない",
+      "pass": true
+    },
+    {
+      "name": "2 遅れて届いた応答の後: キャンバスに「由来は静的解析による推定」を出さない",
+      "pass": true
+    },
+    {
+      "name": "2 遅れて届いた応答の後: キャンバスに前の由来のカラム（poc.listings.region）のノードを残さない",
+      "pass": true
+    },
+    {
+      "note": "2 の後: 開発サーバーを再起動した"
+    },
+    {
+      "name": "前提: 由来を結んだ",
+      "pass": true
+    },
+    {
+      "note": "src/app/listings/page.tsx（選択とは無関係のファイル）を書き換えた"
+    },
+    {
+      "name": "3 選択を解除しない",
+      "pass": true
+    },
+    {
+      "name": "3 由来の表示（パネル・右ドック・キャンバス）を保つ",
+      "pass": true
+    },
+    {
+      "name": "前提: 由来を表示している",
+      "pass": true
+    },
+    {
+      "note": "src/app/lin-a/page.tsx の末尾にコメントだけを足した（要素の位置も値の式も変えない）"
+    },
+    {
+      "name": "4 結んだ由来: 選択を無効にする（data-selection=cleared）",
+      "pass": true
+    },
+    {
+      "name": "4 結んだ由来: 解除の理由は source-changed",
+      "pass": true
+    },
+    {
+      "name": "4 結んだ由来: 「コードが変更されたため…もう一度選択」の理由を出す",
+      "pass": true
+    },
+    {
+      "name": "4 結んだ由来: 右ドックに前の要素の位置（src/app/lin-a/page.tsx:18:11）を残さない",
+      "pass": true
+    },
+    {
+      "name": "4 結んだ由来: パネルの由来の状態を消す（data-lineage が linked でない）",
+      "pass": true
+    },
+    {
+      "name": "4 結んだ由来: 右ドックに「この値の出所」を出さない",
+      "pass": true
+    },
+    {
+      "name": "4 結んだ由来: キャンバスに「由来は静的解析による推定」を出さない",
+      "pass": true
+    },
+    {
+      "name": "4 結んだ由来: キャンバスに前の由来のカラム（poc.listings.region）のノードを残さない",
+      "pass": true
+    },
+    {
+      "name": "4 HMR の後の DOM を選ぶ: 前の文書の通信には同定しない（refetched-after-document）・由来を結ばない",
+      "pass": true
+    },
+    {
+      "note": "同じ起動のまま読み込み直した: 文書 identified・由来 cut（fetch-not-measured）・呼び出し位置の特定 no-app-frame: 注入範囲（src/）のソース位置へ戻せるフレームが無い"
+    },
+    {
+      "name": "4 同じ起動でコードを変えた後: 文書は同定する",
+      "pass": true
+    },
+    {
+      "name": "4 同じ起動でコードを変えた後: 実測との照合で切れる（fetch-not-measured）。推測で結ばない",
+      "pass": true
+    },
+    {
+      "name": "4 その理由は「呼び出し位置をソースへ戻せない」（no-app-frame。実行中のコードとディスクの生成物が一致しない）",
+      "pass": true
+    },
+    {
+      "name": "4 右ドックに「この値の出所」を出さない（前の由来も出さない）",
+      "pass": true
+    },
+    {
+      "note": "4 の後: 開発サーバーを再起動した"
+    },
+    {
+      "name": "前提: 由来を結んだ（region）",
+      "pass": true
+    },
+    {
+      "note": "src/app/lin-a/page.tsx: <li key={row.id} data-poc-field=\"a-region\">{row.region}</li> → <li key={row.id} data-poc-field=\"a-region\">{row.id}</li>（同じ行・列・同じタグ・同じコンポーネント）"
+    },
+    {
+      "note": "開発サーバーに直接 /lin-a を要求して変換を起こした（HTTP 200）。プレビューへの HMR は止めている"
+    },
+    {
+      "name": "5 既存の選択（結んだ由来）: 選択を無効にする（data-selection=cleared）",
+      "pass": true
+    },
+    {
+      "name": "5 既存の選択（結んだ由来）: 解除の理由は source-changed",
+      "pass": true
+    },
+    {
+      "name": "5 既存の選択（結んだ由来）: 「コードが変更されたため…もう一度選択」の理由を出す",
+      "pass": true
+    },
+    {
+      "name": "5 既存の選択（結んだ由来）: 右ドックに前の要素の位置（src/app/lin-a/page.tsx:18:11）を残さない",
+      "pass": true
+    },
+    {
+      "name": "5 既存の選択（結んだ由来）: パネルの由来の状態を消す（data-lineage が linked でない）",
+      "pass": true
+    },
+    {
+      "name": "5 既存の選択（結んだ由来）: 右ドックに「この値の出所」を出さない",
+      "pass": true
+    },
+    {
+      "name": "5 既存の選択（結んだ由来）: キャンバスに「由来は静的解析による推定」を出さない",
+      "pass": true
+    },
+    {
+      "name": "5 既存の選択（結んだ由来）: キャンバスに前の由来のカラム（poc.listings.region）のノードを残さない",
+      "pass": true
+    },
+    {
+      "name": "前提: プレビューの DOM はまだ前の版（region の文字列）",
+      "pass": true
+    },
+    {
+      "name": "前提: その間にプレビューは読み込み直していない",
+      "pass": true
+    },
+    {
+      "name": "前提: クリックの時点でも DOM は前の版",
+      "pass": true
+    },
+    {
+      "name": "5 古い DOM の要素を、同じ行・列の新しい要素として特定しない",
+      "pass": true
+    },
+    {
+      "name": "5 理由は source-changed",
+      "pass": true
+    },
+    {
+      "name": "5 由来を結ばない（新しいソースの poc.listings.id を古い DOM の値の由来にしない）",
+      "pass": true
+    },
+    {
+      "name": "5 右ドックに poc.listings.id も「この値の出所」も出さない",
+      "pass": true
+    },
+    {
+      "name": "5 古い DOM の選択: パネルの由来の状態を消す（data-lineage が linked でない）",
+      "pass": true
+    },
+    {
+      "name": "5 古い DOM の選択: 右ドックに「この値の出所」を出さない",
+      "pass": true
+    },
+    {
+      "name": "5 古い DOM の選択: キャンバスに「由来は静的解析による推定」を出さない",
+      "pass": true
+    },
+    {
+      "name": "5 古い DOM の選択: キャンバスに前の由来のカラム（poc.listings.id）のノードを残さない",
+      "pass": true
+    },
+    {
+      "name": "前提: HMR を戻すと新しい DOM（id の数字）",
+      "pass": true
+    },
+    {
+      "name": "5 HMR の後の最新の DOM: 要素は最新のソースの位置に特定し、前の文書の SQL は結ばない",
+      "pass": true
+    },
+    {
+      "note": "5（{row.id} のまま）: 開発サーバーを再起動した"
+    },
+    {
+      "name": "前提: 起動し直した DOM も id の数字",
+      "pass": true
+    },
+    {
+      "name": "5 新しいソースの要素を選ぶと、新しいソースどおり poc.listings.id に結ぶ",
+      "pass": true
+    },
+    {
+      "name": "5 取得位置は同じ pool.query（ソースの位置）",
+      "pass": true
+    },
+    {
+      "name": "5 右ドック・キャンバスも poc.listings.id（新しいソースの由来）",
+      "pass": true
+    },
+    {
+      "name": "5 右ドックの「この値の出所」は poc.listings . id で、前の由来（region）を言わない",
+      "pass": true
+    },
+    {
+      "note": "5 の後（元に戻した）: 開発サーバーを再起動した"
+    },
+    {
+      "note": "由来の評価の要求を止めている間に src/app/lin-a/page.tsx にコメントを足した"
+    },
+    {
+      "note": "止めた要求の応答: 由来 cut・照合 unresolved（source-changed）"
+    },
+    {
+      "name": "6 サーバーは要素を照合し直し、版が変わったので特定しない（unresolved・source-changed）",
+      "pass": true
+    },
+    {
+      "name": "6 変更の後に評価した由来を、前の選択に付けない",
+      "pass": true
+    },
+    {
+      "name": "6: パネルの由来の状態を消す（data-lineage が linked でない）",
+      "pass": true
+    },
+    {
+      "name": "6: 右ドックに「この値の出所」を出さない",
+      "pass": true
+    },
+    {
+      "name": "6: キャンバスに「由来は静的解析による推定」を出さない",
+      "pass": true
+    },
+    {
+      "name": "6: キャンバスに前の由来のカラム（poc.listings.region）のノードを残さない",
+      "pass": true
+    },
+    {
+      "name": "7 由来は切れたまま（cut）",
+      "pass": true
+    },
+    {
+      "name": "7 候補を出さない",
+      "pass": true
+    },
+    {
+      "name": "7 右ドック: 値の由来は「未確認」・「この値の出所」を出さない",
+      "pass": true
+    },
+    {
+      "name": "IDE の画面にエラーが出ていない",
+      "pass": true
+    },
+    {
+      "note": "転送役で上流に届かなかった要求: 2 件 [\"/api/runtime/observations ECONNRESET\",\"/api/runtime/status ECONNRESET\"]"
+    },
+    {
+      "name": "後片付け: 使い捨ての題材で動くプロセスが残っていない",
+      "pass": true
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+ブラウザ: 同梱の chromium 153.0.8010.12 / 題材: /home/user/Visual-Computing-IDE/poc/out/select-e2e/poc/fixture-app
+IDE: 127.0.0.1:4100（ブラウザからは http://ide.cloud.test）/ 中継: 127.0.0.1:4160（http://preview.cloud.test）
+
+1. fixture-app を起動する（計装・呼び出し位置の記録・要素識別子の注入）
+  ✓ 計装は有効
+  ✓ 要素識別子の注入は有効
+
+2. /lin-a（PoC-04 ケースA）: <li> を選ぶ → 文書を同定 → 静的解析と実測が一致 → poc.listings.region
+  ✓ iframe の文書に、中継が付けた文書の識別子がある（16進32桁）
+  ✓ その識別子は、いまの起動の /lin-a の通信の記録と一致する
+  ✓ 文書の識別子は中継の識別子（relayId）と別
+  ✓ 選択した要素の位置 = ソースの <li>（7B-2）
+  ✓ 文書を同定: いま表示している /lin-a の文書の通信
+  ✗ 由来を結んだ（linked）・1列に確定 — got: ["cut",""]
+  ✗ 由来の候補 = poc.listings.region — got: ""
+  ✓ 値を描く式の位置（PropBindingSite）= ソースの {row.region}
+  ✗ 取得位置（DataAccessSite）= ソースの pool.query（実測と静的解析が列まで一致） — got: null
+  ✗ 結びついた SQL は、その文書の通信のトレースの中で実行されたもの — got: undefined
+  ✗ 実測した SQL の SELECT 結果列に region がある（照合した相手） — got: undefined
+  ✗ パネルの行: 「由来（静的解析による推定）: poc.listings.region」 — got: "文書: 通信 #2 の応答と同定。由来は結んでいません — 実測との照合: 静的解析が見たデータ取得の呼び出しで実行された SQL を、この文書の通信で観測していません（走っていない SQL の列は由来にしない）（src/app/lin-a/page.tsx:12:24。この文書の通信で実行位置を特定した SQL: なし）"
+  ✓ validateDataset() を通過する（実データ）
+  ✗ キャンバスのノード数 = 変換のノード数（画面と同じ変換） — got: 2
+  ✗ supplies を1本 — got: 0
+  ✗ supplies: L2・static-analysis（推定）・向き against-data — got: "undefined/undefined/undefined"
+  ✗ supplies の端点 from = PropBindingSite（式の位置） — got: undefined
+  ✗ supplies の端点 to = DataAccessSite（実測の呼び出し位置） — got: undefined
+  ✗ supplies の終点のノードから queries（server-call-stack）が SQL へ — got: undefined
+  ✓ 経路: 値 → コンポーネント（描いた）→ コンポーネント（取得）→ SQL → テーブル → カラム region
+  ✗ キャンバスに「由来は静的解析による推定」の語 — got: "選択していない経路\nここから先は観測していません\n実測との照合: 静的解析が見たデータ取得の呼び出しで実行された SQL を、この文書の通信で観測していません（走っていない SQL の列は由来にしない）（src/app/lin-a/page.tsx:12:24。この文書の通信で実行位置を特定した SQL: なし）\nブラウザ\nlocalhost:3000\n1\n表示された値\n<li>\n2\nコンポーネント\nLinA\nページ\n✕\n⌕\n▤\n/lin-a\n/lin-a\n\nページの切替は未実装です（観測しているページの経路だけを描いています）\n\nプレビュー\n開発サーバー\nページを表示 ▾\n✕\n↻\n移動\n選択"
+  ✗ 右ドック: この値の出所は poc.listings . region・語は「推定」（最弱環が supplies） — got: "詳細\n経路\n固定\n選んだ値 — 描画位置と値の由来\n描画位置\n特定済み\n実測\nsrc/app/lin-a/page.tsx:18\nLinA\n値の由来\n未確認\nDB のどのテーブル・カラムから来たかは、まだ分かっていません\n切れた段階\n実測との照合\n理由\n静的解析が見たデータ取得の呼び出しで実行された SQL を、この文書の通信で観測していません（走っていない SQL の列は由来にしない）（src/app/lin-a/page.tsx:12:24。この文書の通信で実行位置を特定した SQL: なし）\n\n3 か所のうち 0 か所が推定です。「実測」は描画位置までの話で、値の出所（DB）が実測で分か"
+  ✗ 右ドック: いちばん弱いところ = 由来のホップ（静的解析による推定。実行時に観測したものではない） — got: undefined
+TypeError: Cannot read properties of undefined (reading 'id')
+    at file:///home/user/Visual-Computing-IDE/tests/lineage-e2e.spec.mjs:473:94
+    at Array.find (<anonymous>)
+    at file:///home/user/Visual-Computing-IDE/tests/lineage-e2e.spec.mjs:473:47
+
+✗ 失敗あり — 10 件通過 / 16 件失敗
+  ✗ 由来を結んだ（linked）・1列に確定 — got: ["cut",""]
+  ✗ 由来の候補 = poc.listings.region — got: ""
+  ✗ 取得位置（DataAccessSite）= ソースの pool.query（実測と静的解析が列まで一致） — got: null
+  ✗ 結びついた SQL は、その文書の通信のトレースの中で実行されたもの
+  ✗ 実測した SQL の SELECT 結果列に region がある（照合した相手）
+  ✗ パネルの行: 「由来（静的解析による推定）: poc.listings.region」 — got: "文書: 通信 #2 の応答と同定。由来は結んでいません — 実測との照合: 静的解析が見たデータ取得の呼び出しで実行された SQL を、この文書の通信で観測していません（走っていない SQL の列は由来にしない）（src/app/lin-a/page.tsx:12:24。この文書の通信で実行位置を特定した SQL: なし）"
+  ✗ キャンバスのノード数 = 変換のノード数（画面と同じ変換） — got: 2
+  ✗ supplies を1本 — got: 0
+  ✗ supplies: L2・static-analysis（推定）・向き against-data — got: "undefined/undefined/undefined"
+  ✗ supplies の端点 from = PropBindingSite（式の位置）
+  ✗ supplies の端点 to = DataAccessSite（実測の呼び出し位置）
+  ✗ supplies の終点のノードから queries（server-call-stack）が SQL へ
+  ✗ キャンバスに「由来は静的解析による推定」の語 — got: "選択していない経路\nここから先は観測していません\n実測との照合: 静的解析が見たデータ取得の呼び出しで実行された SQL を、この文書の通信で観測していません（走っていない SQL の列は由来にしない）（src/app/lin-a/page.tsx:12:24。この文書の通信で実行位置を特定した SQL: なし）\nブラウザ\nlocalhost:3000\n1\n表示された値\n<li>\n2\nコンポーネント\nLinA\nページ\n✕\n⌕\n▤\n/lin-a\n/lin-a\n\nページの切替は未実装です（観測しているページの経路だけを描いています）\n\nプレビュー\n開発サーバー\nページを表示 ▾\n✕\n↻\n移動\n選択"
+  ✗ 右ドック: この値の出所は poc.listings . region・語は「推定」（最弱環が supplies） — got: "詳細\n経路\n固定\n選んだ値 — 描画位置と値の由来\n描画位置\n特定済み\n実測\nsrc/app/lin-a/page.tsx:18\nLinA\n値の由来\n未確認\nDB のどのテーブル・カラムから来たかは、まだ分かっていません\n切れた段階\n実測との照合\n理由\n静的解析が見たデータ取得の呼び出しで実行された SQL を、この文書の通信で観測していません（走っていない SQL の列は由来にしない）（src/app/lin-a/page.tsx:12:24。この文書の通信で実行位置を特定した SQL: なし）\n\n3 か所のうち 0 か所が推定です。「実測」は描画位置までの話で、値の出所（DB）が実測で分か"
+  ✗ 右ドック: いちばん弱いところ = 由来のホップ（静的解析による推定。実行時に観測したものではない）
+  ✗ 例外: TypeError: Cannot read properties of undefined (reading 'id')
+    at file:///home/user/Visual-Computing-IDE/tests/lineage-e2e.spec.mjs:473:94
+    at Array.find (<anonymous>)
+    at file:///home/user/Visual-Computing-IDE/tests/lineage-e2e.spec.mjs:473:47

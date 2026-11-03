@@ -177,14 +177,36 @@ function start() {
   function patchCallsiteEntry() {
     if (!CALLSITE) return;
     const targets = [];
+    /*
+     * **包むのは、対象のアプリが使う pg の実体である。**
+     *
+     * この計装の束は IDE 側に在り（src/server/ide.ts の instrumentationBootPath）、
+     * ここで素の `require('pg')` と書くと、束の隣の node_modules（IDE 側）の pg を解決する。
+     * 対象のプロジェクトが自分の node_modules に pg を持っていると、アプリはそちらを読み、
+     * 別の実体（別のプロトタイプ）なので入口を包めず、すべての SQL で入口のスタックが null になる
+     * （7C の lineage-e2e の復旧で実測。題材を IDE の中の poc/fixture-app に置いたときだけ両者が一致していた）。
+     *
+     * そこで、アプリの起点（process.cwd() = APP_DIR。IDE は開発サーバーを対象の直下で起動する）から
+     * pg を解決し、pg-pool はその pg 自身の位置から解決する（pg が内部で読む実体と同じになる）。
+     * 解決できなければ包まない（IDE 側の pg を包んでもアプリの SQL には当たらない）。
+     * OpenTelemetry の pg 計装は require のフックで実体ごとに当たるので、SQL のスパンはこの解決に依らない。
+     */
+    const { createRequire } = require('node:module');
+    const path = require('node:path');
+    let pgPath = null;
     try {
-      const PgPool = require('pg-pool');
-      targets.push(['pg-pool.Pool.query', PgPool.prototype, 'query']);
-    } catch (e) { sink.note('callsite-pg-pool-missing', String(e && e.message).slice(0, 120)); }
-    try {
-      const pg = require('pg');
-      targets.push(['pg.Client.query', pg.Client.prototype, 'query']);
-    } catch (e) { sink.note('callsite-pg-missing', String(e && e.message).slice(0, 120)); }
+      pgPath = createRequire(path.join(APP_DIR, 'package.json')).resolve('pg');
+    } catch (e) { sink.note('callsite-pg-missing', String(e && e.message).split('\n')[0].slice(0, 120)); }
+    if (pgPath) {
+      try {
+        const PgPool = require(createRequire(pgPath).resolve('pg-pool'));
+        targets.push(['pg-pool.Pool.query', PgPool.prototype, 'query']);
+      } catch (e) { sink.note('callsite-pg-pool-missing', String(e && e.message).split('\n')[0].slice(0, 120)); }
+      try {
+        const pg = require(pgPath);
+        targets.push(['pg.Client.query', pg.Client.prototype, 'query']);
+      } catch (e) { sink.note('callsite-pg-missing', String(e && e.message).split('\n')[0].slice(0, 120)); }
+    }
 
     /*
      * サーバー内部の `fetch` も同じ理屈で取る。ただし問題が1つある:

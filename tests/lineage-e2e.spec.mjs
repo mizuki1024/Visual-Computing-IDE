@@ -467,6 +467,11 @@ try {
       summary.includes('この値の出所') && summary.includes('poc.listings . region') && summary.includes('推定'), summary.slice(0, 300));
     ok('右ドック: いちばん弱いところ = 由来のホップ（静的解析による推定。実行時に観測したものではない）',
       summary.includes('いちばん弱いところ') && summary.includes('ソースの静的解析による推定') && summary.includes('実行時に観測したものではありません'));
+    /* 7C（lineage-e2e の復旧）: supplies が無いと起点のノードも無い。そのときは例外で試験全体を止めず、
+     * この項目を失敗として数えて後続のケースを続ける（期待は変えていない。成立したときの検査は下と同じ） */
+    if (!drew) {
+      ok('右ドック（描いた位置）: 「…から来ていると推定」「supplies・L2」と、取得位置', false, 'supplies の起点のノードが無いため選べません');
+    } else {
     /* 数字はステップバッジ（表示順）で選ぶ（03b 7章） */
     const D = requireLib('./derive.js');
     const laid = LIB.L.layout(ds);
@@ -477,6 +482,7 @@ try {
     await page.waitForFunction(() => !document.querySelector('aside.dock')?.innerText.includes('この値の出所'), null, { timeout: 5000 }).catch(() => {});
     const d = await dockText();
     ok('右ドック（描いた位置）: 「…から来ていると推定」「supplies・L2」と、取得位置', /から来ていると\**推定/.test(d) && d.includes('supplies・L2') && d.includes(`${callA.file}:${callA.line}:${callA.col}`), { badge, drew: drew.id, i: d.indexOf('SQL との関係'), tail: d.slice(d.indexOf('概要'), d.indexOf('概要') + 500) });
+    }
   }
   await shot('01-lin-a-supplies');
   await shotCanvas('01b-lin-a-supplies-canvas');
@@ -604,7 +610,7 @@ try {
   const rDa = await pick('li[data-poc-field="d-same-name-a"]', { want: 'linked' });
   const rDb = await pick('li[data-poc-field="d-same-name-b"]', { want: 'linked' });
   eq('同名の変数 row を取り違えない（a → listings.code / b → regions.name）', [rDa.lineage.candidates.map((c) => `${c.table}.${c.column}`).join(), rDb.lineage.candidates.map((c) => `${c.table}.${c.column}`).join()], ['listings.code', 'regions.name']);
-  eq('同名の変数: それぞれ別の pool.query（ソースの2本目・3本目）', [rDa.lineage.fetch.line, rDb.lineage.fetch.line], [truthCall('src/app/lin-d/page.tsx', 1).line, truthCall('src/app/lin-d/page.tsx', 2).line]);
+  eq('同名の変数: それぞれ別の pool.query（ソースの2本目・3本目）', [rDa.lineage.fetch?.line ?? null, rDb.lineage.fetch?.line ?? null], [truthCall('src/app/lin-d/page.tsx', 1).line, truthCall('src/app/lin-d/page.tsx', 2).line]);
 
   await gotoPath('/rsc-dup');
   await waitAttributed(run1, '/rsc-dup', { nSql: 2 });
