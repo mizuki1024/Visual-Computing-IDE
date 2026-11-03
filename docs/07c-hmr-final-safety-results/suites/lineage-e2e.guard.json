@@ -1,0 +1,202 @@
+{
+ "summary": {
+  "cmd": "node tests/lineage-e2e.spec.mjs",
+  "seconds": 31,
+  "exit": 0,
+  "signal": null,
+  "stoppedBy": null,
+  "maxPssMB": 1681,
+  "maxAt": 26,
+  "maxProcs": 11,
+  "minAvailMB": 14011,
+  "leftover": 0
+ },
+ "limits": {
+  "seconds": 1500,
+  "pssMB": 6144,
+  "procs": 150,
+  "minAvailMB": 2048
+ },
+ "samples": [
+  {
+   "t": 2,
+   "procs": 8,
+   "pssMB": 402,
+   "availMB": 15098,
+   "byMB": {
+    "ide": 66,
+    "dev-server": 0,
+    "browser": 225,
+    "other": 112
+   }
+  },
+  {
+   "t": 4,
+   "procs": 10,
+   "pssMB": 776,
+   "availMB": 14858,
+   "byMB": {
+    "ide": 370,
+    "dev-server": 39,
+    "browser": 256,
+    "other": 111
+   }
+  },
+  {
+   "t": 6,
+   "procs": 11,
+   "pssMB": 1042,
+   "availMB": 14598,
+   "byMB": {
+    "ide": 534,
+    "dev-server": 112,
+    "browser": 284,
+    "other": 112
+   }
+  },
+  {
+   "t": 8,
+   "procs": 11,
+   "pssMB": 1245,
+   "availMB": 14405,
+   "byMB": {
+    "ide": 703,
+    "dev-server": 112,
+    "browser": 310,
+    "other": 119
+   }
+  },
+  {
+   "t": 10,
+   "procs": 11,
+   "pssMB": 1362,
+   "availMB": 14243,
+   "byMB": {
+    "ide": 752,
+    "dev-server": 112,
+    "browser": 378,
+    "other": 120
+   }
+  },
+  {
+   "t": 12,
+   "procs": 11,
+   "pssMB": 1205,
+   "availMB": 14307,
+   "byMB": {
+    "ide": 601,
+    "dev-server": 105,
+    "browser": 378,
+    "other": 120
+   }
+  },
+  {
+   "t": 14,
+   "procs": 11,
+   "pssMB": 1174,
+   "availMB": 14323,
+   "byMB": {
+    "ide": 570,
+    "dev-server": 105,
+    "browser": 378,
+    "other": 120
+   }
+  },
+  {
+   "t": 16,
+   "procs": 11,
+   "pssMB": 1224,
+   "availMB": 14311,
+   "byMB": {
+    "ide": 635,
+    "dev-server": 105,
+    "browser": 362,
+    "other": 122
+   }
+  },
+  {
+   "t": 18,
+   "procs": 11,
+   "pssMB": 1310,
+   "availMB": 14315,
+   "byMB": {
+    "ide": 641,
+    "dev-server": 105,
+    "browser": 468,
+    "other": 96
+   }
+  },
+  {
+   "t": 20,
+   "procs": 11,
+   "pssMB": 1377,
+   "availMB": 14267,
+   "byMB": {
+    "ide": 707,
+    "dev-server": 105,
+    "browser": 466,
+    "other": 99
+   }
+  },
+  {
+   "t": 22,
+   "procs": 11,
+   "pssMB": 1454,
+   "availMB": 14224,
+   "byMB": {
+    "ide": 726,
+    "dev-server": 106,
+    "browser": 520,
+    "other": 103
+   }
+  },
+  {
+   "t": 24,
+   "procs": 11,
+   "pssMB": 1509,
+   "availMB": 14175,
+   "byMB": {
+    "ide": 731,
+    "dev-server": 106,
+    "browser": 569,
+    "other": 104
+   }
+  },
+  {
+   "t": 26,
+   "procs": 11,
+   "pssMB": 1681,
+   "availMB": 14011,
+   "byMB": {
+    "ide": 892,
+    "dev-server": 106,
+    "browser": 579,
+    "other": 104
+   }
+  },
+  {
+   "t": 28,
+   "procs": 9,
+   "pssMB": 1045,
+   "availMB": 14419,
+   "byMB": {
+    "ide": 339,
+    "dev-server": 15,
+    "browser": 574,
+    "other": 117
+   }
+  },
+  {
+   "t": 30,
+   "procs": 10,
+   "pssMB": 1368,
+   "availMB": 14252,
+   "byMB": {
+    "ide": 645,
+    "dev-server": 43,
+    "browser": 567,
+    "other": 113
+   }
+  }
+ ]
+}

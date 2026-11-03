@@ -27,3 +27,7 @@ observe-e2e	86	0	0	52	1253	-
 queries-unit	126	0	0	1	0	-
 lineage-live-unit	157	0	0	3	278	-
 queries-e2e	122	0	0	19	1658	-
+lineage-e2e	93	0	0	31	1681	-
+callsite-entry-unit	23	0	0	1	0	-
+select-revision-unit	50	0	0	0	0	-
+select-revision-e2e	104	0	0	71	2337	-

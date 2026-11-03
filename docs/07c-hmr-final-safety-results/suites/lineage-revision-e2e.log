@@ -1,0 +1,24 @@
+ブラウザ: 同梱の chromium 153.0.8010.12 / 題材（使い捨て）: /home/user/Visual-Computing-IDE/poc/out/lin-rev-e2e/poc/fixture-app
+  ✓ 前提: 題材の DB（使い捨ての PostgreSQL）に届く
+  ✓ 前提: コピーの pg は IDE 側の pg と別の実体（実在のプロジェクトと同じ条件）
+
+0. 使い捨ての題材を起動する（計装・呼び出し位置の記録・要素識別子の注入）
+  ✓ 前提: 計装は有効
+  ✓ 前提: 要素識別子の注入は有効
+  ✓ 前提: HMR の WebSocket を転送役で中継できている
+  ✓ 前提: /lin-a は DB の値（region）を描いている
+
+1. /lin-a の <li>{row.region}</li> を選ぶ → 由来を結ぶ
+  ✓ 1 選択の位置 = ソースの <li>
+  ✓ 1 由来を結んだ（linked）・候補 = poc.listings.region
+  ✓ 1 由来の評価の応答: 取得位置（DataAccessSite）= ソースの pool.query（server-call-stack）
+  ✓ 1 由来の評価の応答: 結びついた SQL のスパンがある（この文書の通信で観測）
+  ✓ 1 由来の評価の応答: 照合した要素はいまの選択と同じ
+  ✓ 1 右ドック: 「この値の出所」と poc.listings . region
+  ✓ 1 キャンバス: 「由来は静的解析による推定」
+  ✓ 1 キャンバス: カラム poc.listings.region のノード
+
+2. 由来の評価（結べた）の応答が画面に届く前に、選んだ要素のファイルが変わる
+  ✓ 前提: 止めた応答は「結べた」（linked。サーバーは変更の前に評価した）
+  ✓ 前提: 選択は解決済み（版の確かめが動く）
+    · 由来の評価の応答を止めている間に src/app/lin-a/page.tsx にコメントを足した
