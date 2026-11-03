@@ -1,0 +1,67 @@
+ブラウザ: 同梱の chromium 153.0.8010.12 / 題材: <REPO>/poc/fixture-app
+IDE: 127.0.0.1:3800（ブラウザからは http://ide.cloud.test）/ 中継: 127.0.0.1:3860（http://preview.cloud.test）
+
+1. fixture-app を起動する（計装つき）。呼び出し位置の記録（POC02_CALLSITE）と中継の識別子が有効
+  ✓ 計装は有効
+  ✓ 要素識別子の注入も有効（囲むコンポーネントの第2の情報源）
+  ✓ 起動先に POC02_CALLSITE=1 を渡した（PoC-02 の計装をそのまま使う）
+  ✓ 起動先に POC07_RELAY_ID=1 を渡した（受付スパンに中継の識別子を写す）
+  ✓ サーバー内部の fetch の計装（POC02_UNDICI）は渡していない（今回の範囲外）
+  ✓ 観測に呼び出し位置の記録の状態がある（有効）
+  ✓ 照合器（PoC-02 の rscattr.mjs）を読み込める
+  ✓ 中継が開発サーバーへ書き足すヘッダは x-vcide-relay だけ
+  ✓ 中継が読むヘッダは 7B-3A のまま
+
+2. /rsc-db（Server Component が pool.query で直接読む）: SQL を実行した呼び出し位置を特定する
+  ✓ 文書の取得を中継が記録した
+  ✓ 中継の識別子（16進32桁）を持つ
+  ✓ 通信 → 受付スパンは中継の識別子で結んだ（relay-id）
+  ✓ 受付スパンが中継の識別子を受け取っていた
+  ✓ 応答の専用ヘッダのトレース識別子も同じ受付スパンを指す（食い違いなし）
+  ✓ サーバー処理はページの描画スパン（ルート単位）
+  ✓ 描画スパンの子孫に SQL を1本
+  ✓ 正解（ソースから）: 候補は1つ
+  ✗ 呼び出し位置を特定した（理由なし） — got: {"reason":"changed-during-request","detail":"生成物（要求の開始の 945 ms 後）・ソースマップ（要求の開始の 945 ms 後） が書き換わっています"}
+  ✗ 呼び出し位置 = 試験がソースから決めた行・列 — got: null
+  ✗ 囲むコンポーネント = ソースの関数宣言 — got: undefined
+  ✗ 読み直した行に pool.query がある — got: undefined
+  ✓ 照合の記録は SQL のスパンと同じトレース
+  ✓ 呼び出しの入口は pg-pool の Pool.query
+  ✗ 通った照合を7つ持つ（記録1件・PoC-02 の4段・注入範囲・実行後の書き換えなし） — got: []
+  ✓ validateDataset() を通過する（いまの起動の実データ）
+  ✗ ノード: 通信・サーバー処理・呼び出し位置・SQL・テーブル・カラム×3（id / code / plan） — got: "http,server,sql,table,column,column,column"
+  ✗ queries を1本 — got: 0
+  ✗ queries の取得手段は server-call-stack（L1相当・実測） — got: "undefined/undefined"
+  ✗ queries の始点は DataAccessSite（列まで） — got: undefined
+  ✗ queries はコンポーネントのノードから SQL のノードへ — got: "undefined->undefined"
+  ✓ executes は別にある（サーバー処理 → SQL、trace-span）
+  ✗ executes と queries は同じ SQL への別々の観測（shared-object） — got: "false,,"
+  ✓ supplies / derives / maps / binds / requests を作らない
+  ✓ 表示された値のノードは作らない
+  ✗ 呼び出し位置のノードに「結果の行き先は未確認」の切断 — got: undefined
+  ✗ 帰属の範囲（どの描画インスタンスかは同定しない）を出す — got: undefined
+  ✗ キャンバス: コンポーネント（呼び出し位置）1・実行SQL 1 — got: "0/1"
+  ✗ 一覧の行: 呼び出し位置を特定した SQL の本数を出す — got: false
+  ✓ 観測の行に「実行した呼び出し位置を特定」
+TypeError: Cannot read properties of undefined (reading 'id')
+    at file://<REPO>/tests/queries-e2e.spec.mjs:418:100
+
+✗ 失敗あり — 24 件通過 / 16 件失敗
+  ✗ 呼び出し位置を特定した（理由なし） — got: {"reason":"changed-during-request","detail":"生成物（要求の開始の 945 ms 後）・ソースマップ（要求の開始の 945 ms 後） が書き換わっています"}
+  ✗ 呼び出し位置 = 試験がソースから決めた行・列 — got: null
+  ✗ 囲むコンポーネント = ソースの関数宣言
+  ✗ 読み直した行に pool.query がある
+  ✗ 通った照合を7つ持つ（記録1件・PoC-02 の4段・注入範囲・実行後の書き換えなし） — got: []
+  ✗ ノード: 通信・サーバー処理・呼び出し位置・SQL・テーブル・カラム×3（id / code / plan） — got: "http,server,sql,table,column,column,column"
+  ✗ queries を1本 — got: 0
+  ✗ queries の取得手段は server-call-stack（L1相当・実測） — got: "undefined/undefined"
+  ✗ queries の始点は DataAccessSite（列まで）
+  ✗ queries はコンポーネントのノードから SQL のノードへ — got: "undefined->undefined"
+  ✗ executes と queries は同じ SQL への別々の観測（shared-object） — got: "false,,"
+  ✗ 呼び出し位置のノードに「結果の行き先は未確認」の切断
+  ✗ 帰属の範囲（どの描画インスタンスかは同定しない）を出す
+  ✗ キャンバス: コンポーネント（呼び出し位置）1・実行SQL 1 — got: "0/1"
+  ✗ 一覧の行: 呼び出し位置を特定した SQL の本数を出す — got: false
+  ✗ 例外: TypeError: Cannot read properties of undefined (reading 'id')
+    at file://<REPO>/tests/queries-e2e.spec.mjs:418:100
+[guard] {"cmd":"node tests/queries-e2e.spec.mjs","seconds":9,"exit":1,"signal":null,"stoppedBy":null,"maxPssMB":1047,"maxAt":6,"maxProcs":11,"minAvailMB":14605,"leftover":0}

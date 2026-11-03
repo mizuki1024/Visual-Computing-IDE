@@ -1,0 +1,70 @@
+{
+ "summary": {
+  "cmd": "node tests/explore.spec.mjs",
+  "seconds": 8,
+  "exit": 0,
+  "signal": null,
+  "stoppedBy": null,
+  "maxPssMB": 633,
+  "maxAt": 8,
+  "maxProcs": 10,
+  "minAvailMB": 15005,
+  "leftover": 0
+ },
+ "limits": {
+  "seconds": 1500,
+  "pssMB": 6144,
+  "procs": 150,
+  "minAvailMB": 2048
+ },
+ "samples": [
+  {
+   "t": 2,
+   "procs": 10,
+   "pssMB": 476,
+   "availMB": 15121,
+   "byMB": {
+    "ide": 0,
+    "dev-server": 0,
+    "browser": 372,
+    "other": 104
+   }
+  },
+  {
+   "t": 4,
+   "procs": 10,
+   "pssMB": 525,
+   "availMB": 15088,
+   "byMB": {
+    "ide": 0,
+    "dev-server": 0,
+    "browser": 415,
+    "other": 109
+   }
+  },
+  {
+   "t": 6,
+   "procs": 10,
+   "pssMB": 597,
+   "availMB": 15028,
+   "byMB": {
+    "ide": 0,
+    "dev-server": 0,
+    "browser": 487,
+    "other": 110
+   }
+  },
+  {
+   "t": 8,
+   "procs": 10,
+   "pssMB": 633,
+   "availMB": 15005,
+   "byMB": {
+    "ide": 0,
+    "dev-server": 0,
+    "browser": 519,
+    "other": 114
+   }
+  }
+ ]
+}

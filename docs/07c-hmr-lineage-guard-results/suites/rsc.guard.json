@@ -1,0 +1,118 @@
+{
+ "summary": {
+  "cmd": "node tests/rsc.spec.mjs",
+  "seconds": 16,
+  "exit": 0,
+  "signal": null,
+  "stoppedBy": null,
+  "maxPssMB": 644,
+  "maxAt": 14,
+  "maxProcs": 10,
+  "minAvailMB": 14946,
+  "leftover": 0
+ },
+ "limits": {
+  "seconds": 1500,
+  "pssMB": 6144,
+  "procs": 150,
+  "minAvailMB": 2048
+ },
+ "samples": [
+  {
+   "t": 2,
+   "procs": 10,
+   "pssMB": 486,
+   "availMB": 15102,
+   "byMB": {
+    "ide": 0,
+    "dev-server": 0,
+    "browser": 386,
+    "other": 100
+   }
+  },
+  {
+   "t": 4,
+   "procs": 10,
+   "pssMB": 532,
+   "availMB": 15076,
+   "byMB": {
+    "ide": 0,
+    "dev-server": 0,
+    "browser": 429,
+    "other": 103
+   }
+  },
+  {
+   "t": 6,
+   "procs": 10,
+   "pssMB": 537,
+   "availMB": 15055,
+   "byMB": {
+    "ide": 0,
+    "dev-server": 0,
+    "browser": 430,
+    "other": 107
+   }
+  },
+  {
+   "t": 8,
+   "procs": 10,
+   "pssMB": 565,
+   "availMB": 15043,
+   "byMB": {
+    "ide": 0,
+    "dev-server": 0,
+    "browser": 459,
+    "other": 106
+   }
+  },
+  {
+   "t": 10,
+   "procs": 10,
+   "pssMB": 630,
+   "availMB": 14993,
+   "byMB": {
+    "ide": 0,
+    "dev-server": 0,
+    "browser": 524,
+    "other": 106
+   }
+  },
+  {
+   "t": 12,
+   "procs": 10,
+   "pssMB": 632,
+   "availMB": 14959,
+   "byMB": {
+    "ide": 0,
+    "dev-server": 0,
+    "browser": 524,
+    "other": 108
+   }
+  },
+  {
+   "t": 14,
+   "procs": 10,
+   "pssMB": 644,
+   "availMB": 14946,
+   "byMB": {
+    "ide": 0,
+    "dev-server": 0,
+    "browser": 534,
+    "other": 110
+   }
+  },
+  {
+   "t": 16,
+   "procs": 10,
+   "pssMB": 595,
+   "availMB": 14992,
+   "byMB": {
+    "ide": 0,
+    "dev-server": 0,
+    "browser": 484,
+    "other": 111
+   }
+  }
+ ]
+}

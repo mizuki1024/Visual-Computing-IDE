@@ -1,0 +1,82 @@
+
+0. 画面は操作中も状態を取り続け、古い応答だけを捨てる（R2）
+  ✓ 手元が無ければ反映する
+  ✓ 新しい seq は反映する
+  ✓ 同じ seq も反映する（進み具合・HTTP の観測は seq を変えずに進む）
+  ✓ 古い seq は捨てる（起動の応答の後に届いた、起動前の取得結果）
+  ✓ IDE が再起動して seq が数え直しになっても反映する
+  ✓ RuntimeStore は操作中に取得を止めていない（pendingRef による早期 return が無い）
+  ✓ スナップショットは instance を持つ
+  ✓ 管理実体ごとに instance が違う
+
+1. 応答しないまま待ちが切れる — 理由を先に、壊れているとは書かない（R3）
+  ✓ 起動前の検出で、上の階層の lockfile を所見に出している
+  ✓ 起動中は running にならない
+  ✓ 起動中の進み具合として Next.js の出力をそのまま持つ
+  ✓ 待ちが切れたら error
+  ✓ 理由コードは start-timeout
+  ✓ ルートの推定が関わっている証拠を理由に書く
+  ✓ 「プロジェクトが壊れている」と書かない
+  ✓ 次の操作として turbopack.root を示す
+  ✓ 最後の出力を添えている
+  ✓ IDE はプロセスを止めている
+  ✓ 台帳を残していない
+
+2. next dev が書き換えた対象ファイルを、観測した事実として出す（R4）
+  ✓ 起動できる
+  ✓ 変化を観測した
+  ✓ 重大度は「限定」
+  ✓ 変わったファイルを具体的に書く
+  ✓ Next.js の出力を証拠として示す
+  ✓ IDE は書き込まないと明記する
+  ✓ IDE が元に戻していないことを書く
+  ✓ 実際に tsconfig.json は変わっている（観測の裏付け）
+  ✓ 停止できる
+  ✓ 停止後も、観測した変化は残して見せる
+  ✓ 再起動できる
+  ✓ 再起動しても、最初の起動からの変化として残して見せる
+  ✓ 出力の証拠も起動をまたいで残す
+  ✓ 書き換えない代役でも起動できる
+  ✓ 変化が無ければ何も出さない（推測で出さない）
+  ✓ 確認し直しても出さない
+
+3. IDE 自身の実行時の環境変数を、対象の next dev に渡さない
+  ✓ NODE_ENV は渡さない（IDE の実行時の状態）
+  ✓ PORT は渡さない（IDE の実行時の状態）
+  ✓ __NEXT_PRIVATE_ORIGIN は渡さない（IDE の実行時の状態）
+  ✓ TURBOPACK は渡さない（IDE の実行時の状態）
+  ✓ NEXT_RUNTIME は渡さない（IDE の実行時の状態）
+  ✓ NEXT_PRIVATE_START_TIME は渡さない（IDE の実行時の状態）
+  ✓ NEXT_DEPLOYMENT_ID は渡さない（IDE の実行時の状態）
+  ✓ npm_package_name は渡さない（IDE の実行時の状態）
+  ✓ npm_lifecycle_event は渡さない（IDE の実行時の状態）
+  ✓ 利用者のプロキシ設定は渡す
+  ✓ 利用者の NODE_OPTIONS は渡す
+  ✓ PATH は渡す
+  ✓ テレメトリは切る
+  ✓ 起動できる
+  ✓ 子は NODE_ENV=production を受け取らない
+  ✓ 子は IDE のポートを受け取らない
+  ✓ 子は IDE の URL（__NEXT_PRIVATE_ORIGIN）を受け取らない
+  ✓ 子は TURBOPACK を受け取らない
+  ✓ 子は IDE の package 名を受け取らない
+  ✓ IDE の設定（VCIDE_*）は渡さない
+  ✓ 名前を許可していない変数は渡さない
+  ✓ VCIDE_CHILD_ENV_PASS で明示した変数は渡す
+  ✓ 子が受け取った環境のどの値にも、ダミーの秘密情報が無い
+  ✓ 子は GITHUB_TOKEN を受け取らない
+  ✓ 子は GH_TOKEN を受け取らない
+  ✓ 子は AWS_SECRET_ACCESS_KEY を受け取らない
+  ✓ 子は AWS_ACCESS_KEY_ID を受け取らない
+  ✓ 子は ANTHROPIC_API_KEY を受け取らない
+  ✓ 子は CLAUDE_CODE_OAUTH_TOKEN を受け取らない
+  ✓ 子は CLOUDSDK_AUTH_ACCESS_TOKEN を受け取らない
+  ✓ 子は DATABASE_URL を受け取らない
+  ✓ 子は ALL_PROXY を受け取らない
+  ✓ 子は npm_config__authToken を受け取らない
+  ✓ 子は PATH を受け取る
+  ✓ 画面に出す記録は名前と数だけ（値を持たない）
+  ✓ 記録の渡した名前に秘密情報の名前が無い
+
+✓ すべて通過 — 71 件通過 / 0 件失敗
+[guard] {"cmd":"node tests/devserver-stub.spec.mjs","seconds":6,"exit":0,"signal":null,"stoppedBy":null,"maxPssMB":54,"maxAt":6,"maxProcs":2,"minAvailMB":15209,"leftover":0}

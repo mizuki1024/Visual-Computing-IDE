@@ -1,0 +1,142 @@
+
+1. 契約: queries は M1 のまま（DataAccessSite → SqlStatement / server-call-stack / ソース位置まで）
+  ✓ 関係種別は12件のまま
+  ✓ queries の始点・終点
+  ✓ queries の取得手段は server-call-stack だけ
+  ✓ queries の帰属はソース位置まで（インスタンスではない）
+  ✓ server-call-stack は L1相当（実測）
+  ✓ executes は従来どおり Span → SqlStatement（始点の型が違う）
+  ✓ handles の取得手段は変えていない（中継の識別子は trace-context の一種として扱う）
+  ✓ supplies は推定のまま（static-analysis・上限 estimated）
+  ✓ preview-relay はどの関係の取得手段でもない（requests にも使えない）
+
+2. 収集ファイルの呼び出し位置の記録（形の検査）
+  ✓ spanId / traceId / pid を読む
+  ✓ 使うフレームだけを残す（計装・生成物・仮想モジュール）
+  ✓ 元のフレーム数は数として残す
+  ✓ `..` を含む・絶対パスの生成物は捨てる（IDE が任意のファイルを読まない）
+  ✓ スパン開始時のスタックは持たない（根拠にしない）
+  ✓ 形の違う spanId は読まない
+  ✓ type が callsite でなければ読まない
+  ✓ 入口のスタックが無い記録は entry: null
+  ✓ pid が無ければ null（比べない）
+
+3. 計装のマスク: 中継の識別子は 16 進 32 桁だけを残す
+  ✓ 16 進 32 桁は残す
+  ✓ 形の違う値（ABC…）は捨てる
+  ✓ 形の違う値（aaaaaaaaaaaa…）は捨てる
+  ✓ 形の違う値（secret-token…）は捨てる
+  ✓ 形の違う値（gggggggggggg…）は捨てる
+  ✓ 形の違う値（12…）は捨てる
+  ✓ 計装は POC07_RELAY_ID=1 のときだけ識別子を写す（既定では PoC の条件を変えない）
+  ✓ 計装が読む要求ヘッダは x-vcide-relay の1つだけ（requestHook）
+
+4. 中継（本物の PreviewGateway ＋ 代役の開発サーバー）: 要求ごとの識別子と、応答ヘッダの付け替えの検出
+  ✓ 応答は届く
+  ✓ 開発サーバーへの要求に、中継が作った識別子（16 進 32 桁）を載せる
+  ✓ ブラウザから来た x-vcide-relay は通さず、中継の値に置き換える
+  ✓ 要求ごとに別の値
+  ✓ 静的資材（記録しない通信）には載せない
+  ✓ ブラウザへの応答に x-vcide-relay を返さない
+  ✓ 台帳の記録は、中継が開発サーバーへ載せた値を持つ
+  ✓ 2要求とも応答は届く
+  ✓ 前提: 2要求とも、応答ヘッダが**もう一方**の受付スパンを指している
+  ✓ #3: 7B-3B-1 の規則は結ばない（食い違いを検出）
+  ✓ #3: 理由に「食い違います」
+  ✓ #3: 比較 — 7B-3A の規則（応答ヘッダ＋パス）は**もう一方の要求**に結んでしまう
+  ✓ #4: 7B-3B-1 の規則は結ばない（食い違いを検出）
+  ✓ #4: 理由に「食い違います」
+  ✓ #4: 比較 — 7B-3A の規則（応答ヘッダ＋パス）は**もう一方の要求**に結んでしまう
+  ✓ 入れ替えなければ、2要求とも中継の識別子で自分の受付スパンへ
+  ✓ 同じ識別子の受付スパンが2本あれば結ばない（1つに決まらない）
+  ✓ 識別子を受け取った受付スパンがまだ無ければ結ばない（応答ヘッダだけでは結ばない）
+
+5. 照合（本物の dataAccess.ts ＋ PoC-02 の照合器）を、試験用の小さなプロジェクトにかける
+  ✓ 成立: ソースマップで戻した位置（行・列）
+  ✓ 成立: 囲むコンポーネント（2つの情報源が一致）
+  ✓ 成立: 読み直した1行
+  ✓ 成立: 理由なし・照合10（7C で A1・A2・A3 を足した）
+  ✓ 結果に絶対パスが無い
+  ✓ 記録が0件 → no-callsite-record
+  ✓ 記録が2件 → multiple-callsite-records（断定しない）
+  ✓ 記録のトレースが違う → callsite-mismatch
+  ✓ 記録を書いたプロセスが違う → callsite-mismatch
+  ✓ 7B-3B-2: 記録に PID が無い → callsite-pid-missing（比べずに通さない）
+  ✓ 7B-3B-2: 記録に PID が無いとき位置を出さない
+  ✓ 7B-3B-2: SQL のスパンに PID が無い → callsite-pid-missing
+  ✓ 7B-3B-2: 両方に PID が無い → callsite-pid-missing
+  ✓ 7B-3B-2: PID の形が違う（文字列）記録 → 欠損として断定しない
+  ✓ 7B-3B-2: 両方に PID があり一致 → 成立
+  ✓ 7B-3B-2: 照合の項目に「PID が両方にあり一致」を書く
+  ✓ 記録の種類が SQL でない → callsite-mismatch
+  ✓ 入口のスタックが無い → no-entry-callsite
+  ✓ 記録を有効にしていない起動 → callsite-disabled
+  ✓ 対応表が無い → manifest-unavailable（1つの情報源だけでは決めない）
+  ✓ 対応表のコンポーネント名が違う → component-not-agreed
+  ✓ 戻した行にデータ取得の呼び出しが無い → source-line-mismatch
+  ✓ コンポーネントでない関数の中 → component-not-agreed
+  ✓ 戻した位置は参考として持つ（関係は作らない）
+  ✓ シンボリックリンクで src/ の外へ出る → outside-scope
+  ✓ `..` で src/ の外へ出る → outside-scope
+  ✓ SQL の実行の後に生成物が書き換わった → build-changed-after-call
+  ✓ SQL の実行の後にソースが書き換わった → source-changed-after-call
+  ✓ 書き換えが実行の前なら成立に戻る（判定は時刻の前後だけ）
+  ✓ webpack の仮想モジュール → build-freshness-unverified（戻せても断定しない）
+
+6. 観測の台帳: 同じ起動の収集ファイルの記録だけを使う
+  ✓ 呼び出し位置の記録を数える（SQL のものだけ・同じファイル）
+  ✓ 照合は通信のトレースの SQL だけ（中継を通っていない T2 の SQL は照合しない）
+  ✓ SQL #10: 位置を特定
+  ✓ SQL #11: 記録のトレースが違う → 断定しない
+  ✓ 形の違う中継の識別子は記録に持たない
+  ✓ 中継が書き足すヘッダを明示する
+  ✓ 返す形に絶対パス（プロジェクト・収集ファイル）が無い
+  ✓ 返す形にスタックのフレーム（生成物のパス）が無い
+  ✓ 再起動後: 前の起動の照合結果・記録を持たない
+  ✓ 停止後は観測を返さない
+  ✓ dataAccess を渡さなければ 7B-3A の形のまま（dataAccess / callsite を持たない）
+
+7. 変換（fromLiveRun）: 根拠のある queries だけ。executes と混同しない。選択した要素と結ばない
+  ✓ validateDataset() を通過する
+  ✓ layout を通る
+  ✓ ノード: 通信・サーバー処理・呼び出し位置・SQL・SQL（2本目は位置なし）・テーブル・カラム×2
+  ✓ queries は照合が通った1本だけ
+  ✓ queries: component → 1本目の SQL・server-call-stack・端点は DataAccessSite（列まで）
+  ✓ executes は2本とも server → sql・trace-span（queries とは別）
+  ✓ queries の入る SQL では、executes も queries も shared-object
+  ✓ 2本目の SQL（記録のトレースが違う）には queries を作らない
+  ✓ 2本目の SQL の詳細に「特定していません」と理由
+  ✓ supplies / derives / maps / binds / requests を作らない
+  ✓ 呼び出し位置のノードに「結果の行き先は未確認」の切断
+  ✓ 呼び出し位置のノードは帰属の範囲（インスタンスを同定しない）を書く
+  ✓ サーバー処理の主張: スパンだけではどのコードかは言えない（別の根拠で出している）
+  ✓ handles は中継の識別子で結んだ（根拠に書く）
+  ✓ すべて実測（推定の関係を作っていない）
+  ✓ 同じ位置から2本: 位置のノード1つ・queries 2本
+  ✓ validateDataset() を通過する（同じ位置から2本）
+  ✓ 照合結果のトレースが SQL と違えば queries を作らない
+  ✓ 照合の無い観測: コンポーネントのノード・queries を作らない
+  ✓ 照合の無い観測: サーバー処理の主張は 7B-3A の文言のまま
+  ✓ queries の端点（ソース位置）を外すと validateDataset が検出する
+  ✓ queries を要素識別子（element-anchor）で作ると validateDataset が拒否する
+  ✓ queries をサーバー処理（Span）から張ると validateDataset が拒否する（executes と混同しない）
+  ✓ 流入の意味（shared-object）を外すと validateDataset が検出する
+  ✓ validateDataset() を通過する（選択＋観測）
+  ✓ ノード: 値・描いた位置・通信・サーバー処理・実行した位置・SQL・SQL・テーブル・カラム×2
+  ✓ ノードの識別子は重ならない
+  ✓ 値に触れる関係は renders だけ
+  ✓ 描いた位置に触れる関係は renders だけ（同じ XPage でも SQL へ線を引かない）
+  ✓ 実行した位置に触れる関係は queries だけ
+  ✓ 描いた位置と実行した位置は同じ定義（XPage）だが別のノード
+  ✓ 描いた位置: 「同じ定義の中にあることは根拠にしていません」
+  ✓ 描いた位置の切断: 「この値の由来は未確認です」
+  ✓ 値: この要素を描いた文書取得がこの通信かは特定していない
+  ✓ 選択と並べたとき、実行した位置には二重に切断を付けない（値の側の切断だけ）
+  ✓ provenance に「選択した要素を描いた文書取得の同定」を観測していないと書く
+  ✓ supplies / derives を作らない（選択＋観測）
+  ✓ server-call-stack で supplies を作ると validateDataset が拒否する
+  ✓ 選択＋位置2つ: コンポーネントのノードは2つまで（3つ目は描かない）
+  ✓ 描かなかった位置は SQL の詳細に書く（線は描いていないと明記）
+  ✓ validateDataset() を通過する（上限）
+
+✓ すべて通過 — 126 件通過 / 0 件失敗

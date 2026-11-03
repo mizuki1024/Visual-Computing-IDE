@@ -1,0 +1,70 @@
+{
+ "summary": {
+  "cmd": "node tests/queries-e2e.spec.mjs",
+  "seconds": 9,
+  "exit": 1,
+  "signal": null,
+  "stoppedBy": null,
+  "maxPssMB": 1047,
+  "maxAt": 6,
+  "maxProcs": 11,
+  "minAvailMB": 14605,
+  "leftover": 0
+ },
+ "limits": {
+  "seconds": 1500,
+  "pssMB": 6144,
+  "procs": 150,
+  "minAvailMB": 2048
+ },
+ "samples": [
+  {
+   "t": 2,
+   "procs": 8,
+   "pssMB": 403,
+   "availMB": 15139,
+   "byMB": {
+    "ide": 68,
+    "dev-server": 0,
+    "browser": 229,
+    "other": 107
+   }
+  },
+  {
+   "t": 4,
+   "procs": 10,
+   "pssMB": 753,
+   "availMB": 14870,
+   "byMB": {
+    "ide": 353,
+    "dev-server": 39,
+    "browser": 256,
+    "other": 105
+   }
+  },
+  {
+   "t": 6,
+   "procs": 11,
+   "pssMB": 1047,
+   "availMB": 14605,
+   "byMB": {
+    "ide": 537,
+    "dev-server": 112,
+    "browser": 290,
+    "other": 109
+   }
+  },
+  {
+   "t": 8,
+   "procs": 10,
+   "pssMB": 571,
+   "availMB": 14788,
+   "byMB": {
+    "ide": 139,
+    "dev-server": 6,
+    "browser": 312,
+    "other": 114
+   }
+  }
+ ]
+}
