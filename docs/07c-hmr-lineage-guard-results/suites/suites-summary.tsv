@@ -30,3 +30,4 @@ queries-e2e	24	16	1
 lineage-e2e	71	22	1			
 callsite-entry-unit	23	0	0			
 select-revision-unit	50	0	0			
+select-revision-e2e	-	-	1			
