@@ -1,0 +1,114 @@
+ブラウザ: 同梱の chromium 153.0.8010.12 / 題材（使い捨て）: /home/user/Visual-Computing-IDE/poc/out/lin-rev-e2e/poc/fixture-app
+  ✓ 前提: 題材の DB（使い捨ての PostgreSQL）に届く
+  ✓ 前提: コピーの pg は IDE 側の pg と別の実体（実在のプロジェクトと同じ条件）
+
+0. 使い捨ての題材を起動する（計装・呼び出し位置の記録・要素識別子の注入）
+  ✓ 前提: 計装は有効
+  ✓ 前提: 要素識別子の注入は有効
+  ✓ 前提: HMR の WebSocket を転送役で中継できている
+  ✓ 前提: /lin-a は DB の値（region）を描いている
+
+1. /lin-a の <li>{row.region}</li> を選ぶ → 由来を結ぶ
+  ✓ 1 選択の位置 = ソースの <li>
+  ✓ 1 由来を結んだ（linked）・候補 = poc.listings.region
+  ✓ 1 由来の評価の応答: 取得位置（DataAccessSite）= ソースの pool.query（server-call-stack）
+  ✓ 1 由来の評価の応答: 結びついた SQL のスパンがある（この文書の通信で観測）
+  ✓ 1 由来の評価の応答: 照合した要素はいまの選択と同じ
+  ✓ 1 右ドック: 「この値の出所」と poc.listings . region
+  ✓ 1 キャンバス: 「由来は静的解析による推定」
+  ✓ 1 キャンバス: カラム poc.listings.region のノード
+
+2. 由来の評価（結べた）の応答が画面に届く前に、選んだ要素のファイルが変わる
+  ✓ 前提: 止めた応答は「結べた」（linked。サーバーは変更の前に評価した）
+  ✓ 前提: 選択は解決済み（版の確かめが動く）
+    · 由来の評価の応答を止めている間に src/app/lin-a/page.tsx にコメントを足した
+  ✓ 2 版の確かめで選択を無効にする
+  ✓ 2 遅れて届いた古い「結べた」応答で、選択も由来も復活させない
+  ✓ 2 遅れて届いた応答の後: パネルの由来の状態を消す（data-lineage が linked でない）
+  ✓ 2 遅れて届いた応答の後: 右ドックに「この値の出所」を出さない
+  ✓ 2 遅れて届いた応答の後: キャンバスに「由来は静的解析による推定」を出さない
+  ✓ 2 遅れて届いた応答の後: キャンバスに前の由来のカラム（poc.listings.region）のノードを残さない
+    · 2 の後: 開発サーバーを再起動した
+
+3. 由来を表示している状態で、無関係なファイルを変える
+  ✓ 前提: 由来を結んだ
+    · src/app/listings/page.tsx（選択とは無関係のファイル）を書き換えた
+  ✓ 3 選択を解除しない
+  ✓ 3 由来の表示（パネル・右ドック・キャンバス）を保つ
+
+4. 由来を表示している状態で、選んだ要素のファイル（取得の呼び出しも同じファイル）を変える
+  ✓ 前提: 由来を表示している
+    · src/app/lin-a/page.tsx の末尾に、生成されるコードが変わる文を足した（要素の位置も値の式も取得の位置も変えない）
+  ✓ 4 結んだ由来: 選択を無効にする（data-selection=cleared）
+  ✓ 4 結んだ由来: 解除の理由は source-changed
+  ✓ 4 結んだ由来: 「コードが変更されたため…もう一度選択」の理由を出す
+  ✓ 4 結んだ由来: 右ドックに前の要素の位置（src/app/lin-a/page.tsx:18:11）を残さない
+  ✓ 4 結んだ由来: パネルの由来の状態を消す（data-lineage が linked でない）
+  ✓ 4 結んだ由来: 右ドックに「この値の出所」を出さない
+  ✓ 4 結んだ由来: キャンバスに「由来は静的解析による推定」を出さない
+  ✓ 4 結んだ由来: キャンバスに前の由来のカラム（poc.listings.region）のノードを残さない
+  ✓ 4 前提: HMR が実際に起きた（変更の後に、プレビューが /lin-a の RSC の再取得を送った）
+    · 4 診断: 変更の後に受けた HMR の通知 ["+115ms building","+385ms serverComponentChanges","+386ms built","+420ms isrManifest","+446ms built","+450ms isrManifest","+2844ms isrManifest","+2865ms isrManifest","+2871ms built","+4480ms isrManifest","+4492ms isrManifest","+4501ms built"]
+    · 4 診断: 変更の後にプレビューが送った要求 ["+385ms GET /lin-a RSC ?_rsc"]
+    · 4 診断: IDE が観測した通信（変更の後） ["#5 rsc /lin-a +387ms"]・文書の同定 refetched-after-document
+  ✓ 4 HMR の後の DOM を選ぶ: 前の文書の通信には同定しない（refetched-after-document）・由来を結ばない
+    · 同じ起動のまま読み込み直した: 文書 identified・由来 cut（fetch-callsite-unverifiable）・呼び出し位置の特定 hmr-evaluated-code: 呼び出しの入口から 1 番目のフレームが eval されたコード（LinA）です
+  ✓ 4 同じ起動でコードを変えた後: 文書は同定する
+  ✓ 4 同じ起動でコードを変えた後: 実測との照合で切れる（fetch-callsite-unverifiable）。推測で結ばない
+  ✓ 4 その理由は「HMR で eval されたコードが SQL を実行した」（hmr-evaluated-code。ディスクの生成物・ソースマップとの対応を確かめられない）
+  ✓ 4 右ドックに「この値の出所」を出さない（前の由来も出さない）
+    · 4 の後: 開発サーバーを再起動した
+
+5. ソースの値の式を {row.id} に変え、HMR の前の古い DOM（region を描いている）から選ぶ
+  ✓ 前提: 由来を結んだ（region）
+    · src/app/lin-a/page.tsx: <li key={row.id} data-poc-field="a-region">{row.region}</li> → <li key={row.id} data-poc-field="a-region">{row.id}</li>（同じ行・列・同じタグ・同じコンポーネント）
+    · 開発サーバーに直接 /lin-a を要求して変換を起こした（HTTP 200）。プレビューへの HMR は止めている
+  ✓ 5 既存の選択（結んだ由来）: 選択を無効にする（data-selection=cleared）
+  ✓ 5 既存の選択（結んだ由来）: 解除の理由は source-changed
+  ✓ 5 既存の選択（結んだ由来）: 「コードが変更されたため…もう一度選択」の理由を出す
+  ✓ 5 既存の選択（結んだ由来）: 右ドックに前の要素の位置（src/app/lin-a/page.tsx:18:11）を残さない
+  ✓ 5 既存の選択（結んだ由来）: パネルの由来の状態を消す（data-lineage が linked でない）
+  ✓ 5 既存の選択（結んだ由来）: 右ドックに「この値の出所」を出さない
+  ✓ 5 既存の選択（結んだ由来）: キャンバスに「由来は静的解析による推定」を出さない
+  ✓ 5 既存の選択（結んだ由来）: キャンバスに前の由来のカラム（poc.listings.region）のノードを残さない
+  ✓ 前提: プレビューの DOM はまだ前の版（region の文字列）
+  ✓ 前提: その間にプレビューは読み込み直していない
+  ✓ 前提: クリックの時点でも DOM は前の版
+  ✓ 5 古い DOM の要素を、同じ行・列の新しい要素として特定しない
+  ✓ 5 理由は source-changed
+  ✓ 5 由来を結ばない（新しいソースの poc.listings.id を古い DOM の値の由来にしない）
+  ✓ 5 右ドックに poc.listings.id も「この値の出所」も出さない
+  ✓ 5 古い DOM の選択: パネルの由来の状態を消す（data-lineage が linked でない）
+  ✓ 5 古い DOM の選択: 右ドックに「この値の出所」を出さない
+  ✓ 5 古い DOM の選択: キャンバスに「由来は静的解析による推定」を出さない
+  ✓ 5 古い DOM の選択: キャンバスに前の由来のカラム（poc.listings.id）のノードを残さない
+  ✓ 前提: HMR を戻すと新しい DOM（id の数字）
+  ✓ 5 HMR の後の最新の DOM: 要素は最新のソースの位置に特定し、前の文書の SQL は結ばない
+    · 5（{row.id} のまま）: 開発サーバーを再起動した
+  ✓ 前提: 起動し直した DOM も id の数字
+  ✓ 5 新しいソースの要素を選ぶと、新しいソースどおり poc.listings.id に結ぶ
+  ✓ 5 取得位置は同じ pool.query（ソースの位置）
+  ✓ 5 右ドック・キャンバスも poc.listings.id（新しいソースの由来）
+  ✓ 5 右ドックの「この値の出所」は poc.listings . id で、前の由来（region）を言わない
+    · 5 の後（元に戻した）: 開発サーバーを再起動した
+
+6. 由来の評価の要求がサーバーに届く前に、選んだ要素のファイルが変わる
+    · 由来の評価の要求を止めている間に src/app/lin-a/page.tsx にコメントを足した
+    · 止めた要求の応答: 由来 cut・照合 unresolved（source-changed）
+  ✓ 6 サーバーは要素を照合し直し、版が変わったので特定しない（unresolved・source-changed）
+  ✓ 6 変更の後に評価した由来を、前の選択に付けない
+  ✓ 6: パネルの由来の状態を消す（data-lineage が linked でない）
+  ✓ 6: 右ドックに「この値の出所」を出さない
+  ✓ 6: キャンバスに「由来は静的解析による推定」を出さない
+  ✓ 6: キャンバスに前の由来のカラム（poc.listings.region）のノードを残さない
+
+7. 由来を結べない要素（同名の局所変数）は「結ばない」のまま
+  ✓ 7 由来は切れたまま（cut）
+  ✓ 7 候補を出さない
+  ✓ 7 右ドック: 値の由来は「未確認」・「この値の出所」を出さない
+  ✓ IDE の画面にエラーが出ていない
+    · 転送役で上流に届かなかった要求: 0 件 []
+  ✓ 後片付け: 使い捨ての題材で動くプロセスが残っていない
+
+✓ すべて通過 — 78 件通過 / 0 件失敗
+[guard] {"cmd":"node tests/lineage-revision-e2e.spec.mjs","seconds":60,"exit":0,"signal":null,"stoppedBy":null,"maxPssMB":1728,"maxAt":44,"maxProcs":12,"minAvailMB":13827,"leftover":0}

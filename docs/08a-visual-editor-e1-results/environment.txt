@@ -1,0 +1,11 @@
+# 再現条件（視覚編集 E1）。秘密情報は含めない
+記録日時(UTC): 2026-11-05T07:42:32Z
+作業基準: feature/explore @ 2e5c0a2（開始時の作業ツリーはクリーン）。feature/visual-editor は開始時に f1260e2 → 2e5c0a2 へ早送り
+OS: Linux 6.18.44-fc-v236
+Node: v22.23.4  npm: 10.9.9
+IDE next: 16.4.3  playwright-core: 1.64.1  typescript: 5.7.3
+編集の題材 poc/fixture-edit: next 16.4.3 tailwindcss 4.3.3（npm ci、package-lock どおり）
+ブラウザ: 同梱の Chromium（PW_CHANNEL=none。playwright-core 1.64.1 が探す *-1248 に、事前に入っていた *-1243 をリポジトリの外の /opt/pw-browsers でシンボリックリンク — 7C と同じ）
+DB: PostgreSQL 16.15 (Ubuntu 16.15-0ubuntu0.（initdb の使い捨て、127.0.0.1:55432・trust、poc/fixture-app/db/init.sql、poc.listings 12 行）。題材の .env は .env.example の複写
+実行: npm ci（ルート・poc/fixture-app・poc/fixture-edit）→ prisma generate（poc/fixture-app）→ npm run typecheck → npm run build → PW_CHANNEL=none bash scripts/test-all.sh docs/08a-visual-editor-e1-results/suites
+開始前の全件（変更前の 2e5c0a2）: 37 行中 36 行が失敗 0。runtime-e2e が 55/1（下の第6.4節）

@@ -1,0 +1,148 @@
+
+0. 状態の遷移（純粋な規則）
+  ✓ prepared → prepared は許さない
+  ✓ prepared → applying は許す
+  ✓ prepared → committed は許さない
+  ✓ prepared → failed は許す
+  ✓ applying → prepared は許さない
+  ✓ applying → applying は許さない
+  ✓ applying → committed は許す
+  ✓ applying → failed は許す
+  ✓ committed → prepared は許さない
+  ✓ committed → applying は許さない
+  ✓ committed → committed は許さない
+  ✓ committed → failed は許さない
+  ✓ failed → prepared は許さない
+  ✓ failed → applying は許さない
+  ✓ failed → committed は許さない
+  ✓ failed → failed は許さない
+  ✓ 終わりの状態は committed と failed
+  ✓ committed・at-before: 何もしない
+  ✓ failed・at-before: 何もしない
+  ✓ applying・at-before・持ち主が生きている: 何もしない
+  ✓ committed・at-after: 何もしない
+  ✓ failed・at-after: 何もしない
+  ✓ applying・at-after・持ち主が生きている: 何もしない
+  ✓ committed・other: 何もしない
+  ✓ failed・other: 何もしない
+  ✓ applying・other・持ち主が生きている: 何もしない
+  ✓ committed・missing: 何もしない
+  ✓ failed・missing: 何もしない
+  ✓ applying・missing・持ち主が生きている: 何もしない
+  ✓ prepared: failed にするだけ（書かない）
+  ✓ applying・適用前: failed にするだけ
+  ✓ applying・適用後: 適用前へ戻す
+  ✓ applying・それ以外: 書かずに要確認
+  ✓ applying・ファイルが無い: 書かずに要確認
+
+T7 確定済み（committed）のジャーナルは、復旧で取り消されない（RV05）
+  ✓ 前提: 適用は committed
+  ✓ 復旧の後もファイルは適用後の内容（巻き戻さない）
+  ✓ 復旧は committed のジャーナルに何もしない
+  ✓ ジャーナルは committed のまま
+  ✓ 利用者が戻した内容にも触れない
+  ✓ 前提: 子プロセスは SIGKILL で止まった
+  ✓ 前提: ファイルは適用後
+  ✓ 前提: ジャーナルは committed
+  ✓ committed の直後に落ちた後の復旧でも、適用後の内容のまま
+  ✓ （同）復旧は何も書かない
+  ✓ 前提: 外部変更で止まった適用は、ジャーナルを作らないか failed
+  ✓ failed のジャーナルにも何もしない（外部変更は残る）
+
+T8 適用の途中の停止（子プロセスを各段で SIGKILL）と、仕様どおりの復旧
+  ✓ [prepared] 子プロセスは SIGKILL で止まった
+  ✓ [prepared] 止まった時点のファイルは適用前の内容（途中で切れた内容にならない）
+  ✓ [prepared] 止まった時点のジャーナルは prepared
+  ✓ [prepared] 止まった時点の一時ファイルは無い
+  ✓ [prepared] 書き込みが無効なら、復旧は見せるだけ（ファイル・ジャーナル・一時ファイルを変えない）
+  ✓ [prepared] 復旧の判断は mark-failed
+  ✓ [prepared] 復旧の後のファイルは適用前の内容（確定していない適用を残さない）
+  ✓ [prepared] 復旧の後のジャーナルは failed（committed にしない）
+  ✓ [prepared] 復旧の後に一時ファイルを残さない（F-06）
+  ✓ [prepared] 2回目の復旧は何もしない
+  ✓ [applying] 子プロセスは SIGKILL で止まった
+  ✓ [applying] 止まった時点のファイルは適用前の内容（途中で切れた内容にならない）
+  ✓ [applying] 止まった時点のジャーナルは applying
+  ✓ [applying] 止まった時点の一時ファイルは無い
+  ✓ [applying] 書き込みが無効なら、復旧は見せるだけ（ファイル・ジャーナル・一時ファイルを変えない）
+  ✓ [applying] 復旧の判断は mark-failed
+  ✓ [applying] 復旧の後のファイルは適用前の内容（確定していない適用を残さない）
+  ✓ [applying] 復旧の後のジャーナルは failed（committed にしない）
+  ✓ [applying] 復旧の後に一時ファイルを残さない（F-06）
+  ✓ [applying] 2回目の復旧は何もしない
+  ✓ [temp-created] 子プロセスは SIGKILL で止まった
+  ✓ [temp-created] 止まった時点のファイルは適用前の内容（途中で切れた内容にならない）
+  ✓ [temp-created] 止まった時点のジャーナルは applying
+  ✓ [temp-created] 止まった時点の一時ファイルは残っている
+  ✓ [temp-created] 書き込みが無効なら、復旧は見せるだけ（ファイル・ジャーナル・一時ファイルを変えない）
+  ✓ [temp-created] 復旧の判断は mark-failed
+  ✓ [temp-created] 復旧の後のファイルは適用前の内容（確定していない適用を残さない）
+  ✓ [temp-created] 復旧の後のジャーナルは failed（committed にしない）
+  ✓ [temp-created] 復旧の後に一時ファイルを残さない（F-06）
+  ✓ [temp-created] 2回目の復旧は何もしない
+  ✓ [temp-written] 子プロセスは SIGKILL で止まった
+  ✓ [temp-written] 止まった時点のファイルは適用前の内容（途中で切れた内容にならない）
+  ✓ [temp-written] 止まった時点のジャーナルは applying
+  ✓ [temp-written] 止まった時点の一時ファイルは残っている
+  ✓ [temp-written] 書き込みが無効なら、復旧は見せるだけ（ファイル・ジャーナル・一時ファイルを変えない）
+  ✓ [temp-written] 復旧の判断は mark-failed
+  ✓ [temp-written] 復旧の後のファイルは適用前の内容（確定していない適用を残さない）
+  ✓ [temp-written] 復旧の後のジャーナルは failed（committed にしない）
+  ✓ [temp-written] 復旧の後に一時ファイルを残さない（F-06）
+  ✓ [temp-written] 2回目の復旧は何もしない
+  ✓ [before-rename] 子プロセスは SIGKILL で止まった
+  ✓ [before-rename] 止まった時点のファイルは適用前の内容（途中で切れた内容にならない）
+  ✓ [before-rename] 止まった時点のジャーナルは applying
+  ✓ [before-rename] 止まった時点の一時ファイルは残っている
+  ✓ [before-rename] 書き込みが無効なら、復旧は見せるだけ（ファイル・ジャーナル・一時ファイルを変えない）
+  ✓ [before-rename] 復旧の判断は mark-failed
+  ✓ [before-rename] 復旧の後のファイルは適用前の内容（確定していない適用を残さない）
+  ✓ [before-rename] 復旧の後のジャーナルは failed（committed にしない）
+  ✓ [before-rename] 復旧の後に一時ファイルを残さない（F-06）
+  ✓ [before-rename] 2回目の復旧は何もしない
+  ✓ [renamed] 子プロセスは SIGKILL で止まった
+  ✓ [renamed] 止まった時点のファイルは適用後の内容（途中で切れた内容にならない）
+  ✓ [renamed] 止まった時点のジャーナルは applying
+  ✓ [renamed] 止まった時点の一時ファイルは無い
+  ✓ [renamed] 書き込みが無効なら、復旧は見せるだけ（ファイル・ジャーナル・一時ファイルを変えない）
+  ✓ [renamed] 復旧の判断は restore-before
+  ✓ [renamed] 復旧の後のファイルは適用前の内容（確定していない適用を残さない）
+  ✓ [renamed] 復旧の後のジャーナルは failed（committed にしない）
+  ✓ [renamed] 復旧の後に一時ファイルを残さない（F-06）
+  ✓ [renamed] 2回目の復旧は何もしない
+  ✓ 停止の後の外部変更: 復旧は書かない（refuse）
+  ✓ （同）外部変更は残る
+  ✓ （同）ジャーナルは failed・要確認
+  ✓ [復旧の途中 temp-written] 復旧の子プロセスも SIGKILL で止まった
+  ✓ [復旧の途中 temp-written] ジャーナルはまだ applying（終わりの状態にしていない）
+  ✓ [復旧の途中 temp-written] 次の復旧でファイルは適用前
+  ✓ [復旧の途中 temp-written] ジャーナルは failed
+  ✓ [復旧の途中 temp-written] 一時ファイル（適用と復旧の両方）を残さない
+    · 判断: restore-before
+  ✓ [復旧の途中 before-rename] 復旧の子プロセスも SIGKILL で止まった
+  ✓ [復旧の途中 before-rename] ジャーナルはまだ applying（終わりの状態にしていない）
+  ✓ [復旧の途中 before-rename] 次の復旧でファイルは適用前
+  ✓ [復旧の途中 before-rename] ジャーナルは failed
+  ✓ [復旧の途中 before-rename] 一時ファイル（適用と復旧の両方）を残さない
+    · 判断: restore-before
+  ✓ [復旧の途中 renamed] 復旧の子プロセスも SIGKILL で止まった
+  ✓ [復旧の途中 renamed] ジャーナルはまだ applying（終わりの状態にしていない）
+  ✓ [復旧の途中 renamed] 次の復旧でファイルは適用前
+  ✓ [復旧の途中 renamed] ジャーナルは failed
+  ✓ [復旧の途中 renamed] 一時ファイル（適用と復旧の両方）を残さない
+    · 判断: mark-failed
+
+同時に走る適用（別のプロセスが適用の途中）を、復旧で巻き戻さない
+  ✓ 前提: 子プロセスは rename の後で止まっている（ファイルは適用後・ジャーナルは applying）
+  ✓ 別のプロセスが適用の途中なら、復旧は何もしない（busy または持ち主が生きている）
+  ✓ 子プロセスは最後まで進んだ
+  ✓ （同）子プロセスの適用は committed
+  ✓ （同）ファイルは適用後
+
+ジャーナルの保存期間（終わりのものだけを消す）
+  ✓ 保存期間（30日）を過ぎた committed のジャーナルは消す
+  ✓ （同）ソースには触れない
+  ✓ 終わっていない（applying の）ジャーナルは、保存期間を過ぎても消さない
+
+✓ すべて通過 — 132 件通過 / 0 件失敗
+[guard] {"cmd":"node tests/edit-journal-unit.spec.mjs","seconds":10,"exit":0,"signal":null,"stoppedBy":null,"maxPssMB":123,"maxAt":8,"maxProcs":3,"minAvailMB":15067,"leftover":0}

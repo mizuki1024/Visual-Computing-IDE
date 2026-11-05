@@ -1,0 +1,4 @@
+  ✗ 製品の編集エンジン・範囲の検査を読み込める — got: "Cannot find module '/var/tmp/libjs-dev/server/edit/engine.js'\nRequire stack:\n- /home/user/Visual-Computing-IDE/tests/lib/edit-harness.mjs"
+
+✗ 失敗あり — 0 件通過 / 1 件失敗
+  ✗ 製品の編集エンジン・範囲の検査を読み込める — got: "Cannot find module '/var/tmp/libjs-dev/server/edit/engine.js'\nRequire stack:\n- /home/user/Visual-Computing-IDE/tests/lib/edit-harness.mjs"

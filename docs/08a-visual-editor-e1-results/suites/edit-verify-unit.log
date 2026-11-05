@@ -1,0 +1,71 @@
+
+正しい報告（2幅・実測・適用後の版）
+  ✓ 2幅の実測で、版・時刻・対応がすべて合えば verified
+  ✓ 問題は0件
+  ✓ 成功（success）は committed かつ verified のとき
+  ✓ 検証した版（いまのファイルの版）を記録する
+
+T9 検証不足（必須の幅が欠ける・版・時刻・対応が合わない）
+  ✓ RS02: Mobile だけ（Desktop が欠ける） → 成功扱いにしない（viewport-missing）
+  ✓ （同）適用の結果は success ではない
+  ✓ Desktop だけ（Mobile が欠ける） → 成功扱いにしない（viewport-missing）
+  ✓ （同）適用の結果は success ではない
+  ✓ 幅が0件 → 成功扱いにしない（viewport-missing）
+  ✓ （同）適用の結果は success ではない
+  ✓ 同じ幅が2回（どちらを信じるか決めない） → 成功扱いにしない（duplicate-viewport）
+  ✓ （同）適用の結果は success ではない
+  ✓ 必須でない幅に置き換えた（1024） → 成功扱いにしない（viewport-missing）
+  ✓ （同）適用の結果は success ではない
+  ✓ 要素を測っていない → 成功扱いにしない（no-elements）
+  ✓ （同）適用の結果は success ではない
+  ✓ 文書の版が適用前（HMR の前の描画） → 成功扱いにしない（document-revision-mismatch）
+  ✓ （同）適用の結果は success ではない
+  ✓ 文書が対象のファイルの版を持たない → 成功扱いにしない（document-revision-mismatch）
+  ✓ （同）適用の結果は success ではない
+  ✓ 要素の版が適用前 → 成功扱いにしない（element-revision-mismatch）
+  ✓ （同）適用の結果は success ではない
+  ✓ 報告の版が適用後の版と違う → 成功扱いにしない（revision-mismatch）
+  ✓ （同）適用の結果は success ではない
+  ✓ 別の要素を測った → 成功扱いにしない（anchor-mismatch）
+  ✓ （同）適用の結果は success ではない
+  ✓ 別のファイルの報告 → 成功扱いにしない（file-mismatch）
+  ✓ （同）適用の結果は success ではない
+  ✓ 描画に変更後の token が無い（変更前の描画） → 成功扱いにしない（token-not-rendered）
+  ✓ （同）適用の結果は success ではない
+  ✓ 確定より前に測った → 成功扱いにしない（measured-before-commit）
+  ✓ （同）適用の結果は success ではない
+  ✓ 未来の時刻 → 成功扱いにしない（measured-in-future）
+  ✓ （同）適用の結果は success ではない
+  ✓ 文書の識別子が無い → 成功扱いにしない（bad-report）
+  ✓ （同）適用の結果は success ではない
+  ✓ 知らないキー（形の検査） → 成功扱いにしない（bad-report）
+  ✓ （同）適用の結果は success ではない
+  ✓ 検証の報告が古すぎる（10分超）→ 成功扱いにしない（measurement-too-old）
+  ✓ RS04: 検証の時点でファイルが適用後の版でない → 適用後の版で検証済みと記録しない（stale-source）
+  ✓ RS04: 文書が描いた他のファイルの版が、いまの版と違う → verified にしない（stale-source）
+  ✓ 期待する計算済みスタイルと違えば成功扱いにしない（expectation-mismatch）
+  ✓ （同）期待どおりなら verified
+  ✓ 知らない適用の報告は受け取らない（tx-unknown）
+  ✓ 取り消した後の古い適用の報告は verified にしない（いまのファイルは適用前の版）
+  ✓ 検証済みの後にファイルが変わったら、結果は古いと出す（staleSinceVerification）
+
+T10 予測（predicted）を実測として受け入れない
+  ✓ Mobile が予測 → verified にしない
+  ✓ （同）理由は予測・形の不備のどちらか
+  ✓ （同）成功扱いにしない
+  ✓ 両方とも予測 → verified にしない
+  ✓ （同）理由は予測・形の不備のどちらか
+  ✓ （同）成功扱いにしない
+  ✓ 実測と名乗るが、予測の印（data-vcide-predict）が描画に残っている → verified にしない
+  ✓ （同）理由は予測・形の不備のどちらか
+  ✓ （同）成功扱いにしない
+  ✓ 実測か予測かを言わない → verified にしない
+  ✓ （同）理由は予測・形の不備のどちらか
+  ✓ （同）成功扱いにしない
+  ✓ 予測の印の数を言わない → verified にしない
+  ✓ （同）理由は予測・形の不備のどちらか
+  ✓ （同）成功扱いにしない
+  ✓ 予測の報告の後でも、正しい実測の報告なら verified
+
+✓ すべて通過 — 62 件通過 / 0 件失敗
+[guard] {"cmd":"node tests/edit-verify-unit.spec.mjs","seconds":1,"exit":0,"signal":null,"stoppedBy":null,"maxPssMB":0,"maxAt":null,"maxProcs":0,"minAvailMB":null,"leftover":0}
