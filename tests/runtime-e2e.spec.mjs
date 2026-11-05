@@ -220,10 +220,23 @@ ok(`クリック後 5 秒以内に「構成を検証中」か「起動中」に�
 ok('起動の応答を待っている間は「実行中」と書かない（応答確認前）',
   during !== '実行中' || (await panel().locator('.rt-run dd').nth(2).innerText()).startsWith('応答あり'), during);
 if (during === '起動中') {
-  await page.waitForTimeout(1500);
-  const prog = await panel().locator('.rt-prog').innerText().catch(() => '');
-  ok('起動中は経過秒と Next.js の出力を出す（平坦な待ちにしない）',
-    /HTTP の応答を確認するまで/.test(prog) && /\d+ 秒/.test(await panel().locator('.rt-st').innerText()), prog);
+  // E1.1: 以前は「起動中」を見てから固定で 1.5 秒待ち、別々に .rt-prog と .rt-st を読んでいた。.rt-prog は起動中だけ描かれるため、
+  // 題材の .next が温まっていて 1.5 秒以内に「実行中」へ移ると要素が消え、innerText が既定の 30 秒待った末に '' になっていた
+  // （docs/08b 第8.3節）。経過秒は起動中なら 0 秒から常に出るので、待ちは判定の中身に寄与しない。
+  // 状態の見出し・経過秒・説明を**同じ時点の DOM から1回で**読み、その時点が「起動中」であることも同じ読み取りで確かめる。
+  const snap = await panel().evaluate((el) => ({
+    state: el.querySelector('.rt-st b')?.textContent ?? '',
+    st: el.querySelector('.rt-st')?.textContent ?? '',
+    prog: el.querySelector('.rt-prog')?.textContent ?? null,
+  }));
+  if (snap.state === '起動中') {
+    ok('起動中は経過秒と Next.js の出力を出す（平坦な待ちにしない）',
+      /HTTP の応答を確認するまで/.test(snap.prog ?? '') && /\d+ 秒/.test(snap.st), snap);
+  } else {
+    // 「起動中」を見た直後の読み取りまでに状態が進んだ（起動が速い）。起動中の画面を観測できなかったことを記録し、
+    // 通過にも失敗にも数えない（下の「実行中」の検証は続ける）
+    console.log(`  · 起動中の画面を読む前に「${snap.state}」へ進んだ（この回は起動中の表示を観測できない）`);
+  }
 }
 await shot('05-starting');
 await waitState('実行中');
