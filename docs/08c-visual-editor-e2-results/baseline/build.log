@@ -1,0 +1,168 @@
+
+> visual-computing-ide@0.1.0 build
+> next build
+
+▲ Next.js 16.4.3 (Turbopack)
+✓ Running next.config.mjs took 13ms
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 3.3s
+  Running TypeScript ...
+  Finished TypeScript in 3.6s ...
+  Collecting page data using 3 workers ...
+  Generating static pages using 3 workers (0/4) ...
+  Generating static pages using 3 workers (1/4) 
+  Generating static pages using 3 workers (2/4) 
+  Generating static pages using 3 workers (3/4) 
+✓ Generating static pages using 3 workers (4/4) in 101ms
+Turbopack build encountered 4 warnings:
+./src/server/dataAccess.ts:466:25
+Warning: Dynamic filesystem access causes tracing of the whole project
+  [90m464 |[0m         }
+  [90m465 |[0m         [36mlet[0m current: string | [36mnull[0m = [36mnull[0m;
+[33m[1m>[0m [90m466 |[0m         [36mtry[0m { current = fs.readFileSync(srcAbs, [32m'utf8'[0m); } [36mcatch[0m { current = [36mnull[0m; }
+  [90m    |[0m                         [33m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m467 |[0m         [36mconst[0m cmp = current === [36mnull[0m ? [32m'unverified'[0m : r.compareMapSource(prov.sourceConte...
+  [90m468 |[0m         [36mif[0m (cmp !== [32m'match'[0m) {
+  [90m469 |[0m           out.push(cmp === [32m'mismatch'[0m
+
+Static analysis determined that this filesystem access causes the whole project to be traced and included in the output.
+This is usually unintentional and leads to all source files (including the public folder) to be deployed as part of the server code.
+This can slow down deployments or lead to failures when size limits are exceeded.
+To resolve this, you can
+- make sure the path is statically scoped to some subfolder, for example path.join(process.cwd(), 'data', bar), or
+- only use them in development, or
+- opt out by adding an ignore comment to the highlighted call: fs.readFileSync(/*turbopackIgnore: true*/ ...), or
+- remove them.
+
+Import traces:
+  #1 [App Route]:
+    ./src/server/dataAccess.ts
+    ./src/server/anchors.ts
+    ./src/app/api/runtime/lineage/route.ts
+
+  #2 [App Route]:
+    ./src/server/dataAccess.ts
+    ./src/server/observations.ts
+    ./src/server/liveCollect.ts
+    ./src/app/api/runtime/observations/route.ts
+
+
+./src/server/projectInspect.ts:152:44
+Warning: Dynamic filesystem access causes tracing of the whole project
+  [90m150 |[0m [36mfunction[0m hasRouterEntry(dir: string): boolean {
+  [90m151 |[0m   [36mfor[0m ([36mconst[0m b [36mof[0m [33mENTRY_BASENAMES[0m) {
+[33m[1m>[0m [90m152 |[0m     [36mfor[0m ([36mconst[0m e [36mof[0m [33mENTRY_EXTS[0m) [36mif[0m (exists(path.join(dir, [32m`[0m${b[32m}.[0m${e[32m}`[0m))) [36mreturn[0m [36mtrue[0m;
+  [90m    |[0m                                            [33m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m153 |[0m   }
+  [90m154 |[0m   [36mreturn[0m [36mfalse[0m;
+  [90m155 |[0m }
+
+Static analysis determined that this filesystem access causes the whole project to be traced and included in the output.
+This is usually unintentional and leads to all source files (including the public folder) to be deployed as part of the server code.
+This can slow down deployments or lead to failures when size limits are exceeded.
+To resolve this, you can
+- make sure the path is statically scoped to some subfolder, for example path.join(process.cwd(), 'data', bar), or
+- only use them in development, or
+- opt out by adding an ignore comment to the highlighted call: path.join(/*turbopackIgnore: true*/ ...), or
+- remove them.
+
+Import traces:
+  #1 [App Route]:
+    ./src/server/projectInspect.ts
+    ./src/server/anchors.ts
+    ./src/app/api/runtime/lineage/route.ts
+
+  #2 [App Route]:
+    ./src/server/projectInspect.ts
+    ./src/server/devServer.ts
+    ./src/app/api/runtime/stop/route.ts
+
+
+./src/server/projectInspect.ts:495:25
+Warning: Dynamic filesystem access causes tracing of the whole project
+  [90m493 |[0m
+  [90m494 |[0m   [36mconst[0m packageManager = [[32m'pnpm-lock.yaml'[0m, [32m'yarn.lock'[0m, [32m'bun.lockb'[0m, [32m'bun.lock'[0m, [32m'packag...[0m
+[33m[1m>[0m [90m495 |[0m     .find((f) => exists(path.join(root, f)))
+  [90m    |[0m                         [33m[1m^^^^^^^^^^^^^^^^^^[0m
+  [90m496 |[0m     ?.replace([32m'pnpm-lock.yaml'[0m, [32m'pnpm'[0m).replace([32m'yarn.lock'[0m, [32m'yarn'[0m)
+  [90m497 |[0m     .replace([32m'bun.lockb'[0m, [32m'bun'[0m).replace([32m'bun.lock'[0m, [32m'bun'[0m)
+  [90m498 |[0m     .replace([32m'package-lock.json'[0m, [32m'npm'[0m) ?? [36mnull[0m;
+
+Static analysis determined that this filesystem access causes the whole project to be traced and included in the output.
+This is usually unintentional and leads to all source files (including the public folder) to be deployed as part of the server code.
+This can slow down deployments or lead to failures when size limits are exceeded.
+To resolve this, you can
+- make sure the path is statically scoped to some subfolder, for example path.join(process.cwd(), 'data', bar), or
+- only use them in development, or
+- opt out by adding an ignore comment to the highlighted call: path.join(/*turbopackIgnore: true*/ ...), or
+- remove them.
+
+Import traces:
+  #1 [App Route]:
+    ./src/server/projectInspect.ts
+    ./src/server/anchors.ts
+    ./src/app/api/runtime/lineage/route.ts
+
+  #2 [App Route]:
+    ./src/server/projectInspect.ts
+    ./src/server/devServer.ts
+    ./src/app/api/runtime/stop/route.ts
+
+
+./src/server/projectInspect.ts:500:25
+Warning: Dynamic filesystem access causes tracing of the whole project
+  [90m498 |[0m     .replace([32m'package-lock.json'[0m, [32m'npm'[0m) ?? [36mnull[0m;
+  [90m499 |[0m   [36mconst[0m nextConfig = [[32m'next.config.ts'[0m, [32m'next.config.mjs'[0m, [32m'next.config.js'[0m, [32m'next.config...[0m
+[33m[1m>[0m [90m500 |[0m     .find((f) => exists(path.join(root, f))) ?? [36mnull[0m;
+  [90m    |[0m                         [33m[1m^^^^^^^^^^^^^^^^^^[0m
+  [90m501 |[0m
+  [90m502 |[0m   [36mconst[0m base: [33mProjectInspection[0m = {
+  [90m503 |[0m     input, root, name, verdict: [32m'unsupported'[0m,
+
+Static analysis determined that this filesystem access causes the whole project to be traced and included in the output.
+This is usually unintentional and leads to all source files (including the public folder) to be deployed as part of the server code.
+This can slow down deployments or lead to failures when size limits are exceeded.
+To resolve this, you can
+- make sure the path is statically scoped to some subfolder, for example path.join(process.cwd(), 'data', bar), or
+- only use them in development, or
+- opt out by adding an ignore comment to the highlighted call: path.join(/*turbopackIgnore: true*/ ...), or
+- remove them.
+
+Import traces:
+  #1 [App Route]:
+    ./src/server/projectInspect.ts
+    ./src/server/anchors.ts
+    ./src/app/api/runtime/lineage/route.ts
+
+  #2 [App Route]:
+    ./src/server/projectInspect.ts
+    ./src/server/devServer.ts
+    ./src/app/api/runtime/stop/route.ts
+
+
+  Finalizing page optimization ...
+
+Route (app)
+┌ ƒ /
+├ ○ /_not-found
+├ ƒ /api/runtime/anchor
+├ ƒ /api/runtime/lineage
+├ ƒ /api/runtime/logs
+├ ƒ /api/runtime/observations
+├ ƒ /api/runtime/project
+├ ƒ /api/runtime/source-revisions
+├ ƒ /api/runtime/start
+├ ƒ /api/runtime/status
+├ ƒ /api/runtime/stop
+└ ○ /icon.svg
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

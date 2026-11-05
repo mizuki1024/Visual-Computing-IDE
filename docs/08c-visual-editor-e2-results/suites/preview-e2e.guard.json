@@ -1,0 +1,118 @@
+{
+ "summary": {
+  "cmd": "node tests/preview-e2e.spec.mjs",
+  "seconds": 16,
+  "exit": 0,
+  "signal": null,
+  "stoppedBy": null,
+  "maxPssMB": 1162,
+  "maxAt": 10,
+  "maxProcs": 16,
+  "minAvailMB": 14364,
+  "leftover": 0
+ },
+ "limits": {
+  "seconds": 1500,
+  "pssMB": 6144,
+  "procs": 150,
+  "minAvailMB": 2048
+ },
+ "samples": [
+  {
+   "t": 2,
+   "procs": 8,
+   "pssMB": 389,
+   "availMB": 14960,
+   "byMB": {
+    "ide": 64,
+    "dev-server": 0,
+    "browser": 227,
+    "other": 98
+   }
+  },
+  {
+   "t": 4,
+   "procs": 10,
+   "pssMB": 731,
+   "availMB": 14782,
+   "byMB": {
+    "ide": 327,
+    "dev-server": 37,
+    "browser": 261,
+    "other": 106
+   }
+  },
+  {
+   "t": 6,
+   "procs": 10,
+   "pssMB": 934,
+   "availMB": 14603,
+   "byMB": {
+    "ide": 503,
+    "dev-server": 37,
+    "browser": 281,
+    "other": 113
+   }
+  },
+  {
+   "t": 8,
+   "procs": 11,
+   "pssMB": 1008,
+   "availMB": 14533,
+   "byMB": {
+    "ide": 505,
+    "dev-server": 109,
+    "browser": 282,
+    "other": 112
+   }
+  },
+  {
+   "t": 10,
+   "procs": 12,
+   "pssMB": 1162,
+   "availMB": 14374,
+   "byMB": {
+    "ide": 600,
+    "dev-server": 109,
+    "browser": 339,
+    "other": 114
+   }
+  },
+  {
+   "t": 12,
+   "procs": 12,
+   "pssMB": 1157,
+   "availMB": 14364,
+   "byMB": {
+    "ide": 600,
+    "dev-server": 102,
+    "browser": 340,
+    "other": 114
+   }
+  },
+  {
+   "t": 14,
+   "procs": 11,
+   "pssMB": 695,
+   "availMB": 14671,
+   "byMB": {
+    "ide": 188,
+    "dev-server": 41,
+    "browser": 351,
+    "other": 115
+   }
+  },
+  {
+   "t": 16,
+   "procs": 16,
+   "pssMB": 724,
+   "availMB": 14691,
+   "byMB": {
+    "ide": 138,
+    "dev-server": 0,
+    "browser": 469,
+    "other": 116
+   }
+  }
+ ]
+}

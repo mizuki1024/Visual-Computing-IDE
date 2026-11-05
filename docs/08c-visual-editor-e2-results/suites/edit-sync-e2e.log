@@ -1,0 +1,54 @@
+  ✓ 製品の中継が待ち受ける
+  ✓ 題材（使い捨てのコピー）の next dev が /properties に応答する
+ブラウザ: 153.0.8010.12 / 題材（使い捨て）: /home/user/Visual-Computing-IDE/poc/out/edit-sync-e2e/poc/fixture-edit / 中継: 3450
+
+1. 中継が差し込んだ文書の識別子と、中継の記録の対応（実測）
+  ✓ [1440] 文書に中継の識別子がある（32桁の16進）
+  ✓ [1440] 中継の記録に、その識別子を持つ通信がちょうど1件（/properties・200・document）
+  ✓ [1440] 探索の bindDocument は、適用の前のこの文書を同定する
+  ✓ [375] 文書に中継の識別子がある（32桁の16進）
+  ✓ [375] 中継の記録に、その識別子を持つ通信がちょうど1件（/properties・200・document）
+  ✓ [375] 探索の bindDocument は、適用の前のこの文書を同定する
+  ✓ 幅ごとに別の文書（別の識別子）
+  ✓ 中継の記録に無い識別子は同定しない（token-not-in-session）
+
+2. 適用 → HMR の後の選択の引き継ぎ（afterRev と afterFingerprint）
+  ✓ 起動時の復旧: 未完了の記録は無い（点検 → 復旧）
+  ✓ DOM から作った選択は製品の parseSelection を通る
+  ✓ 対象の解決（第1段）
+  ✓ 適用は committed
+  ✓ ファイルは token 1つだけが変わった
+  ✓ HMR の前の DOM の選択（適用前の版）は引き継がない（dom-not-at-after）
+    · HMR の反映まで 475 ms（2幅）
+  ✓ [1440] 前提: HMR の後の DOM の版は afterRev
+  ✓ [1440] HMR の後の選択は引き継ぐ（同じ要素・afterRev・afterFingerprint）
+  ✓ [375] 前提: HMR の後の DOM の版は afterRev
+  ✓ [375] HMR の後の選択は引き継ぐ（同じ要素・afterRev・afterFingerprint）
+  ✓ 引き継いだ対象で次の下書きを作れる（第2段の照合を通る。適用はしない）
+
+4. HMR の後の文書の同定（実測。規則は決めない）
+    · [1440] HMR の後の文書の識別子は適用の前と同じ（文書を読み直していない）
+    · [1440] 中継を通った RSC の取り直し（同じパス・文書の後）: 2 件 / 探索の bindDocument: unidentified（refetched-after-document）
+  ✓ [1440] HMR の後の文書の識別子も、中継の記録の1件にある（偽の識別子ではない）
+    · [375] HMR の後の文書の識別子は適用の前と同じ（文書を読み直していない）
+    · [375] 中継を通った RSC の取り直し（同じパス・文書の後）: 2 件 / 探索の bindDocument: unidentified（refetched-after-document）
+  ✓ [375] HMR の後の文書の識別子も、中継の記録の1件にある（偽の識別子ではない）
+
+5. 検証の結果は、文書と中継の結び付けを確かめていないことを返す
+  ✓ 2幅の実測の報告は verified（中身の照合。E1.1 と同じ）
+  ✓ （同）ただし文書と中継の結び付けは確かめていない（documentBinding: not-checked・measurement: declared-by-report）
+  ✓ outcome も documentBinding: not-checked
+
+3. 外部変更（同じファイルの別の行）→ HMR: 引き継がない
+  ✓ 前提: 外部変更の後の DOM の版
+  ✓ 外部変更の後の DOM の選択は引き継がない（選び直し）
+  ✓ 外部変更の前（適用後）の古い選択も、いまは引き継がない
+  ✓ 引き継いだ（外部変更の前の）対象では下書きを作らない（版の照合で止まる）
+  ✓ 選び直せば、いまの版の対象として通常どおり解決できる
+  ✓ 最後の点検: 予定の処理は無い（committed の記録には何もしない）
+  ✓ src/ に一時ファイルを残さない
+  ✓ 元の題材（poc/fixture-edit/src）は1バイトも変わらない（F-10）
+  ✓ 使い捨てのコピーを消した
+
+✓ すべて通過 — 35 件通過 / 0 件失敗
+[guard] {"cmd":"node tests/edit-sync-e2e.spec.mjs","seconds":8,"exit":0,"signal":null,"stoppedBy":null,"maxPssMB":1544,"maxAt":6,"maxProcs":13,"minAvailMB":13988,"leftover":0}

@@ -1,0 +1,8 @@
+1. darwin + env=1 の適用の結果: {"status":"refused","written":false}
+1. ファイルが変わったか: false
+2. 書いた後の reresolveTarget（対象 id は解決時のもの）: {"reason":"element-mismatch","reselect":true}
+2. carrySelection の有無: "function"
+2. carrySelection の結果: {"carried":true}
+3. 要確認（needsAttention）の古い記録を整理で消したか: false
+4. outcome の documentBinding: {"outcome":"not-checked"}
+5. ジャーナルの持ち主: {"pid":8031,"host":"vm","start":"2ea59ff8-5564-4662-b4eb-b0f18cc8a69f:110744"}

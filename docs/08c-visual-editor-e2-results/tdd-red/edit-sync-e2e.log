@@ -1,0 +1,21 @@
+  ✓ 製品の中継が待ち受ける
+  ✓ 題材（使い捨てのコピー）の next dev が /properties に応答する
+ブラウザ: 153.0.8010.12 / 題材（使い捨て）: /home/user/Visual-Computing-IDE/poc/out/edit-sync-e2e/poc/fixture-edit / 中継: 3450
+
+1. 中継が差し込んだ文書の識別子と、中継の記録の対応（実測）
+  ✓ [1440] 文書に中継の識別子がある（32桁の16進）
+  ✓ [1440] 中継の記録に、その識別子を持つ通信がちょうど1件（/properties・200・document）
+  ✓ [1440] 探索の bindDocument は、適用の前のこの文書を同定する
+  ✓ [375] 文書に中継の識別子がある（32桁の16進）
+  ✓ [375] 中継の記録に、その識別子を持つ通信がちょうど1件（/properties・200・document）
+  ✓ [375] 探索の bindDocument は、適用の前のこの文書を同定する
+  ✓ 幅ごとに別の文書（別の識別子）
+  ✓ 中継の記録に無い識別子は同定しない（token-not-in-session）
+
+2. 適用 → HMR の後の選択の引き継ぎ（afterRev と afterFingerprint）
+  ✗ e2e の本体が例外なく終わる — got: "TypeError: eng.startupRecovery is not a function |     at main (file:///home/user/Visual-Computing-IDE/tests/edit-sync-e2e.spec.mjs:181:19) |     at runNextTicks (node:internal/process/task_queues:64:5) |     at process.processImmediate (node:internal/timers:452:9)"
+  ✓ 元の題材（poc/fixture-edit/src）は1バイトも変わらない（F-10）
+  ✓ 使い捨てのコピーを消した
+
+✗ 失敗あり — 12 件通過 / 1 件失敗
+  ✗ e2e の本体が例外なく終わる — got: "TypeError: eng.startupRecovery is not a function |     at main (file:///home/user/Visual-Computing-IDE/tests/edit-sync-e2e.spec.mjs:181:19) |     at runNextTicks (node:internal/process/task_queues:64:5) |     at process.processImmediate (node:internal/timers:452:9)"

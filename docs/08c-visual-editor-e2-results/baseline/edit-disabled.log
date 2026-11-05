@@ -1,0 +1,56 @@
+
+1. 環境変数を明示しない限り、書き込まない
+  ✓ 環境変数の名前
+  ✓ 値 undefined では無効
+  ✓ 値 "" では無効
+  ✓ 値 "0" では無効
+  ✓ 値 "true" では無効
+  ✓ 値 "yes" では無効
+  ✓ 値 "on" では無効
+  ✓ 値 "1 " では無効
+  ✓ 値 " 1" では無効
+  ✓ 値 "TRUE" では無効
+  ✓ 値 "1" のときだけ有効
+  ✓ 無効でも、対象の解決（読むだけ）はできる
+  ✓ 無効でも、下書き（ファイルに触れない）は作れる
+  ✓ 無効なら適用しない（edit-disabled・written: false）
+  ✓ （同）ファイルは元のまま
+  ✓ （同）ジャーナルを作らない
+  ✓ 前提: 有効にすれば適用できる
+  ✓ 無効なら取り消しも書かない
+  ✓ （同）ファイルは適用後のまま
+  ✓ 無効なら復旧は見せるだけ（dry-run）
+  ✓ 書き込みの入口（fsio.replaceSourceFile）も、自分で無効を確かめる
+  ✓ （同）ファイルは適用後のまま
+
+2. 通常の IDE の起動に、編集の書き込みの API は無い
+  ✓ IDE の起動先（BASE）が与えられている（scripts/test-all.sh が next start で起動する）
+  ✓ 前提: IDE は応答する（/api/runtime/status）
+  ✓ GET /api/edit は 404
+  ✓ POST /api/edit は 404
+  ✓ GET /api/edit/apply は 404
+  ✓ POST /api/edit/apply は 404
+  ✓ GET /api/edit/draft は 404
+  ✓ POST /api/edit/draft は 404
+  ✓ GET /api/edit/revert は 404
+  ✓ POST /api/edit/revert は 404
+  ✓ GET /api/edit/recover は 404
+  ✓ POST /api/edit/recover は 404
+  ✓ GET /api/edit/verify は 404
+  ✓ POST /api/edit/verify は 404
+  ✓ GET /api/runtime/edit は 404
+  ✓ POST /api/runtime/edit は 404
+
+3. 書き込みの入口は1か所・利用者向けの入口を作らない（コードの検索）
+  ✓ 編集のモジュールは src/server/edit/ にある
+  ✓ src/server/edit/ の中で fs に書くのは fsio.ts だけ
+  ✓ 画面・API・探索のモジュールは編集のモジュールを読み込まない
+  ✓ 編集の API のディレクトリ（src/app/api/edit）は無い
+    · 編集の外で fs に書くモジュール（IDE 自身の .ide-runtime への記録。対象のソースではない）: src/server/anchors.ts, src/server/devServer.ts, src/server/ide.ts, src/server/observations.ts, src/server/spanFiles.ts
+  ✓ 編集の外で fs に触れる上のモジュールは、E1 の前からある IDE 自身の記録だけ（新しく足していない）
+
+4. 探索の持ち物を、この段で変えていない
+  ✓ 探索の持ち物（07d 4.2）は 2e5c0a2（探索の確認済みの先端）から変わっていない（作業ツリーを含む）
+
+✓ すべて通過 — 44 件通過 / 0 件失敗
+[guard] {"cmd":"node tests/edit-disabled.spec.mjs","seconds":0,"exit":0,"signal":null,"stoppedBy":null,"maxPssMB":0,"maxAt":null,"maxProcs":0,"minAvailMB":null,"leftover":0}

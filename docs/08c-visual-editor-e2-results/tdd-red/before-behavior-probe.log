@@ -1,0 +1,7 @@
+1. darwin + env=1 の適用の結果: {"status":"committed","written":true,"directoryPinned":true}
+1. ファイルが変わったか: true
+2. 書いた後の reresolveTarget（対象 id は解決時のもの）: {"reason":"element-mismatch","reselect":true}
+2. carrySelection の有無: "undefined"
+3. 要確認（needsAttention）の古い記録を整理で消したか: true
+4. outcome の documentBinding: {}
+5. ジャーナルの持ち主: {"pid":8052,"host":"vm"}

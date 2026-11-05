@@ -1,0 +1,31 @@
+
+Y1 書き込みの可否: 環境変数に加えて OS（Linux だけ。macOS では無効のまま）
+  ✗ editWriteGate がある — got: undefined
+
+Y2 起動時の復旧: 読むだけの点検とファイルを変える復旧を分ける。無効なら何も変えない
+  ✗ inspectRecovery・startupRecovery がある — got: undefined
+
+Y3 持ち主の識別: pid ＋ プロセスの開始時刻（PID の再利用を見分ける）
+  ✗ processStartId・judgeOwner がある — got: undefined
+
+Y4 自分が書いた変更の後の選択の引き継ぎ（afterRev と afterFingerprint の両方が一致するときだけ）
+  ✗ carrySelection がある — got: undefined
+
+Y5 ApplyResult の種類と報告書（08b 第3.5節）の照合
+  ✗ APPLY_STATUSES がある — got: undefined
+
+Y6 検証の報告の出所: 文書と中継の結び付けを確かめていないことを結果に明示する
+  ✓ 前提: 報告の中身は合格（verified）
+  ✗ 検証の結果は「文書と中継の結び付けは確かめていない」（documentBinding: not-checked） — got: undefined
+  ✗ （同）実測か予測かは報告の申告（measurement: declared-by-report） — got: undefined
+  ✗ outcome も documentBinding: not-checked を返す — got: undefined
+
+✗ 失敗あり — 1 件通過 / 8 件失敗
+  ✗ editWriteGate がある
+  ✗ inspectRecovery・startupRecovery がある
+  ✗ processStartId・judgeOwner がある
+  ✗ carrySelection がある
+  ✗ APPLY_STATUSES がある
+  ✗ 検証の結果は「文書と中継の結び付けは確かめていない」（documentBinding: not-checked）
+  ✗ （同）実測か予測かは報告の申告（measurement: declared-by-report）
+  ✗ outcome も documentBinding: not-checked を返す
