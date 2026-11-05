@@ -247,19 +247,21 @@ guard('T5', () => {
   /* (f) 書き込んだ直後（読み直しの前）の外部変更: 成功扱いにしない */
   {
     const { p, eng, r } = midway('renamed', (x) => x.write(CARD, EXT));
-    ok('(f) 書き込みの直後に外部変更が入ったら、成功扱いにしない（failed・書き込みの状態は yes）', r.status === 'failed' && r.written === true && r.fileState === 'other', r);
+    /* E1.1: 書いたが確かめられない結果は failed から uncertain に分けた（docs/08b 第3.5節） */
+    ok('(f) 書き込みの直後に外部変更が入ったら、成功扱いにしない（uncertain・書き込みの状態は yes）', r.status === 'uncertain' && r.written === true && r.fileState === 'other', r);
     eq('(f) 外部変更は残る（書き戻さない）', p.read(CARD), EXT);
     ok('(f) ジャーナルは failed・要確認', eng.journal(r.txId)?.state === 'failed' && eng.journal(r.txId)?.needsAttention === true, eng.journal(r.txId));
     const rv = eng.revert(r.txId);
     ok('(f) 成否が確定しない書き込みは、取り消しの対象にしない（F-11）', rv.written === false && rv.reason === 'tx-not-committed', rv);
     p.cleanup();
   }
-  /* RV03: 最後の照合から rename までの窓（ファイルのロックが無い限り 0 にできない） */
+  /* RV03: 最後の照合から rename までの窓。E1.1 で退避リンク（rename の後に、置き換えた元の実体を確かめる）により、
+   * 同じ実体への上書きは検出して外部の版へ戻すようになった。rename による置き換えの残る窓は edit-safety-unit S4(d) */
   {
     const { p, r } = midway('before-rename', (x) => x.write(CARD, EXT));
-    const lost = p.read(CARD) !== EXT;
-    limit('RV03: 最後の照合〜rename の窓の中の外部変更は検出できない（ファイルシステムの制約）',
-      { status: r.status, externalChangeLost: lost, note: '窓は数十マイクロ秒。報告書 第5節。保証の語として「上書きしない」を使わない' });
+    ok('RV03: 最後の照合〜rename の窓の上書きを、committed と報告しない', r.status !== 'committed' && r.written === false, r);
+    eq('RV03:（同）外部の変更は失われない', p.read(CARD), EXT);
+    eq('RV03:（同）一時ファイル・退避リンクを残さない', p.leftovers().length, 0);
     p.cleanup();
   }
 });

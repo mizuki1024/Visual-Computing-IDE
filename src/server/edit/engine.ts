@@ -27,9 +27,12 @@ import {
   CLOCK_SKEW_MS, EDIT_WRITE_ENV, editWritesEnabled, JOURNAL_RETENTION_MS, MAX_VERIFICATION_AGE_MS, REQUIRED_VIEWPORTS, TEMP_MARK,
   type RequiredViewport,
 } from './config';
-import { acquireLock, pidAlive, removeRecord, removeRecordedTemp, replaceSourceFile, writeJsonAtomic, type WriteStep } from './fsio';
 import {
-  journalName, listJournals, planRecovery, readJournalFile, transition, TX_ID_RE, verificationName,
+  acquireLock, cleanupRecordedArtifacts, pidAlive, recordedArtifactsPresent, removeRecord, replaceSourceFile,
+  snapshotNameOf, writeJsonAtomic, type WriteStep,
+} from './fsio';
+import {
+  journalName, listJournals, planRecovery, readJournalFile, TERMINAL_STATES, transition, TX_ID_RE, verificationName,
   type FileState, type JournalRecord,
 } from './journal';
 import { diffHashOf, patchToken, unifiedDiff, unpatchToken } from './patch';
@@ -77,13 +80,49 @@ export interface DraftView {
   diff: string; diffHash: string; createdAt: string;
 }
 
+/**
+ * committed の結果が**保証すること・しないこと**（E1.1。docs/08b 第3.5節）。committed は「競合が無かった」ことの保証ではない。
+ */
+export interface CommitAssurance {
+  /** 置き換えた元の実体（退避リンク）が、照合した inode で、内容が確認した差分の基準とバイト一致した（rename の**後**に確かめた） */
+  displacedOriginalVerified: true;
+  /** 書いた後に読み直した内容が、書いた内容とバイト一致した */
+  readBackVerified: true;
+  /** 検査したディレクトリの実体を固定して操作した（Linux の /proc/self/fd）。false はパスで操作し、事後に確かめた */
+  directoryPinned: boolean;
+  /** この結果では検出できない競合の種類（**これらが起きていないことは保証しない**） */
+  undetectable: readonly UndetectableRace[];
+}
+export type UndetectableRace =
+  /** 退避リンクと rename の間（連続する2つの系呼び出しの間）に、外部が別のファイルを rename で置き換える形で保存した */
+  | 'replace-save-between-link-and-rename'
+  /** 置き換えの前から書き込み先を開いていた外部のプロセスが、照合の後にその fd で書いた */
+  | 'write-through-descriptor-opened-before-replace'
+  /** 確定の後に外部が書いた（committed は確定の時点の事実。いまの内容は outcome・検証で確かめる） */
+  | 'external-write-after-commit';
+export const COMMIT_UNDETECTABLE: readonly UndetectableRace[] = [
+  'replace-save-between-link-and-rename', 'write-through-descriptor-opened-before-replace', 'external-write-after-commit',
+];
+
+/**
+ * 適用・取り消しの結果（E1.1 で uncertain を分けた。docs/08b 第3.5節）。
+ *   committed : 書いて確かめた（CommitAssurance の範囲で）。**検証（verified）はまだ**。成功とは呼ばない
+ *   refused   : 書いていない（形・範囲・無効・下書き）
+ *   conflict  : 書いていない。外部の変更を見つけた。transient: true は「置き換えた直後に外部の変更を見つけ、外部の版へ戻した」
+ *               （ごく短い間だけ自分の内容が書き込み先にあった）。kept は要確認で残したファイル
+ *   busy      : 書いていない。別の適用・取り消し・復旧が鍵を持っている
+ *   failed    : 書いていない（ジャーナルを書けない・一時ファイルを作れない 等）
+ *   uncertain : 書いた、または書いたかどうか確かめられない。**成功扱いにしない・取り消しの対象にしない・要確認**
+ */
 export type ApplyResult =
   | { status: 'committed'; written: true; txId: string; kind: 'apply' | 'revert'; file: string;
-    beforeRev: string; afterRev: string; beforeHash: string; afterHash: string; verification: 'pending' }
+    beforeRev: string; afterRev: string; beforeHash: string; afterHash: string; verification: 'pending'; assurance: CommitAssurance }
   | { status: 'refused' | 'conflict' | 'busy'; written: false; reason: string; detail: string; stage?: Stage; reselect?: boolean;
-    anchorReason?: string; txId?: string }
-  | { status: 'failed'; written: boolean | 'unknown'; reason: string; detail: string; txId?: string; fileState?: FileState | null;
-    needsAttention: boolean };
+    anchorReason?: string; txId?: string; transient?: true; kept?: string[]; needsAttention?: boolean }
+  | { status: 'failed'; written: false; reason: string; detail: string; txId?: string; fileState?: FileState | null;
+    needsAttention: boolean }
+  | { status: 'uncertain'; written: true | 'unknown'; reason: string; detail: string; txId?: string; fileState?: FileState | null;
+    needsAttention: true; kept?: string[] };
 
 export interface RecoveryEntry {
   txId: string | null; file?: string; state?: string; action: string; why: string; wrote: boolean; fileState?: FileState; removedTemps?: number;
@@ -318,17 +357,18 @@ export class EditEngine {
     if (c.reviewedDiffHash !== d.diffHash) return refused('diff-not-reviewed', REFUSAL_TEXT['diff-not-reviewed'] as string);
     const t = this.#targets.get(d.targetId);
     if (!t) return refused('target-unknown', REFUSAL_TEXT['target-unknown'] as string, { reselect: true });
-    const chk = this.#check(t, c.selection, 'apply');
-    if (!chk.ok) {
-      const conflict = chk.reason === 'source-changed' || chk.reason === 'element-mismatch';
-      return { status: conflict ? 'conflict' : 'refused', written: false, reason: chk.reason, detail: chk.detail, stage: 'apply', reselect: chk.reselect, ...(chk.anchorReason ? { anchorReason: chk.anchorReason } : {}) };
-    }
-    if (chk.identity.contentHash !== d.baseContentHash) {
-      return { status: 'conflict', written: false, reason: 'external-change', detail: '下書きを作った後に、このファイルが変わりました。上書きしません。', stage: 'apply', reselect: true };
-    }
+    /* E1.1: 第3段の照合は鍵を持ってから行う（別の適用が置き換えの途中なら、照合の結果ではなく busy を返す） */
     const unlock = acquireLock(this.journalDir);
     if (!unlock) return { status: 'busy', written: false, reason: 'busy', detail: '別の適用・取り消し・復旧が進行中です。' };
     try {
+      const chk = this.#check(t, c.selection, 'apply');
+      if (!chk.ok) {
+        const conflict = chk.reason === 'source-changed' || chk.reason === 'element-mismatch';
+        return { status: conflict ? 'conflict' : 'refused', written: false, reason: chk.reason, detail: chk.detail, stage: 'apply', reselect: chk.reselect, ...(chk.anchorReason ? { anchorReason: chk.anchorReason } : {}) };
+      }
+      if (chk.identity.contentHash !== d.baseContentHash) {
+        return { status: 'conflict', written: false, reason: 'external-change', detail: '下書きを作った後に、このファイルが変わりました。上書きしません。', stage: 'apply', reselect: true };
+      }
       const r = this.#write({
         kind: 'apply', revertOf: null, file: d.file, w: chk.writable, beforeHash: d.baseContentHash, afterHash: d.afterContentHash,
         beforeRev: d.beforeRev, afterRev: d.afterRev, range: d.range, change: d.change, next: d.next,
@@ -398,12 +438,13 @@ export class EditEngine {
           j = transition(j, 'committed', at, { committedAt: at });
           this.#writeJournal(j);
         } catch (e) {
-          return { status: 'failed', written: true, reason: 'journal-commit-failed', txId, needsAttention: true, fileState: 'at-after',
+          return { status: 'uncertain', written: true, reason: 'journal-commit-failed', txId, needsAttention: true, fileState: 'at-after',
             detail: `書き込みましたが、確定の記録を書けません（次の復旧で適用前へ戻します）: ${String((e as Error).message).slice(0, 200)}` };
         }
         this.#step('committed', txId);
         return { status: 'committed', written: true, txId, kind: p.kind, file: p.file, beforeRev: p.beforeRev, afterRev: p.afterRev,
-          beforeHash: p.beforeHash, afterHash: p.afterHash, verification: 'pending' };
+          beforeHash: p.beforeHash, afterHash: p.afterHash, verification: 'pending',
+          assurance: { displacedOriginalVerified: true, readBackVerified: true, directoryPinned: r.pinned, undetectable: COMMIT_UNDETECTABLE } };
       }
       const fileState = this.#fileState(j);
       if (r.status === 'not-written') {
@@ -417,11 +458,22 @@ export class EditEngine {
           ? { status, written: false, reason: r.reason, detail: r.detail, txId, fileState, needsAttention: j.needsAttention }
           : { status, written: false, reason: r.reason, detail: r.detail, txId };
       }
+      if (r.status === 'conflict-restored') {
+        /* 置き換えた直後に外部の変更を見つけ、外部の版へ戻した: 自分の変更は残っていない（書き込み先は外部の版） */
+        const attention = r.kept.length > 0;
+        j = transition(j, 'failed', this.#now(), {
+          failure: { reason: r.reason, detail: r.detail, written: false, fileState }, needsAttention: attention,
+        });
+        try { this.#writeJournal(j); } catch { /* 次の復旧で applying として判断する（外部の版は at-before でも at-after でもないので書かない） */ }
+        return { status: 'conflict', written: false, transient: true, reason: r.reason, detail: r.detail, txId, reselect: true,
+          kept: r.kept, needsAttention: attention };
+      }
       j = transition(j, 'failed', this.#now(), {
         failure: { reason: r.reason, detail: r.detail, written: r.renamed ? true : 'unknown', fileState }, needsAttention: true,
       });
       try { this.#writeJournal(j); } catch { /* 記録できなくても、結果は成功扱いにしない */ }
-      return { status: 'failed', written: r.renamed ? true : 'unknown', reason: r.reason, detail: r.detail, txId, fileState, needsAttention: true };
+      return { status: 'uncertain', written: r.renamed ? true : 'unknown', reason: r.reason, detail: r.detail, txId, fileState, needsAttention: true,
+        ...(r.kept && r.kept.length ? { kept: r.kept } : {}) };
     } finally { IN_FLIGHT.delete(txId); }
   }
 
@@ -444,25 +496,26 @@ export class EditEngine {
     if (j.projectRoot !== this.root) return refused('tx-unknown', 'この適用は別のプロジェクトのものです。');
     if (j.state !== 'committed') return refused('tx-not-committed', `この適用は確定していません（${j.state}）。成否が確定しない書き込みは取り消しの対象にしません。`);
     if (j.kind !== 'apply') return refused('revert-unsupported', '取り消しの取り消し（やり直し）は E1 では扱いません。');
-    if (listJournals(this.journalDir).records.some((x) => x.revertOf === txId && x.state === 'committed')) {
-      return refused('already-reverted', 'この適用はすでに取り消しました。');
-    }
-    const w = resolveWritable(this.root, j.file);
-    if (!w.ok) return refused('outside-scope', w.detail);
-    const id = this.#read(w.file);
-    if (!id) return refused('unsupported-encoding', REFUSAL_TEXT['unsupported-encoding'] as string);
-    if (id.contentHash === j.beforeHash) return refused('already-at-before', 'ファイルはすでに適用前の内容です。書き込みません。');
-    if (id.contentHash !== j.afterHash) {
-      return { status: 'conflict', written: false, reason: 'changed-after-apply',
-        detail: '適用の後にこのファイルが変わっています。適用前の内容に戻すと、その変更が失われるため取り消しません。' };
-    }
-    let before: string;
-    try { before = unpatchToken(id.text, j.range.start, j.change.from, j.change.to); } catch { return refused('patch-invariant', REFUSAL_TEXT['patch-invariant'] as string); }
-    const bi = identifyText(before);
-    if (bi.contentHash !== j.beforeHash) return refused('patch-invariant', '適用前の内容を作り直せません（記録と一致しません）。書き込みません。');
+    /* E1.1: 取り消しの照合も鍵を持ってから行う */
     const unlock = acquireLock(this.journalDir);
     if (!unlock) return { status: 'busy', written: false, reason: 'busy', detail: '別の適用・取り消し・復旧が進行中です。' };
     try {
+      if (listJournals(this.journalDir).records.some((x) => x.revertOf === txId && x.state === 'committed')) {
+        return refused('already-reverted', 'この適用はすでに取り消しました。');
+      }
+      const w = resolveWritable(this.root, j.file);
+      if (!w.ok) return refused('outside-scope', w.detail);
+      const id = this.#read(w.file);
+      if (!id) return refused('unsupported-encoding', REFUSAL_TEXT['unsupported-encoding'] as string);
+      if (id.contentHash === j.beforeHash) return refused('already-at-before', 'ファイルはすでに適用前の内容です。書き込みません。');
+      if (id.contentHash !== j.afterHash) {
+        return { status: 'conflict', written: false, reason: 'changed-after-apply',
+          detail: '適用の後にこのファイルが変わっています。適用前の内容に戻すと、その変更が失われるため取り消しません。' };
+      }
+      let before: string;
+      try { before = unpatchToken(id.text, j.range.start, j.change.from, j.change.to); } catch { return refused('patch-invariant', REFUSAL_TEXT['patch-invariant'] as string); }
+      const bi = identifyText(before);
+      if (bi.contentHash !== j.beforeHash) return refused('patch-invariant', '適用前の内容を作り直せません（記録と一致しません）。書き込みません。');
       return this.#write({
         kind: 'revert', revertOf: txId, file: j.file, w: w.file, beforeHash: j.afterHash, afterHash: j.beforeHash,
         beforeRev: j.afterRev, afterRev: j.beforeRev, range: { start: j.range.start, end: j.range.start + j.change.to.length },
@@ -491,7 +544,12 @@ export class EditEngine {
       const entries = records.map((j): RecoveryEntry => {
         const fileState = this.#fileState(j);
         const plan = planRecovery(j, fileState, this.#ownerAlive(j));
-        return { txId: j.txId, file: j.file, state: j.state, action: plan.kind, why: `（書き込みが無効のため実行していません）${plan.why}`, wrote: false, fileState };
+        const left = this.#artifactSets(j).flatMap((a) => {
+          const x = recordedArtifactsPresent(this.root, j.file, a.tempName);
+          return [x.temp ? a.tempName : null, x.orig ? snapshotNameOf(a.tempName) : null, x.ours ? a.tempName.replace(/\.tmp$/, '.ours.tmp') : null];
+        }).filter((x): x is string => !!x);
+        return { txId: j.txId, file: j.file, state: j.state, action: plan.kind, wrote: false, fileState,
+          why: `（書き込みが無効のため実行していません）${plan.why}${left.length ? `（残っているファイル: ${left.join('・')}）` : ''}` };
       });
       return { status: 'dry-run', entries: [...entries, ...bad], pruned: [] };
     }
@@ -505,28 +563,58 @@ export class EditEngine {
     } finally { unlock(); }
   }
 
+  /**
+   * ジャーナルが記録した一時ファイル（と、名前から決まる退避リンク）の組。
+   *   適用の一時ファイル  : 退避リンクは「適用前」の内容、自分の版は「適用後」の内容なら外してよい
+   *   復旧の一時ファイル  : 復旧は「適用後 → 適用前」へ書くので逆になる
+   */
+  #artifactSets(j: JournalRecord): { tempName: string; origAllowed: string[]; oursAllowed: string[] }[] {
+    const out = [{ tempName: j.tempName, origAllowed: [j.beforeHash], oursAllowed: [j.afterHash] }];
+    if (j.recovery?.tempName) out.push({ tempName: j.recovery.tempName, origAllowed: [j.afterHash], oursAllowed: [j.beforeHash] });
+    return out;
+  }
+
   #recoverOne(j0: JournalRecord): RecoveryEntry {
     if (j0.projectRoot !== this.root) return { txId: j0.txId, file: j0.file, state: j0.state, action: 'none', why: 'other-project', wrote: false };
     let j = j0;
+    const alive = this.#ownerAlive(j);
+    if (TERMINAL_STATES.includes(j.state) || alive) {
+      const fileState = this.#fileState(j);
+      const plan = planRecovery(j, fileState, alive);
+      return { txId: j.txId, file: j.file, state: j.state, fileState, action: 'none', why: plan.kind === 'none' ? plan.why : 'none', wrote: false };
+    }
+    /* 0. 失うものが無い一時ファイル・退避リンクを先に片付ける（書き込み先と同じ実体・基準/書いた内容とバイト一致するものだけ）。
+     *    止まった時点で書き込み先にもう1つの名前が付いている（リンク数 2）と、範囲の検査が通らないため */
+    let removedTemps = 0;
+    const kept: string[] = [];
+    for (const a of this.#artifactSets(j)) {
+      const c = cleanupRecordedArtifacts(this.root, j.file, a.tempName, a.origAllowed, a.oursAllowed);
+      if (!c) continue;
+      removedTemps += [c.temp, c.orig, c.ours].filter((x) => x === 'removed').length;
+      if (c.temp === 'kept') kept.push(a.tempName);
+      if (c.orig === 'kept') kept.push(snapshotNameOf(a.tempName));
+      if (c.ours === 'kept') kept.push(a.tempName.replace(/\.tmp$/, '.ours.tmp'));
+    }
     const fileState = this.#fileState(j);
-    const plan = planRecovery(j, fileState, this.#ownerAlive(j));
+    let plan = planRecovery(j, fileState, false);
+    /* 退避リンクに外部の変更が残っている（置き換えの最中の外部の書き込み）: 適用前へ戻すと、どちらの版でもない内容になる。書かない */
+    if (plan.kind === 'restore-before' && kept.length) {
+      plan = { kind: 'refuse', why: `置き換えの最中の外部の変更を含むファイルが残っています（${kept.join('・')}）。書かずに要確認` };
+    }
     const base = { txId: j.txId, file: j.file, state: j.state, fileState };
-    if (plan.kind === 'none') return { ...base, action: 'none', why: plan.why, wrote: false };
-    const temps = [j.tempName, j.recovery?.tempName].filter((x): x is string => !!x);
-    const removeTemps = () => temps.reduce((n, t) => n + (removeRecordedTemp(this.root, j.file, t).removed ? 1 : 0), 0);
     const at = this.#now();
+    if (plan.kind === 'none') return { ...base, action: 'none', why: plan.why, wrote: false, removedTemps };
     if (plan.kind === 'mark-failed' || plan.kind === 'refuse') {
-      const removedTemps = removeTemps();
       j = transition(j, 'failed', at, {
         failure: j.failure ?? { reason: 'interrupted', detail: plan.why, written: false, fileState },
-        recovery: { at, action: plan.kind, fileState, state: 'done', detail: plan.why },
-        needsAttention: plan.kind === 'refuse' || fileState !== 'at-before',
+        recovery: { at, action: plan.kind, fileState, state: 'done', detail: kept.length ? `${plan.why}（残したファイル: ${kept.join('・')}）` : plan.why,
+          ...(j.recovery?.tempName ? { tempName: j.recovery.tempName } : {}) },
+        needsAttention: plan.kind === 'refuse' || fileState !== 'at-before' || kept.length > 0,
       });
       this.#writeJournal(j);
       return { ...base, action: plan.kind, why: plan.why, wrote: false, removedTemps };
     }
     /* restore-before: いまの内容（＝適用後の内容とバイト一致）から適用前の内容を作り直して戻す */
-    const removedTemps = removeTemps();
     const w = resolveWritable(this.root, j.file);
     const id = w.ok ? this.#read(w.file) : null;
     let before: string | null = null;
@@ -635,9 +723,13 @@ export class EditEngine {
     const verification = ok ? 'verified' : results.length ? 'not-verified' : 'pending';
     let stale = false;
     if (ok) {
+      /* E1.1: 対象のファイルだけでなく、検証した文書が描いた全ファイルの版を見る（どれかが変われば、検証はいまの内容の証拠ではない） */
+      const vr = ok.verifiedRevisions as Record<string, string>;
       const w = resolveWritable(this.root, j.file);
       const cur = w.ok ? this.#read(w.file)?.rev ?? null : null;
-      stale = cur !== (ok.verifiedRevisions as Record<string, string>)[j.file];
+      const others = Object.keys(vr).filter((f) => f !== j.file).slice(0, 200);
+      const otherRevs = others.length ? sourceRevisionsOf(this.root, others) : {};
+      stale = cur !== vr[j.file] || others.some((f) => (otherRevs[f] ?? null) !== vr[f]);
     }
     return { txId, write: j.state, kind: j.kind, verification, success: j.state === 'committed' && verification === 'verified' && !!ok, staleSinceVerification: stale };
   }

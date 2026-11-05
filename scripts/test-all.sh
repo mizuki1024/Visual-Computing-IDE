@@ -3,7 +3,7 @@
 # 全件の試験を**直列に**回す（scripts/test-all-29.sh と同じ手順。差は次の2つだけ）。
 #   1. 回す本の一覧を、tests/*.spec.mjs と**両向きに**照らし合わせる（一覧に無い試験・一覧にだけある名前があれば止める）。
 #      7C 以降に足した 7 本（callsite-entry-unit・select-revision-*・lineage-revision-e2e・hmr-*）と、
-#      編集 E1 の 6 本（edit-*。docs/08a-visual-editor-e1-report.md）を含む 42 本。
+#      編集 E1 の 6 本（edit-*。docs/08a-visual-editor-e1-report.md）と E1.1 の安全性の監査の 1 本（edit-safety-unit。docs/08b）を含む 43 本。
 #   2. lineage-e2e を、題材の**使い捨てのコピー**（poc/out/lineage-copy。IDE の中ではない場所）でも回す（行名 lineage-e2e@copy）。
 #      題材が IDE の中にあると、IDE 側の依存とたまたま同じことで通ってしまう（docs/07c-lineage-e2e-recovery-report.md 第9節）。
 #   bash scripts/test-all.sh <出力ディレクトリ> [<本> ...]     （本を省くと全件。指定しても一覧の照合は行う）
@@ -20,14 +20,14 @@ cd "$REPO"
 PORT=3100
 BASE=http://localhost:$PORT
 
-# test-all-29.sh の 29 本（同じ順）＋ 7C 以降の 7 本 ＋ 編集 E1 の 6 本（探索の本の後に回す）
+# test-all-29.sh の 29 本（同じ順）＋ 7C 以降の 7 本 ＋ 編集 E1 の 6 本 ＋ E1.1 の 1 本（探索の本の後に回す）
 SUITES=(poc01 explore measured poc03 elements poc05 flows poc02 rsc poc04 lineage sqlparse sqlimpact model
   project-inspect devserver devserver-stub runtime-e2e
   childenv-origin preview-gateway select-unit preview-e2e select-e2e observe-unit observe-e2e
   queries-unit lineage-live-unit queries-e2e lineage-e2e
   callsite-entry-unit select-revision-unit select-revision-e2e lineage-revision-e2e
   hmr-guard-unit hmr-lineage-guard-e2e hmr-chunk-layout-e2e
-  edit-engine-unit edit-scope-unit edit-journal-unit edit-verify-unit edit-disabled edit-e2e)
+  edit-engine-unit edit-scope-unit edit-journal-unit edit-verify-unit edit-disabled edit-e2e edit-safety-unit)
 LISTED=$(printf '%s\n' "${SUITES[@]}" | sort)
 ONDISK=$(ls tests/*.spec.mjs | xargs -n1 basename | sed 's/\.spec\.mjs$//' | sort)
 if [ "$LISTED" != "$ONDISK" ]; then

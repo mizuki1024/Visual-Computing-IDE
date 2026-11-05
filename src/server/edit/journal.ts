@@ -99,7 +99,15 @@ export function parseJournal(v: unknown): JournalRecord | null {
   if (v.target !== null && !(isObj(v.target) && isStr(v.target.anchorId) && /^[0-9a-f]{10}$/.test(v.target.anchorId)
     && isInt(v.target.line) && isInt(v.target.col) && isStr(v.target.tag) && isStr(v.target.fingerprint))) return null;
   if (v.expect !== null && !(isObj(v.expect) && Object.values(v.expect).every((x) => isObj(x) && Object.values(x).every(isStr)))) return null;
-  if (!isStr(v.tempName) || !/^\.[^/\\\0]{1,200}\.vcide-edit-tx-[0-9]{14}-[0-9a-f]{8}\.tmp$/.test(v.tempName)) return null;
+  /* E1.1: 一時ファイルの名前は、このジャーナルの txId と書き込み先の名前から決まるものだけ（書き換えた記録で、別の適用の
+   * 一時ファイル・退避リンクを消させない）。復旧の一時ファイルも同じ規則（-r<n>） */
+  const tempOf = (suffix: string) => `.${path.posix.basename(v.file as string)}.vcide-edit-${v.txId as string}${suffix}.tmp`;
+  if (!isStr(v.tempName) || v.tempName !== tempOf('')) return null;
+  if (v.recovery !== null && v.recovery !== undefined) {
+    if (!isObj(v.recovery)) return null;
+    const rt = v.recovery.tempName;
+    if (rt !== undefined && !(isStr(rt) && /-r[0-9]{1,6}\.tmp$/.test(rt) && rt === tempOf(rt.slice(rt.lastIndexOf('-r'), -4)))) return null;
+  }
   return v as unknown as JournalRecord;
 }
 

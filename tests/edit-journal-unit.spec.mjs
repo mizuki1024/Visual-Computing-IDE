@@ -117,7 +117,8 @@ guard('T8', () => {
     { at: 'temp-created', file: ORIG, state: 'applying', temp: true, recovered: ORIG, action: 'mark-failed' },
     { at: 'temp-written', file: ORIG, state: 'applying', temp: true, recovered: ORIG, action: 'mark-failed' },
     { at: 'before-rename', file: ORIG, state: 'applying', temp: true, recovered: ORIG, action: 'mark-failed' },
-    { at: 'renamed', file: AFTER, state: 'applying', temp: false, recovered: ORIG, action: 'restore-before' },
+    /* E1.1: rename の直後は、置き換えた元の実体の退避リンク（.orig.tmp）が残る（復旧で、適用前の内容のときだけ外す） */
+    { at: 'renamed', file: AFTER, state: 'applying', temp: true, recovered: ORIG, action: 'restore-before' },
   ];
   for (const k of CASES) {
     const { p, selection } = setup(`j8-${k.at}`);

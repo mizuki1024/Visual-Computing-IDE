@@ -124,3 +124,35 @@ export function sameFile(a: WritableFile, b: WritableFile): boolean {
 export function sameDir(a: WritableFile, b: WritableFile): boolean {
   return a.dir === b.dir && a.dirDev === b.dirDev && a.dirIno === b.dirIno && a.real === b.real;
 }
+
+/**
+ * 書き込み先の**親ディレクトリ**だけの検査（E1.1。復旧で一時ファイル・退避リンクを片付けるため）。
+ * パスの形・根から親までのどの区間もリンクでない・親の実体が src/ の中、を resolveWritable と同じ規則で確かめる。
+ * 書き込み先そのもの（無い・リンク数が 2 など）は問わない。**ここで通ったディレクトリへ、新しい内容は書かない**（消すだけ）。
+ */
+export function resolveParentDir(projectRoot: string, rel: unknown):
+  { ok: true; root: string; dir: string; dirDev: number; dirIno: number; srcReal: string } | { ok: false; reason: ScopeRefusal; detail: string } {
+  const shape = checkRelShape(rel);
+  if (shape) return fail(shape, typeof rel === 'string' ? rel.slice(0, 200) : typeof rel) as { ok: false; reason: ScopeRefusal; detail: string };
+  const segs = (rel as string).split('/');
+  let root: string;
+  try {
+    root = fs.realpathSync(path.resolve(projectRoot));
+    if (!fs.statSync(root).isDirectory()) return fail('root-invalid') as { ok: false; reason: ScopeRefusal; detail: string };
+  } catch { return fail('root-invalid') as { ok: false; reason: ScopeRefusal; detail: string }; }
+  let cur = root;
+  let st: fs.Stats | null = null;
+  for (let i = 0; i < segs.length - 1; i++) {
+    cur = path.join(cur, segs[i]);
+    try { st = fs.lstatSync(cur); } catch { return fail(i === 0 ? 'src-missing' : 'missing') as { ok: false; reason: ScopeRefusal; detail: string }; }
+    if (st.isSymbolicLink()) return fail('symlink-in-path', path.relative(root, cur)) as { ok: false; reason: ScopeRefusal; detail: string };
+    if (!st.isDirectory()) return fail('not-directory', path.relative(root, cur)) as { ok: false; reason: ScopeRefusal; detail: string };
+  }
+  if (!st) return fail('missing') as { ok: false; reason: ScopeRefusal; detail: string };
+  let real: string; let srcReal: string;
+  try { real = fs.realpathSync(cur); srcReal = fs.realpathSync(path.join(root, EDIT_SCOPE)); } catch { return fail('missing') as { ok: false; reason: ScopeRefusal; detail: string }; }
+  if (real !== cur || srcReal !== path.join(root, EDIT_SCOPE) || !(real === srcReal || real.startsWith(srcReal + path.sep))) {
+    return fail('outside-src') as { ok: false; reason: ScopeRefusal; detail: string };
+  }
+  return { ok: true, root, dir: cur, dirDev: st.dev, dirIno: st.ino, srcReal };
+}
