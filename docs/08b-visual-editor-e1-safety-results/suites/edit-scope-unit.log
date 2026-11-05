@@ -1,0 +1,93 @@
+
+1. パスの形
+  ✓ 拒否: "/etc/passwd"（bad-path）
+  ✓ 拒否: "../outside.tsx"（bad-path）
+  ✓ 拒否: "src/../next.config.mjs"（bad-path）
+  ✓ 拒否: "next.config.mjs"（bad-path）
+  ✓ 拒否: ".env"（bad-path）
+  ✓ 拒否: "src/.env.tsx"（bad-path）
+  ✓ 拒否: "src/components/util.ts"（extension-not-allowed）
+  ✓ 拒否: "src/app/globals.css"（extension-not-allowed）
+  ✓ 拒否: "src/node_modules/x.tsx"（bad-path）
+  ✓ 拒否: "src//components/PropertyCard.tsx"（bad-path）
+  ✓ 拒否: "src/./components/PropertyCard.tsx"（bad-path）
+  ✓ 拒否: "src\\components\\PropertyCard.tsx"（bad-path）
+  ✓ 拒否: "src/components/PropertyCard.tsx\u0000"（bad-path）
+  ✓ 拒否: "SRC/components/PropertyCard.tsx"（bad-path）
+  ✓ 拒否: "src/components/PropertyCard.TSX"（extension-not-allowed）
+  ✓ 拒否: ""（bad-path）
+  ✓ 拒否: 42（bad-path）
+  ✓ 拒否: null（bad-path）
+  ✓ src/ の下の .tsx は書き込み先になる
+  ✓ 書き込み先の実体のパスは realpath(root/src) の中
+  ✓ 存在しないファイルは拒否（新規作成は E1 の対象外）
+
+2. シンボリックリンク（RV01・RV02）
+  ✓ (a) プロジェクトの外を指すリンクの要素は対象にしない
+  ✓ (a) 書き込み先の検査も拒否（symlink-in-path）
+  ✓ (a) リンク先は変わらない
+  ✓ (b) RV01: src/ の中のリンクが src/ の外（プロジェクトの中）を指すなら対象にしない（outside-scope）
+    · 探索の照合（anchors.ts）の結果に依らず、編集は自分で範囲を確かめる（照合: 通過）
+  ✓ (b) RV02: リンク先（src/ の外）は変わらない
+  ✓ (c) 途中のディレクトリがリンクなら対象にしない
+  ✓ (c) 理由は symlink-in-path
+  ✓ (c) リンク先は変わらない
+  ✓ (d) src そのものがリンクなら書き込み先にしない
+
+3. ハードリンク
+  ✓ ハードリンク（リンク数 > 1）は書き込み先にしない
+  ✓ 外のファイルは変わらない
+
+4. 書き込み直前の再検証（下書きの後に同じ内容のリンクへ差し替え）
+  ✓ 適用の直前にリンクへ差し替えられたら書かない
+  ✓ リンク先（プロジェクトの外）は変わらない
+  ✓ リンクはそのまま（消したり置き換えたりしない）
+
+5. 検査から書き込みまでの競合（段ごとの差し替え）
+  ✓ ディレクトリの差し替え（applying）: 書き込みを確定しない
+  ✓ （applying）src/ の外のディレクトリの中身は変わらない（一時ファイルも残さない）
+  ✓ （applying）src/ に一時ファイルを残さない
+  ✓ ディレクトリの差し替え（before-temp）: 書き込みを確定しない
+  ✓ （before-temp）src/ の外のディレクトリの中身は変わらない（一時ファイルも残さない）
+  ✓ （before-temp）src/ に一時ファイルを残さない
+  ✓ ディレクトリの差し替え（temp-created）: 書き込みを確定しない
+  ✓ （temp-created）src/ の外のディレクトリの中身は変わらない（一時ファイルも残さない）
+  ✓ （temp-created）src/ に一時ファイルを残さない
+  ✓ ディレクトリの差し替え（temp-written）: 書き込みを確定しない
+  ✓ （temp-written）src/ の外のディレクトリの中身は変わらない（一時ファイルも残さない）
+  ✓ （temp-written）src/ に一時ファイルを残さない
+  ✓ ディレクトリの差し替え（before-final-check）: 書き込みを確定しない
+  ✓ （before-final-check）src/ の外のディレクトリの中身は変わらない（一時ファイルも残さない）
+  ✓ （before-final-check）src/ に一時ファイルを残さない
+  ✓ ディレクトリの差し替え（before-last-stat）: 書き込みを確定しない
+  ✓ （before-last-stat）src/ の外のディレクトリの中身は変わらない（一時ファイルも残さない）
+  ✓ （before-last-stat）src/ に一時ファイルを残さない
+  ✓ ファイルの差し替え（applying）: src/ の外のファイルは変わらない
+  ✓ （applying）書き込みを確定しない
+  ✓ ファイルの差し替え（temp-written）: src/ の外のファイルは変わらない
+  ✓ （temp-written）書き込みを確定しない
+  ✓ ファイルの差し替え（before-final-check）: src/ の外のファイルは変わらない
+  ✓ （before-final-check）書き込みを確定しない
+  ✓ ファイルの差し替え（before-last-stat）: src/ の外のファイルは変わらない
+  ✓ （before-last-stat）書き込みを確定しない
+  ✓ ファイルの差し替え（before-rename）: src/ の外のファイルは変わらない
+    · rename は対象の名前（リンク）を置き換えるだけで、リンク先へは書かない（結果: refused）
+  ✓ ディレクトリの差し替え（before-rename）: src/ の外の中身は変わらない
+  ✓ （before-rename）成功と報告しない
+  ✓ （before-rename）一時ファイルを残さない（移された元のディレクトリからも消す）
+  ⚠ [既知の限界] 同じ権限で src/ を書き換え続ける敵対的なプロセスとの競合（検査と rename の間でディレクトリを2回以上差し替える） — {"note":"Node に renameat/openat が無いため 0 にできない。Linux では /proc/self/fd で書いた実体の場所を事後に確かめて要確認として報告する（docs/08a 第5節）"}
+
+6. ジャーナルの書き換えで src/ の外を指させても書かない
+  ✓ ジャーナルの file を next.config.mjs に書き換えても取り消しで書かない
+  ✓ （同）復旧も書かない
+  ✓ ジャーナルの file を src/../next.config.mjs に書き換えても取り消しで書かない
+  ✓ （同）復旧も書かない
+  ✓ ジャーナルの file を /etc/hosts に書き換えても取り消しで書かない
+  ✓ （同）復旧も書かない
+  ✓ next.config.mjs は変わらない
+  ✓ ジャーナルのプロジェクトの根が違えば取り消さない
+
+既知の限界の記録: 1 件（安全の主張ではない。docs/08a 第5節）
+
+✓ すべて通過 — 73 件通過 / 0 件失敗
+[guard] {"cmd":"node tests/edit-scope-unit.spec.mjs","seconds":0,"exit":0,"signal":null,"stoppedBy":null,"maxPssMB":0,"maxAt":null,"maxProcs":0,"minAvailMB":null,"leftover":0}

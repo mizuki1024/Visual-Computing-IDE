@@ -1,0 +1,5 @@
+before-fix-cold	✓ すべて通過 — 56 件通過 / 0 件失敗	起動中は経過秒と Next.js の出力を出す（平坦な待ちにしない）	rc=0	13s	next_cache=present
+before-fix-warm	✓ すべて通過 — 56 件通過 / 0 件失敗	起動中は経過秒と Next.js の出力を出す（平坦な待ちにしない）	rc=0	13s	next_cache=present
+after-fix-warm	✓ すべて通過 — 56 件通過 / 0 件失敗	起動中は経過秒と Next.js の出力を出す（平坦な待ちにしない）	rc=0	13s	next_cache=present
+after-fix-cold	✓ すべて通過 — 56 件通過 / 0 件失敗	起動中は経過秒と Next.js の出力を出す（平坦な待ちにしない）	rc=0	14s	next_cache=present
+after-fix-warm2	✓ すべて通過 — 56 件通過 / 0 件失敗	起動中は経過秒と Next.js の出力を出す（平坦な待ちにしない）	rc=0	14s	next_cache=present

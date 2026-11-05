@@ -1,0 +1,4 @@
+warm {"timeline":["85ms 起動中|prog=true","2851ms 実行中|prog=false"],"startingMs":2766,"wouldOldTestFail":false}
+warm {"timeline":["67ms 起動中|prog=true","2841ms 実行中|prog=false"],"startingMs":2774,"wouldOldTestFail":false}
+cold {"timeline":["60ms 停止しています|prog=false","90ms 起動中|prog=true","2858ms 実行中|prog=false"],"startingMs":2768,"wouldOldTestFail":false}
+warm {"timeline":["91ms 起動中|prog=true","2758ms 実行中|prog=false"],"startingMs":2667,"wouldOldTestFail":false}

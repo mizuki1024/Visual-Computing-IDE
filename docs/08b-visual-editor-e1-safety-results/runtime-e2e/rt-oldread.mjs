@@ -1,0 +1,24 @@
+// 旧試験の読み方（.rt-prog の innerText・既定の待ち時間）を、状態が「実行中」へ移った**後**に行うと何が返るか（仕組みの確認）
+import { createRequire } from 'node:module';
+const require = createRequire('/home/user/Visual-Computing-IDE/package.json');
+const { chromium } = require('playwright-core');
+const BASE = process.env.BASE; const PROJECT = process.argv[2];
+const browser = await chromium.launch();
+const page = await browser.newPage({ viewport: { width: 1600, height: 1000 } });
+await page.goto(BASE, { waitUntil: 'networkidle' });
+const panel = () => page.locator('.fpnl[aria-label="プロジェクトと実行"]');
+await panel().locator('#rt-path').fill(PROJECT);
+await panel().locator('.rt-b', { hasText: '検出' }).click();
+await page.locator('.rt-b.go:not(.off)').waitFor({ timeout: 15000 });
+await panel().locator('.rt-b.go', { hasText: '起動する' }).click();
+await page.locator('.rt-st b', { hasText: '起動中' }).first().waitFor({ timeout: 5000 });
+const progWhileStarting = await panel().locator('.rt-prog').innerText();
+await page.locator('.rt-st b', { hasText: '実行中' }).first().waitFor({ timeout: 200000 });
+const t = Date.now();
+const progAfter = await panel().locator('.rt-prog').innerText().catch(() => '');
+const ms = Date.now() - t;
+const pass = /HTTP の応答を確認するまで/.test(progAfter);
+console.log(JSON.stringify({ progWhileStarting, progAfterRunning: progAfter, oldReadWaitedMs: ms, oldAssertionWouldPass: pass }));
+await panel().locator('.rt-b', { hasText: '停止する' }).click().catch(() => {});
+await page.locator('.rt-st b', { hasText: '停止しています' }).waitFor({ timeout: 40000 }).catch(() => {});
+await browser.close();

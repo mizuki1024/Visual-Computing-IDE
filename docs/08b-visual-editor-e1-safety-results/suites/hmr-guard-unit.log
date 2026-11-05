@@ -1,0 +1,127 @@
+
+1. 計装（A1）: eval されたコードのフレームに印を付ける
+  ✓ 前提: ディスクの生成物のコードから呼んだ — 計装を前置したアプリが正常に終わる
+  ✓ 前提: 呼び出し位置の記録がある
+  ✓ ディスクの生成物: 最初のフレームは build-output（ファイル・行）
+  ✓ 記録の作り方を書く（frameSource = v8-callsite: V8 の呼び出し位置の API で eval を判定した）
+  ✓ A4（計装）: 生成物のフレームに、実行中のスクリプトの内容のハッシュ（V8 の CallSite.getScriptHash()）＝ 生成物のファイルの SHA-256
+  ✓ A4（計装）: 読み込んだときの内容から作った区画の表で、フレームが入る区画のハッシュと区画の先頭からの行を書く
+  ✓ A4（計装）: モジュールの名前（[project]/…）・絶対パスを記録しない
+  ✓ HMR と同じ形の eval（sourceURL に ?moduleId）: 呼び出し位置の記録がある
+  ✓ HMR と同じ形の eval（sourceURL に ?moduleId）: 最初のフレームに eval の印（scope: evaluated）。build-output と区別する
+  ✓ HMR と同じ形の eval（sourceURL に ?moduleId）: 印の付いたフレームを生成物のフレームとして記録しない
+  ✓ HMR と同じ形の eval（sourceURL に ?moduleId）: ?moduleId・絶対パスを記録しない
+  ✓ sourceURL に ? が無い eval（形が変わった場合）: 呼び出し位置の記録がある
+  ✓ sourceURL に ? が無い eval（形が変わった場合）: 最初のフレームに eval の印（scope: evaluated）。build-output と区別する
+  ✓ sourceURL に ? が無い eval（形が変わった場合）: 印の付いたフレームを生成物のフレームとして記録しない
+  ✓ sourceURL に ? が無い eval（形が変わった場合）: ?moduleId・絶対パスを記録しない
+  ✓ new Function（eval at の形）: 呼び出し位置の記録がある
+  ✓ new Function（eval at の形）: 最初のフレームに eval の印（scope: evaluated）。build-output と区別する
+  ✓ new Function（eval at の形）: 印の付いたフレームを生成物のフレームとして記録しない
+  ✓ new Function（eval at の形）: ?moduleId・絶対パスを記録しない
+
+2. 記録の読み取り（parseCallsiteRecord）: 印の付いたフレームを黙って捨てない
+  ✓ 印の付いたフレーム（evaluated）を順序どおりに残す
+  ✓ 未知の種別のフレームは「形を認識できない」印に置き換えて残す（ファイル名は読まない）
+  ✓ 印の付いたフレームのファイル名は読まない（照合に使わない）
+  ✓ 記録の作り方（frameSource）を読む
+  ✓ 作り方の書かれていない記録 → frameSource null
+
+3. 呼び出し位置の照合（本物の dataAccess.ts ＋ PoC-02 の照合器）— A1・A2・A3 と T5 の異常系
+  ✓ 前提: .tsx はローダで内容が変わる（sourcesContent はいまのソースそのものではない）
+  ✓ 基準: A1〜A3 がすべて通る → 位置を特定（page.tsx 4 行目の query）
+  ✓ 基準: 理由なし
+  ✓ 基準: 通った照合に A1・A2・A3 を書く
+  ✓ A1（T1・T5）: eval のフレームが呼び出し側より内側にある → hmr-evaluated-code
+  ✓ A1: eval のフレームを飛ばして、外側の生成物のフレームを採らない（位置を出さない）
+  ✓ A1: eval のフレームしか無い → hmr-evaluated-code（no-app-frame ではなく、実行したコードが差し替わったことを理由にする）
+  ✓ A1: 呼び出しを書いたフレームより外側（呼び出し元）の eval は、その位置の座標を変えない → 特定する
+  ✓ A1（T5）: 未知の形のフレームが内側にある → unrecognized-frame（飛ばして外側を採らない）
+  ✓ A1（T5）: eval を判定した方法が記録に無い（印の有無を確かめられない）→ frame-origin-unverified
+  ✓ A1: スタックの文字列から推した記録（V8 の判定ではない）→ frame-origin-unverified
+  ✓ A2（T5）: その SQL の要求の開始を確かめられない → request-start-unknown
+  ✓ A2（T2）: 要求の開始の後・SQL の前にソースが書き換わった → changed-during-request（修正前の D は通していた）
+  ✓ A2→A4（初回のコンパイル）: 要求の処理中に生成物が書かれ、実行したコード＝その生成物 → 特定する
+  ✓ A2→A4（保存から適用までの間）: 要求の処理中に生成物が書き換わり、実行したコード ≠ ディスクの生成物 → changed-during-request（位置を出さない）
+  ✓ A2→A5: 要求の処理中にソースマップだけが書かれ、その組が生成物に合い、実行したコード＝生成物 → 特定する
+  ✓ A2→A5: 要求の処理中に書かれたソースマップが生成物に合わない（別の世代の並び）→ build-map-unbound
+  ✓ A2: 更新時刻が要求の開始と同時刻 → 変わったとみなす（changed-during-request）
+  ✓ A2: 要求の開始の直前（2000 ms の分解能の幅の内）→ 変わったとみなす
+  ✓ A2: 幅より前の書き換え → 通す（ほかの照合が通れば特定）
+  ✓ A2（T3）: 無関係なファイル（戻した先ではないソース）の書き換えでは止めない
+  ✓ 既存の D は残す: SQL の実行の後のソースの書き換え → source-changed-after-call
+  ✓ 既存の D は残す: SQL の実行の後の生成物の書き換え → build-changed-after-call
+  ✓ A3（T5）: 使った区画に sourcesContent が無い → map-source-unverified（一致とは扱わない）
+  ✓ A3（T5）: sourcesContent の該当が null → map-source-unverified
+  ✓ A3（T5）: ソースマップが古い（区画の sourcesContent ≠ いまのソースの変換結果）→ map-source-mismatch
+  ✓ A3: sourcesContent が、ローダを通さない、いまのソースそのもの → 一致（要素識別子の注入を無効にした起動）
+  ✓ A3: 末尾の空白1文字だけの差でも一致にしない（正規化で差を消さない）
+  ✓ A3: 改行コードだけの差でも一致にしない
+  ✓ A3: 使っていない区画（other.ts）の sourcesContent が古くても、使った区画（page.tsx）で照合する → 特定
+  ✓ A3: 使った区画が古ければ、ほかの区画が一致していても止める
+  ✓ A3: 比較は決定的（同じ入力で同じ結果）
+  ✓ A3: ローダの変換は決定的（同じソースから同じ出力）
+  ✓ 独立性: A2・A3 が通っても A1 だけで止まる
+  ✓ 独立性: A1・A3 が通っても A2 だけで止まる
+  ✓ 独立性: A1・A2 が通っても A3 だけで止まる（ソースとマップのどちらも要求の前の書き換え）
+  ✓ 結果に絶対パスが無い
+
+3b. 実行コードの版（A4）と、読み直した生成物・ソースマップの組（A5）— 第3の経路
+  ✓ 前提: 区画の切り方は計装と IDE で同じファイル（chunkregions.cjs）。page.tsx の区画は 10 行目から
+  ✓ A4（T5）: 記録に実行中のスクリプトのハッシュが無い → executed-code-unverified（位置を出さない）
+  ✓ A4（T5）: ハッシュの形が違う（16 進 64 桁でない）→ 読まない → executed-code-unverified
+  ✓ 前提: 古い世代の page の区画は内容が同じ（ハッシュが同じ）で、2 行後ろにある
+  ✓ A4（第3の経路）: 実行中のコードが古い世代で、区画の証拠が無い → executed-code-mismatch（古い行を新しいソースマップで戻さない）
+  ✓ A4（第3の経路）: 区画の内容が同じ → いまの生成物の同じ区画の同じ行へ移して戻す → 正しい位置（page.tsx 4 行目の query）
+  ✓ A4: 位置を移したことを通った照合に書く
+  ✓ A4: 実行したコードの区画と同じ内容の区画がディスクに無い（そのモジュール自身が変わった）→ executed-code-mismatch
+  ✓ A4: 同じ内容の区画が2つ → 1つに決まらないので mismatch（推測で選ばない）
+  ✓ A4: 内側の生成物のフレームの版が違う → executed-code-mismatch（それより外側のフレームを採らない）
+  ✓ A4: 呼び出しを書いたフレームより外側（呼び出し元）の版の違いは、その位置を変えない → 特定する
+  ✓ A2 の改善（初回のコンパイル）: 生成物・ソースマップが要求の開始の後・SQL の前に書かれ、実行したコード＝その生成物 → 特定
+  ✓ 同じ時刻の条件で、実行したコード ≠ その生成物 → 止める（changed-during-request）
+  ✓ A5: 版を確かめた生成物と、位置を戻すのに使ったソースマップのまま → 組として通る
+  ✓ A5: 版を確かめた後に生成物の内容が変わった → chunk-changed
+  ✓ A5: 位置を戻すのに使ったソースマップが、いまのものと違う → map-changed
+  ✓ A5: 使ったソースマップの記録が無い → map-changed（一致とは扱わない）
+  ✓ mapFit: 同じ世代（page の区画が page のモジュールの中・列が行に収まる）→ 合う
+  ✓ mapFit: page の区画の開始が別のモジュール（other）の中 → 合わない
+  ✓ mapFit: 2つの区画が同じモジュールの中（並びが合わない）→ 合わない
+  ✓ mapFit: セグメントの列が行の長さを超える（並びのずれた世代の組）→ 合わない
+  ✓ mapFit: モジュールの見出しが無い生成物 → 合わない（未観測にする側）
+  ✓ mapFit: sections の形でないソースマップ → 合わない
+  ✓ 区画: 見出しの4つの形（実測）を区画の先頭とみなす
+  ✓ 区画: 行の途中の見出しに似た文字列は区画の先頭にしない
+  ✓ 区画: 区画のハッシュは見出しを含む（同じコードでもモジュールが違えば別の区画）
+  ✓ 区画: 決定的（同じ内容から同じ表）
+  ✓ 区画: 空白1文字の違いで、その区画のハッシュだけが変わる（正規化しない・ほかの区画は同じ）
+  ✓ 結果に絶対パスが無い（A4・A5 の詳細を含む）
+
+4. 要求の特定（requestOfSql）と観測の台帳
+  ✓ 同じトレースの受付スパンがちょうど1本 → その開始
+  ✓ 受付スパンがまだ無い（応答を送り終えていない）→ 特定しない
+  ✓ 受付スパンが2本 → 特定しない（1つに決まらない）
+  ✓ 受付スパンが SQL より後に始まっている → 特定しない（時刻の向きが合わない）
+  ✓ 別のトレースの受付スパンは使わない
+  ✓ 台帳: 受付スパンがまだ無い → request-start-unknown
+  ✓ 台帳: 受付スパンが書かれた後に照合し直す（前の「確かめられない」を使い回さない）→ 特定
+
+5. 由来の評価: 呼び出し位置を確かめられない SQL と「SQL を観測していない」を区別する
+  ✓ 前提: 静的解析器を使える（lineage.mjs）
+  ✓ SQL は観測したが呼び出し位置を確かめられない（hmr-evaluated-code）→ fetch-callsite-unverifiable（fetch-not-measured にしない）
+  ✓ （hmr-evaluated-code）理由を詳細に残す・候補を出さない
+  ✓ SQL は観測したが呼び出し位置を確かめられない（changed-during-request）→ fetch-callsite-unverifiable（fetch-not-measured にしない）
+  ✓ （changed-during-request）理由を詳細に残す・候補を出さない
+  ✓ SQL は観測したが呼び出し位置を確かめられない（map-source-mismatch）→ fetch-callsite-unverifiable（fetch-not-measured にしない）
+  ✓ （map-source-mismatch）理由を詳細に残す・候補を出さない
+  ✓ SQL は観測したが呼び出し位置を確かめられない（map-source-unverified）→ fetch-callsite-unverifiable（fetch-not-measured にしない）
+  ✓ （map-source-unverified）理由を詳細に残す・候補を出さない
+  ✓ SQL は観測したが呼び出し位置を確かめられない（request-start-unknown）→ fetch-callsite-unverifiable（fetch-not-measured にしない）
+  ✓ （request-start-unknown）理由を詳細に残す・候補を出さない
+  ✓ SQL そのものを観測していない → 従来どおり fetch-not-measured
+  ✓ ほかの理由（コンポーネントの外の取得関数など）→ 従来どおり fetch-not-measured
+  ✓ T3: 同じ文書のほかの SQL が確かめられなくても、確かめられた SQL の由来は保つ
+  ✓ 文言: 理由の表（観測画面）に、利用者に分かる言葉と再起動の案内がある
+
+✓ すべて通過 — 112 件通過 / 0 件失敗
+[guard] {"cmd":"node tests/hmr-guard-unit.spec.mjs","seconds":2,"exit":0,"signal":null,"stoppedBy":null,"maxPssMB":291,"maxAt":2,"maxProcs":1,"minAvailMB":15083,"leftover":0}

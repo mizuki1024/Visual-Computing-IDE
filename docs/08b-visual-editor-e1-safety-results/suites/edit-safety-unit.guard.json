@@ -1,0 +1,46 @@
+{
+ "summary": {
+  "cmd": "node tests/edit-safety-unit.spec.mjs",
+  "seconds": 4,
+  "exit": 0,
+  "signal": null,
+  "stoppedBy": null,
+  "maxPssMB": 117,
+  "maxAt": 2,
+  "maxProcs": 3,
+  "minAvailMB": 15166,
+  "leftover": 0
+ },
+ "limits": {
+  "seconds": 1500,
+  "pssMB": 6144,
+  "procs": 150,
+  "minAvailMB": 2048
+ },
+ "samples": [
+  {
+   "t": 2,
+   "procs": 2,
+   "pssMB": 117,
+   "availMB": 15208,
+   "byMB": {
+    "ide": 0,
+    "dev-server": 0,
+    "browser": 0,
+    "other": 117
+   }
+  },
+  {
+   "t": 4,
+   "procs": 3,
+   "pssMB": 75,
+   "availMB": 15166,
+   "byMB": {
+    "ide": 0,
+    "dev-server": 0,
+    "browser": 0,
+    "other": 75
+   }
+  }
+ ]
+}

@@ -1,0 +1,58 @@
+{
+ "summary": {
+  "cmd": "node tests/devserver-stub.spec.mjs",
+  "seconds": 6,
+  "exit": 0,
+  "signal": null,
+  "stoppedBy": null,
+  "maxPssMB": 54,
+  "maxAt": 6,
+  "maxProcs": 2,
+  "minAvailMB": 15222,
+  "leftover": 0
+ },
+ "limits": {
+  "seconds": 1500,
+  "pssMB": 6144,
+  "procs": 150,
+  "minAvailMB": 2048
+ },
+ "samples": [
+  {
+   "t": 2,
+   "procs": 2,
+   "pssMB": 40,
+   "availMB": 15222,
+   "byMB": {
+    "ide": 14,
+    "dev-server": 0,
+    "browser": 0,
+    "other": 26
+   }
+  },
+  {
+   "t": 4,
+   "procs": 2,
+   "pssMB": 41,
+   "availMB": 15249,
+   "byMB": {
+    "ide": 14,
+    "dev-server": 0,
+    "browser": 0,
+    "other": 26
+   }
+  },
+  {
+   "t": 6,
+   "procs": 2,
+   "pssMB": 54,
+   "availMB": 15260,
+   "byMB": {
+    "ide": 15,
+    "dev-server": 0,
+    "browser": 0,
+    "other": 39
+   }
+  }
+ ]
+}

@@ -1,0 +1,1 @@
+{"progWhileStarting":"Next.js の出力はまだありません。 HTTP の応答を確認するまで「実行中」にはしません。","progAfterRunning":"","oldReadWaitedMs":30001,"oldAssertionWouldPass":false}

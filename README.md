@@ -32,7 +32,7 @@
 | **探索 M2 の最終確認** | **残条件の A〜D 分類・限定試用の計画とチェックリスト・試用の手引きの更新・視覚編集への引き継ぎ（設計と検証だけ。製品コードは無変更）** | **完了（`docs/07c-m2-readiness-review.md`・`07c-user-trial-plan.md`・`07c3-trial-guide.md`・`07d-visual-editor-handoff.md`）。題材を固定した限定試用は条件付きで可能。M2 自体は未達（#8・#9）** |
 | Phase 7C-3 以降 | 題材を固定した限定試用の実施・P1（利用者自身のプロジェクトへの対応） | 未着手（試用の準備は上の行で完了） |
 | 視覚編集: 設計・PoC | IA・UX・UI（採用画面 `docs/design-references/13-edit-adopted-ui.png`）・隔離した技術 PoC・独立レビュー（F-01〜F-11） | 完了（`docs/02e`・`02f`・`03e`・`04e`・`06h`・`07d`）。PoC（`poc/edit/`）は隔離したまま |
-| **視覚編集 E1** | **安全なコード変更の基盤（画面なし・既定で無効）: 1ファイル・1トークンの className の書き換えエンジン（`src/server/edit/`）。3段の照合（版・内容の指紋）・src/ の範囲とリンクの拒否・外部変更の検出・ジャーナルと復旧・検証の契約** | **完了（`docs/08a-visual-editor-e1-report.md`）。F-01〜F-05 の再現試験は製品のコードで期待どおり。最後の照合〜rename の窓などの競合は保証の外（報告書 第4.2節・第5節）。利用者向けの画面・API は無い（E4 まで作らない）** |
+| **視覚編集 E1** | **安全なコード変更の基盤（画面なし・既定で無効）: 1ファイル・1トークンの className の書き換えエンジン（`src/server/edit/`）。3段の照合（版・内容の指紋）・src/ の範囲とリンクの拒否・外部変更の検出・ジャーナルと復旧・検証の契約** | **完了（`docs/08a-visual-editor-e1-report.md`）。F-01〜F-05 の再現試験は製品のコードで期待どおり。E1.1 の安全性の監査（`docs/08b-visual-editor-e1-safety-review.md`）で、外部変更との競合（退避リンク）・ディレクトリの差し替え（Linux でディレクトリの fd を固定）・鍵の競合を直し、結果に `uncertain` と保証の範囲を足した。検出できない競合は結果に明示する（08b 第3.4節）。利用者向けの画面・API は無い（E4 まで作らない）** |
 | 視覚編集 E2 以降 | プレビューと編集対象の同期 → 編集用の選択 → 視覚編集＋差分と適用（ここで初めて利用者に見せる）… | 未着手（`docs/07d` 第5節・`08a` 第8節） |
 
 Phase 7A は、実ブラウザで「IDE を開く → プロジェクトを指定する → 起動する →
@@ -145,7 +145,7 @@ npm run runtime:reap # 孤立した開発サーバーの掃除
 ブラウザは既定で Chrome（`PW_CHANNEL=none` で同梱の chromium）。`poc/` の PoC ランナーは Docker の Postgres を使うため、
 既定のテストには含まれない（記録済みの観測結果を読む）。
 
-**全件**（探索の 36 本＋視覚編集 E1 の 6 本＋`lineage-e2e@copy`）は `bash scripts/test-all.sh <出力ディレクトリ>` で直列に回す
+**全件**（探索の 36 本＋視覚編集 E1 の 6 本＋E1.1 の `edit-safety-unit`＋`lineage-e2e@copy`）は `bash scripts/test-all.sh <出力ディレクトリ>` で直列に回す
 （`npm run build` 済みが前提。一覧と `tests/*.spec.mjs` を両向きに照合する）。編集 E1 の試験（`tests/edit-*.spec.mjs`）は
 使い捨ての題材だけを書き換え、`edit-e2e` は `poc/fixture-edit` の依存（`cd poc/fixture-edit && npm ci`）が要る。
 
@@ -159,7 +159,7 @@ src/components/   描画部品。合成でも実測でも同じ型を受け取�
 src/lib/          model（関係モデルの契約）/ adapter / layout / derive
 src/data/         記録済みの観測結果（PoC-01〜05 の実測。書き換えない）
 src/server/       Node 側。プロジェクト検出・開発サーバーの起動停止・入口の防御
-src/server/edit/  視覚編集 E1 の安全なコード変更の基盤（既定で無効・画面と API の入口なし。docs/08a）
+src/server/edit/  視覚編集 E1 の安全なコード変更の基盤（既定で無効・画面と API の入口なし。docs/08a・安全性の監査は docs/08b）
 src/state/        画面の状態（探索 / 実行）
 tests/            1,464 件。純粋な層は素の Node、画面は実ブラウザで見る
 poc/              PoC-01〜05 の検証用アプリとランナー（IDE 本体には含めない）

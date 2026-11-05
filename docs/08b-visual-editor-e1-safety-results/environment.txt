@@ -1,0 +1,11 @@
+# 再現条件（視覚編集 E1.1 安全性の監査）。秘密情報は含めない
+記録日時(UTC): 2026-11-05T08:55:19Z
+作業基準: feature/visual-editor @ 87cdfa9（= feature/explore @ 87cdfa9。開始時の作業ツリーはクリーン）。main @ b040295
+OS: Linux 6.18.44-fc-v236  ファイルシステム（使い捨ての題材 /tmp）: ext2/ext3  リポジトリ: ext2/ext3
+Node: v22.23.4  npm: 10.9.9
+IDE next: 16.4.3  playwright-core: 1.64.1  typescript: 5.7.3
+ブラウザ: 同梱の Chromium（PW_CHANNEL=none。playwright-core が探す *-1248 に、入っている *-1243 を /opt/pw-browsers でシンボリックリンク — chromium と chromium_headless_shell の両方。リポジトリの外）
+DB: PostgreSQL 16.15 (Ubuntu 16.15-0ubuntu0.（initdb の使い捨て、127.0.0.1:55432・trust、poc/fixture-app/db/init.sql、poc.listings 12 行）。題材の .env は .env.example の複写
+/proc/self/fd によるディレクトリの固定: 使える（Linux）
+実行: npm ci（ルート・poc/fixture-app・poc/fixture-edit）→ prisma generate（poc/fixture-app）→ npm run typecheck → npm run build → PW_CHANNEL=none bash scripts/test-all.sh docs/08b-visual-editor-e1-safety-results/suites
+修正前の結果: 87cdfa9 を git worktree で取り出し、tsc -p tsconfig.lib.json で別の出力先に作り、VCIDE_LIBJS でその出力を指して edit-safety-unit を回した（before-fix/）
