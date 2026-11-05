@@ -12,8 +12,12 @@
  *   submitVerification(報告)             適用結果の検証の契約（verification）。success = committed かつ verified
  *   revert(txId)                         いまの内容が適用直後の内容とバイト一致するときだけ戻す（それ自体も1つの適用として記録）
  *   recover()                            持ち主のいない prepared・applying だけを、仕様（journal.planRecovery）どおりに片付ける
+ *   inspectRecovery()                    E2: 復旧の点検。**読むだけ**（ソース・一時ファイル・ジャーナル・鍵を変えない）。予定の処理と、それが何を変えるか
+ *   startupRecovery()                    E2: 起動時の復旧。書き込みが無効なら点検だけ。有効なら点検 → recover()（docs/08c 第3.2節）
+ *   carrySelection(txId, DOM の選択)      E2: 自分が書いた変更の後の選択の引き継ぎ（docs/07d 3.3）。afterRev と afterFingerprint の両方が
+ *                                        一致するときだけ新しい対象を返す。読むだけ
  *
- * 既定で無効: 書き込み（apply・revert・recover の書き込み）は VCIDE_EDIT_E1_WRITE=1 のときだけ。
+ * 既定で無効: 書き込み（apply・revert・recover の書き込み）は VCIDE_EDIT_E1_WRITE=1 かつ Linux のときだけ（E2: macOS 等は無効 — config.editWriteGate）。
  * 画面・API の入口は無い（E4 まで作らない — docs/07d 第5節）。探索のモジュールは読むだけで、変えない。
  * ========================================================================== */
 import { createHash, randomBytes } from 'node:crypto';
@@ -24,12 +28,12 @@ import { anchorSupport, resolveSelection, sourceRevisionsOf } from '../anchors';
 import { runtimeDir } from '../ide';
 import { parseSelection } from '../../lib/previewProtocol';
 import {
-  CLOCK_SKEW_MS, EDIT_WRITE_ENV, editWritesEnabled, JOURNAL_RETENTION_MS, MAX_VERIFICATION_AGE_MS, REQUIRED_VIEWPORTS, TEMP_MARK,
+  CLOCK_SKEW_MS, EDIT_WRITE_ENV, editWriteGate, editWritesEnabled, JOURNAL_RETENTION_MS, MAX_VERIFICATION_AGE_MS, REQUIRED_VIEWPORTS, TEMP_MARK,
   type RequiredViewport,
 } from './config';
 import {
-  acquireLock, cleanupRecordedArtifacts, pidAlive, recordedArtifactsPresent, removeRecord, replaceSourceFile,
-  snapshotNameOf, writeJsonAtomic, type WriteStep,
+  acquireLock, cleanupRecordedArtifacts, inspectTargetContent, ownerStatus, predictRecordedCleanup, recordedArtifactsPresent, removeRecord, replaceSourceFile,
+  selfStartId, snapshotNameOf, writeJsonAtomic, type OwnerCheck, type WriteStep,
 } from './fsio';
 import {
   journalName, listJournals, planRecovery, readJournalFile, TERMINAL_STATES, transition, TX_ID_RE, verificationName,
@@ -42,7 +46,7 @@ import { CLASS_REFUSAL_TEXT, inspectElementAt, type ElementFingerprint, type Ele
 import { locateToken, parseChange, type ChangeRefusal, type ClassTokenChange } from './validation';
 import { evaluateVerification, parseVerificationReport, type VerificationResult } from './verification';
 
-export { EDIT_WRITE_ENV, editWritesEnabled };
+export { EDIT_WRITE_ENV, editWriteGate, editWritesEnabled };
 
 export type Stage = 'resolve' | 'draft' | 'apply';
 export type RefusalReason =
@@ -124,10 +128,58 @@ export type ApplyResult =
   | { status: 'uncertain'; written: true | 'unknown'; reason: string; detail: string; txId?: string; fileState?: FileState | null;
     needsAttention: true; kept?: string[] };
 
+/** ApplyResult の種類（6つ。docs/08b 第3.5節の表と tests/edit-sync-unit Y5 が照合する） */
+export const APPLY_STATUSES = ['committed', 'refused', 'conflict', 'busy', 'failed', 'uncertain'] as const;
+/* 型の上でも、ApplyResult['status'] と APPLY_STATUSES が同じ集合であることを確かめる（どちらかだけを変えると型検査で止まる） */
+type _StatusesCoverType = Exclude<ApplyResult['status'], typeof APPLY_STATUSES[number]> extends never ? true : never;
+type _TypeCoversStatuses = Exclude<typeof APPLY_STATUSES[number], ApplyResult['status']> extends never ? true : never;
+export const APPLY_STATUSES_MATCH_TYPE: _StatusesCoverType & _TypeCoversStatuses = true;
+
 export interface RecoveryEntry {
   txId: string | null; file?: string; state?: string; action: string; why: string; wrote: boolean; fileState?: FileState; removedTemps?: number;
 }
 export interface RecoveryReport { status: 'done' | 'dry-run' | 'busy'; entries: RecoveryEntry[]; pruned: string[] }
+
+/** E2: 予定の処理が変えるもの。source = 対象のソース、artifacts = src/ の下の一時ファイル・退避リンク（失うものが無いものだけ外す）、journal = IDE 側の記録 */
+export type RecoveryEffect = 'source' | 'artifacts' | 'journal';
+export interface InspectionEntry {
+  txId: string; file: string; state: string; kind: string;
+  fileState: FileState;
+  ownerAlive: boolean; ownerCheck: OwnerCheck | 'self';
+  /** journal.planRecovery の判断（none・mark-failed・restore-before・refuse） */
+  plannedAction: string; why: string;
+  effects: RecoveryEffect[];
+  /** いま src/ の下に残っている、この記録の一時ファイル・退避リンク・自分の版の名前 */
+  leftovers: string[];
+  needsAttention: boolean;
+}
+/** E2: 復旧の点検（**読むだけ**。mutates は常に false） */
+export interface RecoveryInspection {
+  status: 'inspected'; mutates: false;
+  gate: { enabled: boolean; reason: string; detail: string };
+  entries: InspectionEntry[];
+  /** 形の合わない記録の名前（読まない・従わない・消さない） */
+  unreadable: string[];
+  /** 保存期間の整理で消す、終わって片付いた記録 */
+  prunable: string[];
+  /** 保存期間を過ぎても残す記録と理由（要確認・残したファイルがある） */
+  retained: { txId: string; why: 'needs-attention' | 'leftovers' }[];
+}
+export interface StartupRecovery {
+  /** inspect-only: 書き込みが無効なので点検だけ（何も変えていない）。recovered: 点検の後に recover() を1回。busy: 鍵が取れず何もしていない */
+  mode: 'inspect-only' | 'recovered' | 'busy';
+  gate: RecoveryInspection['gate'];
+  inspection: RecoveryInspection;
+  recovery: RecoveryReport | null;
+}
+
+/** E2: 選択の引き継ぎの結果（docs/07d 3.3） */
+export type CarryReason =
+  | 'bad-request' | 'tx-unknown' | 'not-committed' | 'not-carriable' | 'reverted' | 'dom-not-at-after' | 'target-unresolved'
+  | 'target-moved' | 'outside-scope' | 'unsupported-encoding' | 'verifier-unavailable' | 'changed-since-commit' | 'fingerprint-mismatch';
+export type CarryResult =
+  | { carried: true; carriedFrom: string; target: TargetView }
+  | { carried: false; reason: CarryReason; detail: string; reselect: true; anchorReason?: string };
 
 export interface Outcome {
   txId: string; write: string; kind: string | null;
@@ -136,6 +188,8 @@ export interface Outcome {
   success: boolean;
   /** 検証の後にファイルが変わったか（verified のときだけ意味を持つ） */
   staleSinceVerification: boolean;
+  /** E2: 検証の報告の文書と中継（previewGateway）の結び付けは確かめていない（verification.ts の documentBinding） */
+  documentBinding: 'not-checked';
 }
 
 export interface EditEngineOptions {
@@ -336,7 +390,7 @@ export class EditEngine {
   apply(req: unknown): ApplyResult {
     const refused = (reason: string, detail: string, extra: Record<string, unknown> = {}): ApplyResult =>
       ({ status: 'refused', written: false, reason, detail, ...extra });
-    if (!editWritesEnabled()) return refused('edit-disabled', `編集の書き込みは無効です（${EDIT_WRITE_ENV}=1 を明示したときだけ有効）。ファイルは変更していません。`);
+    { const gate = editWriteGate(); if (!gate.enabled) return refused('edit-disabled', gate.detail); }
     if (!isObj(req) || !Object.keys(req).every((k) => ['changes', 'expect'].includes(k)) || !Array.isArray(req.changes)
       || !req.changes.every((c) => isObj(c) && Object.keys(c).every((k) => ['draftId', 'reviewedDiffHash', 'selection'].includes(k)))) {
       return refused('bad-request', '適用の要求の形が正しくありません。');
@@ -411,7 +465,7 @@ export class EditEngine {
     const now = this.#now();
     let j: JournalRecord = {
       v: 1, txId, kind: p.kind, revertOf: p.revertOf, state: 'prepared', projectRoot: this.root, file: p.file,
-      owner: { pid: process.pid, host: os.hostname() }, createdAt: now, updatedAt: now, committedAt: null,
+      owner: { pid: process.pid, host: os.hostname(), ...(selfStartId() ? { start: selfStartId() as string } : {}) }, createdAt: now, updatedAt: now, committedAt: null,
       beforeHash: p.beforeHash, afterHash: p.afterHash, beforeRev: p.beforeRev, afterRev: p.afterRev,
       range: p.range, change: { from: p.change.from, to: p.change.to }, tempName: `.${path.basename(p.file)}${TEMP_MARK}${txId}.tmp`,
       target: p.target, draftId: p.draftId, diffHash: p.diffHash, expect: p.expect,
@@ -489,7 +543,7 @@ export class EditEngine {
   /** 確定した適用の取り消し。いまの内容が適用直後の内容とバイト一致するときだけ（外部変更の後は拒否 — T11） */
   revert(txId: unknown): ApplyResult {
     const refused = (reason: string, detail: string): ApplyResult => ({ status: 'refused', written: false, reason, detail });
-    if (!editWritesEnabled()) return refused('edit-disabled', `編集の書き込みは無効です（${EDIT_WRITE_ENV}=1 を明示したときだけ有効）。ファイルは変更していません。`);
+    { const gate = editWriteGate(); if (!gate.enabled) return refused('edit-disabled', gate.detail); }
     if (typeof txId !== 'string' || !TX_ID_RE.test(txId)) return refused('bad-request', '適用の識別子の形が正しくありません。');
     const j = this.journal(txId);
     if (!j) return refused('tx-unknown', 'この適用の記録がありません（または記録の形が正しくありません）。');
@@ -527,11 +581,16 @@ export class EditEngine {
   }
 
   /* ------------------------------------------------------------ 復旧 */
-  #ownerAlive(j: JournalRecord): boolean {
-    if (j.owner.host !== os.hostname()) return true;   // 別の機械の記録は確かめられない（安全側: 何もしない）
-    if (j.owner.pid === process.pid) return IN_FLIGHT.has(j.txId);
-    return pidAlive(j.owner.pid);
+  /**
+   * 持ち主の判断。別の機械の記録は確かめられない（安全側: 何もしない）。自分の pid の記録は、このプロセスで進行中のときだけ生きている
+   * （同じ pid だった前のプロセスの残り）。別の pid は pid ＋ 開始時刻（E2。fsio.judgeOwner）
+   */
+  #owner(j: JournalRecord): { alive: boolean; check: OwnerCheck | 'self' } {
+    if (j.owner.host !== os.hostname()) return { alive: true, check: 'other-host' };
+    if (j.owner.pid === process.pid) return { alive: IN_FLIGHT.has(j.txId), check: 'self' };
+    return ownerStatus(j.owner);
   }
+  #ownerAlive(j: JournalRecord): boolean { return this.#owner(j).alive; }
 
   /**
    * 復旧。対象は持ち主のいない prepared・applying だけ（committed・failed は何もしない — F-04）。
@@ -540,14 +599,12 @@ export class EditEngine {
   recover(): RecoveryReport {
     const { records, unreadable } = listJournals(this.journalDir);
     const bad: RecoveryEntry[] = unreadable.map((n) => ({ txId: null, file: n, action: 'none', why: 'unreadable', wrote: false }));
+    /* 書き込みが無効（環境変数なし・Linux 以外）: 判断を見せるだけ。読むだけで、鍵も取らない */
     if (!editWritesEnabled()) {
       const entries = records.map((j): RecoveryEntry => {
-        const fileState = this.#fileState(j);
-        const plan = planRecovery(j, fileState, this.#ownerAlive(j));
-        const left = this.#artifactSets(j).flatMap((a) => {
-          const x = recordedArtifactsPresent(this.root, j.file, a.tempName);
-          return [x.temp ? a.tempName : null, x.orig ? snapshotNameOf(a.tempName) : null, x.ours ? a.tempName.replace(/\.tmp$/, '.ours.tmp') : null];
-        }).filter((x): x is string => !!x);
+        /* E2: 点検（inspectRecovery）と同じ予測（失うものの無い退避リンクを外した後の状態で判断する） */
+        const { fileState, plan } = this.#predictPlan(j, this.#ownerAlive(j));
+        const left = this.#leftovers(j);
         return { txId: j.txId, file: j.file, state: j.state, action: plan.kind, wrote: false, fileState,
           why: `（書き込みが無効のため実行していません）${plan.why}${left.length ? `（残っているファイル: ${left.join('・')}）` : ''}` };
       });
@@ -649,12 +706,31 @@ export class EditEngine {
     return { ...base, action: 'restore-before', why: `戻せませんでした: ${r.detail}`, wrote: r.status === 'unknown' && r.renamed, removedTemps };
   }
 
-  /** 保存期間を過ぎた**終わりの**ジャーナル（と検証の記録）だけを消す */
+  /** この記録の、いま src/ の下に残っている一時ファイル・退避リンク・自分の版の名前（読むだけ） */
+  #leftovers(j: JournalRecord): string[] {
+    return this.#artifactSets(j).flatMap((a) => {
+      const x = recordedArtifactsPresent(this.root, j.file, a.tempName);
+      return [x.temp ? a.tempName : null, x.orig ? snapshotNameOf(a.tempName) : null, x.ours ? a.tempName.replace(/\.tmp$/, '.ours.tmp') : null];
+    }).filter((x): x is string => !!x);
+  }
+
+  /**
+   * 保存期間の整理の判断（読むだけ）。終わった（committed・failed）・期間を過ぎた記録のうち、
+   * E2: **要確認（needsAttention）と、src/ の下にファイルを残した記録は消さない**（判断できない記録・残ったファイルの手がかりを自動で消さない）
+   */
+  #pruneDecision(j: JournalRecord): 'prune' | 'needs-attention' | 'leftovers' | 'keep' {
+    if (!(j.state === 'committed' || j.state === 'failed') || !(Date.parse(j.updatedAt) < this.#clock() - this.#retention)) return 'keep';
+    if (j.projectRoot !== this.root) return 'keep';
+    if (j.needsAttention) return 'needs-attention';
+    if (this.#leftovers(j).length) return 'leftovers';
+    return 'prune';
+  }
+
+  /** 保存期間を過ぎた**終わりの・片付いた**ジャーナル（と検証の記録）だけを消す */
   #prune(): string[] {
-    const limit = this.#clock() - this.#retention;
     const out: string[] = [];
     for (const j of listJournals(this.journalDir).records) {
-      if ((j.state === 'committed' || j.state === 'failed') && Date.parse(j.updatedAt) < limit) {
+      if (this.#pruneDecision(j) === 'prune') {
         removeRecord(this.journalDir, verificationName(j.txId));
         removeRecord(this.journalDir, journalName(j.txId));
         out.push(j.txId);
@@ -663,12 +739,137 @@ export class EditEngine {
     return out;
   }
 
+  /* ------------------------------------------------------------ E2: 復旧の点検・起動時の復旧 */
+  /**
+   * 復旧の点検。**読むだけ**: ジャーナルの一覧・対象のファイルの内容・残っているファイルの有無・持ち主のプロセスを読み、
+   * planRecovery の判断と、その処理が何を変えるかを返す。鍵を取らない・ディレクトリを作らない・何も消さない。
+   * 書き込みの可否に関係なく呼べる（書き込みが無効な起動で見せるもの）。
+   */
+  inspectRecovery(): RecoveryInspection {
+    const g = editWriteGate();
+    const gate = { enabled: g.enabled, reason: g.reason, detail: g.detail };
+    const { records, unreadable } = listJournals(this.journalDir);
+    const entries: InspectionEntry[] = [];
+    const prunable: string[] = [];
+    const retained: RecoveryInspection['retained'] = [];
+    for (const j of records) {
+      if (j.projectRoot !== this.root) continue;
+      const owner = this.#owner(j);
+      const leftovers = this.#leftovers(j);
+      const { fileState, plan } = this.#predictPlan(j, owner.alive);
+      const effects: RecoveryEffect[] = [];
+      if (plan.kind !== 'none') {
+        effects.push('journal');
+        if (leftovers.length) effects.push('artifacts');
+        if (plan.kind === 'restore-before') effects.push('source');
+      }
+      entries.push({ txId: j.txId, file: j.file, state: j.state, kind: j.kind, fileState, ownerAlive: owner.alive, ownerCheck: owner.check,
+        plannedAction: plan.kind, why: plan.why, effects, leftovers, needsAttention: j.needsAttention });
+      const pd = this.#pruneDecision(j);
+      if (pd === 'prune') prunable.push(j.txId);
+      else if (pd === 'needs-attention' || pd === 'leftovers') retained.push({ txId: j.txId, why: pd });
+    }
+    return { status: 'inspected', mutates: false, gate, entries, unreadable, prunable, retained };
+  }
+
+  /**
+   * recover（#recoverOne）が下す判断の予測（**読むだけ**）。recover は終わっていない記録について、まず失うものの無い
+   * 一時ファイル・退避リンクを外してから対象の状態を見る。点検は外さずに、外した後の状態を読んで同じ規則で判断する。
+   */
+  #predictPlan(j: JournalRecord, alive: boolean): { fileState: FileState; plan: ReturnType<typeof planRecovery> } {
+    let fileState = this.#fileState(j);
+    if (TERMINAL_STATES.includes(j.state) || alive) return { fileState, plan: planRecovery(j, fileState, alive) };
+    const preds = this.#artifactSets(j).map((a) => predictRecordedCleanup(this.root, j.file, a.tempName, a.origAllowed, a.oursAllowed));
+    const kept = preds.flatMap((x) => (x ? [x.temp, x.orig, x.ours].filter((o) => o === 'kept') : []));
+    if (fileState === 'outside-scope') {
+      /* 退避リンクが書き込み先と同じ実体で残っている（リンク数 2）: 外した後のリンク数が 1 なら、内容で判断する（recover と同じ） */
+      const w = resolveWritable(this.root, j.file);
+      const same = preds.reduce((n, x) => n + (x?.sameAsTarget ?? 0), 0);
+      const c = !w.ok && w.reason === 'hard-linked' ? inspectTargetContent(this.root, j.file) : null;
+      if (c && c.nlink - same === 1) fileState = c.hash === j.beforeHash ? 'at-before' : c.hash === j.afterHash ? 'at-after' : 'other';
+    }
+    let plan = planRecovery(j, fileState, false);
+    if (plan.kind === 'restore-before' && kept.length) {
+      plan = { kind: 'refuse', why: '置き換えの最中の外部の変更を含むファイルが残っています。書かずに要確認' };
+    }
+    return { fileState, plan };
+  }
+
+  /**
+   * 起動時の復旧（E2）。**書き込みが無効なら点検だけ**で、ソース・一時ファイル・ジャーナル・鍵を変えない。
+   * 有効なら点検の後に recover() を1回（recover は仕様どおり、確定・失敗の記録・判断できない記録・外部の内容を持つファイルに触れない）。
+   * 製品の起動からはまだ呼んでいない（呼び出し場所は編集モードの入口と一緒に決める — docs/08c 第4節）。
+   */
+  startupRecovery(): StartupRecovery {
+    const inspection = this.inspectRecovery();
+    if (!inspection.gate.enabled) return { mode: 'inspect-only', gate: inspection.gate, inspection, recovery: null };
+    const recovery = this.recover();
+    return { mode: recovery.status === 'busy' ? 'busy' : recovery.status === 'done' ? 'recovered' : 'inspect-only', gate: inspection.gate, inspection, recovery };
+  }
+
+  /* ------------------------------------------------------------ E2: 選択の引き継ぎ */
+  /**
+   * 自分が書いた変更の後の選択の引き継ぎ（docs/07d 3.3）。**読むだけ**。次のすべてを満たすときだけ、適用後の版の新しい対象を返す:
+   *   1. txId の記録が、このプロジェクトの kind: 'apply'・state: 'committed'（transient・uncertain・failed・prepared・applying は引き継がない）
+   *   2. その適用を取り消していない
+   *   3. 記録に適用後の指紋（afterFingerprint）がある
+   *   4. いまの DOM の選択の版（data-vcide-rev）が afterRev（HMR の後の DOM）
+   *   5. 探索の7段の照合（DOM の版＝対応表の版＝ファイルの版）を通り、同じ要素（識別子・ファイル・行・列・タグ・コンポーネント）
+   *   6. いまのファイルの内容が、書いた内容（afterHash）とバイト一致（外部の変更が混ざっていない）
+   *   7. その位置の要素の指紋が afterFingerprint（hash と structureHash の両方）と一致
+   * どれか1つでも外れれば引き継がず、選び直しを求める（推測で付け替えない）。探索モードの照合は変えない。
+   */
+  carrySelection(txId: unknown, selection: unknown): CarryResult {
+    const no = (reason: CarryReason, detail: string, extra: { anchorReason?: string } = {}): CarryResult =>
+      ({ carried: false, reason, detail, reselect: true, ...extra });
+    if (typeof txId !== 'string' || !TX_ID_RE.test(txId)) return no('bad-request', '適用の識別子の形が正しくありません。');
+    const sel = parseSelection(selection);
+    if (!sel) return no('bad-request', '選択の形が正しくありません（製品のプレビューの選択の形。版を含む）。');
+    const j = this.journal(txId);
+    if (!j || j.projectRoot !== this.root) return no('tx-unknown', 'この適用の記録がありません。');
+    if (j.state !== 'committed') return no('not-committed', `この適用は確定していません（${j.state}${j.failure ? `・${j.failure.reason}` : ''}）。選択を引き継ぎません。要素を選び直してください。`);
+    if (j.kind !== 'apply' || !j.target || !j.target.afterFingerprint) return no('not-carriable', 'この記録には、引き継ぎに使う適用後の要素の指紋がありません。要素を選び直してください。');
+    if (listJournals(this.journalDir).records.some((x) => x.revertOf === j.txId && x.state === 'committed')) {
+      return no('reverted', 'この適用は取り消されています。要素を選び直してください。');
+    }
+    if (sel.anchorRev !== j.afterRev) return no('dom-not-at-after', `プレビューの要素の版（${sel.anchorRev ?? 'なし'}）が、書いた後の版（${j.afterRev}）ではありません（再描画の前か、外部の変更が入った）。`);
+    const res = resolveSelection(this.root, anchorSupport(this.root), sel);
+    if (res.status !== 'resolved') return no('target-unresolved', res.detail, { anchorReason: res.reason });
+    const a = res.anchor;
+    const t = j.target;
+    const af = j.target.afterFingerprint;
+    if (a.id !== t.anchorId || a.file !== j.file || a.line !== t.line || a.col !== t.col || a.tag !== t.tag || a.component !== t.component) {
+      return no('target-moved', '選んだ要素は、書き込んだ要素と別の要素です（位置・タグ・コンポーネントが違う）。引き継ぎません。');
+    }
+    const w = resolveWritable(this.root, j.file);
+    if (!w.ok) return no('outside-scope', w.detail);
+    const id = this.#read(w.file);
+    if (!id) return no('unsupported-encoding', REFUSAL_TEXT['unsupported-encoding'] as string);
+    if (id.contentHash !== j.afterHash || id.rev !== j.afterRev) return no('changed-since-commit', '書き込んだ後に、このファイルが変わりました（外部の変更）。引き継ぎません。');
+    const el = this.#inspect(id.text, j.file, t.line, t.col);
+    if (el === 'unavailable') return no('verifier-unavailable', '構文解析器（typescript）を読み込めないため照合できません。');
+    if (!el || el.tag !== t.tag || el.component !== t.component
+      || el.fingerprint.hash !== af.hash || el.fingerprint.structureHash !== af.structureHash) {
+      return no('fingerprint-mismatch', 'その位置の要素の内容が、書き込んだ後に期待した要素と一致しません。引き継ぎません。');
+    }
+    const nt: TargetRecord = {
+      id: `t-${randomBytes(6).toString('hex')}`, anchorId: a.id, file: a.file, line: a.line, col: a.col, tag: a.tag, component: a.component,
+      sourceRev: a.rev, domRev: sel.anchorRev as string, manifestRev: a.rev, contentHash: id.contentHash, fingerprint: el.fingerprint,
+      classTokens: el.className.kind === 'literal' ? el.className.tokens.map((x) => x.text) : null,
+      classReason: el.className.kind === 'literal' ? null : CLASS_REFUSAL_TEXT[el.className.reason],
+      resolvedAt: this.#now(),
+    };
+    this.#hold(this.#targets, nt.id, nt);
+    return { carried: true, carriedFrom: j.txId, target: this.#targetView(nt) };
+  }
+
   /* ------------------------------------------------------------ 検証 */
   /** 適用結果の検証の報告を受け取り、サーバー側の契約で確かめて記録する（F-05） */
   submitVerification(report: unknown): VerificationResult {
     const nowMs = this.#clock();
     const reject = (code: 'bad-report' | 'tx-unknown' | 'tx-not-committed', detail: string, txId: string | null): VerificationResult =>
-      ({ status: 'not-verified', txId, problems: [{ code, detail }], verifiedRevisions: null, measuredAt: null, receivedAt: new Date(nowMs).toISOString() });
+      ({ status: 'not-verified', txId, problems: [{ code, detail }], verifiedRevisions: null, measuredAt: null, receivedAt: new Date(nowMs).toISOString(),
+        documentBinding: 'not-checked', measurement: 'declared-by-report' });
     const rep = parseVerificationReport(report);
     if (!rep) return reject('bad-report', '検証の報告の形が正しくありません（知らないキー・型・値の範囲・実測/予測の別・予測の印の数・文書の識別子）。', null);
     if (!TX_ID_RE.test(rep.txId)) return reject('tx-unknown', '適用の識別子の形が正しくありません。', null);
@@ -717,7 +918,7 @@ export class EditEngine {
   /** 適用の結果。success は「committed かつ verified（記録から読む）」のときだけ */
   outcome(txId: string): Outcome {
     const j = this.journal(txId);
-    if (!j) return { txId, write: 'unknown', kind: null, verification: 'pending', success: false, staleSinceVerification: false };
+    if (!j) return { txId, write: 'unknown', kind: null, verification: 'pending', success: false, staleSinceVerification: false, documentBinding: 'not-checked' };
     const results = this.#verifications(txId);
     const ok = [...results].reverse().find((r) => r.status === 'verified' && r.verifiedRevisions);
     const verification = ok ? 'verified' : results.length ? 'not-verified' : 'pending';
@@ -731,6 +932,7 @@ export class EditEngine {
       const otherRevs = others.length ? sourceRevisionsOf(this.root, others) : {};
       stale = cur !== vr[j.file] || others.some((f) => (otherRevs[f] ?? null) !== vr[f]);
     }
-    return { txId, write: j.state, kind: j.kind, verification, success: j.state === 'committed' && verification === 'verified' && !!ok, staleSinceVerification: stale };
+    return { txId, write: j.state, kind: j.kind, verification, success: j.state === 'committed' && verification === 'verified' && !!ok, staleSinceVerification: stale,
+      documentBinding: 'not-checked' };
   }
 }

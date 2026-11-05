@@ -11,7 +11,8 @@
  *   6. 時刻: 確定の後に測った・未来でない・古すぎない
  *   7. 描画: 測った要素がある・すべてに変更後の token があり、変更前の token が無い
  *   8. （サーバー側で与えたときだけ）期待する計算済みスタイル
- * 文書の識別子（token）は形を確かめて記録する。**実際の中継の応答との結び付け（previewGateway の文書の識別子）は E2 で行う**。
+ * 文書の識別子（token）は形を確かめて記録する。**実際の中継の応答との結び付け（previewGateway の文書の識別子）は確かめていない**
+ * （E2 で探索の持ち物の変更が要ると分かり、決定待ち — docs/08c 第4節）。結果の documentBinding: 'not-checked' がそれを示す。
  * ========================================================================== */
 import type { RequiredViewport } from './config';
 
@@ -54,6 +55,14 @@ export interface VerificationResult {
   verifiedRevisions: Record<string, string> | null;
   measuredAt: string | null;
   receivedAt: string;
+  /**
+   * E2: 報告の文書（`document.token`）が、いまの起動の中継（previewGateway）が実際に返した文書・IDE の接続のものかを
+   * **確かめていない**ことを明示する（docs/08c 第4節）。結び付けは探索の持ち物（previewProtocol・previewGateway）への
+   * 知らせの追加が要り、E2 のこの段では実装していない。verified はこの結び付けの証拠ではない
+   */
+  documentBinding: 'not-checked';
+  /** 実測か予測かは、報告の申告（各幅の mode・予測の印の数）に依る。サーバーは描画を自分で測っていない */
+  measurement: 'declared-by-report';
 }
 
 const isObj = (v: unknown): v is Record<string, unknown> =>
@@ -179,5 +188,6 @@ export function evaluateVerification(req: VerificationRequirement, rep: Verifica
   return {
     status: ok ? 'verified' : 'not-verified', txId: rep.txId, problems: dedup,
     verifiedRevisions: ok ? verified : null, measuredAt: rep.measuredAt, receivedAt: new Date(nowMs).toISOString(),
+    documentBinding: 'not-checked', measurement: 'declared-by-report',
   };
 }

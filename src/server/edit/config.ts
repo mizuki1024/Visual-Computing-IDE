@@ -9,9 +9,33 @@
 
 export const EDIT_WRITE_ENV = 'VCIDE_EDIT_E1_WRITE';
 
-/** 書き込みが有効か。呼ぶたびに読む（起動の途中で変えた値も、そのときの値で判断する） */
-export function editWritesEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
-  return env[EDIT_WRITE_ENV] === '1';
+/**
+ * E2: 書き込みを許す OS。**Linux だけ**（docs/08c 第2節。E2 の暫定方針 1「macOS では書き込みを無効のままとする」）。
+ * 理由: 書き込み先のディレクトリの実体を固定する手段（/proc/self/fd）が Linux にしか無く、macOS 等では
+ * 一時ファイルが一瞬 src/ の外に作られうる（docs/08b 第4節）。Windows・BSD 等は試していないため同じく無効（より狭い側）。
+ * これは残るリスクの解消ではなく、確かめていない OS で書かないための取り決め。
+ */
+export const EDIT_WRITE_PLATFORMS: readonly NodeJS.Platform[] = ['linux'];
+
+export type WriteGate =
+  | { enabled: true; reason: 'enabled'; detail: string }
+  | { enabled: false; reason: 'env-not-set' | 'platform-unsupported'; detail: string };
+
+/** 書き込みの可否と理由。呼ぶたびに読む（起動の途中で変えた値も、そのときの値で判断する） */
+export function editWriteGate(env: NodeJS.ProcessEnv = process.env, platform: string = process.platform): WriteGate {
+  if (!EDIT_WRITE_PLATFORMS.includes(platform as NodeJS.Platform)) {
+    return { enabled: false, reason: 'platform-unsupported',
+      detail: `この OS（${platform === 'darwin' ? 'macOS' : platform}）では編集の書き込みを無効にしています（Linux だけ。書き込み先のディレクトリを固定できないため）。ファイルは変更していません。` };
+  }
+  if (env[EDIT_WRITE_ENV] !== '1') {
+    return { enabled: false, reason: 'env-not-set', detail: `編集の書き込みは無効です（${EDIT_WRITE_ENV}=1 を明示したときだけ有効）。ファイルは変更していません。` };
+  }
+  return { enabled: true, reason: 'enabled', detail: '' };
+}
+
+/** 書き込みが有効か（editWriteGate の enabled） */
+export function editWritesEnabled(env: NodeJS.ProcessEnv = process.env, platform: string = process.platform): boolean {
+  return editWriteGate(env, platform).enabled;
 }
 
 /** 書き込んでよい範囲（プロジェクトの根からの相対）。探索の注入範囲（anchors.ANCHOR_SCOPE）と同じ */

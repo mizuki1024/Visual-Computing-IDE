@@ -36,7 +36,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { editWritesEnabled, TEMP_MARK } from './config';
+import { editWriteGate, editWritesEnabled, TEMP_MARK } from './config';
 import { sha256 } from './revision';
 import { resolveParentDir, resolveWritable, sameDir, sameFile, type ScopeRefusal, type WritableFile } from './scope';
 
@@ -180,7 +180,7 @@ export function replaceSourceFile(req: ReplaceRequest): ReplaceResult {
   const step = (s: WriteStep) => { req.hooks?.step?.(s); };
   const notWritten = (reason: NotWrittenReason, detail: string, extra: Partial<Extract<ReplaceResult, { status: 'not-written' }>> = {}): ReplaceResult =>
     ({ status: 'not-written', reason, detail, ...extra });
-  if (!editWritesEnabled()) return notWritten('edit-disabled', '編集の書き込みは無効です（VCIDE_EDIT_E1_WRITE=1 を明示したときだけ有効）。');
+  { const gate = editWriteGate(); if (!gate.enabled) return notWritten('edit-disabled', gate.detail); }
   if (typeof req.tempName !== 'string' || !TEMP_NAME_RE.test(req.tempName) || /\.(?:orig|ours)\.tmp$/.test(req.tempName)
     || typeof req.next !== 'string' || typeof req.expectedHash !== 'string' || !/^[0-9a-f]{64}$/.test(req.expectedHash)) {
     return notWritten('bad-request', '書き込みの要求の形が正しくありません。');
@@ -438,6 +438,48 @@ export function recordedArtifactsPresent(projectRoot: string, rel: string, tempN
   return { temp: exists(p(tempName)), orig: exists(p(snapshotNameOf(tempName))), ours: exists(p(oursNameOf(tempName))) };
 }
 
+/**
+ * E2: cleanupRecordedArtifacts が**何を外すか**の予測（**読むだけ**。復旧の点検 — engine.inspectRecovery — に使う）。
+ * 判断の規則は releaseIfSafe と同じ（書き込み先と同じ実体か、基準/書いた内容とバイト一致するものだけを外す。他は残す）。
+ * sameAsTarget は、外す予定のもののうち書き込み先と同じ実体の数（外した後の書き込み先のリンク数の予測に使う）。
+ * 予測は点検の時点の事実で、実際の復旧の時点までに変わりうる（実際の処理は recover が改めて判断する）。
+ */
+export type PredictedOutcome = 'absent' | 'would-remove' | 'kept';
+export function predictRecordedCleanup(projectRoot: string, rel: string, tempName: string,
+  origAllowed: readonly string[], oursAllowed: readonly string[]): { temp: PredictedOutcome; orig: PredictedOutcome; ours: PredictedOutcome; sameAsTarget: number } | null {
+  if (typeof tempName !== 'string' || !TEMP_NAME_RE.test(tempName) || /\.(?:orig|ours)\.tmp$/.test(tempName)) return null;
+  const d = resolveParentDir(projectRoot, rel);
+  if (!d.ok) return null;
+  const at = (n: string) => path.join(d.dir, n);
+  const leafIno = lstatIno(at(path.basename(rel)));
+  let same = 0;
+  const judge = (name: string, allowed: readonly string[]): PredictedOutcome => {
+    let st: fs.Stats;
+    try { st = fs.lstatSync(at(name)); } catch { return 'absent'; }
+    if (!st.isFile() || !TEMP_NAME_RE.test(name)) return 'kept';
+    if (leafIno !== null && leafIno === st.ino) { same += 1; return 'would-remove'; }
+    const r = readAt(at(name));
+    return r && r.ino === st.ino && allowed.includes(r.hash) ? 'would-remove' : 'kept';
+  };
+  let temp: PredictedOutcome = 'absent';
+  try { temp = fs.lstatSync(at(tempName)).isFile() ? 'would-remove' : 'kept'; } catch { temp = 'absent'; }
+  const orig = judge(snapshotNameOf(tempName), origAllowed);
+  const ours = judge(oursNameOf(tempName), oursAllowed);
+  return { temp, orig, ours, sameAsTarget: same };
+}
+
+/** E2: 書き込み先の内容のハッシュとリンク数（**読むだけ**。リンク数 2 のまま止まった記録の点検に使う。範囲は親ディレクトリまで検査する） */
+export function inspectTargetContent(projectRoot: string, rel: string): { hash: string; nlink: number } | null {
+  const d = resolveParentDir(projectRoot, rel);
+  if (!d.ok) return null;
+  const p = path.join(d.dir, path.basename(rel));
+  let st: fs.Stats;
+  try { st = fs.lstatSync(p); } catch { return null; }
+  if (!st.isFile()) return null;
+  const r = readAt(p);
+  return r && r.ino === st.ino ? { hash: r.hash, nlink: st.nlink } : null;
+}
+
 /** 記録した退避リンクの内容のハッシュと、書き込み先と同じ実体か（読むだけ） */
 export function inspectRecordedSnapshot(projectRoot: string, rel: string, name: string): { present: boolean; hash: string | null; sameAsTarget: boolean } {
   const out = { present: false, hash: null as string | null, sameAsTarget: false };
@@ -482,11 +524,66 @@ export function removeRecord(dir: string, name: string): void {
 
 /* --------------------------------------------------------------- 排他 */
 
-export interface LockOwner { pid: number; host: string; at: string; nonce?: string }
+export interface LockOwner { pid: number; host: string; at: string; nonce?: string; start?: string }
 
 export function pidAlive(pid: number): boolean {
   if (!Number.isInteger(pid) || pid <= 0) return false;
   try { process.kill(pid, 0); return true; } catch (e) { return (e as NodeJS.ErrnoException).code === 'EPERM'; }
+}
+
+/* --------------------------------------------------------------- 持ち主の識別（E2。docs/08c 第3.3節） */
+
+/** 記録する開始時刻の形: `<boot_id>:<起動からの tick>`（Linux の /proc/sys/kernel/random/boot_id と /proc/<pid>/stat の 22 番目） */
+export const START_ID_RE = /^[0-9a-f-]{36}:[0-9]{1,20}$/;
+
+/**
+ * プロセスの開始時刻による識別子。**読むだけ**。読めなければ null（/proc の無い OS・存在しない pid・権限）。
+ * pid だけでは、持ち主が死んだ後に同じ pid が別のプロセスに再利用されると「生きている」と見誤る（docs/08b 第7節 5）。
+ * 開始時刻は同じ起動（boot_id）の中で pid と組にすれば一意。再起動をまたぐと boot_id が変わる。
+ */
+export function processStartId(pid: number): string | null {
+  if (!Number.isInteger(pid) || pid <= 0) return null;
+  try {
+    const stat = fs.readFileSync(`/proc/${pid}/stat`, 'utf8');
+    /* 2 番目（comm）は括弧の中に空白・括弧を含みうるので、最後の ')' の後から数える（3 番目 = state） */
+    const rest = stat.slice(stat.lastIndexOf(')') + 2).split(' ');
+    const ticks = rest[19];
+    const boot = fs.readFileSync('/proc/sys/kernel/random/boot_id', 'utf8').trim();
+    const id = `${boot}:${ticks}`;
+    return START_ID_RE.test(id) ? id : null;
+  } catch { return null; }
+}
+
+export type OwnerCheck = 'other-host' | 'start-time' | 'pid-only';
+/**
+ * 持ち主が生きているかの判断（**純粋な規則**）。確かめられないときは生きている側（何もしない側）に倒す。
+ *   別のホスト                         → 確かめられない（alive）
+ *   pid が死んでいる                    → いない
+ *   記録とその pid のいまの開始時刻が両方ある → 一致すれば いる／違えば いない（PID の再利用）
+ *   どちらかが無い（古い記録・/proc の無い OS） → pid だけ（生きていれば いる。E1.1 と同じ）
+ */
+export function judgeOwner(owner: { pid: number; host: string; start?: string },
+  facts: { host: string; alive: boolean; start: string | null }): { alive: boolean; check: OwnerCheck } {
+  if (owner.host !== facts.host) return { alive: true, check: 'other-host' };
+  const recorded = typeof owner.start === 'string' && START_ID_RE.test(owner.start) ? owner.start : null;
+  if (!facts.alive) return { alive: false, check: recorded ? 'start-time' : 'pid-only' };
+  if (recorded && facts.start) return { alive: recorded === facts.start, check: 'start-time' };
+  return { alive: true, check: 'pid-only' };
+}
+
+/** 別のプロセスの持ち主の判断（いまの事実を読んで judgeOwner に渡す） */
+export function ownerStatus(owner: { pid: number; host: string; start?: string }): { alive: boolean; check: OwnerCheck } {
+  const host = os.hostname();
+  if (owner.host !== host) return { alive: true, check: 'other-host' };
+  const alive = pidAlive(owner.pid);
+  return judgeOwner(owner, { host, alive, start: alive ? processStartId(owner.pid) : null });
+}
+
+/** このプロセスの開始時刻（起動の間は変わらないので1回だけ読む） */
+let SELF_START: string | null | undefined;
+export function selfStartId(): string | null {
+  if (SELF_START === undefined) SELF_START = processStartId(process.pid);
+  return SELF_START;
 }
 
 /** このプロセスがいま持っている鍵（同じ pid の別の（前の）プロセスが残した鍵と区別する） */
@@ -525,7 +622,8 @@ export function acquireLock(dir: string, hooks?: LockHooks): (() => void) | null
       /* 書きかけ（中身が読めない）の鍵は、作った直後かもしれないので取り除かない */
       /* 自分の pid の鍵は、このプロセスが持っているときだけ有効（持っていなければ、同じ pid だった前のプロセスの残り） */
       const mine = owner?.pid === process.pid;
-      if (!owner || ino === null || owner.host !== os.hostname() || (mine && HELD.has(file)) || (!mine && pidAlive(owner.pid))) return null;
+      /* E2: 別のプロセスの鍵は、pid に加えて開始時刻で持ち主を確かめる（PID の再利用を見分ける。確かめられなければ取らない） */
+      if (!owner || ino === null || owner.host !== os.hostname() || (mine && HELD.has(file)) || (!mine && ownerStatus(owner).alive)) return null;
       hooks?.afterStaleRead?.();
       const aside = path.join(dir, `.apply.lock.stale.${process.pid}.${crypto.randomBytes(4).toString('hex')}`);
       try { fs.renameSync(file, aside); } catch { continue; }   // 別のプロセスが先に取り除いた
@@ -539,7 +637,8 @@ export function acquireLock(dir: string, hooks?: LockHooks): (() => void) | null
     }
     const nonce = crypto.randomBytes(8).toString('hex');
     try {
-      const me: LockOwner = { pid: process.pid, host: os.hostname(), at: new Date().toISOString(), nonce };
+      const start = selfStartId();
+      const me: LockOwner = { pid: process.pid, host: os.hostname(), at: new Date().toISOString(), nonce, ...(start ? { start } : {}) };
       fs.writeSync(fd, JSON.stringify(me));
       fs.fsyncSync(fd);
     } finally { closeQuiet(fd); }

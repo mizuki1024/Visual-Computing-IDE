@@ -48,7 +48,8 @@ export interface JournalRecord {
   state: JournalState;
   projectRoot: string;
   file: string;
-  owner: { pid: number; host: string };
+  /** 持ち主。`start` は E2 から（プロセスの開始時刻 `<boot_id>:<tick>`。PID の再利用を見分ける）。E1.1 の記録には無い */
+  owner: { pid: number; host: string; start?: string };
   createdAt: string;
   updatedAt: string;
   committedAt: string | null;
@@ -90,6 +91,7 @@ export function parseJournal(v: unknown): JournalRecord | null {
   if (!isStr(v.projectRoot) || !path.isAbsolute(v.projectRoot)) return null;
   if (!isStr(v.file) || checkRelShape(v.file) !== null) return null;
   if (!isObj(v.owner) || !isInt(v.owner.pid) || !isStr(v.owner.host)) return null;
+  if (v.owner.start !== undefined && !(isStr(v.owner.start) && /^[0-9a-f-]{36}:[0-9]{1,20}$/.test(v.owner.start))) return null;
   for (const k of ['beforeHash', 'afterHash'] as const) if (!isStr(v[k]) || !SHA256_RE.test(v[k] as string)) return null;
   for (const k of ['beforeRev', 'afterRev'] as const) if (!isStr(v[k]) || !REV_RE.test(v[k] as string)) return null;
   if (!isObj(v.range) || !isInt(v.range.start) || !isInt(v.range.end) || (v.range.end as number) < (v.range.start as number)) return null;
