@@ -1,0 +1,43 @@
+  ✓ 題材（使い捨てのコピー）の next dev が /properties に応答する
+ブラウザ: 153.0.8010.12 / 題材（使い捨て）: /home/user/Visual-Computing-IDE/poc/out/edit-e2e/poc/fixture-edit
+  ✓ 起動時の復旧: 未完了のジャーナルは無い
+
+3. 解決 → 下書き → 適用 → HMR → 2幅の実測 → 検証
+  ✓ DOM から作った選択は製品の parseSelection を通る
+  ✓ 選んだ要素は複数回描かれている（同じ部品の利用）
+  ✓ 対象の解決（第1段）
+  ✓ 対照: SiteNotice の <section> も p-4 md:p-6（同じ class）
+  ✓ 適用前: Mobile の padding-top は 16px（p-4）
+  ✓ 下書き（第2段）
+  ✓ 下書きはファイルに触れない
+  ✓ 適用（第3段・Desktop の DOM の選択で照合）は committed
+  ✓ ファイルは token 1つだけが変わった
+  ✓ 検証の前は成功扱いにしない
+    · HMR の反映まで 534 ms（2幅）
+  ✓ HMR の後、適用前の DOM の選択は特定しない（古い版）
+  ✓ Mobile だけの報告は verified にしない（viewport-missing）
+  ✓ 予測を含む報告は verified にしない（predicted-not-accepted）
+  ✓ 実測: Mobile 375 は 20px（p-5）
+  ✓ 対照: 同じ class の SiteNotice は変わらない（p-4・16px のまま）
+  ✓ 実測: Desktop 1440 は 24px のまま（md:p-6 が優先）
+  ✓ 2幅の実測の報告は verified
+  ✓ 成功（committed かつ verified）
+
+4. 取り消し → HMR → 2幅の実測 → 検証
+  ✓ 取り消しは committed
+  ✓ ファイルは適用前とバイト一致
+  ✓ 実測: 取り消し後の Mobile は 16px
+  ✓ 取り消しの検証は verified
+  ✓ 取り消した後に、古い適用の報告を verified にしない
+
+5. 外部の編集で同じ位置に別の要素が来た（兄弟の <dd> の入れ替え）
+  ✓ 前提: <dd>{property.pref}</dd>（PropertyCard）を対象にした
+  ✓ 前提: HMR の後、同じ位置の <dd>（いまは utility）が同じ識別子を持つ
+  ✓ 古い対象（pref の <dd>）を、同じ識別子の別の要素（utility の <dd>）へ付け替えない（element-mismatch）
+  ✓ 最後の復旧: 確定済みのジャーナルに何もしない
+  ✓ src/ に一時ファイルを残さない
+  ✓ 元の題材（poc/fixture-edit/src）は1バイトも変わらない（F-10）
+  ✓ 使い捨てのコピーを消した
+
+✓ すべて通過 — 32 件通過 / 0 件失敗
+[guard] {"cmd":"node tests/edit-e2e.spec.mjs","seconds":9,"exit":0,"signal":null,"stoppedBy":null,"maxPssMB":1488,"maxAt":6,"maxProcs":12,"minAvailMB":13880,"leftover":0}

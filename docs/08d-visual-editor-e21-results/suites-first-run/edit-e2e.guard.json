@@ -1,0 +1,70 @@
+{
+ "summary": {
+  "cmd": "node tests/edit-e2e.spec.mjs",
+  "seconds": 8,
+  "exit": 0,
+  "signal": null,
+  "stoppedBy": null,
+  "maxPssMB": 1558,
+  "maxAt": 6,
+  "maxProcs": 13,
+  "minAvailMB": 14006,
+  "leftover": 0
+ },
+ "limits": {
+  "seconds": 1500,
+  "pssMB": 6144,
+  "procs": 150,
+  "minAvailMB": 2048
+ },
+ "samples": [
+  {
+   "t": 2,
+   "procs": 4,
+   "pssMB": 467,
+   "availMB": 14944,
+   "byMB": {
+    "ide": 277,
+    "dev-server": 0,
+    "browser": 0,
+    "other": 189
+   }
+  },
+  {
+   "t": 4,
+   "procs": 5,
+   "pssMB": 984,
+   "availMB": 14396,
+   "byMB": {
+    "ide": 463,
+    "dev-server": 0,
+    "browser": 0,
+    "other": 521
+   }
+  },
+  {
+   "t": 6,
+   "procs": 13,
+   "pssMB": 1558,
+   "availMB": 14006,
+   "byMB": {
+    "ide": 720,
+    "dev-server": 0,
+    "browser": 257,
+    "other": 581
+   }
+  },
+  {
+   "t": 8,
+   "procs": 1,
+   "pssMB": 150,
+   "availMB": 14942,
+   "byMB": {
+    "ide": 0,
+    "dev-server": 0,
+    "browser": 0,
+    "other": 150
+   }
+  }
+ ]
+}

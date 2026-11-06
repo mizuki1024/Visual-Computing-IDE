@@ -1,0 +1,97 @@
+  ✓ 前提: 適用の途中で止まった記録を、IDE の既定のジャーナルの場所に作った（子プロセスを SIGKILL）
+
+0. IDE（VCIDE_EDIT_SYNC_DEV=1）を開き、題材を製品の画面から起動する
+  ✓ ?editSyncDev=1 が無ければ開発用の同期は描かない（通常の探索の画面）
+  ✓ ?editSyncDev=1 のとき開発用の同期を描く（開発サーバーの起動前は待機）
+  ✓ Desktop・Mobile とも接続済み（接続の識別子が別）
+  ✓ Desktop の文書のビューポートは 1440×900
+  ✓ Mobile の文書のビューポートは 375×812
+  ✓ 書き込みは無効（この画面からは書けない）
+
+E21-01 実プレビューで選んだ要素の正しいソース位置
+  ✓ 前提: 同じコンポーネント（PropertyCard）が複数描かれている
+  ✓ selected
+  ✓ 正しいソース位置（試験がソースを読んで決めた正解）
+  ✓ コンポーネント
+  ✓ ソースの版 = 試験が読んだ内容の sha1
+  ✓ DOM の版 = 対応表の版 = ソースの版
+  ✓ 文書の照合: 中継の応答と照合済み（document-identified）
+  ✓ 描画は未検証（not-verified）
+  ✓ 画面に コンポーネント・ファイル:行:列・描画: 未検証 が出る
+  ✓ プレビューの中のクリックはページを操作しない（同じパスのまま）
+
+E21-02 同一コンポーネントの複数インスタンス
+  ✓ 3つ目のインスタンスも同じソース位置
+  ✓ DOM のインスタンスは別（3番目・全体の数）
+  ✓ 画面に「どの利用箇所かは区別していません」
+
+E21-03 Desktop と Mobile の接続の分離
+  ✓ Mobile で別の要素（SiteNotice）を選ぶ
+  ✓ （同）位置
+  ✓ Mobile の文書は Desktop の文書と別
+  ✓ Desktop の選択は変わらない（同じ対象・selected）
+  ✓ サーバーの登録も2枚別の文書
+
+E21-17 復旧の状態を読み取り専用で確認
+  ✓ 状態の復旧は点検（inspected・mutates: false）
+  ✓ 止まった適用の記録が要確認として出る
+  ✓ 画面にも要確認の記録が出る
+  ✓ IDE は記録を変えていない（自動の復旧・削除なし）
+  ✓ （同）対象のソースも変えていない
+
+E21-12・E21-09・E21-10 Server Component の更新（HMR・RSC の取り直し）
+  ✓ E21-09: HMR の後、Desktop の選択は失効（stale・再選択が必要）
+  ✓ （同）理由は版の違い・要素の置き換わり
+  ✓ Mobile の SiteNotice（変えていないファイル）の選択は selected のまま
+  ✓ E21-12: Mobile の文書も RSC で取り直した（自分の取り直しとして照合）
+  ✓ E21-10: 選び直すと selected
+  ✓ 新しいソースの版 = 試験が読んだ新しい内容の sha1
+  ✓ 前の版とは違う版・別の対象
+  ✓ E21-12: Desktop の文書の取り直しは自分のもの（出した文書で区別）・文書は照合済み
+
+E21-13 別のアートボードの RSC の取り直し
+  ✓ Mobile だけが取り直した: Mobile の自分の取り直しが1件増える
+  ✓ Desktop の取り直しの数は変わらない
+  ✓ Desktop の文書の照合は落ちない（document-identified・selected のまま）
+
+E21-11 Client Component の再描画・ソースの変更・別の要素への置き換わり
+  ✓ Client Component のボタンを選ぶ
+  ✓ ソースを変えない再描画（状態の更新）では選択は失効しない
+  ✓ Client Component のソースが変わると失効（HMR の通常の再描画を自分の適用と混同して引き継がない）
+  ✓ 選び直すと新しい版で selected
+  ✓ 同じ行・列に別の要素（span）が来た: 前の要素（button）を維持しない
+  ✓ 選び直すと、いまの要素（span）として解決する
+
+E21-06・07・08 古い MessagePort・nonce・起動の不一致
+  ✓ E21-07: nonce の違う知らせは捨てる（拒否の数が増え、選択は変わらない）
+  ✓ E21-06: 古い MessagePort からの知らせは受けない（選択を作らない）
+  ✓ E21-06: サーバーも古い接続の選択を受けない（stale-connection）
+  ✓ E21-08: IDE の起動が違えば ide-restarted
+  ✓ E21-08: 開発サーバーの起動が違えば stale-run
+
+E21-04 片方のページの読み込み直し
+  ✓ Desktop は新しい接続・前の選択は失効（再選択が必要）
+  ✓ Desktop は新しい文書を登録
+  ✓ Mobile の接続は変わらない
+  ✓ Mobile の選択は selected のまま
+  ✓ Desktop で選び直せる（新しい文書・新しい対象）
+
+E21-14・15・16 文書の識別子と中継の記録・検証の報告・未確認
+  ✓ E21-14: いまの2枚の文書（中継の台帳の応答）で測った報告は bound（描画は申告のまま・検証は評価しない）
+  ✓ E21-15: 2枚の文書を入れ替えた報告は unbound
+  ✓ E21-15: 読み込み直す前の文書の報告は unbound
+  ✓ E21-15: 中継が出していない識別子の報告は unbound
+  ✓ E21-15: 文書を表示する前の時刻の報告は unbound
+  ✓ E21-16: 出した文書の分からない取り直しの後、文書の照合は未確認（rsc-unattributed）
+  ✓ （同）Mobile も未確認（どちらを描き直したか決めない）
+  ✓ 画面は「未確認」と書き、verified と書かない
+  ✓ （同）その後の報告は unbound（文書の照合が未確認）
+
+E21-05 両方の読み込み直し・ページ遷移
+  ✗ 試験の本体が最後まで進む — got: "TypeError: Cannot read properties of undefined (reading 'token') |     at main (file:///home/user/Visual-Computing-IDE/tests/edit-sync21-e2e.spec.mjs:376:119) |     at async file:///home/user/Visual-Computing-IDE/tests/edit-sync21-e2e.spec.mjs:431:3"
+    · 状態: {"runtime":{"state":"running","seq":5,"instance":"d7fa52a7-3963-4290-ba3c-ac1b5782bf1f","progress":{"line":"✓ Compiled in 243ms","at":"2026-11-06T17:37:45.263Z"},"targetChanges":{"code":"target-files-changed","severity":"limit","fact":"この IDE がこのプロジェクトの開発サーバーを最初に起動してから、対象プロジェクトの next-env.d.ts（作成） が変わりました。","reason":"書き込んだプロセスを特定する出力はありません。IDE は対象プロジェクトに書き込みません。変化は IDE の外（開発サーバーとして起動した next dev を含む）で起きたものです。","impact":"変更の中身は IDE では元に戻していません。Next.js の既定の振る舞いによる書き換えは、起動のたびに起こりえます。","action":"差分はプロジェクトのバージョン管理（git diff など）で確認できます。"},"project":{"root":"/home/user/Visual-Computing-IDE/poc/out/edit-sync21-e2e/poc/fixture-edit","name":"poc-edit-fixture"},"pid":23282,"port":3000,"url":"http://127.0.0.1:3000","owner":"ide","startedAt":"2026-11-06T17:37:27.285Z","readyAt":"2026-11-06T17:37:31.961Z","readyMs":4676,"exitCode":null,"signal":null,"instrumentation":{"state":"enabled","reason":null,"spanFile":"/home/user/Visual-Computing-IDE/.ide-runtime/spans/fixture-edit-1793986647283.jsonl"},"lastProbe":{"at":"2026-11-06T17:37:48.013Z","ok":true,"status":200,"detail":null},"error":null,"logLines":31,"logAvailable":true,"env":{"passed":["HOME","HTTPS_PROXY","NODE_EXTRA_CA_CERTS","NODE_OPTIONS","NO_PROXY","NPM_CONFIG_USERCONFIG","PATH","SHELL","SSL_CERT_FILE","TERM","https_proxy","no_proxy","npm_config_https_proxy","npm_config_noproxy"],"withheld":170,"explicit":[]},"anchors":{"state":"enabled","reason":null,"scope":"src"},"updatedAt":"2026-11-06T17:37:31.962Z"},"inspection":{"input":"/home
+  ✓ 元の題材（poc/fixture-edit/src）は1バイトも変わらない
+
+✗ 失敗あり — 67 件通過 / 1 件失敗
+  ✗ 試験の本体が最後まで進む — got: "TypeError: Cannot read properties of undefined (reading 'token') |     at main (file:///home/user/Visual-Computing-IDE/tests/edit-sync21-e2e.spec.mjs:376:119) |     at async file:///home/user/Visual-Computing-IDE/tests/edit-sync21-e2e.spec.mjs:431:3"
+[guard] {"cmd":"node tests/edit-sync21-e2e.spec.mjs","seconds":56,"exit":1,"signal":null,"stoppedBy":null,"maxPssMB":1918,"maxAt":42,"maxProcs":12,"minAvailMB":13674,"leftover":0}

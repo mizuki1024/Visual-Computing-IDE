@@ -1,0 +1,6 @@
+.libjs: /var/tmp/vcide-baseline/.libjs
+P1 探索の bindDocument（Desktop の文書。取り直したのは Mobile だけ）: unidentified / refetched-after-document
+P1 編集専用の照合: 無い（変更前）
+P2 中継の記録に要求を出した文書の名乗り: 無い
+P2 名乗りのヘッダが開発サーバーへ渡った: はい
+P3 スクリプトに編集の観測の知らせ（edit-observe）: 無い

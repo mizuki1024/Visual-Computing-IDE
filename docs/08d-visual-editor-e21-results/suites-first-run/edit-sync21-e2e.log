@@ -1,0 +1,120 @@
+  ✓ 前提: 適用の途中で止まった記録を、IDE の既定のジャーナルの場所に作った（子プロセスを SIGKILL）
+
+0. IDE（VCIDE_EDIT_SYNC_DEV=1）を開き、題材を製品の画面から起動する
+  ✓ ?editSyncDev=1 が無ければ開発用の同期は描かない（通常の探索の画面）
+  ✓ ?editSyncDev=1 のとき開発用の同期を描く（開発サーバーの起動前は待機）
+  ✓ Desktop・Mobile とも接続済み（接続の識別子が別）
+  ✓ Desktop の文書のビューポートは 1440×900
+  ✓ Mobile の文書のビューポートは 375×812
+  ✓ 書き込みは無効（この画面からは書けない）
+
+E21-01 実プレビューで選んだ要素の正しいソース位置
+  ✓ 前提: 同じコンポーネント（PropertyCard）が複数描かれている
+  ✓ selected
+  ✓ 正しいソース位置（試験がソースを読んで決めた正解）
+  ✓ コンポーネント
+  ✓ ソースの版 = 試験が読んだ内容の sha1
+  ✓ DOM の版 = 対応表の版 = ソースの版
+  ✓ 文書の照合: 中継の応答と照合済み（document-identified）
+  ✓ 描画は未検証（not-verified）
+  ✓ 画面に コンポーネント・ファイル:行:列・描画: 未検証 が出る
+  ✓ プレビューの中のクリックはページを操作しない（同じパスのまま）
+
+E21-02 同一コンポーネントの複数インスタンス
+  ✓ 3つ目のインスタンスも同じソース位置
+  ✓ DOM のインスタンスは別（3番目・全体の数）
+  ✓ 画面に「どの利用箇所かは区別していません」
+
+E21-03 Desktop と Mobile の接続の分離
+  ✓ Mobile で別の要素（SiteNotice）を選ぶ
+  ✓ （同）位置
+  ✓ Mobile の文書は Desktop の文書と別
+  ✓ Desktop の選択は変わらない（同じ対象・selected）
+  ✓ サーバーの登録も2枚別の文書
+
+E21-17 復旧の状態を読み取り専用で確認
+  ✓ 状態の復旧は点検（inspected・mutates: false）
+  ✓ 止まった適用の記録が要確認として出る
+  ✓ 画面にも要確認の記録が出る
+  ✓ IDE は記録を変えていない（自動の復旧・削除なし）
+  ✓ （同）対象のソースも変えていない
+
+E21-12・E21-09・E21-10 Server Component の更新（HMR・RSC の取り直し）
+  ✓ E21-09: HMR の後、Desktop の選択は失効（stale・再選択が必要）
+  ✓ （同）理由は版の違い・要素の置き換わり
+  ✓ Mobile の SiteNotice（変えていないファイル）の選択は selected のまま
+  ✓ E21-12: Mobile の文書も RSC で取り直した（自分の取り直しとして照合）
+  ✓ E21-10: 選び直すと selected
+  ✓ 新しいソースの版 = 試験が読んだ新しい内容の sha1
+  ✓ 前の版とは違う版・別の対象
+  ✓ E21-12: Desktop の文書の取り直しは自分のもの（出した文書で区別）・文書は照合済み
+
+E21-13 別のアートボードの RSC の取り直し
+  ✓ Mobile だけが取り直した: Mobile の自分の取り直しが1件増える
+  ✓ Desktop の取り直しの数は変わらない
+  ✓ Desktop の文書の照合は落ちない（document-identified・selected のまま）
+
+E21-11 Client Component の再描画・ソースの変更・別の要素への置き換わり
+  ✓ Client Component のボタンを選ぶ
+  ✓ ソースを変えない再描画（状態の更新）では選択は失効しない
+  ✓ Client Component のソースが変わると失効（HMR の通常の再描画を自分の適用と混同して引き継がない）
+  ✓ 選び直すと新しい版で selected
+  ✓ 同じ行・列に別の要素（span）が来た: 前の要素（button）を維持しない
+  ✓ 選び直すと、いまの要素（span）として解決する
+
+E21-06・07・08 古い MessagePort・nonce・起動の不一致
+  ✓ E21-07: nonce の違う知らせは捨てる（拒否の数が増え、選択は変わらない）
+  ✓ E21-06: 古い MessagePort からの知らせは受けない（選択を作らない）
+  ✓ E21-06: サーバーも古い接続の選択を受けない（stale-connection）
+  ✓ E21-08: IDE の起動が違えば ide-restarted
+  ✓ E21-08: 開発サーバーの起動が違えば stale-run
+
+E21-04 片方のページの読み込み直し
+  ✓ Desktop は新しい接続・前の選択は失効（再選択が必要）
+  ✓ Desktop は新しい文書を登録
+  ✓ Mobile の接続は変わらない
+  ✓ Mobile の選択は selected のまま
+  ✓ Desktop で選び直せる（新しい文書・新しい対象）
+
+E21-14・15・16 文書の識別子と中継の記録・検証の報告・未確認
+  ✓ E21-14: いまの2枚の文書（中継の台帳の応答）で測った報告は bound（描画は申告のまま・検証は評価しない）
+  ✓ E21-15: 2枚の文書を入れ替えた報告は unbound
+  ✓ E21-15: 読み込み直す前の文書の報告は unbound
+  ✓ E21-15: 中継が出していない識別子の報告は unbound
+  ✓ E21-15: 文書を表示する前の時刻の報告は unbound
+  ✓ E21-16: 出した文書の分からない取り直しの後、文書の照合は未確認（rsc-unattributed）
+  ✗ （同）Mobile も未確認（どちらを描き直したか決めない） — got: {"editBoard":"mobile","connState":"connected","connId":"4H3g7jprpOoX3-gT-iI8p1Rk","sync":"selected","syncReason":"","at":"src/components/SiteNotice.tsx:4:5","component":"SiteNotice","tag":"section","domRev":"8aa439a0a61e976f","sourceRev":"8aa439a0a61e976f","manifestRev":"8aa439a0a61e976f","fingerprint":"1d5c3d4f08f15b69dadefec94fd28fcb88c3ad35883e708562c082de1b2e7dad","targetId":"t-728a02bbba74","docLevel":"document-identified","docReasons":"","refetch":"self","refetchCount":"2","render":"not-verified","docToken":"fd0e967ad56a1db39f5f9e96298a8142","ordinal":"0","count":"1","instanceAnchor":"f6602f8608","reselect":"no","loads":"1","rejected":"2","selN":"1","connection":"identified"}
+  ✓ 画面は「未確認」と書き、verified と書かない
+  ✓ （同）その後の報告は unbound（文書の照合が未確認）
+
+E21-05 両方の読み込み直し・ページ遷移
+  ✓ 両方とも新しい文書・新しい接続
+  ✓ 両方とも前の選択は失効（selected でない）
+  ✓ 遷移先（/）のページの要素を選べる
+  ✓ 新しい文書は照合済み（取り直しなし）
+  ✓ ページ内のリンクでの遷移（新しい文書）: 前の選択は失効し、新しい接続
+  ✓ （同）Mobile は / のまま変わらない
+
+停止・再起動
+  ✓ 停止すると、アートボードを外して待機に戻る（前の起動の選択を表示しない）
+  ✓ 再起動の後は新しい起動
+  ✓ 再起動の後は前の選択を持たない
+  ✓ 前の起動を指す要求は stale-run
+  ✓ 再起動の後も、実プレビューから正しいソース位置へ結び付く
+
+E21-18・E21-19 書き込みの道が無い・探索のプレビューは今までどおり
+  ✓ POST /api/edit-sync/apply は 404
+  ✓ POST /api/edit-sync/revert は 404
+  ✓ POST /api/edit-sync/draft は 404
+  ✓ POST /api/edit-sync/recover は 404
+  ✓ POST /api/edit-sync/verify は 404
+  ✓ POST /api/edit/apply は 404
+  ✓ IDE は記録を変えていない（最後まで自動の復旧・削除なし）
+  ✓ 探索のプレビューも同時に実ページを表示している
+  ✓ E21-19: 探索の選択は今までどおり（同じソース位置へ resolved）
+  ✓ IDE の画面にエラーが出ていない
+  ✓ 元の題材（poc/fixture-edit/src）は1バイトも変わらない
+
+✗ 失敗あり — 87 件通過 / 1 件失敗
+  ✗ （同）Mobile も未確認（どちらを描き直したか決めない） — got: {"editBoard":"mobile","connState":"connected","connId":"4H3g7jprpOoX3-gT-iI8p1Rk","sync":"selected","syncReason":"","at":"src/components/SiteNotice.tsx:4:5","component":"SiteNotice","tag":"section","domRev":"8aa439a0a61e976f","sourceRev":"8aa439a0a61e976f","manifestRev":"8aa439a0a61e976f","fingerprint":"1d5c3d4f08f15b69dadefec94fd28fcb88c3ad35883e708562c082de1b2e7dad","targetId":"t-728a02bbba74","docLevel":"document-identified","docReasons":"","refetch":"self","refetchCount":"2","render":"not-verified","docToken":"fd0e967ad56a1db39f5f9e96298a8142","ordinal":"0","count":"1","instanceAnchor":"f6602f8608","reselect":"no","loads":"1","rejected":"2","selN":"1","connection":"identified"}
+[guard] {"cmd":"node tests/edit-sync21-e2e.spec.mjs","seconds":66,"exit":1,"signal":null,"stoppedBy":null,"maxPssMB":1874,"maxAt":46,"maxProcs":13,"minAvailMB":13658,"leftover":0}

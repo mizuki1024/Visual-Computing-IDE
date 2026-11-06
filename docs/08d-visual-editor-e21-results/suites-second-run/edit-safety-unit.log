@@ -1,0 +1,326 @@
+
+S1 正常なファイル変更（1ファイル・1トークン）と committed の保証の範囲
+  ✓ 適用は committed
+  ✓ ファイルは p-4 → p-5 だけが変わる
+  ✓ 一時ファイル・退避リンクを残さない
+  ✓ 書き込み先のリンク数は 1（退避リンクを外した）
+  ✓ ジャーナルは committed
+  ✓ committed は検証前（verification: pending）で、成功（success）ではない
+  ✓ committed の保証: 置き換えた元の実体が基準とバイト一致したことを rename の後に確かめた
+  ✓ committed の保証: ディレクトリの実体を固定して操作した（Linux の /proc/self/fd）
+  ✓ committed は「競合が無かった」ことを保証しない（検出できない競合の種類を必ず返す）
+  ✓ 書き込みの段は 照合 → 退避リンク → rename → 退避リンクの照合 の順
+
+S2 外部変更: 適用の前・照合の途中に外部がファイルを変えたら拒否する
+  ✓ [同じ実体への上書き] 下書きの後の外部変更: 書かない（written: false・選び直しを求める）
+  ✓ [同じ実体への上書き]（同）外部の版が残る
+  ✓ [同じ実体への上書き]（同）一時ファイルを残さない
+  ✓ [同じ実体への上書き] applying の外部変更: 書かない（conflict・written: false）
+  ✓ [同じ実体への上書き]（applying）外部の版が残る
+  ✓ [同じ実体への上書き]（applying）一時ファイル・退避リンクを残さない
+  ✓ [同じ実体への上書き]（applying）ジャーナルは failed（committed にしない）
+  ✓ [同じ実体への上書き] before-temp の外部変更: 書かない（conflict・written: false）
+  ✓ [同じ実体への上書き]（before-temp）外部の版が残る
+  ✓ [同じ実体への上書き]（before-temp）一時ファイル・退避リンクを残さない
+  ✓ [同じ実体への上書き]（before-temp）ジャーナルは failed（committed にしない）
+  ✓ [同じ実体への上書き] temp-written の外部変更: 書かない（conflict・written: false）
+  ✓ [同じ実体への上書き]（temp-written）外部の版が残る
+  ✓ [同じ実体への上書き]（temp-written）一時ファイル・退避リンクを残さない
+  ✓ [同じ実体への上書き]（temp-written）ジャーナルは failed（committed にしない）
+  ✓ [同じ実体への上書き] before-final-check の外部変更: 書かない（conflict・written: false）
+  ✓ [同じ実体への上書き]（before-final-check）外部の版が残る
+  ✓ [同じ実体への上書き]（before-final-check）一時ファイル・退避リンクを残さない
+  ✓ [同じ実体への上書き]（before-final-check）ジャーナルは failed（committed にしない）
+  ✓ [同じ実体への上書き] before-last-stat の外部変更: 書かない（conflict・written: false）
+  ✓ [同じ実体への上書き]（before-last-stat）外部の版が残る
+  ✓ [同じ実体への上書き]（before-last-stat）一時ファイル・退避リンクを残さない
+  ✓ [同じ実体への上書き]（before-last-stat）ジャーナルは failed（committed にしない）
+  ✓ [rename による置き換え] 下書きの後の外部変更: 書かない（written: false・選び直しを求める）
+  ✓ [rename による置き換え]（同）外部の版が残る
+  ✓ [rename による置き換え]（同）一時ファイルを残さない
+  ✓ [rename による置き換え] applying の外部変更: 書かない（conflict・written: false）
+  ✓ [rename による置き換え]（applying）外部の版が残る
+  ✓ [rename による置き換え]（applying）一時ファイル・退避リンクを残さない
+  ✓ [rename による置き換え]（applying）ジャーナルは failed（committed にしない）
+  ✓ [rename による置き換え] before-temp の外部変更: 書かない（conflict・written: false）
+  ✓ [rename による置き換え]（before-temp）外部の版が残る
+  ✓ [rename による置き換え]（before-temp）一時ファイル・退避リンクを残さない
+  ✓ [rename による置き換え]（before-temp）ジャーナルは failed（committed にしない）
+  ✓ [rename による置き換え] temp-written の外部変更: 書かない（conflict・written: false）
+  ✓ [rename による置き換え]（temp-written）外部の版が残る
+  ✓ [rename による置き換え]（temp-written）一時ファイル・退避リンクを残さない
+  ✓ [rename による置き換え]（temp-written）ジャーナルは failed（committed にしない）
+  ✓ [rename による置き換え] before-final-check の外部変更: 書かない（conflict・written: false）
+  ✓ [rename による置き換え]（before-final-check）外部の版が残る
+  ✓ [rename による置き換え]（before-final-check）一時ファイル・退避リンクを残さない
+  ✓ [rename による置き換え]（before-final-check）ジャーナルは failed（committed にしない）
+  ✓ [rename による置き換え] before-last-stat の外部変更: 書かない（conflict・written: false）
+  ✓ [rename による置き換え]（before-last-stat）外部の版が残る
+  ✓ [rename による置き換え]（before-last-stat）一時ファイル・退避リンクを残さない
+  ✓ [rename による置き換え]（before-last-stat）ジャーナルは failed（committed にしない）
+
+S3 並行変更: 2つの変更要求が同じファイルを同時に編集しようとした
+  ✓ (a) 同じエンジンの適用の途中の2つ目の適用は busy（書かない）
+  ✓ (a) 1つ目は committed
+  ✓ (a) ファイルは1つ目の変更だけ
+  ✓ (a) 古い基準の2つ目の下書きは、後から適用しても書かない（版の照合・内容のハッシュで止める）
+  ✓ (a)（同）ファイルは1つ目の変更のまま
+  ✓ (b) 同じジャーナルの別のエンジンは、適用の途中に割り込めない（busy）
+  ✓ (b) 1つ目は committed・ファイルは1つ目の変更だけ
+  ✓ (c) 前提: B は A の照合の後に committed
+  ✓ (c) A は書かない（committed と報告しない）
+  ✓ (c) B の変更が残る（失われない）
+  ✓ (c) 一時ファイル・退避リンクを残さない
+  ✓ (d) 退避リンクと rename の間の別のエンジンの適用は書かない
+  ✓ (d) A は committed・ファイルは A の変更
+  ✓ (d) B の下書きは古い基準なので、後から適用しても書かない
+  ✓ (d) 一時ファイル・退避リンクを残さない
+  ⚠ [既知の限界] S3(d) 鍵を共有しない2つのエンジン（別の IDE のプロセスの組） — {"note":"同じジャーナルなら鍵で直列にする（S3 b）。別のジャーナルの組は鍵を共有せず、退避リンクのリンク数と内容の照合だけで守る。互いの照合の間の rename の窓は外部のエディタと同じ残余（S4 d）"}
+
+S4 最後の照合と rename の競合（同期点で差し込む。RV03）
+  ✓ (a) 最後の照合の後の上書き: committed と報告しない
+  ✓ (a)（同）外部の版が残る（失われない）
+  ✓ (a)（同）書いていない扱い（conflict・written: false）
+  ✓ (a)（同）一時ファイル・退避リンクを残さない
+  ✓ (a)（同）ジャーナルは failed
+  ✓ (b) 退避リンクの後の上書き: committed と報告しない
+  ✓ (b)（同）外部の版が書き込み先に戻る
+  ✓ (b)（同）conflict・written: false・transient（ごく短い間だけ自分の内容があった）
+  ✓ (b)（同）一時ファイル・退避リンクを残さない
+  ✓ (b)（同）ジャーナルは failed・書いていない
+  ✓ (c) 最後の照合の後の置き換え: 書かない（conflict・written: false）
+  ✓ (c)（同）外部の版が残る
+  ✓ (c)（同）一時ファイル・退避リンクを残さない
+  ✓ (d) 前提: 差し込みが起きた
+  ✓ (d) committed なら、その結果は「この窓の置き換えを検出できない」ことを明示している
+  ⚠ [既知の限界] S4(d) 退避リンクと rename の間（連続する2つの系呼び出しの間）の、rename による外部の置き換え — {"status":"committed","externalLost":true,"note":"POSIX に条件付きの rename が無い（Node に renameat2 も無い）。docs/08b 第3.4節"}
+  ✓ (e) rename の直後の上書き: committed と報告しない（uncertain・written: true）
+  ✓ (e)（同）外部の版が残る（書き戻さない）
+  ✓ (e)（同）一時ファイル・退避リンクを残さない
+  ✓ (e)（同）成否が確定しない書き込みは取り消しの対象にしない
+  ✓ (f) 照合の後・外す前の fd からの書き込み: committed と報告しない
+  ✓ (f)（同）fd からの書き込みを含む版が書き込み先に残る
+  ⚠ [既知の限界] S4(g) 置き換えの前から開いていた fd で、確定の後に書いた内容（名前の無くなった元の実体へ書かれる） — {"status":"committed","lost":true,"note":"rename による保存（外部のエディタの多く）と同じ性質。fd の持ち主を知る手段（リース）が Node に無い"}
+  ✓ (h) 1つ目の外部の版が書き込み先に戻る
+  ✓ (h) 2つ目の外部の版（自分の版の実体へ書かれた）も消さずに残し、要確認
+
+S5 安全確認の後のディレクトリの差し替え（src/components → src/ の外へのリンク）
+  ✓ [applying] 差し替えが起きた・committed と報告しない
+  ✓ [applying] src/ の外のディレクトリには、どの段でも（一時的にも）ファイルが作られない
+  ✓ [applying] src/ の外のファイルの内容は変わらない
+  ✓ [applying] src/ の中（移された元のディレクトリを含む）に一時ファイル・退避リンクを残さない
+  ✓ [applying] 移された元のファイルは元のまま
+  ✓ [before-temp] 差し替えが起きた・committed と報告しない
+  ✓ [before-temp] src/ の外のディレクトリには、どの段でも（一時的にも）ファイルが作られない
+  ✓ [before-temp] src/ の外のファイルの内容は変わらない
+  ✓ [before-temp] src/ の中（移された元のディレクトリを含む）に一時ファイル・退避リンクを残さない
+  ✓ [before-temp] 移された元のファイルは元のまま
+  ✓ [temp-created] 差し替えが起きた・committed と報告しない
+  ✓ [temp-created] src/ の外のディレクトリには、どの段でも（一時的にも）ファイルが作られない
+  ✓ [temp-created] src/ の外のファイルの内容は変わらない
+  ✓ [temp-created] src/ の中（移された元のディレクトリを含む）に一時ファイル・退避リンクを残さない
+  ✓ [temp-created] 移された元のファイルは元のまま
+  ✓ [temp-written] 差し替えが起きた・committed と報告しない
+  ✓ [temp-written] src/ の外のディレクトリには、どの段でも（一時的にも）ファイルが作られない
+  ✓ [temp-written] src/ の外のファイルの内容は変わらない
+  ✓ [temp-written] src/ の中（移された元のディレクトリを含む）に一時ファイル・退避リンクを残さない
+  ✓ [temp-written] 移された元のファイルは元のまま
+  ✓ [before-final-check] 差し替えが起きた・committed と報告しない
+  ✓ [before-final-check] src/ の外のディレクトリには、どの段でも（一時的にも）ファイルが作られない
+  ✓ [before-final-check] src/ の外のファイルの内容は変わらない
+  ✓ [before-final-check] src/ の中（移された元のディレクトリを含む）に一時ファイル・退避リンクを残さない
+  ✓ [before-final-check] 移された元のファイルは元のまま
+  ✓ [before-rename] 差し替えが起きた・committed と報告しない
+  ✓ [before-rename] src/ の外のディレクトリには、どの段でも（一時的にも）ファイルが作られない
+  ✓ [before-rename] src/ の外のファイルの内容は変わらない
+  ✓ [before-rename] src/ の中（移された元のディレクトリを含む）に一時ファイル・退避リンクを残さない
+  ✓ [before-rename] 移された元のファイルは元のまま
+  ✓ [snapshot-linked] 差し替えが起きた・committed と報告しない
+  ✓ [snapshot-linked] src/ の外のディレクトリには、どの段でも（一時的にも）ファイルが作られない
+  ✓ [snapshot-linked] src/ の外のファイルの内容は変わらない
+  ✓ [snapshot-linked] src/ の中（移された元のディレクトリを含む）に一時ファイル・退避リンクを残さない
+  ✓ [snapshot-linked] 置き換えは検査したディレクトリの実体の中だけ（移された元のディレクトリ）。成否は要確認として返す
+  ✓ [renamed] 差し替えが起きた・committed と報告しない
+  ✓ [renamed] src/ の外のディレクトリには、どの段でも（一時的にも）ファイルが作られない
+  ✓ [renamed] src/ の外のファイルの内容は変わらない
+  ✓ [renamed] src/ の中（移された元のディレクトリを含む）に一時ファイル・退避リンクを残さない
+  ✓ [renamed] 置き換えは検査したディレクトリの実体の中だけ（移された元のディレクトリ）。成否は要確認として返す
+  ✓ [固定なし before-temp] 書き込みを確定しない
+  ✓ [固定なし before-temp] src/ の外のファイルの内容は変わらず、最後に何も残らない
+  ⚠ [既知の限界] S5b 固定なしの経路（before-temp）: 自分の一時ファイルが一時的に src/ の外に作られ、検出して消す — {"seen":[".PropertyCard.tsx.vcide-edit-tx-20990101000000-deadbeef.tmp"],"status":"not-written","reason":"temp-outside-scope"}
+  ✓ [固定なし temp-written] 書き込みを確定しない
+  ✓ [固定なし temp-written] src/ の外のファイルの内容は変わらず、最後に何も残らない
+  ✓ [固定なし before-rename] 書き込みを確定しない
+  ✓ [固定なし before-rename] src/ の外のファイルの内容は変わらず、最後に何も残らない
+
+S6 範囲外への書き込み（既存のファイルの変更と、新しいファイルの作成）
+  ✓ 書き込みの入口は next.config.mjs（一時ファイル .PropertyCard.tsx.vcide-edit-tx-20990101000000-deadbeef.tmp）へ書かない
+  ✓ 書き込みの入口は src/../next.config.mjs（一時ファイル .PropertyCard.tsx.vcide-edit-tx-20990101000000-deadbeef.tmp）へ書かない
+  ✓ 書き込みの入口は /etc/hosts（一時ファイル .PropertyCard.tsx.vcide-edit-tx-20990101000000-deadbeef.tmp）へ書かない
+  ✓ 書き込みの入口は src/components/New.tsx（一時ファイル .New.tsx.vcide-edit-tx-20990101000000-deadbeef.tmp）へ書かない
+  ✓ 書き込みの入口は src/new/Deep.tsx（一時ファイル .Deep.tsx.vcide-edit-tx-20990101000000-deadbeef.tmp）へ書かない
+  ✓ 書き込みの入口は src/linked/Exists.tsx（一時ファイル .Exists.tsx.vcide-edit-tx-20990101000000-deadbeef.tmp）へ書かない
+  ✓ 書き込みの入口は src/linked/Missing.tsx（一時ファイル .Missing.tsx.vcide-edit-tx-20990101000000-deadbeef.tmp）へ書かない
+  ✓ 書き込みの入口は src/components/PropertyCard.css（一時ファイル .PropertyCard.tsx.vcide-edit-tx-20990101000000-deadbeef.tmp）へ書かない
+  ✓ 書き込みの入口は src/components/PropertyCard.tsx（一時ファイル ../../evil.tmp）へ書かない
+  ✓ 書き込みの入口は src/components/PropertyCard.tsx（一時ファイル .PropertyCard.tsx.vcide-edit-tx-20990101000000-deadbeef.orig.tmp）へ書かない
+  ✓ 書き込みの入口は src/components/PropertyCard.tsx（一時ファイル evil.tmp）へ書かない
+  ✓ src/ の外・新しい名前・リンク先のどこにもファイルを作らず、何も変えない
+  ✓ 片付けは src/ の外（リンクの先）の名前を消さない
+  ✓ 別の適用の一時ファイルの名前を持つ記録は形の不備（読まない・従わない）
+  ✓ （同）外部の内容を持つ退避リンクは消えない
+  ✓ （同）ソースは適用後のまま
+
+S7 異常終了: ジャーナルの各状態・書き込みの各段で SIGKILL → 復旧
+  ✓ [prepared] 子プロセスは SIGKILL で止まった
+  ✓ [prepared] 止まった時点のファイルは適用前の内容（途中で切れた内容・名前が無い状態にならない）
+  ✓ [prepared] 止まった時点のジャーナルは prepared
+  ✓ [prepared] 止まった時点の一時ファイル・退避リンクの数
+  ✓ [prepared] 書き込みが無効なら復旧は見せるだけ（何も変えない）
+  ✓ [prepared] 復旧の判断は mark-failed
+  ✓ [prepared] 復旧の後のファイル
+  ✓ [prepared] 復旧の後のジャーナルは failed（committed にしない）
+  ✓ [prepared] 復旧の後に一時ファイル・退避リンクを残さない
+  ✓ [prepared] 復旧の後のリンク数は 1
+  ✓ [prepared] 2回目の復旧は何もしない
+  ✓ [applying] 子プロセスは SIGKILL で止まった
+  ✓ [applying] 止まった時点のファイルは適用前の内容（途中で切れた内容・名前が無い状態にならない）
+  ✓ [applying] 止まった時点のジャーナルは applying
+  ✓ [applying] 止まった時点の一時ファイル・退避リンクの数
+  ✓ [applying] 書き込みが無効なら復旧は見せるだけ（何も変えない）
+  ✓ [applying] 復旧の判断は mark-failed
+  ✓ [applying] 復旧の後のファイル
+  ✓ [applying] 復旧の後のジャーナルは failed（committed にしない）
+  ✓ [applying] 復旧の後に一時ファイル・退避リンクを残さない
+  ✓ [applying] 復旧の後のリンク数は 1
+  ✓ [applying] 2回目の復旧は何もしない
+  ✓ [temp-written] 子プロセスは SIGKILL で止まった
+  ✓ [temp-written] 止まった時点のファイルは適用前の内容（途中で切れた内容・名前が無い状態にならない）
+  ✓ [temp-written] 止まった時点のジャーナルは applying
+  ✓ [temp-written] 止まった時点の一時ファイル・退避リンクの数
+  ✓ [temp-written] 書き込みが無効なら復旧は見せるだけ（何も変えない）
+  ✓ [temp-written] 復旧の判断は mark-failed
+  ✓ [temp-written] 復旧の後のファイル
+  ✓ [temp-written] 復旧の後のジャーナルは failed（committed にしない）
+  ✓ [temp-written] 復旧の後に一時ファイル・退避リンクを残さない
+  ✓ [temp-written] 復旧の後のリンク数は 1
+  ✓ [temp-written] 2回目の復旧は何もしない
+  ✓ [before-rename] 子プロセスは SIGKILL で止まった
+  ✓ [before-rename] 止まった時点のファイルは適用前の内容（途中で切れた内容・名前が無い状態にならない）
+  ✓ [before-rename] 止まった時点のジャーナルは applying
+  ✓ [before-rename] 止まった時点の一時ファイル・退避リンクの数
+  ✓ [before-rename] 書き込みが無効なら復旧は見せるだけ（何も変えない）
+  ✓ [before-rename] 復旧の判断は mark-failed
+  ✓ [before-rename] 復旧の後のファイル
+  ✓ [before-rename] 復旧の後のジャーナルは failed（committed にしない）
+  ✓ [before-rename] 復旧の後に一時ファイル・退避リンクを残さない
+  ✓ [before-rename] 復旧の後のリンク数は 1
+  ✓ [before-rename] 2回目の復旧は何もしない
+  ✓ [snapshot-linked] 子プロセスは SIGKILL で止まった
+  ✓ [snapshot-linked] 止まった時点のファイルは適用前の内容（途中で切れた内容・名前が無い状態にならない）
+  ✓ [snapshot-linked] 止まった時点のジャーナルは applying
+  ✓ [snapshot-linked] 止まった時点の一時ファイル・退避リンクの数
+  ✓ [snapshot-linked] 書き込みが無効なら復旧は見せるだけ（何も変えない）
+  ✓ [snapshot-linked] 復旧の判断は mark-failed
+  ✓ [snapshot-linked] 復旧の後のファイル
+  ✓ [snapshot-linked] 復旧の後のジャーナルは failed（committed にしない）
+  ✓ [snapshot-linked] 復旧の後に一時ファイル・退避リンクを残さない
+  ✓ [snapshot-linked] 復旧の後のリンク数は 1
+  ✓ [snapshot-linked] 2回目の復旧は何もしない
+  ✓ [renamed] 子プロセスは SIGKILL で止まった
+  ✓ [renamed] 止まった時点のファイルは適用後の内容（途中で切れた内容・名前が無い状態にならない）
+  ✓ [renamed] 止まった時点のジャーナルは applying
+  ✓ [renamed] 止まった時点の一時ファイル・退避リンクの数
+  ✓ [renamed] 書き込みが無効なら復旧は見せるだけ（何も変えない）
+  ✓ [renamed] 復旧の判断は restore-before
+  ✓ [renamed] 復旧の後のファイル
+  ✓ [renamed] 復旧の後のジャーナルは failed（committed にしない）
+  ✓ [renamed] 復旧の後に一時ファイル・退避リンクを残さない
+  ✓ [renamed] 復旧の後のリンク数は 1
+  ✓ [renamed] 2回目の復旧は何もしない
+  ✓ [snapshot-verified] 子プロセスは SIGKILL で止まった
+  ✓ [snapshot-verified] 止まった時点のファイルは適用後の内容（途中で切れた内容・名前が無い状態にならない）
+  ✓ [snapshot-verified] 止まった時点のジャーナルは applying
+  ✓ [snapshot-verified] 止まった時点の一時ファイル・退避リンクの数
+  ✓ [snapshot-verified] 書き込みが無効なら復旧は見せるだけ（何も変えない）
+  ✓ [snapshot-verified] 復旧の判断は restore-before
+  ✓ [snapshot-verified] 復旧の後のファイル
+  ✓ [snapshot-verified] 復旧の後のジャーナルは failed（committed にしない）
+  ✓ [snapshot-verified] 復旧の後に一時ファイル・退避リンクを残さない
+  ✓ [snapshot-verified] 復旧の後のリンク数は 1
+  ✓ [snapshot-verified] 2回目の復旧は何もしない
+  ✓ [committed] 子プロセスは SIGKILL で止まった
+  ✓ [committed] 止まった時点のファイルは適用後の内容（途中で切れた内容・名前が無い状態にならない）
+  ✓ [committed] 止まった時点のジャーナルは committed
+  ✓ [committed] 止まった時点の一時ファイル・退避リンクの数
+  ✓ [committed] 書き込みが無効なら復旧は見せるだけ（何も変えない）
+  ✓ [committed] 復旧の判断は none
+  ✓ [committed] 復旧の後のファイル
+  ✓ [committed] 復旧の後のジャーナルは committed のまま
+  ✓ [committed] 復旧の後に一時ファイル・退避リンクを残さない
+  ✓ [committed] 復旧の後のリンク数は 1
+  ✓ [committed] 2回目の復旧は何もしない
+  ✓ [外部の版へ戻す途中] 子プロセスは SIGKILL で止まった
+  ✓ [外部の版へ戻す途中] 復旧は書かない（refuse）
+  ✓ [外部の版へ戻す途中] 外部の版は退避リンクとして残る（消さない）
+  ✓ [外部の版へ戻す途中] ジャーナルは failed・要確認
+  ✓ [外部の版へ戻す途中] 書き込み先のリンク数は 1（自分の版への余分な名前は外した）
+  ✓ [停止の後の外部変更] 復旧は書かない（refuse）
+  ✓ [停止の後の外部変更] 外部変更は残る
+  ✓ [復旧の途中 snapshot-linked] 復旧の子プロセスも SIGKILL で止まった
+  ✓ [復旧の途中 snapshot-linked] 次の復旧でファイルは適用前
+  ✓ [復旧の途中 snapshot-linked] ジャーナルは failed
+  ✓ [復旧の途中 snapshot-linked] 一時ファイル・退避リンク（適用と復旧の両方）を残さない
+    · 判断: restore-before
+  ✓ [復旧の途中 renamed] 復旧の子プロセスも SIGKILL で止まった
+  ✓ [復旧の途中 renamed] 次の復旧でファイルは適用前
+  ✓ [復旧の途中 renamed] ジャーナルは failed
+  ✓ [復旧の途中 renamed] 一時ファイル・退避リンク（適用と復旧の両方）を残さない
+    · 判断: mark-failed
+  ✓ [復旧の途中 snapshot-verified] 復旧の子プロセスも SIGKILL で止まった
+  ✓ [復旧の途中 snapshot-verified] 次の復旧でファイルは適用前
+  ✓ [復旧の途中 snapshot-verified] ジャーナルは failed
+  ✓ [復旧の途中 snapshot-verified] 一時ファイル・退避リンク（適用と復旧の両方）を残さない
+    · 判断: mark-failed
+  ✓ [PID の再利用] 持ち主の pid が生きていれば、別のプロセスでも何もしない（安全側。片付かない）
+  ✓ [別のホスト] 持ち主を確かめられない記録は何もしない（安全側）
+  ✓ [古いジャーナル] 終わっていない古い記録は保存期間で消さず、仕様どおりに復旧する
+  ⚠ [既知の限界] S7 PID の再利用・別のホスト（コンテナの作り直し） — {"note":"持ち主が生きているかを確かめられない記録は、安全側で何もしない。そのため自動では片付かず要確認として残る（E2 で画面に出す）"}
+  ✓ [鍵の競合] 前提: 同期点で割り込んだ
+  ✓ [鍵の競合] 別のプロセスの新しい鍵を消さず、自分は鍵を取らない
+  ✓ [鍵の競合] 取り除き用の一時的な名前を残さない
+
+S8 確定済み（committed）の変更は、復旧で取り消されない
+  ✓ 前提: committed
+  ✓ committed のジャーナルに何もしない
+  ✓ ファイルは適用後のまま
+  ✓ 終わった記録の名前を持つファイルにも触れない（外部の内容を持ちうる）
+  ✓ 利用者が適用前へ戻した内容にも触れない
+  ✓ 確定の後に外部変更があれば、取り消しも書かない
+
+S9 検証不足: プレビューの検証が足りなければ verified にしない
+  ✓ 前提: committed
+  ✓ Mobile だけ: verified にしない（viewport-missing）
+  ✓ 予測を含む: verified にしない
+  ✓ 予測の印が残る描画: verified にしない
+  ✓ 同じ幅が2回: verified にしない
+  ✓ ここまで outcome は成功ではない
+  ✓ 2幅の実測・版・対応が揃えば verified
+  ✓ （同）success = committed かつ verified
+  ✓ 検証の後に描いた別のファイルが変わると staleSinceVerification（検証はいまの内容の証拠ではない）
+  ✓ 検証の後に対象のファイルが変わると staleSinceVerification
+  ✓ 変わった後に同じ報告を送っても verified にしない（stale-source）
+  ✓ uncertain の適用は検証の対象にしない（tx-not-committed）
+
+S10 既定で無効: 通常の起動では編集できない
+  ✓ 環境変数が無いと書き込みは無効
+  ✓ 適用は書かない（refused・edit-disabled）
+  ✓ 書き込みの入口も書かない
+  ✓ 片付けの入口も消さない
+  ✓ 復旧は見せるだけ（dry-run）
+  ✓ 無効の間、ソース・一時ファイル・退避リンク・記録のどれも変わらない（ジャーナルの置き場所も作らない）
+
+既知の限界の記録: 5 件（安全の主張ではない。docs/08a 第5節）
+
+✓ すべて通過 — 293 件通過 / 0 件失敗
+[guard] {"cmd":"node tests/edit-safety-unit.spec.mjs","seconds":5,"exit":0,"signal":null,"stoppedBy":null,"maxPssMB":134,"maxAt":2,"maxProcs":2,"minAvailMB":15022,"leftover":0}

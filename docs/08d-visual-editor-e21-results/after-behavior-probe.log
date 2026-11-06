@@ -1,0 +1,6 @@
+.libjs: /home/user/Visual-Computing-IDE/.libjs
+P1 探索の bindDocument（Desktop の文書。取り直したのは Mobile だけ）: unidentified / refetched-after-document
+P1 編集専用の照合（取り直しに Mobile の文書の名乗りがある）: document-identified / 取り直し none
+P2 中継の記録に要求を出した文書の名乗り: ある
+P2 名乗りのヘッダが開発サーバーへ渡った: いいえ
+P3 スクリプトに編集の観測の知らせ（edit-observe）: ある

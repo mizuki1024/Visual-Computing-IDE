@@ -1,0 +1,179 @@
+
+E21-01 プレビューで選んだ要素 → 正しいソース位置（サーバーが決める）
+  ✓ Desktop の接続を登録する
+  ✓ 状態は selected
+  ✓ ファイル（正解はソースを読んで決めた）
+  ✓ 行
+  ✓ 列
+  ✓ コンポーネント
+  ✓ ソースの版 = 試験が読み直した内容の sha1（先頭16桁）
+  ✓ DOM の版・対応表の版・ソースの版が一致
+  ✓ 文書の段: 中継の台帳の応答と照合済み
+  ✓ 取り直しの段: 無し
+  ✓ 描画は確かめていない（not-verified）
+  ✓ 文書の照合の水準は document-identified（verified と言わない）
+  ✓ 位置を受け取る入口が無い: 観測に位置（file・line）を足すと形の検査で拒む
+  ✓ 矩形・計算済みスタイルもサーバーは受け取らない（表示用で、照合の根拠にしない）
+
+E21-02 同じコンポーネントの複数インスタンス（DOM のインスタンスとソースの定義を分ける）
+  ✓ 2つともソースの定義は同じ（ファイル・行・列・識別子）
+  ✓ DOM のインスタンスは別（何番目か）
+  ✓ インスタンスとソースを別の項目で返す（instance / source）
+
+E21-03 Desktop と Mobile の接続の分離
+  ✓ Mobile の接続を登録する
+  ✓ Mobile で別の要素（SiteNotice）を選ぶ
+  ✓ （同）位置
+  ✓ Desktop の選択は Mobile の選択で変わらない（再照合も selected・同じ対象）
+  ✓ Mobile の接続で Desktop の文書の識別子を名乗る選択は受けない
+  ✓ Desktop の文書を Mobile の接続として登録しない
+  ✓ Desktop の接続から Mobile の大きさの観測は受けない
+  ✓ 上の拒否の後も Mobile の選択は selected のまま
+
+E21-04・E21-06 片方の読み込み直し・古い MessagePort
+  ✓ 前の文書の接続（古い MessagePort）からの再照合は disconnected（stale-connection）
+  ✓ 前の文書の接続からの選択も受けない
+  ✓ 新しい文書では前の選択を引き継がない（stale・再選択）
+  ✓ Mobile の接続・選択は変わらない
+  ✓ Mobile の文書の照合も変わらない
+  ✓ E21-06: 画面の側でも、古い接続の port の知らせは捨てる
+  ✓ いまの接続の知らせは受ける
+  ✓ 別のアートボードの接続の知らせは捨てる
+
+E21-05 両方の読み込み直し
+  ✓ Mobile の前の接続は disconnected
+  ✓ Mobile の新しい文書でも前の選択を引き継がない
+  ✓ 状態に、2枚それぞれのいまの接続（別の文書）が出る
+  ✓ 選び直せば、両方とも新しい対象として selected（同じ定義でも別の対象）
+
+E21-07・E21-08 nonce・起動の不一致
+  ✓ 形の合う観測は受ける
+  ✓ nonce が違えば捨てる
+  ✓ 求めた番号と違う答え（遅れた答え）は捨てる
+  ✓ 知らないキーがあれば捨てる
+  ✓ 版が違えば捨てる
+  ✓ 拡張の版が違えば捨てる
+  ✓ 許していない計算済みスタイル（background-image）は捨てる
+  ✓ URL を含みうる値は捨てる
+  ✓ 選んでいないのに選択があるものは捨てる
+  ✓ 応答済みの数が要求の数を超えるものは捨てる
+  ✓ 画面の側: nonce が違う知らせは捨てる
+  ✓ IDE の起動が違う要求は disconnected（ide-restarted）
+  ✓ 開発サーバーの起動が違う要求は disconnected（stale-run）
+  ✓ （同）開始時刻だけが違っても拒む
+  ✓ 画面の側: 開発サーバーが入れ替わった後の知らせは捨てる
+  ✓ 画面の側: IDE が起動し直した後の知らせは捨てる
+  ✓ 拒否の後も、正しい要求の選択は selected のまま
+
+E21-09〜11 HMR の後の古い版・選び直し・別の要素への置き換わり
+  ✓ HMR の前の DOM（古い版）での再照合は stale
+  ✓ 理由は版の違い（source-changed 系）
+  ✓ 前提: 新しい DOM の版は前と違う
+  ✓ HMR の後の DOM（新しい版）でも、前の対象は引き継がない（stale のまま）
+  ✓ 一度失効した選択は、何度確かめても戻らない
+  ✓ 選び直すと、新しい対象として selected
+  ✓ 新しい版 = いまの内容の sha1（試験が読み直した）
+  ✓ 指紋 = いまの内容のその位置の要素の指紋
+  ✓ 構造の指紋も一致
+  ✓ 前の対象とは別の対象（識別子が違う）
+  ✓ 変わっていなければ再照合は selected
+  ✓ ソースが変わった後、新しい版の DOM で直接確かめても stale（自動で引き継がない）
+  ✓ 前提: 同じ行・列に要素があり、識別子（位置から決まる）は同じ
+  ✓ 同じ位置に別の要素が来ても、前の要素を維持しない（stale）
+  ✓ 選び直すと、いまの要素（別の要素）として解決する（前の指紋ではない）
+
+E21-12・E21-13 RSC の取り直しを、出した文書で区別する（探索の bindDocument は変えない）
+  ✓ Desktop: Mobile の取り直しでは同定を落とさない（document-identified・取り直し無し）
+  ✓ Mobile: 自分の取り直し1件（スクリプトの数と一致）
+  ✓ E21-20: 探索の bindDocument は変えていない（同じ記録で refetched-after-document のまま。安全側）
+  ✓ Desktop: 自分の取り直し1件として照合済み
+  ✓ Mobile: 自分の取り直し2件
+  ✓ 描画は確かめていない
+  ✓ スクリプトの数（1）が台帳（2）より少ない＝誰かがこの識別子を名乗った → 未確認
+
+E21-14・E21-16 文書の識別子と中継の記録の照合・未確認を verified としない
+  ✓ 台帳に無い識別子は token-not-in-relay
+  ✓ 識別子が無ければ no-document-token
+  ✓ パスが違えば path-mismatch
+  ✓ 2xx でない応答の文書は document-failed
+  ✓ 別のアートボードの文書の識別子は token-of-other-artboard
+  ✓ 保持の上限で外した文書は ledger-evicted（推測で token-not-in-relay と言わない）
+  ✓ 別の起動の台帳には無い（起動ごとに分ける）
+  ✓ ページ内の遷移の後は client-navigation（未確認）
+  ✓ 応答待ちの取り直しは rsc-pending（未確認・一時的）
+  ✓ 出した文書が分からない同じパスの取り直しがあれば rsc-unattributed（未確認）
+  ✓ 台帳に無い識別子を名乗る取り直しも、出した文書が分からないものとして扱う
+  ✓ 文書の照合の結果に "verified" という水準は無い（document-identified / unverified だけ）
+  ✓ 選択は selected でも、文書の照合が未確認ならそう返す（選択の成功を文書の照合に格上げしない）
+
+E21-15 偽の・古い検証の報告の拒否（結び付けだけ。検証の評価・記録はしない）
+  ✓ いまの2枚の文書・接続で測った報告は bound
+  ✓ （同）描画は報告の申告のまま（declared-by-report）
+  ✓ （同）検証の契約は評価していない（verified にしない）
+  ✓ Desktop と Mobile の文書を入れ替えた報告は unbound（other-artboard）
+  ✓ 前の文書（読み込み直す前）の識別子の報告は unbound
+  ✓ 中継が出していない識別子の報告は unbound
+  ✓ その文書を接続する前の時刻の計測は unbound（古い報告）
+  ✓ その文書の最後の取り直しより前の計測は unbound（計測の後に描き直された）
+  ✓ Mobile が無い報告は unbound（viewport-missing）
+  ✓ 別の IDE の起動の画面からは unbound
+  ✓ 形の合わない報告は unbound
+  ✓ 結び付けは記録を書かない（ジャーナルのディレクトリは変わらない）
+
+E21-17 復旧の状態を読むだけで確かめる
+  ✓ 前提: 適用の途中で止まった子プロセス（SIGKILL）
+  ✓ 状態の復旧は点検（inspected）
+  ✓ （同）mutates: false
+  ✓ 止まった適用の記録が、要確認として出る
+  ✓ 3回点検しても、ジャーナル・src/ の下は1バイトも変わらない（種類・inode・大きさ・時刻・リンク数・内容）
+  ✓ （同）点検の結果も変わらない（自動で片付けない）
+  ✓ 書き込みの可否は既定で無効（env-not-set）
+
+E21-18 既定で書き込みが無効・同期の層に書き込みの道が無い
+  ✓ VCIDE_EDIT_E1_WRITE が無ければ書き込みは無効
+  ✓ VCIDE_EDIT_SYNC_DEV の既定は無効
+  ✓ VCIDE_EDIT_SYNC_DEV="" は無効
+  ✓ VCIDE_EDIT_SYNC_DEV="0" は無効
+  ✓ VCIDE_EDIT_SYNC_DEV="true" は無効
+  ✓ VCIDE_EDIT_SYNC_DEV="yes" は無効
+  ✓ VCIDE_EDIT_SYNC_DEV=" 1" は無効
+  ✓ "1" のときだけ有効
+  ✓ 読み取りの窓口が出すのは root・resolveTarget・reresolveTarget・inspectRecovery だけ
+  ✓ 窓口は凍結（後から書き込みの関数を足せない）
+  ✓ 窓口にもセッションにも apply は無い
+  ✓ 窓口にもセッションにも revert は無い
+  ✓ 窓口にもセッションにも recover は無い
+  ✓ 窓口にもセッションにも startupRecovery は無い
+  ✓ 窓口にもセッションにも submitVerification は無い
+  ✓ 窓口にもセッションにも createDraft は無い
+  ✓ 窓口にもセッションにも carrySelection は無い
+  ✓ 窓口のソースは apply・revert・recover・createDraft・submitVerification・carrySelection を呼ばない
+  ✓ API の操作は connect・disconnect・select・recheck・bind-report・state だけ（apply・revert・draft・recover が無い）
+
+E21-19 探索の既存の知らせ・選択・スクリプトが変わらない
+  ✓ 既定のスクリプトは変更前と同じ（ループバック）
+  ✓ 既定のスクリプトは変更前と同じ（転送ホストを許した設定）
+  ✓ editSync: false を明示しても同じ
+  ✓ editSync のスクリプトは構文として正しい
+  ✓ editSync のスクリプトは edit-observe に答え、RSC の要求に文書の識別子を載せる
+  ✓ 探索の版は 3 のまま
+  ✓ 探索の parseAgentMessage は編集の知らせを受けない（知らない種類として捨てる）
+  ✓ 探索の select の知らせは今までどおり受ける
+  ✓ 探索の select の知らせに編集の項目を足すと受けない（形を広げていない）
+
+中継（製品の PreviewGateway）: RSC の要求の文書の識別子
+  ✓ editSync: RSC の要求の名乗りを initiatorDoc として記録する
+  ✓ editSync: RSC でない要求の名乗りは記録しない
+  ✓ editSync: 形の違う名乗りは記録しない
+  ✓ 名乗りのヘッダは開発サーバーへ渡さない
+  ✓ editSync: 配るスクリプトは編集の知らせを含む
+  ✓ editSync なし: 名乗りを記録しない
+  ✓ editSync なし: 名乗りのヘッダは開発サーバーへ渡さない
+  ✓ editSync なし: 配るスクリプトは変更前と同じ
+
+台帳（teeObserver）: 探索の観測の記録を変えない
+  ✓ 探索の観測は同じ引数で受ける
+  ✓ 台帳にも入る
+  ✓ 台帳の失敗は探索の記録を止めない（例外を外へ出さない）
+
+✓ すべて通過 — 147 件通過 / 0 件失敗

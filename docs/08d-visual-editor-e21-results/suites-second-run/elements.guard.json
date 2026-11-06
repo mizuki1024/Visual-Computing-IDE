@@ -1,0 +1,46 @@
+{
+ "summary": {
+  "cmd": "node tests/elements.spec.mjs",
+  "seconds": 6,
+  "exit": 0,
+  "signal": null,
+  "stoppedBy": null,
+  "maxPssMB": 529,
+  "maxAt": 4,
+  "maxProcs": 10,
+  "minAvailMB": 15081,
+  "leftover": 0
+ },
+ "limits": {
+  "seconds": 1500,
+  "pssMB": 6144,
+  "procs": 150,
+  "minAvailMB": 2048
+ },
+ "samples": [
+  {
+   "t": 2,
+   "procs": 10,
+   "pssMB": 490,
+   "availMB": 15111,
+   "byMB": {
+    "ide": 0,
+    "dev-server": 0,
+    "browser": 385,
+    "other": 105
+   }
+  },
+  {
+   "t": 4,
+   "procs": 10,
+   "pssMB": 529,
+   "availMB": 15081,
+   "byMB": {
+    "ide": 0,
+    "dev-server": 0,
+    "browser": 422,
+    "other": 107
+   }
+  }
+ ]
+}

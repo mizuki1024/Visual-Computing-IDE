@@ -1,0 +1,70 @@
+{
+ "summary": {
+  "cmd": "node tests/edit-sync-e2e.spec.mjs",
+  "seconds": 8,
+  "exit": 0,
+  "signal": null,
+  "stoppedBy": null,
+  "maxPssMB": 1486,
+  "maxAt": 6,
+  "maxProcs": 13,
+  "minAvailMB": 14060,
+  "leftover": 0
+ },
+ "limits": {
+  "seconds": 1500,
+  "pssMB": 6144,
+  "procs": 150,
+  "minAvailMB": 2048
+ },
+ "samples": [
+  {
+   "t": 2,
+   "procs": 4,
+   "pssMB": 443,
+   "availMB": 14972,
+   "byMB": {
+    "ide": 254,
+    "dev-server": 0,
+    "browser": 0,
+    "other": 189
+   }
+  },
+  {
+   "t": 4,
+   "procs": 5,
+   "pssMB": 859,
+   "availMB": 14473,
+   "byMB": {
+    "ide": 358,
+    "dev-server": 0,
+    "browser": 0,
+    "other": 501
+   }
+  },
+  {
+   "t": 6,
+   "procs": 13,
+   "pssMB": 1486,
+   "availMB": 14060,
+   "byMB": {
+    "ide": 686,
+    "dev-server": 0,
+    "browser": 224,
+    "other": 576
+   }
+  },
+  {
+   "t": 8,
+   "procs": 1,
+   "pssMB": 141,
+   "availMB": 14824,
+   "byMB": {
+    "ide": 0,
+    "dev-server": 0,
+    "browser": 0,
+    "other": 141
+   }
+  }
+ ]
+}

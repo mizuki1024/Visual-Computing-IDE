@@ -1,0 +1,112 @@
+
+T1 正常な変更（p-4 → p-5。1ファイル・1トークン）
+  ✓ 対象の解決は、選んだ要素（外枠の <div>）・版・内容の指紋を持つ
+  ✓ 対象は DOM の版・対応表の版・ファイルの版が一致したもの
+  ✓ 下書きはファイルに触れない（内容は元のまま）
+  ✓ 下書きの差分は1行だけを変える（-/+ が1行ずつ）
+  ✓ 差分の行は p-4 → p-5 で、md:p-6 は残る
+  ✓ 適用の結果は committed
+  ✓ 書き込んだ（written: true）
+  ✓ ファイルは token 1つだけが変わった内容とバイト一致
+  ✓ 変わった文字は1文字（4 → 5）
+  ✓ 適用後の版は、書いた内容の版（読み直して確かめた）
+  ✓ ジャーナルは committed
+  ✓ 検証の前は成功扱いにしない（committed だが未検証）
+  ✓ src/ に一時ファイルを残さない（F-06）
+  ✓ ジャーナルは題材の外に置く（.ide-runtime と同じ扱い）
+  ✓ ジャーナルを題材の中に置く設定は受け付けない
+  ✓ ジャーナルにソースの本文を写さない（ハッシュと範囲と token だけ）
+  ✓ 適用済みの下書きは2回目を拒否する（書き込まない）
+  ✓ 確認した差分のハッシュが違えば適用しない（diff-not-reviewed）
+  ✓ （同）ファイルは元のまま
+  ✓ 条件付きの className は推測で書き換えない（unsupported-class）
+  ✓ 同じ token が2つ以上なら一意に決めない（token-ambiguous）
+  ✓ 変更の検証: variant を変える は下書きを作らない（variant-mismatch）
+  ✓ 変更の検証: 任意値 は下書きを作らない（invalid-change）
+  ✓ 変更の検証: 同じ値 は下書きを作らない（invalid-change）
+  ✓ 変更の検証: 引用符 は下書きを作らない（invalid-change）
+  ✓ 変更の検証: 無い token は下書きを作らない（token-not-found）
+  ✓ 変更の検証: 既にある token は下書きを作らない（token-already-present）
+  ✓ 変更の検証: 知らないキー は下書きを作らない（invalid-change）
+  ✓ 変更の検証: 種類が違う は下書きを作らない（invalid-change）
+  ✓ （同）ファイルは元のまま
+
+T2 古い版（対象のソースが変わった）
+  ✓ 下書きの作成（第2段）: 古い DOM の版では拒否し、再選択を求める
+    · 理由: target-unresolved（照合: source-changed）
+  ✓ 下書きの作成: いまの DOM でも、選択した時点の版と違えば拒否（source-changed）
+  ✓ 適用の直前（第3段）: 古い版の下書きは適用しない
+  ✓ （同）外部の変更は残る（上書きしない）
+  ✓ 適用の直前: いまの DOM の選択を付けても、古い版の下書きは適用しない
+  ✓ （同）外部の変更は残る
+  ✓ 解決（第1段）: 対応表の版が古ければ特定しない（manifest-stale）
+
+T3 別の要素への誤編集（RV07・RV08 — 同じ行・列・タグ・コンポーネントに別の要素）
+  ✓ 前提: 2つ目の要素が、1つ目と同じ識別子（同じ 行:列・タグ・コンポーネント）になった
+  ✓ RV07: 古い DOM の選択は特定しない（照合: source-changed）
+  ✓ RV07: 選んだ対象を新しい DOM で再解決すると、別の要素なので拒否する（element-mismatch）
+  ✓ RV08（下書き・第2段）: 選んだ要素の下書きを、同じ位置の別の要素に作らない
+  ✓ RV08（適用・第3段）: 変更前に作った下書きを、同じ位置の別の要素へ適用しない
+  ✓ （同）2つ目の要素の p-4 は書き換えられていない（ファイルは外部の編集のまま）
+  ✓ （同）古い DOM の選択を付けても適用しない
+  ✓ （同）ファイルは外部の編集のまま
+  ✓ いまの DOM で選び直すと、2つ目の要素を対象にする（指紋は1つ目と違う）
+  ✓ （同）適用は committed
+  ✓ （同）書き換わったのは2つ目（second）の p-4 だけ
+  ✓ 前提: 入れ替えた内容は同じ大きさ
+  ✓ 前提: 入れ替え後、utility の <dd> が pref の <dd> と同じ識別子
+  ✓ 兄弟の入れ替えの後、同じ識別子の別の <dd> を、選んだ要素として扱わない（element-mismatch）
+  ✓ 同じ要素が別の行へ動いた後の古い対象は、付け替えずに再選択を求める（target-moved）
+
+T5 外部変更（編集の途中でファイルが変わった）
+  ✓ (a) 下書きの後の外部変更: 適用しない（written: false）
+  ✓ (a) 外部変更はそのまま残る
+  ✓ (a) 一時ファイルを残さない
+  ✓ 書き込みの途中（applying）の外部変更: 適用しない（conflict・written: false）
+  ✓ （applying）外部変更はそのまま残る
+  ✓ （applying）一時ファイルを残さない
+  ✓ （applying）ジャーナルは failed（committed と報告しない）
+  ✓ 書き込みの途中（temp-written）の外部変更: 適用しない（conflict・written: false）
+  ✓ （temp-written）外部変更はそのまま残る
+  ✓ （temp-written）一時ファイルを残さない
+  ✓ （temp-written）ジャーナルは failed（committed と報告しない）
+  ✓ 書き込みの途中（before-final-check）の外部変更: 適用しない（conflict・written: false）
+  ✓ （before-final-check）外部変更はそのまま残る
+  ✓ （before-final-check）一時ファイルを残さない
+  ✓ （before-final-check）ジャーナルは failed（committed と報告しない）
+  ✓ 書き込みの途中（before-last-stat）の外部変更: 適用しない（conflict・written: false）
+  ✓ （before-last-stat）外部変更はそのまま残る
+  ✓ （before-last-stat）一時ファイルを残さない
+  ✓ （before-last-stat）ジャーナルは failed（committed と報告しない）
+  ✓ (f) 書き込みの直後に外部変更が入ったら、成功扱いにしない（uncertain・書き込みの状態は yes）
+  ✓ (f) 外部変更は残る（書き戻さない）
+  ✓ (f) ジャーナルは failed・要確認
+  ✓ (f) 成否が確定しない書き込みは、取り消しの対象にしない（F-11）
+  ✓ RV03: 最後の照合〜rename の窓の上書きを、committed と報告しない
+  ✓ RV03:（同）外部の変更は失われない
+  ✓ RV03:（同）一時ファイル・退避リンクを残さない
+
+T6 複数ファイル・複数の変更（E1 は1ファイル・1トークンだけ）
+  ✓ 2ファイルの変更は拒否する（multi-file-unsupported）
+  ✓ （同）どのファイルも書き込まない
+  ✓ 同じファイルの2つの変更も拒否する（multi-change-unsupported）
+  ✓ （同）どのファイルも書き込まない
+  ✓ 変更が0件の要求は拒否する
+  ✓ 拒否した要求はジャーナルを作らない
+  ✓ 知らないキーを持つ要求は拒否する（形の検査）
+
+T11 外部変更の後の取り消し
+  ✓ 適用の後に外部変更が入ったら、取り消さない（changed-after-apply・written: false）
+  ✓ （同）外部変更は残る（適用前の内容で上書きしない）
+  ✓ （同）元の適用のジャーナルは committed のまま
+  ✓ 適用直後の内容のままなら、取り消しは committed
+  ✓ （同）取り消し後の内容は適用前とバイト一致
+  ✓ （同）取り消しも別のジャーナル（kind: revert）として記録する
+  ✓ 2回目の取り消しは拒否する（already-reverted）
+  ✓ （同）ファイルは適用前のまま
+  ✓ 知らない適用の取り消しは拒否する
+  ✓ 形の合わない識別子は拒否する（ジャーナルの外を読まない）
+  ✓ sha256 は内容のハッシュ（自己確認）
+
+✓ すべて通過 — 96 件通過 / 0 件失敗
+[guard] {"cmd":"node tests/edit-engine-unit.spec.mjs","seconds":1,"exit":0,"signal":null,"stoppedBy":null,"maxPssMB":0,"maxAt":null,"maxProcs":0,"minAvailMB":null,"leftover":0}

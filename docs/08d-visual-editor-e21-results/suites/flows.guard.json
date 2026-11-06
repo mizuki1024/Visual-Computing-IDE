@@ -1,0 +1,70 @@
+{
+ "summary": {
+  "cmd": "node tests/flows.spec.mjs",
+  "seconds": 9,
+  "exit": 0,
+  "signal": null,
+  "stoppedBy": null,
+  "maxPssMB": 619,
+  "maxAt": 8,
+  "maxProcs": 10,
+  "minAvailMB": 14938,
+  "leftover": 0
+ },
+ "limits": {
+  "seconds": 1500,
+  "pssMB": 6144,
+  "procs": 150,
+  "minAvailMB": 2048
+ },
+ "samples": [
+  {
+   "t": 2,
+   "procs": 10,
+   "pssMB": 485,
+   "availMB": 15057,
+   "byMB": {
+    "ide": 0,
+    "dev-server": 0,
+    "browser": 384,
+    "other": 100
+   }
+  },
+  {
+   "t": 4,
+   "procs": 10,
+   "pssMB": 530,
+   "availMB": 15047,
+   "byMB": {
+    "ide": 0,
+    "dev-server": 0,
+    "browser": 427,
+    "other": 104
+   }
+  },
+  {
+   "t": 6,
+   "procs": 10,
+   "pssMB": 602,
+   "availMB": 14970,
+   "byMB": {
+    "ide": 0,
+    "dev-server": 0,
+    "browser": 497,
+    "other": 106
+   }
+  },
+  {
+   "t": 8,
+   "procs": 10,
+   "pssMB": 619,
+   "availMB": 14938,
+   "byMB": {
+    "ide": 0,
+    "dev-server": 0,
+    "browser": 513,
+    "other": 106
+   }
+  }
+ ]
+}

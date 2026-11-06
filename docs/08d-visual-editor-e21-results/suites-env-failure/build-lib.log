@@ -1,0 +1,4 @@
+
+> visual-computing-ide@0.1.0 build:lib
+> tsc -p tsconfig.lib.json
+

@@ -1,0 +1,175 @@
+
+Y1 書き込みの可否: 環境変数に加えて OS（Linux だけ。macOS では無効のまま）
+  ✓ editWriteGate がある
+  ✓ Linux・環境変数 "1" → 有効
+  ✓ darwin・環境変数 "1" → 無効（platform-unsupported）
+  ✓ darwin: editWritesEnabled も無効
+  ✓ win32・環境変数 "1" → 無効（platform-unsupported）
+  ✓ win32: editWritesEnabled も無効
+  ✓ freebsd・環境変数 "1" → 無効（platform-unsupported）
+  ✓ freebsd: editWritesEnabled も無効
+  ✓ openbsd・環境変数 "1" → 無効（platform-unsupported）
+  ✓ openbsd: editWritesEnabled も無効
+  ✓ sunos・環境変数 "1" → 無効（platform-unsupported）
+  ✓ sunos: editWritesEnabled も無効
+  ✓ aix・環境変数 "1" → 無効（platform-unsupported）
+  ✓ aix: editWritesEnabled も無効
+  ✓ android・環境変数 "1" → 無効（platform-unsupported）
+  ✓ android: editWritesEnabled も無効
+  ✓ Linux・環境変数なし → 無効（env-not-set）
+  ✓ macOS・環境変数なし → 無効（env-not-set より OS の理由を優先しない／どちらでも無効）
+  ✓ 書き込みを許す OS の一覧は linux だけ
+  ✓ macOS では環境変数 "1" でも適用しない（edit-disabled・written: false）
+  ✓ （同）理由の文言は OS を挙げる
+  ✓ （同）macOS では復旧は見せるだけ（dry-run）
+  ✓ （同）起動時の復旧も点検だけ（inspect-only）
+  ✓ （同）書き込みの入口も OS を確かめる
+  ✓ （同）ソース・ジャーナル・鍵を1バイトも変えない
+
+Y2 起動時の復旧: 読むだけの点検とファイルを変える復旧を分ける。無効なら何も変えない
+  ✓ inspectRecovery・startupRecovery がある
+  ✓ [prepared] 前提: 子プロセスは SIGKILL で止まった
+  ✓ [prepared] 無効の点検・復旧・起動時の復旧と、有効の点検は、題材（ソース・一時ファイル・退避リンク）を変えない
+  ✓ [prepared]（同）ジャーナル・検証の記録・鍵を変えない（作らない・消さない・書き換えない）
+  ✓ [prepared]（同）鍵を作らない
+  ✓ [prepared] 点検は mutates: false を返す
+  ✓ [prepared] 点検の判断（予定の処理）
+  ✓ [prepared] 点検は、処理が何を変えるか（effects）を分けて示す
+  ✓ [prepared] 点検は持ち主の確かめ方（開始時刻）を示す
+  ✓ [prepared] 形の合わない記録は点検で「読めない」と示し、消さない
+  ✓ [prepared] 無効の復旧は dry-run
+  ✓ [prepared] 無効の起動時の復旧は点検だけ（inspect-only・recovery: null・理由 env-not-set）
+  ✓ [prepared] 有効の起動時の復旧は点検 → 復旧（recovered）
+  ✓ [prepared]（同）実際の処理は点検の予定と同じ
+  ✓ [prepared]（同）ソースは適用前
+  ✓ [prepared]（同）形の合わない記録は消さない
+  ✓ [temp-written] 前提: 子プロセスは SIGKILL で止まった
+  ✓ [temp-written] 無効の点検・復旧・起動時の復旧と、有効の点検は、題材（ソース・一時ファイル・退避リンク）を変えない
+  ✓ [temp-written]（同）ジャーナル・検証の記録・鍵を変えない（作らない・消さない・書き換えない）
+  ✓ [temp-written]（同）鍵を作らない
+  ✓ [temp-written] 点検は mutates: false を返す
+  ✓ [temp-written] 点検の判断（予定の処理）
+  ✓ [temp-written] 点検は、処理が何を変えるか（effects）を分けて示す
+  ✓ [temp-written] 点検は持ち主の確かめ方（開始時刻）を示す
+  ✓ [temp-written] 形の合わない記録は点検で「読めない」と示し、消さない
+  ✓ [temp-written] 無効の復旧は dry-run
+  ✓ [temp-written] 無効の起動時の復旧は点検だけ（inspect-only・recovery: null・理由 env-not-set）
+  ✓ [temp-written] 有効の起動時の復旧は点検 → 復旧（recovered）
+  ✓ [temp-written]（同）実際の処理は点検の予定と同じ
+  ✓ [temp-written]（同）ソースは適用前
+  ✓ [temp-written]（同）形の合わない記録は消さない
+  ✓ [snapshot-linked] 前提: 子プロセスは SIGKILL で止まった
+  ✓ [snapshot-linked] 無効の点検・復旧・起動時の復旧と、有効の点検は、題材（ソース・一時ファイル・退避リンク）を変えない
+  ✓ [snapshot-linked]（同）ジャーナル・検証の記録・鍵を変えない（作らない・消さない・書き換えない）
+  ✓ [snapshot-linked]（同）鍵を作らない
+  ✓ [snapshot-linked] 点検は mutates: false を返す
+  ✓ [snapshot-linked] 点検の判断（予定の処理）
+  ✓ [snapshot-linked] 点検は、処理が何を変えるか（effects）を分けて示す
+  ✓ [snapshot-linked] 点検は持ち主の確かめ方（開始時刻）を示す
+  ✓ [snapshot-linked] 形の合わない記録は点検で「読めない」と示し、消さない
+  ✓ [snapshot-linked] 無効の復旧は dry-run
+  ✓ [snapshot-linked] 無効の起動時の復旧は点検だけ（inspect-only・recovery: null・理由 env-not-set）
+  ✓ [snapshot-linked] 有効の起動時の復旧は点検 → 復旧（recovered）
+  ✓ [snapshot-linked]（同）実際の処理は点検の予定と同じ
+  ✓ [snapshot-linked]（同）ソースは適用前
+  ✓ [snapshot-linked]（同）形の合わない記録は消さない
+  ✓ [renamed] 前提: 子プロセスは SIGKILL で止まった
+  ✓ [renamed] 無効の点検・復旧・起動時の復旧と、有効の点検は、題材（ソース・一時ファイル・退避リンク）を変えない
+  ✓ [renamed]（同）ジャーナル・検証の記録・鍵を変えない（作らない・消さない・書き換えない）
+  ✓ [renamed]（同）鍵を作らない
+  ✓ [renamed] 点検は mutates: false を返す
+  ✓ [renamed] 点検の判断（予定の処理）
+  ✓ [renamed] 点検は、処理が何を変えるか（effects）を分けて示す
+  ✓ [renamed] 点検は持ち主の確かめ方（開始時刻）を示す
+  ✓ [renamed] 形の合わない記録は点検で「読めない」と示し、消さない
+  ✓ [renamed] 無効の復旧は dry-run
+  ✓ [renamed] 無効の起動時の復旧は点検だけ（inspect-only・recovery: null・理由 env-not-set）
+  ✓ [renamed] 有効の起動時の復旧は点検 → 復旧（recovered）
+  ✓ [renamed]（同）実際の処理は点検の予定と同じ
+  ✓ [renamed]（同）ソースは適用前
+  ✓ [renamed]（同）形の合わない記録は消さない
+  ✓ 前提: 1つ目は committed
+  ✓ 前提: 3つの記録は形が正しい
+  ✓ 点検は、整理の対象と、残す記録（理由つき）を分けて示す
+  ✓ 期間を過ぎた、片付いた committed の記録は整理する（従来どおり）
+  ✓ 期間を過ぎても、要確認の記録は消さない
+  ✓ 期間を過ぎても、残したファイルがある記録は消さない
+  ✓ 残したファイルそのものも消さない
+
+Y3 持ち主の識別: pid ＋ プロセスの開始時刻（PID の再利用を見分ける）
+  ✓ processStartId・judgeOwner がある
+  ✓ 自分の開始時刻は /proc/self/stat と boot_id から独立に読んだ値と一致する
+  ✓ 形は <boot_id>:<tick>
+  ✓ 存在しない pid は null
+  ✓ 別のホスト → 確かめられない（alive 扱い・other-host）
+  ✓ pid が死んでいる → いない
+  ✓ pid が生きていて開始時刻が同じ → いる
+  ✓ pid が生きていて開始時刻が違う → いない（PID の再利用）
+  ✓ 開始時刻を記録していない（古い記録）→ pid だけで判断（生きていれば alive・安全側）
+  ✓ いまの開始時刻を読めない → pid だけで判断（安全側）
+  ✓ 記録の開始時刻の形が違う → 使わず pid だけで判断（安全側）
+  ✓ 前提: committed
+  ✓ ジャーナルの持ち主に開始時刻を記録する
+  ✓ 鍵の持ち主にも開始時刻を記録する
+  ✓ 開始時刻の無い記録（E1.1 の形）も読める
+  ✓ 形の違う開始時刻の記録は読まない
+  ✓ 前提: 止まった子プロセスの記録に開始時刻がある
+  ✓ [同じ開始時刻] 持ち主が生きている → 何もしない
+  ✓ [開始時刻の無い古い記録] pid が生きていれば何もしない（E1.1 と同じ安全側）
+  ✓ [PID の再利用] 点検は「持ち主はいない（開始時刻が違う）」と示す
+  ✓ [PID の再利用] 開始時刻が違えば持ち主はいない → 仕様どおり適用前へ戻す
+  ✓ [鍵] 生きている持ち主（同じ開始時刻）の鍵は取らない
+  ✓ [鍵] 開始時刻の無い古い鍵は pid が生きていれば取らない（安全側）
+  ✓ [鍵] PID が再利用された鍵（開始時刻が違う）は古い鍵として取り除いて取る
+  ✓ [鍵] 外した後に名前を残さない
+
+Y4 自分が書いた変更の後の選択の引き継ぎ（afterRev と afterFingerprint の両方が一致するときだけ）
+  ✓ carrySelection がある
+  ✓ 前提: committed
+  ✓ HMR の前の DOM（適用前の版）の選択は引き継がない
+  ✓ 対応表が古い（HMR の途中）なら引き継がない（探索の照合で止まる）
+  ✓ HMR の後の選択（版 = afterRev・指紋 = afterFingerprint）は引き継ぐ
+  ✓ （同）引き継いだ対象は、同じ要素（識別子・位置・タグ・コンポーネント）
+  ✓ （同）引き継いだ対象の指紋は、ジャーナルの afterFingerprint
+  ✓ （同）引き継いだ元の適用を示す
+  ✓ （同）引き継ぎは読むだけ（ソース・ジャーナルを変えない）
+  ✓ 引き継いだ対象で次の下書きを作れる（第2段の照合を通る）
+  ✓ 前提: 取り消しは committed
+  ✓ 取り消した適用からは引き継がない
+  ✓ 取り消し（kind: revert）からは引き継がない（選び直し）
+  ✓ [外部変更・DOM はまだ適用後の版] 引き継がない
+  ✓ [外部変更・HMR の後] DOM の版が afterRev でないので引き継がない（dom-not-at-after）
+  ✓ （同）選び直せば、いまの版の対象として通常どおり解決できる
+  ✓ [外部変更の後に書いた内容とバイト一致へ戻った] 版と指紋が一致すれば引き継ぐ（内容で判断する）
+  ✓ 前提: 1つ目の <div> の適用は committed
+  ✓ 同じ版（afterRev）の別の要素は引き継がない
+  ✓ 版が一致しても、指紋（afterFingerprint）が違えば引き継がない
+  ✓ 適用後の指紋の記録が無ければ引き継がない
+  ✓ 前提: 記録を戻せば引き継げる
+  ✓ 形の違う txId
+  ✓ 記録の無い txId
+  ✓ 形の違う選択
+  ✓ [transient] 前提: 結果は conflict・transient
+  ✓ [transient] 引き継がない（not-committed・選び直し）
+  ✓ [transient] いまの DOM の選択でも引き継がない
+  ✓ [uncertain] 前提: 結果は uncertain
+  ✓ [uncertain] 引き継がない（not-committed・選び直し）
+  ✓ [uncertain] いまの DOM の選択でも引き継がない
+  ✓ [refused] 書き込みが無効の結果には txId が無く、引き継げない
+
+Y5 ApplyResult の種類と報告書（08b 第3.5節）の照合
+  ✓ APPLY_STATUSES がある
+  ✓ 種類は6つ
+  ✓ 種類の名前
+  ✓ 08b 第3.5節の表の書き込みの結果の種類は、型の種類と同じ
+  ✓ engine.ts の ApplyResult の型の種類は APPLY_STATUSES と同じ
+  ✓ committed は検証の前は成功（success）ではない
+
+Y6 検証の報告の出所: 文書と中継の結び付けを確かめていないことを結果に明示する
+  ✓ 前提: 報告の中身は合格（verified）
+  ✓ 検証の結果は「文書と中継の結び付けは確かめていない」（documentBinding: not-checked）
+  ✓ （同）実測か予測かは報告の申告（measurement: declared-by-report）
+  ✓ outcome も documentBinding: not-checked を返す
+
+✓ すべて通過 — 160 件通過 / 0 件失敗
+[guard] {"cmd":"node tests/edit-sync-unit.spec.mjs","seconds":2,"exit":0,"signal":null,"stoppedBy":null,"maxPssMB":0,"maxAt":null,"maxProcs":0,"minAvailMB":null,"leftover":0}

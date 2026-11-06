@@ -1,0 +1,13 @@
+  ✗ 製品のモジュール lib/editPreviewProtocol.js を読み込める — got: "Cannot find module '/var/tmp/vcide-baseline/.libjs/lib/editPreviewProtocol.js'"
+  ✗ 製品のモジュール lib/editSyncBinding.js を読み込める — got: "Cannot find module '/var/tmp/vcide-baseline/.libjs/lib/editSyncBinding.js'"
+  ✗ 製品のモジュール server/editSync/relayLedger.js を読み込める — got: "Cannot find module '/var/tmp/vcide-baseline/.libjs/server/editSync/relayLedger.js'"
+  ✗ 製品のモジュール server/editSync/session.js を読み込める — got: "Cannot find module '/var/tmp/vcide-baseline/.libjs/server/editSync/session.js'"
+  ✗ 製品のモジュール server/editSync/readonlyEdit.js を読み込める — got: "Cannot find module '/var/tmp/vcide-baseline/.libjs/server/editSync/readonlyEdit.js'"
+    · E2.1 のモジュールが無いため、ここで止める（変更前のコード）
+
+✗ 失敗あり — 0 件通過 / 5 件失敗
+  ✗ 製品のモジュール lib/editPreviewProtocol.js を読み込める — got: "Cannot find module '/var/tmp/vcide-baseline/.libjs/lib/editPreviewProtocol.js'"
+  ✗ 製品のモジュール lib/editSyncBinding.js を読み込める — got: "Cannot find module '/var/tmp/vcide-baseline/.libjs/lib/editSyncBinding.js'"
+  ✗ 製品のモジュール server/editSync/relayLedger.js を読み込める — got: "Cannot find module '/var/tmp/vcide-baseline/.libjs/server/editSync/relayLedger.js'"
+  ✗ 製品のモジュール server/editSync/session.js を読み込める — got: "Cannot find module '/var/tmp/vcide-baseline/.libjs/server/editSync/session.js'"
+  ✗ 製品のモジュール server/editSync/readonlyEdit.js を読み込める — got: "Cannot find module '/var/tmp/vcide-baseline/.libjs/server/editSync/readonlyEdit.js'"

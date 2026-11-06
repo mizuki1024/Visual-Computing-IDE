@@ -1,0 +1,57 @@
+ブラウザ: 同梱の chromium 153.0.8010.12 / 題材: /home/user/Visual-Computing-IDE/poc/fixture-app
+
+1. IDE を開く
+  ✓ Phase 5 の確定 UI が出ている（N0 / キャンバス / 右ドック）
+  ✓ 「プロジェクトと実行」のパネルが出ている
+  ✓ 最初は未起動
+  ✓ N0 は「記録」であることを明示している（実プロセスの状態と混ぜない）
+  ✓ 起動ボタンは押せない（まだ検出していない）
+  ✓ 停止ボタンは押せない
+
+2. 指定が不正・対応外なら理由が出る
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+locator.click: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for locator('.fpnl[aria-label="プロジェクトと実行"]').locator('.rt-b').filter({ hasText: '検出' })[22m
+[2m    - locator resolved to <button disabled class="rt-b" type="button">検出</button>[22m
+[2m  - attempting click action[22m
+[2m    2 × waiting for element to be visible, enabled and stable[22m
+[2m      - element is not enabled[22m
+[2m    - retrying click action[22m
+[2m    - waiting 20ms[22m
+[2m    2 × waiting for element to be visible, enabled and stable[22m
+[2m      - element is not enabled[22m
+[2m    - retrying click action[22m
+[2m      - waiting 100ms[22m
+[2m    58 × waiting for element to be visible, enabled and stable[22m
+[2m       - element is not enabled[22m
+[2m     - retrying click action[22m
+[2m       - waiting 500ms[22m
+
+    at typePath (/home/user/Visual-Computing-IDE/tests/runtime-e2e.spec.mjs:143:53)
+    at async file:///home/user/Visual-Computing-IDE/tests/runtime-e2e.spec.mjs:149:1 {
+  log: [
+    `  - waiting for locator('.fpnl[aria-label="プロジェクトと実行"]').locator('.rt-b').filter({ hasText: '検出' })`,
+    '    - locator resolved to <button disabled class="rt-b" type="button">検出</button>',
+    '  - attempting click action',
+    '    2 × waiting for element to be visible, enabled and stable',
+    '      - element is not enabled',
+    '    - retrying click action',
+    '    - waiting 20ms',
+    '    2 × waiting for element to be visible, enabled and stable',
+    '      - element is not enabled',
+    '    - retrying click action',
+    '      - waiting 100ms',
+    '    58 × waiting for element to be visible, enabled and stable',
+    '       - element is not enabled',
+    '     - retrying click action',
+    '       - waiting 500ms'
+  ],
+  name: 'TimeoutError'
+}
+
+Node.js v22.23.4
+[guard] {"cmd":"node tests/runtime-e2e.spec.mjs","seconds":32,"exit":1,"signal":null,"stoppedBy":null,"maxPssMB":607,"maxAt":6,"maxProcs":7,"minAvailMB":14902,"leftover":0}

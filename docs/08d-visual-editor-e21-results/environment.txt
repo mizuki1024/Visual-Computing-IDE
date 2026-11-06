@@ -1,0 +1,13 @@
+# 再現条件（視覚編集 E2.1 のプレビューと編集対象の同期）。秘密情報は含めない
+記録日時(UTC): 2026-11-06T17:19:56Z
+作業基準: feature/visual-editor @ 86ffbc8（開始時の作業ツリーはクリーン・リモートと一致）。feature/explore @ 87cdfa9（リモート）・main @ b040295。どちらも変更していない
+OS: Linux 6.18.44-fc-v242  Node: v22.23.4  npm: 10.9.9
+IDE next: 16.4.3  playwright-core: 1.64.1  typescript: 5.7.3
+題材 next: 16.4.3（poc/fixture-edit の使い捨てのコピー。Client Component を1つ足す）
+ブラウザ: 同梱の Chromium 153（PW_CHANNEL=none。playwright-core が探す *-1248 に、入っている *-1243 を /opt/pw-browsers でシンボリックリンク。リポジトリの外）
+DB: PostgreSQL 16（initdb の使い捨て、127.0.0.1:55432・trust、poc/fixture-app/db/init.sql、poc.listings 12 行）。題材の .env は .env.example の複写
+依存: npm ci（ルート・poc/fixture-app・poc/fixture-edit）→ prisma generate（poc/fixture-app）
+変更前の全件: git worktree（/var/tmp/vcide-baseline @ 86ffbc8。リポジトリの外。node_modules はハードリンク）で npm run typecheck → npm run build → PW_CHANNEL=none bash scripts/test-all.sh（46 行・4,119 件通過・失敗 0。結果は /var/tmp/vcide-baseline-out。08c の変更後の回と同じ数）
+TDD の赤: 変更前の .libjs を VCIDE_LIBJS で指して tests/edit-sync21-unit と tests/lib/edit-e21-before-probe.mjs を回した（tdd-red/）
+変更後: npm run typecheck → npm run build → PW_CHANNEL=none bash scripts/test-all.sh docs/08d-visual-editor-e21-results/suites
+開発用の同期の有効化: IDE の環境変数 VCIDE_EDIT_SYNC_DEV=1 と、画面の ?editSyncDev=1（edit-sync21-e2e が自分で起動する IDE だけ。test-all の IDE（3100）は付けない）

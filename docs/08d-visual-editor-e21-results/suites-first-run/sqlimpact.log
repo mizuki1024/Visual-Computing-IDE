@@ -1,0 +1,79 @@
+
+1. いま画面に出ているカラムが、修正後も消えない
+  ✓ [PoC-01] 表示カラムが1つも消えない
+  ✓ [PoC-01] 表示カラムが勝手に増えない
+  ✓ [PoC-03] 表示カラムが1つも消えない
+  ✓ [PoC-03] 表示カラムが勝手に増えない
+  ✓ [PoC-05] 表示カラムが1つも消えない
+  ✓ [PoC-05] 表示カラムが勝手に増えない
+  ✓ [PoC-02] 表示カラムが1つも消えない
+  ✓ [PoC-02] 表示カラムが勝手に増えない
+  ✓ [PoC-02(Gate A)] 表示カラムが1つも消えない
+  ✓ [PoC-02(Gate A)] 表示カラムが勝手に増えない
+  ✓ [PoC-04 A] 表示カラムが1つも消えない
+  ✓ [PoC-04 A] 表示カラムが勝手に増えない
+  ✓ [PoC-04 C] 表示カラムが1つも消えない
+  ✓ [PoC-04 C] 表示カラムが勝手に増えない
+  ✓ [PoC-04 G] 表示カラムが1つも消えない
+  ✓ [PoC-04 G] 表示カラムが勝手に増えない
+
+2. 実測された SQL 文ごとの射影（期待値はソースを読んで手で書いた）
+  ✓ 記録されている実測 SQL は6通り
+  ✓ 期待値の表が、記録されている SQL をすべて覆っている
+  ✓ 射影: SELECT "poc"."listings"."id", "poc"."listings"."code", "…
+  ✓ 結果列でない参照: SELECT "poc"."listings"."id", "poc"."listings"."code", "…
+  ✓ 射影: SELECT id, code, plan FROM poc.listings ORDER BY id LIMI…
+  ✓ 結果列でない参照: SELECT id, code, plan FROM poc.listings ORDER BY id LIMI…
+  ✓ 射影: SELECT code, name FROM poc.regions ORDER BY code LIMIT $…
+  ✓ 結果列でない参照: SELECT code, name FROM poc.regions ORDER BY code LIMIT $…
+  ✓ 射影: SELECT id, region FROM poc.listings ORDER BY id LIMIT $0
+  ✓ 結果列でない参照: SELECT id, region FROM poc.listings ORDER BY id LIMIT $0
+  ✓ 射影: SELECT id, code, region FROM poc.listings ORDER BY id LI…
+  ✓ 結果列でない参照: SELECT id, code, region FROM poc.listings ORDER BY id LI…
+  ✓ 射影: SELECT code, region FROM poc.listings ORDER BY id LIMIT …
+  ✓ 結果列でない参照: SELECT code, region FROM poc.listings ORDER BY id LIMIT …
+
+3. 旧実装（columnList 由来）との差
+  ✓ 記録された6通りのうち、射影が変わるのは1通りだけ
+  ✓ 変わるのは ORDER BY の列が SELECT 句に無い文である
+  ✓ 変化は「余計な列が消える」方向だけである（増えない）
+  ✓ 消えるのは poc.listings.id の1件だけ
+
+4. PoC-04 G の記録は、修正後の挙動と既に一致している
+  ✓ 記録された射影は2件
+  ✓ 記録された射影に id が入っていない
+  ✓ 記録は id を referenced-outside-select-list として残している
+  ✓ 新実装も同じ2件を射影にする（記録を作り直す必要が無い）
+
+5. 右詳細パネルの説明（変換で作らなかったもの）
+  ✓ ORDER BY の列について、ORDER BY だと言えている
+  ✓ 「修飾が一意に決まらず」という別の理由を当てていない
+  ✓ [PoC-01] 説明に理由コードが生のまま出ていない
+  ✓ [PoC-03] 説明に理由コードが生のまま出ていない
+  ✓ [PoC-05] 説明に理由コードが生のまま出ていない
+  ✓ [PoC-02] 説明に理由コードが生のまま出ていない
+  ✓ [PoC-02(Gate A)] 説明に理由コードが生のまま出ていない
+  ✓ [PoC-04 A] 説明に理由コードが生のまま出ていない
+  ✓ [PoC-04 C] 説明に理由コードが生のまま出ていない
+  ✓ [PoC-04 G] 説明に理由コードが生のまま出ていない
+
+6. 実測・推定の分類
+  ✓ [PoC-01] 構文解析由来の要素はすべて実測である
+  ✓ [PoC-01] 推定は supplies（PoC-04）のときだけ在る
+  ✓ [PoC-03] 構文解析由来の要素はすべて実測である
+  ✓ [PoC-03] 推定は supplies（PoC-04）のときだけ在る
+  ✓ [PoC-05] 構文解析由来の要素はすべて実測である
+  ✓ [PoC-05] 推定は supplies（PoC-04）のときだけ在る
+  ✓ [PoC-02] 構文解析由来の要素はすべて実測である
+  ✓ [PoC-02] 推定は supplies（PoC-04）のときだけ在る
+  ✓ [PoC-02(Gate A)] 構文解析由来の要素はすべて実測である
+  ✓ [PoC-02(Gate A)] 推定は supplies（PoC-04）のときだけ在る
+  ✓ [PoC-04 A] 構文解析由来の要素はすべて実測である
+  ✓ [PoC-04 A] 推定は supplies（PoC-04）のときだけ在る
+  ✓ [PoC-04 C] 構文解析由来の要素はすべて実測である
+  ✓ [PoC-04 C] 推定は supplies（PoC-04）のときだけ在る
+  ✓ [PoC-04 G] 構文解析由来の要素はすべて実測である
+  ✓ [PoC-04 G] 推定は supplies（PoC-04）のときだけ在る
+
+✓ すべて通過 — 64 件通過 / 0 件失敗
+[guard] {"cmd":"node tests/sqlimpact.spec.mjs","seconds":0,"exit":0,"signal":null,"stoppedBy":null,"maxPssMB":0,"maxAt":null,"maxProcs":0,"minAvailMB":null,"leftover":0}

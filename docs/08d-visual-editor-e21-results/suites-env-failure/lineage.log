@@ -1,0 +1,27 @@
+
+1. ケースA — 由来を1列に絞れた場合
+  ✓ キャンバスに9ノード出る
+  ✓ ホップは8本
+  ✓ 追跡できない箇所は0件（由来を推定で結べたため）
+  ✓ 推定を含む旨が俯瞰に出る
+  ✓ キャンバスに「由来は静的解析による推定」の語が残っている
+
+1b. ケースA — 表示値を選ぶと、出所が列まで出る
+  ✗ 出所の主張が「poc.listings . region」である — got: "/lin-a"
+  ✓ 経路全体の語は「推定」である
+  ✗ ★ブロック（いちばん弱いところ）が出る — got: 0
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+locator.innerText: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for locator('.weak .wh')[22m
+
+    at /home/user/Visual-Computing-IDE/tests/lineage.spec.mjs:83:36 {
+  log: [ "  - waiting for locator('.weak .wh')" ],
+  name: 'TimeoutError'
+}
+
+Node.js v22.23.4
+[guard] {"cmd":"node tests/lineage.spec.mjs","seconds":32,"exit":1,"signal":null,"stoppedBy":null,"maxPssMB":734,"maxAt":4,"maxProcs":10,"minAvailMB":14837,"leftover":0}

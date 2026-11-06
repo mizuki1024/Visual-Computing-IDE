@@ -1,0 +1,11 @@
+file:///home/user/Visual-Computing-IDE/tests/lib/canvas-precondition.mjs:31
+  throw new Error('「プロジェクトと実行」パネルを閉じられませんでした');
+        ^
+
+Error: 「プロジェクトと実行」パネルを閉じられませんでした
+    at closeRuntimePanel (file:///home/user/Visual-Computing-IDE/tests/lib/canvas-precondition.mjs:31:9)
+    at async page.goto (file:///home/user/Visual-Computing-IDE/tests/lib/canvas-precondition.mjs:39:14)
+    at async file:///home/user/Visual-Computing-IDE/tests/flows.spec.mjs:39:1
+
+Node.js v22.23.4
+[guard] {"cmd":"node tests/flows.spec.mjs","seconds":12,"exit":1,"signal":null,"stoppedBy":null,"maxPssMB":717,"maxAt":12,"maxProcs":10,"minAvailMB":14813,"leftover":0}

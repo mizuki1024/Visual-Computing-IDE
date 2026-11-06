@@ -1,0 +1,101 @@
+ブラウザ: 同梱の chromium 153.0.8010.12 / 題材（使い捨てのコピー）: poc/out/hmr-guard-e2e/poc/fixture-app
+  ✓ 前提: 題材の DB（使い捨ての PostgreSQL）に届く
+
+0. 使い捨ての題材を起動する
+  ✓ 前提: 計装は有効
+  ✓ 前提: 要素識別子の注入は有効
+
+T0. 初回のコンパイルの文書（記録）→ 読み込み直した文書（基準）
+    · T0-first-compile: correct / 右ドック「この値の出所 poc.listings . region 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になりま」
+    ·   SQL「SELECT id, region FROM poc.listings ORDER BY」 呼び出し位置 src/app/hmr-m/page.tsx:7:24
+    ·   SQL「SELECT id, name AS region FROM poc.regions O」 呼び出し位置 src/app/hmr-m/page.tsx:14:24
+  ✓ T0 初回のコンパイル: poc.regions.name を値 a の由来として出さない（パネル）
+  ✓ T0 初回のコンパイル: 右ドックに「この値の出所 poc.regions.name」を出さない
+  ✓ T0 初回のコンパイル: 由来の評価の応答に poc.regions.name を候補として返さない
+    · T0-baseline: correct / 右ドック「この値の出所 poc.listings . region 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になりま」
+    ·   SQL「SELECT id, region FROM poc.listings ORDER BY」 呼び出し位置 src/app/hmr-m/page.tsx:7:24
+    ·   SQL「SELECT id, name AS region FROM poc.regions O」 呼び出し位置 src/app/hmr-m/page.tsx:14:24
+  ✓ T0 前提: 選択の位置 = ソースの <p>
+  ✓ T0 基準: 正しく結ぶ（poc.listings.region・取得位置は SQL a）
+  ✓ T0 基準: この文書の SQL a・b の呼び出し位置はどちらも正しい
+
+T3. 無関係なファイル・共有の lib/db.ts を変更しても、正しく確かめられる由来を保つ
+    · T3a 無関係なページ（listings/page.tsx）: correct / 右ドック「この値の出所 poc.listings . region 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になりま」
+    ·   SQL「SELECT id, region FROM poc.listings ORDER BY」 呼び出し位置 src/app/hmr-m/page.tsx:7:24
+    ·   SQL「SELECT id, name AS region FROM poc.regions O」 呼び出し位置 src/app/hmr-m/page.tsx:14:24
+  ✓ T3a 無関係なページ（listings/page.tsx）: 由来を保つ（poc.listings.region・取得位置は SQL a）
+  ✓ T3a 無関係なページ（listings/page.tsx）: SQL a・b の呼び出し位置を保つ
+    · T3b 共有の lib/db.ts: correct / 右ドック「この値の出所 poc.listings . region 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になりま」
+    ·   SQL「SELECT id, region FROM poc.listings ORDER BY」 呼び出し位置 src/app/hmr-m/page.tsx:7:24
+    ·   SQL「SELECT id, name AS region FROM poc.regions O」 呼び出し位置 src/app/hmr-m/page.tsx:14:24
+  ✓ T3b 共有の lib/db.ts: 由来を保つ（poc.listings.region・取得位置は SQL a）
+  ✓ T3b 共有の lib/db.ts: SQL a・b の呼び出し位置を保つ
+
+T1. 同じ起動のまま hmr-m/page.tsx の末尾にコメントだけ足す（サーバー側の HMR）→ 読み込み直して選び直す
+    · T1: cut（fetch-callsite-unverifiable） / 右ドック「（この値の出所なし）」
+    ·   SQL「SELECT id, region FROM poc.listings ORDER BY」 呼び出し位置 - / hmr-evaluated-code
+    ·   SQL「SELECT id, name AS region FROM poc.regions O」 呼び出し位置 - / hmr-evaluated-code
+  ✓ T1 前提: 選択はいまのソースの <p> に特定（F-01 は通る）
+  ✓ T1 前提: 文書は新しい要求に同定
+  ✓ T1: poc.regions.name を値 a の由来として出さない（パネル）
+  ✓ T1: 右ドックに「この値の出所 poc.regions.name」を出さない
+  ✓ T1: 由来の評価の応答に poc.regions.name を候補として返さない
+  ✓ T1: 由来は結ばず、呼び出し位置を確かめられないことを理由にする（fetch-callsite-unverifiable）
+  ✓ T1: この文書の SQL を観測している（SQL そのものは観測できている）
+  ✓ T1: SQL b を SQL a の位置（誤った呼び出し位置）に対応させない
+  ✓ T1: どの SQL も呼び出し位置を作らず、理由は hmr-evaluated-code（HMR で eval されたコード）
+  ✓ T1: 「参考の位置」も出さない（located なし）
+  ✓ T1: 右ドックに、コードの更新で確かめられないことと再起動の案内を出す
+  ✓ T1: 値 b も誤って結ばない（poc.listings.region を出さない）
+  ✓ T1 観測画面: SQL a の位置のコンポーネントのノード（誤った呼び出し位置）を描かない
+  ✓ T1 観測画面: SQL の詳細の「実行した呼び出し位置」は「特定していません」とその理由
+
+T4. 同じモジュールを続けて変更する（SQL の前に1文 → SQL の SELECT 句を変える → 元に戻す）
+    · T4a SQL より前に1文: cut（fetch-callsite-unverifiable） / 右ドック「（この値の出所なし）」
+    ·   SQL「SELECT id, region FROM poc.listings ORDER BY」 呼び出し位置 - / hmr-evaluated-code
+    ·   SQL「SELECT id, name AS region FROM poc.regions O」 呼び出し位置 - / hmr-evaluated-code
+  ✓ T4a SQL より前に1文: poc.regions.name を値 a の由来として出さない（パネル）
+  ✓ T4a SQL より前に1文: 右ドックに「この値の出所 poc.regions.name」を出さない
+  ✓ T4a SQL より前に1文: 由来の評価の応答に poc.regions.name を候補として返さない
+  ✓ T4a SQL より前に1文: どの SQL にも呼び出し位置を作らない（HMR で eval されたコード）
+    · T4b SQL a の SELECT 句に plan を足す: cut（fetch-callsite-unverifiable） / 右ドック「（この値の出所なし）」
+    ·   SQL「SELECT id, region, plan FROM poc.listings OR」 呼び出し位置 - / hmr-evaluated-code
+    ·   SQL「SELECT id, name AS region FROM poc.regions O」 呼び出し位置 - / hmr-evaluated-code
+  ✓ T4b SQL a の SELECT 句に plan を足す: poc.regions.name を値 a の由来として出さない（パネル）
+  ✓ T4b SQL a の SELECT 句に plan を足す: 右ドックに「この値の出所 poc.regions.name」を出さない
+  ✓ T4b SQL a の SELECT 句に plan を足す: 由来の評価の応答に poc.regions.name を候補として返さない
+  ✓ T4b SQL a の SELECT 句に plan を足す: どの SQL にも呼び出し位置を作らない（HMR で eval されたコード）
+    · T4c 元に戻す: cut（fetch-callsite-unverifiable） / 右ドック「（この値の出所なし）」
+    ·   SQL「SELECT id, region FROM poc.listings ORDER BY」 呼び出し位置 - / hmr-evaluated-code
+    ·   SQL「SELECT id, name AS region FROM poc.regions O」 呼び出し位置 - / hmr-evaluated-code
+  ✓ T4c 元に戻す: poc.regions.name を値 a の由来として出さない（パネル）
+  ✓ T4c 元に戻す: 右ドックに「この値の出所 poc.regions.name」を出さない
+  ✓ T4c 元に戻す: 由来の評価の応答に poc.regions.name を候補として返さない
+  ✓ T4c 元に戻す: どの SQL にも呼び出し位置を作らない（HMR で eval されたコード）
+  開発サーバーを起動し直す
+    · T4 再起動の後: correct / 右ドック「この値の出所 poc.listings . region 推定 25 か所のうち 1 か所が推定です。経路全体は、いちばん弱いところに合わせて「推定」になりま」
+    ·   SQL「SELECT id, region FROM poc.listings ORDER BY」 呼び出し位置 src/app/hmr-m/page.tsx:7:24
+    ·   SQL「SELECT id, name AS region FROM poc.regions O」 呼び出し位置 src/app/hmr-m/page.tsx:14:24
+  ✓ T4: 再起動の後は正しい由来に戻る
+
+T2. 要求の処理中にソースを書き換える（SQL a → 5 秒待つ → SQL b）
+    · 要求の開始の約 1.5 秒後に、SQL a より前へ 7 文を足した
+  ✓ T2 前提: 書き換えの前に始まった文書の要求を観測した
+    ·   SQL「SELECT id, region FROM poc.listings ORDER BY」 呼び出し位置 - / changed-during-request
+    ·   SQL「SELECT id, name AS region FROM poc.regions O」 呼び出し位置 - / changed-during-request
+  ✓ T2 前提: この要求の SQL a・b を観測した
+  ✓ T2: SQL b を、書き換え後のソースの a の行（誤った呼び出し位置）に対応させない
+  ✓ T2: 取得位置を証明できない SQL は呼び出し位置を作らない（a・b とも）
+  ✓ T2: SQL b の理由は changed-during-request（要求の処理中の変更）
+  ✓ T2 観測画面: hmr-r/page.tsx のコンポーネントのノード（呼び出し位置）を描かない
+  ✓ T2 観測画面: SQL の詳細は「特定していません」とその理由
+    · T2 値 a を選ぶ: cut（） / 右ドック「（この値の出所なし）」
+  ✓ T2 値 a: poc.regions.name を値 a の由来として出さない（パネル）
+  ✓ T2 値 a: 右ドックに「この値の出所 poc.regions.name」を出さない
+  ✓ T2 値 a: 由来の評価の応答に poc.regions.name を候補として返さない
+  ✓ 画面にエラーが出ていない
+  ✓ 後片付け: 使い捨ての題材で動くプロセスが残っていない
+
+判定: T0-first-compile=correct / T0-baseline=correct / T3a 無関係なページ（listings/page.tsx）=correct / T3b 共有の lib/db.ts=correct / T1=cut（fetch-callsite-unverifiable） / T4a SQL より前に1文=cut（fetch-callsite-unverifiable） / T4b SQL a の SELECT 句に plan を足す=cut（fetch-callsite-unverifiable） / T4c 元に戻す=cut（fetch-callsite-unverifiable） / T4 再起動の後=correct / T2=- / T2 値 a を選ぶ=cut（）
+✓ すべて通過 — 52 件通過 / 0 件失敗
+[guard] {"cmd":"node tests/hmr-lineage-guard-e2e.spec.mjs","seconds":106,"exit":0,"signal":null,"stoppedBy":null,"maxPssMB":2220,"maxAt":58,"maxProcs":11,"minAvailMB":13376,"leftover":0}
