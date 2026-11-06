@@ -34,6 +34,7 @@ import {
   RELAY_ID_HEADER, RELAY_TRACE_HEADER, classifyRelayRequest, parseTraceparent, type LiveExchange,
 } from '../lib/liveObservation';
 import { PROTOCOL_VERSION } from '../lib/previewProtocol';
+import { EDIT_DOC_HEADER, EDIT_EXT_VERSION, STYLE_PROPS } from '../lib/editPreviewProtocol';
 
 /** 中継が自分で答えるパス。対象のアプリのパスと重ならない名前にする */
 export const AGENT_PREFIX = '/__vcide_preview/';
@@ -67,8 +68,12 @@ export interface RelayObserver {
    * スクリプトの属性に書いた識別子。iframe の文書がこの値を知らせてくるので、
    * 「いま表示している文書は、どの通信の応答か」を照合できる。`relayId` とは別の乱数で、
    * 開発サーバーには送らない（ブラウザには文書の識別子だけが渡り、中継の内部の識別子は渡らない）
+   *
+   * `meta.initiatorDoc`（E2.1。`editSync` のときだけ）は、RSC の要求に**文書のスクリプトが申告した**、要求を出した文書の識別子
+   * （`x-vcide-doc`）。中継が記録したのは「この識別子を名乗る要求が実際に中継を通った」ことで、名乗りそのものはスクリプトの申告
+   * （アプリと同じ JavaScript の世界）。探索の記録（observations）はこれを読まない。ヘッダは開発サーバーへ渡さない
    */
-  record(run: string, rec: RelayRecord, meta?: { relayId?: string; docToken?: string }): void;
+  record(run: string, rec: RelayRecord, meta?: { relayId?: string; docToken?: string; initiatorDoc?: string }): void;
   /** 静的資材。通信として数えず、件数だけ */
   excludeStatic(run: string): void;
 }
@@ -81,6 +86,11 @@ export interface GatewayOptions {
   port?: number;
   /** Phase 7B-3A: 転送した通信の記録先。省略時は記録しない */
   observer?: RelayObserver;
+  /**
+   * E2.1: 編集の同期の開発用の画面のための知らせを有効にする（既定は無効。docs/08d 第4節）。
+   * 無効なら、差し込むスクリプトは E2 までと**1バイトも違わない**（tests/edit-sync21-unit が確かめる）
+   */
+  editSync?: boolean;
 }
 
 /* --------------------------------------------------------------- 埋め込む部品 */
@@ -109,7 +119,8 @@ export function parentPatterns(cfg: AccessConfig): { s: string; h: string; p: st
  * テキストの文字数と文字種。**本文・属性・フォームの値・Cookie は送らない。**
  * 選択は、選択モードのときの利用者の本物のクリック（isTrusted）だけで起こる。
  */
-export function agentJs(cfg: AccessConfig): string {
+export function agentJs(cfg: AccessConfig, opts: { editSync?: boolean } = {}): string {
+  const E = opts.editSync ? editAgentParts() : { vars: '', click: '', fn: '', msg: '' };
   return `(function(){
   if (window.__vcidePreviewAgent) return; window.__vcidePreviewAgent = 1;
   var PARENTS = ${JSON.stringify(parentPatterns(cfg))};
@@ -126,7 +137,7 @@ export function agentJs(cfg: AccessConfig): string {
   var getAttr = Element.prototype.getAttribute, qsa = Document.prototype.querySelectorAll;
   var rect = Element.prototype.getBoundingClientRect, addL = W.addEventListener.bind(W);
   var ID = /^[0-9a-f]{10}$/, REV = /^[0-9a-f]{16}$/, port = null, nonce = null, queue = [], selecting = false, seq = 0;
-  var hoverBox = null, selBox = null, hoverEl = null, selEl = null, raf = 0;
+  var hoverBox = null, selBox = null, hoverEl = null, selEl = null, raf = 0;${E.vars}
   function allowed(o){
     try { var u = new URL(o);
       for (var i = 0; i < PARENTS.length; i++) { var p = PARENTS[i];
@@ -207,13 +218,13 @@ export function agentJs(cfg: AccessConfig): string {
     if (!e.isTrusted || !port) return;          // 本物のクリックだけ。アプリが作ったクリックでは選ばない
     var d = describe(e.target);
     if (!d) return;
-    selEl = e.target && e.target.nodeType === 3 ? e.target.parentElement : e.target;
+    selEl = e.target && e.target.nodeType === 3 ? e.target.parentElement : e.target;${E.click}
     seq += 1;
     /* doc: この文書の応答の識別子。soft: この文書の中でクライアント側の遷移（pushState / popstate）があったか。
      * 遷移の後の DOM は文書の取得が描いたものではない（IDE は文書と同一視しない） */
     post({ kind: 'select', seq: seq, selection: d, doc: doc, soft: soft });
   }, true);
-  addL('mousemove', function(e){ if (selecting) hoverEl = e.target; }, true);
+  addL('mousemove', function(e){ if (selecting) hoverEl = e.target; }, true);${E.fn}
   /* ------------------------------------------------------- 親との接続 */
   addL('message', function(e){
     var d = e.data;
@@ -224,7 +235,7 @@ export function agentJs(cfg: AccessConfig): string {
     port = e.ports[0]; nonce = d.nonce;
     port.onmessage = function(m){
       var x = m.data;
-      if (x && x.source === 'vcide-ide' && x.v === ${PROTOCOL_VERSION} && x.nonce === nonce && x.kind === 'mode' && typeof x.select === 'boolean') setMode(x.select);
+      if (x && x.source === 'vcide-ide' && x.v === ${PROTOCOL_VERSION} && x.nonce === nonce && x.kind === 'mode' && typeof x.select === 'boolean') setMode(x.select);${E.msg}
     };
     post({ kind: 'connected' });
     for (var i = 0; i < queue.length; i++) post(queue[i]);
@@ -242,6 +253,71 @@ export function agentJs(cfg: AccessConfig): string {
   addL('load', function(){ where('load'); });
 })();
 `;
+}
+
+/**
+ * E2.1: 編集の同期のためにスクリプトへ足す部分（editSync のときだけ）。**探索の知らせ・選択の規則は変えない。**
+ *   vars  : 編集の同期で選んだ要素（editEl）と、この文書が送った RSC の要求の数。fetch を包む（下記）
+ *   click : 選択モードの本物のクリックで選んだ要素を editEl にも覚える（選択モードを抜けても観測できるように。探索の selEl とは別）
+ *   fn    : 観測の答えを作る（選んだ要素の選択・矩形・許可した計算済みスタイル・文書の識別子・遷移の有無・RSC の数・ビューポート）
+ *   msg   : IDE からの `edit-observe`（同じ port・同じ nonce・拡張の版 1）に答える。**求められたときだけ**送る
+ * fetch の包み: 同じ origin への RSC の要求（rsc: 1 のヘッダ）にだけ、この文書の識別子を `x-vcide-doc` に載せ、数える。
+ * それ以外の要求・識別子の無い文書では、元の fetch をそのまま呼ぶ。中継はこのヘッダを開発サーバーへ渡さない。
+ */
+function editAgentParts(): { vars: string; click: string; fn: string; msg: string } {
+  const props = JSON.stringify(STYLE_PROPS);
+  return {
+    vars: `
+  var editEl = null, rscS = 0, rscD = 0, gcs = W.getComputedStyle, FX = W.fetch, HP = Object.prototype.hasOwnProperty;
+  if (typeof FX === 'function' && doc) {
+    W.fetch = function(input, init){
+      var a = arguments;
+      try {
+        var h = init && init.headers, isR = false;
+        if (h && typeof h === 'object') {
+          if (typeof Headers !== 'undefined' && h instanceof Headers) isR = h.get('rsc') === '1';
+          else if (!Array.isArray(h)) { for (var k in h) if (HP.call(h, k) && String(k).toLowerCase() === 'rsc' && String(h[k]) === '1') isR = true; }
+        }
+        if (isR) {
+          var u = new URL(typeof input === 'string' ? input : (input && input.url) ? input.url : String(input), location.href);
+          if (u.origin === location.origin) {
+            var nh = new Headers(h); nh.set('${EDIT_DOC_HEADER}', doc);
+            var ni = {}; for (var j in init) ni[j] = init[j]; ni.headers = nh;
+            rscS += 1;
+            var pr = FX.call(W, input, ni), fin = function(){ rscD += 1; };
+            pr.then(fin, fin);
+            return pr;
+          }
+        }
+      } catch (e) {}
+      return FX.apply(W, a);
+    };
+  }`,
+    click: `
+    editEl = selEl;`,
+    fn: `
+  var EPROPS = ${props}, EVAL = /^[0-9a-zA-Z.,%()# -]{0,80}$/;
+  function rd(v){ return Math.round(v * 100) / 100; }
+  function editObserve(req){
+    var st = 'none', d = null, r = null, cs = null;
+    if (editEl) {
+      if (!editEl.isConnected) st = 'detached';
+      else {
+        d = describe(editEl);
+        if (d) {
+          st = 'ok';
+          var b = rect.call(editEl); r = { x: rd(b.left), y: rd(b.top), width: rd(b.width), height: rd(b.height) };
+          cs = {}; var c = gcs.call(W, editEl);
+          for (var i = 0; i < EPROPS.length; i++) { var v = String(c.getPropertyValue(EPROPS[i]) || ''); if (EVAL.test(v)) cs[EPROPS[i]] = v; }
+        } else st = 'detached';
+      }
+    }
+    post({ kind: 'edit-observation', ev: ${EDIT_EXT_VERSION}, req: req, state: st, selection: d, rect: r, style: cs,
+      doc: doc, soft: soft, rsc: { started: rscS, settled: rscD }, vw: Math.round(W.innerWidth), vh: Math.round(W.innerHeight) });
+  }`,
+    msg: `
+      if (x && x.source === 'vcide-ide' && x.v === ${PROTOCOL_VERSION} && x.nonce === nonce && x.kind === 'edit-observe' && x.ev === ${EDIT_EXT_VERSION} && typeof x.req === 'number' && x.req >= 1 && x.req % 1 === 0) editObserve(x.req);`,
+  };
 }
 
 /** from: そのページを作ったのが開発サーバー（app）か、この中継（gateway）か */
@@ -304,6 +380,8 @@ const DROP_REQ = new Set([
   'x-forwarded-server', 'x-real-ip',
   /* 7B-3B-1: 中継の識別子はブラウザから受けない（ページのスクリプトが偽れないように、中継だけが付ける） */
   RELAY_ID_HEADER,
+  /* E2.1: 文書のスクリプトが RSC の要求に載せる文書の識別子。中継が読むだけで、開発サーバーへは渡さない（editSync でなくても落とす） */
+  EDIT_DOC_HEADER,
 ]);
 const DROP_RES = new Set([
   'connection', 'keep-alive', 'proxy-connection', 'transfer-encoding', 'trailer', 'upgrade',
@@ -447,7 +525,7 @@ export class PreviewGateway {
           'content-type': 'text/javascript; charset=utf-8', 'cache-control': 'no-store',
           ...this.#securityHeaders(),
         });
-        res.end(agentJs(this.#opts.config));
+        res.end(agentJs(this.#opts.config, { editSync: this.#opts.editSync === true }));
         return;
       }
       if (p === 'ping') {
@@ -497,6 +575,9 @@ export class PreviewGateway {
     /* 7B-3B-1: 記録する通信には、中継が自分で作った識別子を載せる（要求ごとに新しい乱数）。
      * 計装が受付スパンに写すので、応答のトレース識別子が別の要求を指していても見分けられる */
     const relayId = observer && run && cls && !cls.static ? randomBytes(16).toString('hex') : null;
+    /* E2.1: RSC の要求に文書のスクリプトが申告した、要求を出した文書の識別子（editSync のときだけ読む。形が違えば無いものとする） */
+    const declaredDoc = this.#opts.editSync && cls && !cls.static && cls.kind === 'rsc' ? headerOne(req.headers[EDIT_DOC_HEADER]) : undefined;
+    const initiatorDoc = typeof declaredDoc === 'string' && /^[0-9a-f]{32}$/.test(declaredDoc) ? declaredDoc : null;
     const finish = (failure: RelayRecord['failure']) => {
       if (recorded || !observer || !run || !cls || cls.static) return;
       recorded = true;
@@ -505,7 +586,8 @@ export class PreviewGateway {
         path: cls.path, hasQuery: cls.hasQuery, kind: cls.kind,
         status, startMs: t0, durationMs: failure ? null : Date.now() - t0,
         trace: traced, failure,
-      }, relayId || docToken ? { ...(relayId ? { relayId } : {}), ...(docToken ? { docToken } : {}) } : undefined);
+      }, relayId || docToken || initiatorDoc
+        ? { ...(relayId ? { relayId } : {}), ...(docToken ? { docToken } : {}), ...(initiatorDoc ? { initiatorDoc } : {}) } : undefined);
     };
     res.once('finish', () => finish(null));
     res.once('close', () => { if (!res.writableFinished) finish({ kind: 'aborted', detail: '応答を送り終える前に接続が閉じられました' }); });

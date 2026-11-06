@@ -7,7 +7,11 @@
  *   2. 通常の IDE の起動（next start）に、編集の書き込みの API は無い（/api/edit/* は 404）
  *   3. コードの検索: 対象のソースへ書く fs の呼び出しは src/server/edit/fsio.ts だけ。
  *      画面・API・探索のモジュールは編集のモジュールを読み込まない（利用者向けの入口を作らない）
+ *      E2.1（docs/08d 第3節 D-4）: 例外は読み取り・照合だけの窓口 src/server/editSync/readonlyEdit.ts の1つだけ。
+ *      窓口は書き込み（apply・revert・recover・startupRecovery・submitVerification・createDraft・carrySelection）を呼ばない
  *   4. 探索の持ち物（anchors.ts・previewProtocol.ts・dataAccess.ts・注入）は、この段で変えていない
+ *      E2.1（D-1）: previewGateway.ts だけは、既定の動作を変えない追加（editSync の知らせ）を許す。消した行は下の一覧と一致すること
+ *   5. E2.1: 通常の起動（VCIDE_EDIT_SYNC_DEV を付けない）に、開発用の同期の API は無い（/api/edit-sync/* は 404）
  * ========================================================================== */
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
@@ -70,7 +74,9 @@ await guard('2', async () => {
   if (!BASE) return;
   const ping = await fetch(`${BASE}/api/runtime/status`).then((r) => r.status).catch((e) => String(e));
   eq('前提: IDE は応答する（/api/runtime/status）', ping, 200);
-  for (const p of ['/api/edit', '/api/edit/apply', '/api/edit/draft', '/api/edit/revert', '/api/edit/recover', '/api/edit/verify', '/api/runtime/edit']) {
+  for (const p of ['/api/edit', '/api/edit/apply', '/api/edit/draft', '/api/edit/revert', '/api/edit/recover', '/api/edit/verify', '/api/runtime/edit',
+    /* 5. E2.1: 開発用の同期の API も、通常の起動では無い */
+    '/api/edit-sync/state', '/api/edit-sync/select', '/api/edit-sync/connect', '/api/edit-sync/recheck', '/api/edit-sync/bind-report', '/api/edit-sync/apply']) {
     for (const method of ['GET', 'POST']) {
       const st = await fetch(`${BASE}${p}`, { method, headers: { 'content-type': 'application/json' }, body: method === 'POST' ? '{}' : undefined }).then((r) => r.status).catch((e) => String(e));
       eq(`${method} ${p} は 404`, st, 404);
@@ -90,8 +96,27 @@ guard('3', () => {
   ok('編集のモジュールは src/server/edit/ にある', editFiles.length >= 6, editFiles.map(rel));
   const writers = editFiles.filter((f) => WRITE.test(fs.readFileSync(f, 'utf8'))).map(rel);
   eq('src/server/edit/ の中で fs に書くのは fsio.ts だけ', JSON.stringify(writers), JSON.stringify(['src/server/edit/fsio.ts']));
-  const importers = files.filter((f) => !rel(f).startsWith('src/server/edit/') && /server\/edit\/|from '\.\/edit\/|from '\.\.\/edit\/|['"]@\/server\/edit/.test(fs.readFileSync(f, 'utf8'))).map(rel);
-  eq('画面・API・探索のモジュールは編集のモジュールを読み込まない', JSON.stringify(importers), '[]');
+  /* E2.1: 読み込みの指定を実際のパスに解決して、src/server/edit/ の中を指すかで判定する（src/components/edit/ のような名前の似た別の場所を取り違えない） */
+  const EDIT_DIR = path.join(REPO, 'src', 'server', 'edit');
+  const importsEdit = (f, text = fs.readFileSync(f, 'utf8')) => [...text.matchAll(/(?:from\s+|import\s*\(\s*|require\s*\(\s*)['"]([^'"]+)['"]/g)].some(([, spec]) => {
+    const target = spec.startsWith('@/') ? path.join(REPO, 'src', spec.slice(2)) : spec.startsWith('.') ? path.resolve(path.dirname(f), spec) : null;
+    return !!target && (target === EDIT_DIR || target.startsWith(EDIT_DIR + path.sep));
+  });
+  const importers = files.filter((f) => !rel(f).startsWith('src/server/edit/') && importsEdit(f)).map(rel);
+  ok('判定の確かめ: src/server/edit/ の外のファイルが ../edit/engine を読むと検出する（試験の検索が働く）',
+    importsEdit(path.join(REPO, 'src', 'server', 'editSync', 'x.ts'), "import { X } from '../edit/engine';\n")
+    && importsEdit(path.join(REPO, 'src', 'app', 'x.ts'), "import { X } from '@/server/edit/engine';\n")
+    && !importsEdit(path.join(REPO, 'src', 'components', 'x.tsx'), "import X from './edit/EditSyncDevPanel';\n"));
+  /* E2.1（D-4）: 読み取り・照合だけの窓口の1つだけを許す */
+  eq('画面・API・探索のモジュールは編集のモジュールを読み込まない（読み取りの窓口 editSync/readonlyEdit.ts の1つだけを除く）',
+    JSON.stringify(importers), JSON.stringify(['src/server/editSync/readonlyEdit.ts']));
+  const ro = fs.readFileSync(path.join(REPO, 'src/server/editSync/readonlyEdit.ts'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  ok('窓口は書き込み（apply・revert・recover・startupRecovery・submitVerification・createDraft・carrySelection）を呼ばない',
+    !/\.(apply|revert|recover|startupRecovery|submitVerification|createDraft|carrySelection)\s*\(/.test(ro));
+  ok('窓口は書き込みの入口（fsio）を読み込まない', !/fsio/.test(ro));
+  ok('窓口はエンジンの実体を外へ渡さない（凍結した4つの関数だけ）', /Object\.freeze\(\{[\s\S]*root: e\.root,[\s\S]*resolveTarget[\s\S]*reresolveTarget[\s\S]*inspectRecovery[\s\S]*\}\)/.test(ro));
+  const viaRo = files.filter((f) => /editSync\/readonlyEdit|from '\.\/readonlyEdit'/.test(fs.readFileSync(f, 'utf8'))).map(rel).sort();
+  eq('窓口を読み込むのは同期のセッションだけ', JSON.stringify(viaRo), JSON.stringify(['src/server/editSync/session.ts']));
   ok('編集の API のディレクトリ（src/app/api/edit）は無い', !fs.existsSync(path.join(REPO, 'src/app/api/edit')));
   const others = files.filter((f) => !rel(f).startsWith('src/server/edit/') && WRITE.test(fs.readFileSync(f, 'utf8'))).map(rel);
   note(`編集の外で fs に書くモジュール（IDE 自身の .ide-runtime への記録。対象のソースではない）: ${others.join(', ')}`);
@@ -113,7 +138,26 @@ guard('4', () => {
     execFileSync('git', ['cat-file', '-e', `${BASELINE}^{commit}`], { cwd: REPO, stdio: 'ignore' });
     diff = execFileSync('git', ['diff', '--name-only', BASELINE, '--', ...OWNED], { cwd: REPO, encoding: 'utf8' }).trim();
   } catch (e) { diff = `git が使えない: ${e.message}`; }
-  eq(`探索の持ち物（07d 4.2）は ${BASELINE}（探索の確認済みの先端）から変わっていない（作業ツリーを含む）`, diff, '');
+  /* E2.1（D-1）: previewGateway.ts は既定の動作を変えない追加だけを許す（既定のスクリプトの同一性は edit-sync21-unit の E21-19 が sha256 で確かめる） */
+  const rest = diff.split('\n').filter((f) => f && f !== 'src/server/previewGateway.ts');
+  eq(`探索の持ち物（07d 4.2）は ${BASELINE}（探索の確認済みの先端）から変わっていない（作業ツリーを含む。previewGateway.ts を除く）`, rest.join(','), '');
+  let removed = null;
+  try {
+    removed = execFileSync('git', ['diff', BASELINE, '--', 'src/server/previewGateway.ts'], { cwd: REPO, encoding: 'utf8' })
+      .split('\n').filter((l) => l.startsWith('-') && !l.startsWith('---')).map((l) => l.slice(1).trim());
+  } catch (e) { removed = [`git が使えない: ${e.message}`]; }
+  const ALLOWED_REMOVED = [
+    'record(run: string, rec: RelayRecord, meta?: { relayId?: string; docToken?: string }): void;',
+    'export function agentJs(cfg: AccessConfig): string {',
+    'var hoverBox = null, selBox = null, hoverEl = null, selEl = null, raf = 0;',
+    'selEl = e.target && e.target.nodeType === 3 ? e.target.parentElement : e.target;',
+    "addL('mousemove', function(e){ if (selecting) hoverEl = e.target; }, true);",
+    "if (x && x.source === 'vcide-ide' && x.v === ${PROTOCOL_VERSION} && x.nonce === nonce && x.kind === 'mode' && typeof x.select === 'boolean') setMode(x.select);",
+    'res.end(agentJs(this.#opts.config));',
+    '}, relayId || docToken ? { ...(relayId ? { relayId } : {}), ...(docToken ? { docToken } : {}) } : undefined);',
+  ];
+  ok('previewGateway.ts で消した（書き換えた）行は、既定の動作を変えない拡張の差し込み口だけ（D-1）',
+    removed.every((l) => ALLOWED_REMOVED.includes(l)), removed.filter((l) => !ALLOWED_REMOVED.includes(l)));
 });
 
 C.finish();

@@ -10,6 +10,8 @@ import { pidAlive } from './net';
 import type { Finding } from './projectInspect';
 import { PreviewGateway, type GatewayInfo } from './previewGateway';
 import { observations } from './observations';
+import { editSyncRuntime } from './editSync/runtime';
+import { teeObserver } from './editSync/relayLedger';
 
 export interface PreviewInfo {
   gateway: GatewayInfo;
@@ -36,7 +38,10 @@ const RUN_REASON: Record<string, string> = {
 };
 
 function makeGateway(cfg: AccessConfig): PreviewGateway {
+  /* E2.1: 開発用の同期（VCIDE_EDIT_SYNC_DEV=1）のときだけ、編集の台帳を探索の観測と並べて記録し、スクリプトに編集の知らせを足す */
+  const edit = editSyncRuntime();
   return new PreviewGateway({
+    editSync: !!edit,
     config: cfg,
     target: () => {
       const s = devServer().snapshot();
@@ -48,7 +53,7 @@ function makeGateway(cfg: AccessConfig): PreviewGateway {
       // 観測の記録をこの起動に紐づける（Phase 7B-3A）。鍵は 7B-2 の選択と同じ3つ組
       return { target: { port: s.port, run: `${s.instance}:${s.pid}:${s.startedAt}` }, reason: '' };
     },
-    observer: observations(),
+    observer: edit ? teeObserver(observations(), edit.ledger) : observations(),
   });
 }
 

@@ -14,6 +14,7 @@ import MinimapPanel from './panels/MinimapPanel';
 import CanvasControls from './panels/CanvasControls';
 import RuntimePanel from './panels/RuntimePanel';
 import DetailDock from './dock/DetailDock';
+import EditSyncDevPanel from './edit/EditSyncDevPanel';
 import { useExplore } from '@/state/ExploreStore';
 import { RuntimeProvider } from '@/state/RuntimeStore';
 import { CanvasEmpty, DemoBanner, ProjectBridge } from './empty/ProjectEmpty';
@@ -38,6 +39,8 @@ export default function AppShell() {
             {/* 7C-3（P1-9）: プロジェクトを開いている間、合成デモの代わりに出す空の状態 */}
             <CanvasEmpty />
             <DemoBanner />
+            {/* E2.1: 編集の同期の開発用の表示（VCIDE_EDIT_SYNC_DEV=1 かつ ?editSyncDev=1 のときだけ。それ以外は何も描かず要求も出さない） */}
+            <EditSyncDevPanel />
             {/*
               データの出所を常時表示する（表示規則11）。
               合成なら「合成データ」と言い、実測なら計装方式を言う。文言はデータが持つ。
